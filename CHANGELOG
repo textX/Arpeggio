@@ -1,0 +1,14 @@
+Changelog for Arpeggio
+Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+Copyright: (c) Igor R. Dejanovic, 2009
+Licence: MIT Licence
+
+2009-09-15 - Initial release (v0.1-dev)
+    Implemented features:
+        - Basic error reporting.
+        - Basic support for comments handling (needs refactoring)
+        - Raw parse tree.
+        - Support for semantic actions with abbility to transform parse 
+            tree to semantic representation - aka Abstract Semantic Graphs (see examples).
+
+

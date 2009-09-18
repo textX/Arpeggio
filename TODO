@@ -1,0 +1,15 @@
+Arpeggio parser - TODO
+----------------------
+Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+Copyright: (c) Igor R. Dejanovic, 2009
+Licence: MIT Licence
+
+Some stuff that should be done in the near future:
+- Documentation.
+- Test suite.
+- Error recovery.
+    This is the essential requirement for the Arpeggio because IDE usage is the main
+    motivation that has started Arpeggio development.
+    It would be nice to find all errors, whether syntactic or semantic, in one
+    parsing session. If error is found the parser should report the error and then
+    try to recover and continue parsing.

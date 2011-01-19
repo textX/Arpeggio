@@ -12,6 +12,7 @@
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
+import logging        
 
 def comment():          return [_("//.*"), _("/\*.*\*/")]
 def literal():          return _(r'\d*\.\d*|\d+|".*?"')
@@ -30,8 +31,7 @@ def function():         return Kwd("function"), symbol, parameterlist, block
 def simpleLanguage():   return function
 
 try:
-    import arpeggio
-    arpeggio.DEBUG = True
+    logging.basicConfig(level=logging.DEBUG)
     
     # Parser instantiation. simpleLanguage is root definition and comment is
     # grammar rule for comments.

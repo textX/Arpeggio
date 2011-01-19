@@ -10,8 +10,10 @@
 __all__ = ['ParserPEG']
 
 from arpeggio import *
-from arpeggio import _log
 from arpeggio import RegExMatch as _
+import logging
+
+logger = logging.getLogger('arpeggio.peg')
 
 # PEG Grammar
 def grammar():          return OneOrMore(rule), EOF
@@ -93,7 +95,7 @@ class SemOrderedChoice(PEGSemanticAction):
 
 class SemPrefix(PEGSemanticAction):
     def first_pass(self, parser, node, nodes):
-        _log("Prefix: %s " % str(nodes))
+        logger.debug("Prefix: %s " % str(nodes))
         if len(nodes)==2:
             if nodes[0] == NOT():
                 retval = Not()
@@ -110,9 +112,9 @@ class SemPrefix(PEGSemanticAction):
 
 class SemSufix(PEGSemanticAction):
     def first_pass(self, parser, node, nodes):
-        _log("Sufix : %s" % str(nodes))
+        logger.debug("Sufix : %s" % str(nodes))
         if len(nodes) == 2:
-            _log("Sufix : %s" % str(nodes[1]))
+            logger.debug("Sufix : %s" % str(nodes[1]))
             if nodes[1] == STAR():
                 retval = ZeroOrMore(nodes[0])
             elif nodes[1] == QUESTION():
@@ -130,7 +132,7 @@ class SemSufix(PEGSemanticAction):
 
 class SemExpression(PEGSemanticAction):
     def first_pass(self, parser, node, nodes):
-        _log("Expression : %s" % str(nodes))
+        logger.debug("Expression : %s" % str(nodes))
         if len(nodes)==1:
             return nodes[0]
         else:
@@ -138,17 +140,17 @@ class SemExpression(PEGSemanticAction):
 
 class SemIdentifier(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        _log("Identifier %s." % node.value)
+        logger.debug("Identifier %s." % node.value)
         return node
     
 class SemRegEx(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        _log("RegEx %s." % nodes[2].value)
+        logger.debug("RegEx %s." % nodes[2].value)
         return RegExMatch(nodes[2].value)
     
 class SemLiteral(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        _log("Literal: %s" % node.value)
+        logger.debug("Literal: %s" % node.value)
         match_str = node.value[1:-1]
         match_str = match_str.replace("\\'", "'")
         match_str = match_str.replace("\\\\", "\\")
@@ -197,6 +199,8 @@ class ParserPEG(Parser):
     
 if __name__ == "__main__":
     try:
+        logging.basicConfig(level=logging.DEBUG)
+
         parser = ParserPython(grammar, None)
             
         f = open("peg_parser_model.dot", "w")

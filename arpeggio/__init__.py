@@ -12,8 +12,10 @@
 
 import re
 import bisect
+import logging
 
-DEBUG = False
+logger = logging.getLogger('arpeggio')
+
 DEFAULT_WS='\t\n\r '
 
 class ArpeggioError(Exception):
@@ -46,10 +48,6 @@ class NoMatch(Exception):
         self.parser = parser
         self._up = True # By default when NoMatch is thrown we will go up the Parse Model Tree.
 
-
-def _log(msg):
-    if DEBUG:
-        print msg
 
 def flatten(_iterable):
     '''Flattening of python iterables.'''
@@ -105,7 +103,7 @@ class ParsingExpression(object):
             return id(self)        
                 
     def _parse_intro(self, parser):
-        _log("Parsing %s" % self.name)
+        logger.debug("Parsing %s" % self.name)
         results = []
         parser._skip_ws()
         self.c_pos = parser.position
@@ -117,7 +115,7 @@ class ParsingExpression(object):
         #If this position is already parsed by this parser expression than use 
         #the result
         if self.result_cache.has_key(self.c_pos):
-            _log("Result for [%s, %s] founded in result_cache." % (self, self.c_pos))
+            logger.debug("Result for [%s, %s] founded in result_cache." % (self, self.c_pos))
             result, new_pos =  self.result_cache[self.c_pos]
             parser.position = new_pos
             return result
@@ -362,10 +360,10 @@ class RegExMatch(Match):
         m = self.regex.match(parser.input[parser.position:])
         if m:
             parser.position += len(m.group())
-            _log("Match %s at %d" % (m.group(), self.c_pos))
+            logger.debug("Match %s at %d" % (m.group(), self.c_pos))
             return Terminal(self.rule if self.root else '', self.c_pos, m.group())
         else:
-            _log("NoMatch at %d" % self.c_pos)
+            logger.debug("NoMatch at %d" % self.c_pos)
             parser._nm_raise(self.root if self.root else self.name, self.c_pos, parser)
 
 class StrMatch(Match):
@@ -382,10 +380,10 @@ class StrMatch(Match):
     def _parse(self, parser):
         if parser.input[parser.position:].startswith(self.to_match):
             parser.position += len(self.to_match)
-            _log("Match %s at %d" % (self.to_match, self.c_pos))
+            logger.debug("Match %s at %d" % (self.to_match, self.c_pos))
             return Terminal(self.rule if self.root else '', self.c_pos, self.to_match)
         else:
-            _log("NoMatch at %d" % self.c_pos)
+            logger.debug("NoMatch at %d" % self.c_pos)
             parser._nm_raise(self.to_match, self.c_pos, parser)
 
     def __str__(self):
@@ -422,7 +420,7 @@ class EndOfFile(Match):
         if len(parser.input) == parser.position:
             return Terminal(self.rule if self.root else '', self.c_pos, 'EOF')
         else:
-            _log("EOF not matched.")
+            logger.debug("EOF not matched.")
             parser._nm_raise(self.name, self.c_pos, parser)
         
 
@@ -579,10 +577,10 @@ class Parser(object):
             return retval
                 
                 
-        _log("ASG: First pass")
+        logger.debug("ASG: First pass")
         asg = tree_walk(self.parse_tree)
                 
-        _log("ASG: Second pass")
+        logger.debug("ASG: Second pass")
         # Second pass
         for sa_name, asg_node in for_second_pass:
             sem_actions[sa_name].second_pass(self, asg_node)
@@ -679,7 +677,7 @@ class ParserPython(Parser):
         root = False
         while callable(expression): # Is this expression a parser rule?
             if self.__rule_cache.has_key(expression.__name__):
-                _log("Rule %s founded in cache." % expression.__name__)
+                logger.debug("Rule %s founded in cache." % expression.__name__)
                 return self.__rule_cache.get(expression.__name__)
             rule = expression.__name__
             root = True
@@ -687,7 +685,7 @@ class ParserPython(Parser):
             if hasattr(expression, "sem"):
                 self.sem_actions[rule] = expression.sem
                 
-            _log("push : %s" % rule)
+            logger.debug("push : %s" % rule)
             self.__rule_stack.append(rule)
             expression = expression()
 
@@ -715,7 +713,7 @@ class ParserPython(Parser):
             # in order to support recursive definitions
             if root: 
                 self.__rule_cache[rule] = retval
-                _log("New rule: %s -> %s" % (rule, retval.__class__.__name__))
+                logger.debug("New rule: %s -> %s" % (rule, retval.__class__.__name__))
             retval.nodes = [self._from_python(e) for e in expression]
             
         elif type(expression) is str:
@@ -730,7 +728,7 @@ class ParserPython(Parser):
 
         if root:
             name = self.__rule_stack.pop()
-            _log("pop: %s" % name)
+            logger.debug("pop: %s" % name)
             
         return retval
 

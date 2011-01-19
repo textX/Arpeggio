@@ -13,7 +13,7 @@
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
-from arpeggio import _log
+import logging        
 
 def number():          return _(r'\d*\.\d*|\d+')
 def factor():           return [number, ("(", expression, ")")]
@@ -25,13 +25,13 @@ def calc():             return expression, EndOfFile
 class ToFloat(SemanticAction):
     '''Converts node value to float.'''
     def first_pass(self, parser, node, nodes):
-        _log("Converting %s." % node.value)
+        logging.debug("Converting %s." % node.value)
         return float(node.value)        
 
 class Factor(SemanticAction):
     '''Removes parenthesis if exists and returns what was contained inside.'''
     def first_pass(self, parser, node, nodes):
-        _log("Factor %s" % nodes)
+        logging.debug("Factor %s" % nodes)
         if nodes[0] == "(":
             return nodes[1]
         else:
@@ -43,14 +43,14 @@ class Term(SemanticAction):
     Factor nodes will be already evaluated.
     '''
     def first_pass(self, parser, node, nodes):
-        _log("Term %s" % nodes)
+        logging.debug("Term %s" % nodes)
         term = nodes[0]
         for i in range(2, len(nodes), 2):
             if nodes[i-1]=="*":
                 term *= nodes[i]
             else:
                 term /= nodes[i]
-        _log("Term = %f" % term)
+        logging.debug("Term = %f" % term)
         return term
                 
 class Expr(SemanticAction):
@@ -59,7 +59,7 @@ class Expr(SemanticAction):
     Term nodes will be already evaluated.
     '''
     def first_pass(self, parser, node, nodes):
-        _log("Expression %s" % nodes)
+        logging.debug("Expression %s" % nodes)
         expr = 0
         start = 0
         # Check for unary + or - operator
@@ -72,7 +72,7 @@ class Expr(SemanticAction):
             else:
                 expr += nodes[i]
         
-        _log("Expression = %f" % expr)
+        logging.debug("Expression = %f" % expr)
         return expr
     
 class Calc(SemanticAction):
@@ -88,11 +88,8 @@ calc.sem = Calc()
 
 if __name__ == "__main__":
     try:
-        import arpeggio
-        
-        # Setting DEBUG to true will show log messages.
-        arpeggio.DEBUG = True
-        
+        logging.basicConfig(level=logging.DEBUG)
+
         # First we will make a parser - an instance of the calc parser model.
         # Parser model is given in the form of python constructs therefore we 
         # are using ParserPython class.

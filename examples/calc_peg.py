@@ -16,6 +16,7 @@
 from arpeggio import *
 from arpeggio.peg import ParserPEG
 from arpeggio.export import PMDOTExport, PTDOTExport
+import logging        
 
 # Semantic actions
 from calc import ToFloat, Factor, Term, Expr, Calc
@@ -38,11 +39,9 @@ sem_actions = {
     "calc"   : Calc()
 }
 
-try:
-    # Turning debugging on
-    import arpeggio
-    arpeggio.DEBUG = True
-    
+try:    
+    logging.basicConfig(level=logging.DEBUG)
+
     # First we will make a parser - an instance of the calc parser model.
     # Parser model is given in the form of PEG notation therefore we 
     # are using ParserPEG class. Root rule name (parsing expression) is "calc".

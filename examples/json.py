@@ -36,6 +36,7 @@ value
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
+import logging
 
 def TRUE():     return "true"
 def FALSE():    return "false"
@@ -82,9 +83,7 @@ if __name__ == "__main__":
     }
     """
     try:
-        
-        import arpeggio
-        arpeggio.DEBUG = True
+        logging.basicConfig(level=logging.DEBUG)
         
         # Creating parser from parser model.
         parser = ParserPython(jsonFile)

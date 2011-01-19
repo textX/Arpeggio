@@ -12,9 +12,9 @@
 ##############################################################################
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
-from arpeggio import _log
 from arpeggio import RegExMatch as _
 from arpeggio.peg import ParserPEG
+import logging        
 
 # Semantic actions
 from arpeggio.peg import SemGrammar, SemRule, SemOrderedChoice, SemSequence, SemPrefix, \
@@ -66,8 +66,7 @@ peg_grammar = r"""
     
 
 try:
-    import arpeggio
-    arpeggio.DEBUG = True
+    logging.basicConfig(level=logging.DEBUG)
 
     # ParserPEG will use ParserPython to parse peg_grammar definition and 
     # create parser_model for parsing PEG based grammars

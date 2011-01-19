@@ -348,13 +348,16 @@ class RegExMatch(Match):
     '''
     This Match class will perform input matching based on Regular Expressions.
     '''
-    def __init__(self, to_match, rule=None):
+    def __init__(self, to_match, rule=None, flags=None):
         '''
         @param to_match - regular expression string to match.
         '''
         super(RegExMatch, self).__init__(rule)
         self.to_match = to_match
-        self.regex = re.compile(to_match)
+        if flags is not None:
+            self.regex = re.compile(to_match, flags)
+        else:
+            self.regex = re.compile(to_match)
 
     def _parse(self, parser):
         m = self.regex.match(parser.input[parser.position:])

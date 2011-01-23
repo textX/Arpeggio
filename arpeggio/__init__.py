@@ -125,9 +125,19 @@ class ParsingExpression(object):
             parser.nm._up = False
             
         result = self._parse(parser)
-
-        if self.root and result:
-            result = NonTerminal(self.rule, self.c_pos, result)
+        
+        if result:
+            if parser.reduce_tree:
+                if isinstance(result,list):
+                    if self.root:
+                        result = flatten(result)
+                        if len(result)>1:
+                            result = NonTerminal(self.rule, self.c_pos, result)
+                        else:
+                            result = result[0]
+            else:
+                if self.root:
+                    result = NonTerminal(self.rule, self.c_pos, result)
             
         # Result caching for use by memoization.
         self.result_cache[self.c_pos] = (result, parser.position)
@@ -519,9 +529,15 @@ class SemanticAction(object):
 # Parsers
 
 class Parser(object):
-    def __init__(self, skipws=True, ws=DEFAULT_WS):
+    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False):
+        '''
+        @skipws     - if True whitespaces will not be part of parse tree.
+        @ws         - rule for matching ws
+        @reduce_tree - if true nonterminals with single child will be eliminated.
+        '''
         self.skipws = skipws
         self.ws = ws
+        self.reduce_tree = reduce_tree
         self.comments_model = None
         self.sem_actions = {}   
             
@@ -649,8 +665,9 @@ class Parser(object):
         
 
 class ParserPython(Parser):
-    def __init__(self, language_def, comment_def=None, skipws=True, ws=DEFAULT_WS):
-        super(ParserPython, self).__init__(skipws, ws)
+    def __init__(self, language_def, comment_def=None, skipws=True, ws=DEFAULT_WS, \
+                 reduce_tree=False):
+        super(ParserPython, self).__init__(skipws, ws, reduce_tree)
         
         self._init_caches()
         

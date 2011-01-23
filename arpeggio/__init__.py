@@ -211,11 +211,16 @@ class Repetition(ParsingExpression):
     '''
     Base class for all repetition-like parser expressions (?,*,+)
     '''
-    def __init__(self, *elements):
+    def __init__(self, *elements, **kwargs):
         super(Repetition, self).__init__(None)
         if len(elements)==1:
             elements = elements[0]
         self.elements = elements
+        
+        nodes = kwargs.get('nodes', [])
+        if not hasattr(nodes, '__iter__'):
+            nodes = [nodes]
+        self.nodes = nodes
 
 
 class Optional(Repetition):
@@ -276,10 +281,16 @@ class SyntaxPredicate(ParsingExpression):
     Predicates are parser expressions that will do the match but will not consume
     any input.
     '''
-    def __init__(self, *elements):
+    def __init__(self, *elements, **kwargs):
         if len(elements)==1:
             elements = elements[0]
         self.elements = elements
+
+        nodes = kwargs.get('nodes', [])
+        if not hasattr(nodes, '__iter__'):
+            nodes = [nodes]
+        self.nodes = nodes
+
         super(SyntaxPredicate, self).__init__(None)
 
 class And(SyntaxPredicate):

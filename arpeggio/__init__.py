@@ -679,9 +679,7 @@ class ParserPython(Parser):
     def __init__(self, language_def, comment_def=None, skipws=True, ws=DEFAULT_WS, \
                  reduce_tree=False):
         super(ParserPython, self).__init__(skipws, ws, reduce_tree)
-        
-        self._init_caches()
-        
+                
         # PEG Abstract Syntax Graph
         self.parser_model = self._from_python(language_def)
         self.comments_model = self._from_python(comment_def) if comment_def else None
@@ -691,11 +689,6 @@ class ParserPython(Parser):
             self.comments_model.root = True
             self.comments_model.rule = comment_def.__name__
 
-    def _init_caches(self):
-        self.__rule_stack = []   # Used to keep track of the "path" from the initial parser model node
-        self.__rule_cache = {}   # Used for recursive definitions
-        self.__rule_cache["EndOfFile"] = EndOfFile()
-        
     def _parse(self):
         return self.parser_model.parse(self)
 
@@ -705,63 +698,84 @@ class ParserPython(Parser):
         lists, tuples, callables, strings and ParsingExpression objects.
         @returns - Parser Model (PEG Abstract Semantic Graph)
         """
-        root = False
-        while callable(expression): # Is this expression a parser rule?
-            if self.__rule_cache.has_key(expression.__name__):
-                logger.debug("Rule %s founded in cache." % expression.__name__)
-                return self.__rule_cache.get(expression.__name__)
-            rule = expression.__name__
-            root = True
-            # Semantic action for the rule
-            if hasattr(expression, "sem"):
-                self.sem_actions[rule] = expression.sem
-                
-            logger.debug("push : %s" % rule)
-            self.__rule_stack.append(rule)
-            expression = expression()
-
-        rule = self.__rule_stack[-1]
-
-        retval = None
-        if isinstance(expression, Match):
-            retval = expression
-            retval.rule = rule
-            retval.root = root
-
-        elif isinstance(expression, Repetition) or isinstance(expression, SyntaxPredicate):
-            retval = expression
-            retval.rule = rule
-            retval.root = root
-            retval.nodes.append(self._from_python(retval.elements))
-                        
-        elif type(expression) in [list, tuple]:
-            if type(expression) is list:
-                retval = OrderedChoice(expression, rule, root)
-            else:
-                retval = Sequence(expression, rule, root)
-
-            # If this expression is rule than we will cache it
-            # in order to support recursive definitions
-            if root: 
-                self.__rule_cache[rule] = retval
-                logger.debug("New rule: %s -> %s" % (rule, retval.__class__.__name__))
-            retval.nodes = [self._from_python(e) for e in expression]
-            
-        elif type(expression) is str:
-            retval = StrMatch(expression, rule, root)
+        __rule_cache = {"EndOfFile": EndOfFile()}
+        __for_resolving = [] # Expressions that needs crossref resolvnih
+        self.__cross_refs = 0
         
-        else:
-            raise GrammarError("Unrecognized grammar element '%s' in rule %s." % (str(expression), rule))
-            
+        class CrossRef(object):
+            def __init__(self, rule_name):
+                self.rule_name = rule_name
+                
+        def inner_from_python(expression):
+            retval = None
+            if callable(expression): # Is this expression a parser rule?
+                rule = expression.__name__
+                if __rule_cache.has_key(rule):
+                    logger.debug("Rule %s founded in cache." % rule)
+                    if isinstance(__rule_cache.get(rule), CrossRef):
+                        self.__cross_refs += 1
+                        logger.debug("CrossRef usage: %s" % __rule_cache.get(rule).rule_name)
+                    return __rule_cache.get(rule)
 
-        if root:
-            self.__rule_cache[rule] = retval
-
-        if root:
-            name = self.__rule_stack.pop()
-            logger.debug("pop: %s" % name)
+                expression_expression = expression()
+                if callable(expression_expression):
+                    raise GrammarError(
+                        "Rule element can't be just another rule in '%s'." % rule)            
+    
+                # Semantic action for the rule
+                if hasattr(expression, "sem"):
+                    self.sem_actions[rule] = expression.sem
+                    
+                # Register rule cross-ref to support recursion
+                __rule_cache[rule] = CrossRef(rule)
+                
+                retval = inner_from_python(expression())
+                retval.rule = rule
+                retval.root = True
+                
+                # Update cache
+                __rule_cache[rule] = retval
+                logger.debug("New rule: %s -> %s" % (rule, retval.__class__.__name__))
+                
+            elif isinstance(expression, Match):
+                retval = expression
+    
+            elif isinstance(expression, Repetition) or isinstance(expression, SyntaxPredicate):
+                retval = expression
+                retval.nodes.append(inner_from_python(retval.elements))
+                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                    __for_resolving.append(retval)
+                            
+            elif type(expression) in [list, tuple]:
+                if type(expression) is list:
+                    retval = OrderedChoice(expression)
+                else:
+                    retval = Sequence(expression)
+    
+                retval.nodes = [inner_from_python(e) for e in expression]
+                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                    __for_resolving.append(retval)
+                
+            elif type(expression) is str:
+                retval = StrMatch(expression)
             
-        return retval
+            else:
+                raise GrammarError("Unrecognized grammar element '%s' in rule %s." % (str(expression), rule))
+                
+            return retval
+
+        # Cross-ref resolving
+        def resolve():
+            for e in __for_resolving:
+                for i, node in enumerate(e.nodes):
+                    if isinstance(node, CrossRef):
+                        self.__cross_refs -= 1
+                        e.nodes[i] = __rule_cache[node.rule_name]
+                                
+        parser_model = inner_from_python(expression)
+        resolve()
+        assert self.__cross_refs == 0, "Not all crossrefs are resolved!"
+        return parser_model
 
     def errors(self):
         pass

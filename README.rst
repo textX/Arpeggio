@@ -68,7 +68,3 @@ to build PEG parser itself. See also peg_peg.py example where PEG parser is boot
 using description given in PEG language itself.
 
 
-CONTRIBUTION
-------------
-If you have ideas, suggestions or code that you wish to contribute to the project
-please use google code issue tracker at http://arpeggio.googlecode.com/

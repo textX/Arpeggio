@@ -12,9 +12,9 @@ as access to the raw parse tree in order to support syntax highlighting and
 other nice features of today's IDEs.
 
 For more information on PEG and pacrat parsers see:
-http://pdos.csail.mit.edu/~baford/packrat/
-http://pdos.csail.mit.edu/~baford/packrat/thesis/
-http://en.wikipedia.org/wiki/Parsing_expression_grammar
+ * http://pdos.csail.mit.edu/~baford/packrat/
+ * http://pdos.csail.mit.edu/~baford/packrat/thesis/
+ * http://en.wikipedia.org/wiki/Parsing_expression_grammar
 
 
 INSTALLATION

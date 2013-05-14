@@ -100,7 +100,24 @@ class ParsingExpression(object):
         if self.root:
             return self.rule
         else:
-            return id(self)        
+            return id(self)
+        
+    def clear_cache(self, processed=None):
+        '''
+        Clears memoization cache. Should be called on input change.
+        
+        Args:
+            processed (set): Set of processed nodes to prevent infinite loops.
+        '''
+        
+        self.result_cache = {}
+        if not processed:
+            processed = set()
+        
+        for node in self.nodes:
+            if node not in processed:
+                processed.add(node)        
+                node.clear_cache(processed)
                 
     def _parse_intro(self, parser):
         logger.debug("Parsing %s" % self.name)
@@ -561,6 +578,7 @@ class Parser(object):
         self.nm = None  # Last NoMatch exception
         self.line_ends = []
         self.input = _input
+        self.parser_model.clear_cache()
         self.parse_tree = self._parse()
         return self.parse_tree
     

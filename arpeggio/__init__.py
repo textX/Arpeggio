@@ -670,7 +670,7 @@ class Parser(object):
 
     def _skip_comments(self):
         # We do not want to recurse into parsing comments
-        if comments_model and not self.in_skip_comments:
+        if self.comments_model and not self.in_skip_comments:
             self.in_skip_comments = True
             comments = self.comments_model.parse(self)
             self.in_skip_comments = False

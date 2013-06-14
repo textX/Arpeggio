@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#######################################################################
+###############################################################################
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
@@ -9,7 +9,7 @@
 #
 # Arpeggio is implementation of pacrat parser interpreter based on PEG grammars.
 # Parsers are defined using python language construction or PEG language.
-#######################################################################
+###############################################################################
 
 __author__ = "Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>"
 __version__ = "0.1-dev"
@@ -22,7 +22,7 @@ DESC = 'Pacrat parser interpreter'
 AUTHOR = 'Igor R. Dejanovic'
 AUTHOR_EMAIL = 'igor DOT dejanovic AT gmail DOT com'
 LICENCE = 'MIT'
-URL = 'http://arpeggio.googlecode.com/'
+URL = 'https://github.com/igordejanovic/arpeggio'
 
 setup(
     name = NAME,

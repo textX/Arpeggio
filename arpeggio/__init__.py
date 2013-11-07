@@ -6,7 +6,7 @@
 # Copyright: (c) 2009 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
-# This is implementation of pacrat parser interpreter based on PEG grammars.
+# This is implementation of packrat parser interpreter based on PEG grammars.
 # Parsers are defined using python language construction or PEG language.
 #######################################################################
 

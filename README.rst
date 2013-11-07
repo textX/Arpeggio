@@ -1,8 +1,8 @@
-Arpeggio - Pacrat parser interpreter
-====================================
+Arpeggio - Packrat parser interpreter
+=====================================
 
 Arpeggio is parser interpreter based on PEG grammars implemented as recursive descent 
-parser with memoization (aka Pacrat parser).
+parser with memoization (aka Packrat parser).
 
 Arpeggio is part of research project whose main goal is building environment for DSL development.
 The main domain of application is IDE for DSL development but it can be used for all
@@ -11,7 +11,7 @@ Some essential planed/done features are error reporting and error recovery as we
 as access to the raw parse tree in order to support syntax highlighting and
 other nice features of today's IDEs.
 
-For more information on PEG and pacrat parsers see:
+For more information on PEG and packrat parsers see:
  * http://pdos.csail.mit.edu/~baford/packrat/
  * http://pdos.csail.mit.edu/~baford/packrat/thesis/
  * http://en.wikipedia.org/wiki/Parsing_expression_grammar

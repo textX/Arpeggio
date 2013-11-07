@@ -7,7 +7,7 @@
 # Copyright: (c) 2009 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
-# Arpeggio is implementation of pacrat parser interpreter based on PEG grammars.
+# Arpeggio is implementation of packrat parser interpreter based on PEG grammars.
 # Parsers are defined using python language construction or PEG language.
 ###############################################################################
 
@@ -18,7 +18,7 @@ from setuptools import setup
 
 NAME = 'Arpeggio'
 VERSION = __version__
-DESC = 'Pacrat parser interpreter'
+DESC = 'Packrat parser interpreter'
 AUTHOR = 'Igor R. Dejanovic'
 AUTHOR_EMAIL = 'igor DOT dejanovic AT gmail DOT com'
 LICENCE = 'MIT'
@@ -35,7 +35,7 @@ setup(
     license = LICENCE,
     url = URL,
     packages = ["arpeggio"],
-    keywords = "parser pacrat peg",
+    keywords = "parser packrat peg",
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

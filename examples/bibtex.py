@@ -16,14 +16,14 @@ from arpeggio import RegExMatch as _
 import logging        
 
 
-def bibfile():          return ZeroOrMore(bibentry), EndOfFile
+def bibfile():          return ZeroOrMore([bibentry, comment]), EndOfFile
 def bibentry():         return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
 def bibtype():          return _(r'@\w+')
 def bibkey():           return _(r'[^\s,]+'),
 def field():            return fieldname, "=", '"', fieldvalue, '"'
 def fieldname():        return _(r'\w+')
 def fieldvalue():       return _(r'[^"]*')
-def comment():          return _(r'%[^\n]*') 
+def comment():          return _(r'[^@]+') 
 
 # Semantic actions
 class BibFileSem(SemanticAction):
@@ -46,7 +46,7 @@ class BibEntrySem(SemanticAction):
             if isinstance(field, tuple):
                 bib_entry_map[field[0]] = field[1]
         return bib_entry_map
-
+            
 
 class FieldSem(SemanticAction):
     '''Constructs a tuple (fieldname, fieldvalue).'''
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         # First we will make a parser - an instance of the bib parser model.
         # Parser model is given in the form of python constructs therefore we 
         # are using ParserPython class.
-        parser = ParserPython(bibfile, comment_def=comment, reduce_tree=True)
+        parser = ParserPython(bibfile, reduce_tree=True)
 
         # Then we export it to a dot file in order to visualise it. This is
         # particulary handy for debugging purposes.

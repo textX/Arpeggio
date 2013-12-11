@@ -22,7 +22,8 @@ def bibtype():          return _(r'@\w+')
 def bibkey():           return _(r'[^\s,]+'),
 def field():            return fieldname, "=", '"', fieldvalue, '"'
 def fieldname():        return _(r'\w+')
-def fieldvalue():       return _(r'[^"]*') 
+def fieldvalue():       return _(r'[^"]*')
+def comment():          return _(r'%[^\n]*') 
 
 # Semantic actions
 class BibFileSem(SemanticAction):
@@ -80,7 +81,7 @@ if __name__ == "__main__":
         # First we will make a parser - an instance of the bib parser model.
         # Parser model is given in the form of python constructs therefore we 
         # are using ParserPython class.
-        parser = ParserPython(bibfile, reduce_tree=True)
+        parser = ParserPython(bibfile, comment_def=comment, reduce_tree=True)
 
         # Then we export it to a dot file in order to visualise it. This is
         # particulary handy for debugging purposes.

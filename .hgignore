@@ -1,5 +1,0 @@
-syntax: glob
-*pyc
-*orig
-*bak
-Arpeggio.egg-info

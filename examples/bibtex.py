@@ -1,9 +1,9 @@
 #-*- coding: utf-8 -*-
 #######################################################################
-# Name: calc.py
+# Name: bibtex.py
 # Purpose: Parser for bibtex files
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2013 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example demonstrates grammar for bibtex files.
@@ -13,7 +13,7 @@ import sys
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
-import logging        
+import logging
 
 
 def bibfile():          return ZeroOrMore([bibentry, comment]), EndOfFile
@@ -23,14 +23,14 @@ def bibkey():           return _(r'[^\s,]+'),
 def field():            return fieldname, "=", '"', fieldvalue, '"'
 def fieldname():        return _(r'\w+')
 def fieldvalue():       return _(r'[^"]*')
-def comment():          return _(r'[^@]+') 
+def comment():          return _(r'[^@]+')
 
 # Semantic actions
 class BibFileSem(SemanticAction):
     '''Just returns list of child nodes (bibentries).'''
     def first_pass(self, parser, node, nodes):
         logging.debug("Processing Bibfile")
-        return nodes[:-1]        
+        return nodes[:-1]
 
 
 class BibEntrySem(SemanticAction):
@@ -46,7 +46,7 @@ class BibEntrySem(SemanticAction):
             if isinstance(field, tuple):
                 bib_entry_map[field[0]] = field[1]
         return bib_entry_map
-            
+
 
 class FieldSem(SemanticAction):
     '''Constructs a tuple (fieldname, fieldvalue).'''
@@ -54,10 +54,10 @@ class FieldSem(SemanticAction):
         logging.debug("    Processing field %s" % nodes[0])
         field = (nodes[0].value, nodes[3])
         return field
-    
-    
+
+
 class FieldValueSem(SemanticAction):
-    '''Converts serbian letters form latex encoding to unicode.'''
+    '''Serbian Serbian letters form latex encoding to Unicode.'''
     def first_pass(self, parser, node, nodes):
         return node.value.replace(r"\'{c}", u"ć")\
                     .replace(r"\'{C}", u"Ć")\
@@ -67,7 +67,7 @@ class FieldValueSem(SemanticAction):
                     .replace(r"\v{Z}", u"Ž")\
                     .replace(r"\v{s}", u"š")\
                     .replace(r"\v{S}", u"Š")
-    
+
 # Connecting rules with semantic actions
 bibfile.sem = BibFileSem()
 bibentry.sem = BibEntrySem()
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         logging.basicConfig(level=logging.DEBUG)
 
         # First we will make a parser - an instance of the bib parser model.
-        # Parser model is given in the form of python constructs therefore we 
+        # Parser model is given in the form of python constructs therefore we
         # are using ParserPython class.
         parser = ParserPython(bibfile, reduce_tree=True)
 
@@ -89,16 +89,16 @@ if __name__ == "__main__":
         # dot -O -Tjpg calc_parse_tree_model.dot
         PMDOTExport().exportFile(parser.parser_model,
                         "bib_parse_tree_model.dot")
-                
+
         # First parameter is bibtex file
         if len(sys.argv) > 1:
             with open(sys.argv[1], "r") as bibtexfile:
                 bibtexfile_content = bibtexfile.read()
-                
-                
+
+
                 # We create a parse tree or abstract syntax tree out of textual input
                 parse_tree = parser.parse(bibtexfile_content)
-                
+
                 # Then we export it to a dot file in order to visualise it.
                 PTDOTExport().exportFile(parse_tree,
                                 "bib_parse_tree.dot")
@@ -108,6 +108,6 @@ if __name__ == "__main__":
                 print parser.getASG()
         else:
             print "Usage: python bibtex.py file_to_parse"
-        
+
     except NoMatch, e:
         print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

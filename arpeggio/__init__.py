@@ -676,12 +676,12 @@ class Parser(object):
 
             return retval
 
-        if parser.debug:
+        if self.debug:
             print "ASG: First pass"
         asg = tree_walk(self.parse_tree)
 
         # Second pass
-        if parser.debug:
+        if self.debug:
             print "ASG: Second pass"
         for sa_name, asg_node in for_second_pass:
             sem_actions[sa_name].second_pass(self, asg_node)

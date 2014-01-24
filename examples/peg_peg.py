@@ -13,7 +13,6 @@
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio.peg import ParserPEG
-import logging
 
 # Semantic actions
 from arpeggio.peg import SemGrammar, SemRule, SemOrderedChoice, SemSequence,\
@@ -67,11 +66,10 @@ peg_grammar = r"""
 
 
 try:
-    logging.basicConfig(level=logging.DEBUG)
 
     # ParserPEG will use ParserPython to parse peg_grammar definition and
     # create parser_model for parsing PEG based grammars
-    parser = ParserPEG(peg_grammar, 'grammar')
+    parser = ParserPEG(peg_grammar, 'grammar', debug=True)
 
     # Exporting parser model to dot file in order to visualise.
     PMDOTExport().exportFile(parser.parser_model,

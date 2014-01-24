@@ -4,26 +4,26 @@
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
-# 
-# This example is based on jsonParser.py from pyparsing project 
+#
+# This example is based on jsonParser.py from pyparsing project
 # (see http://pyparsing.wikispaces.com/).
 ##############################################################################
 
 
 json_bnf = """
-object 
-    { members } 
-    {} 
-members 
-    string : value 
-    members , string : value 
-array 
+object
+    { members }
+    {}
+members
+    string : value
+    members , string : value
+array
     [ elements ]
-    [] 
-elements 
-    value 
-    elements , value 
-value 
+    []
+elements
+    value
+    elements , value
+value
     string
     number
     object
@@ -51,15 +51,15 @@ def jsonMembers():      return memberDef, ZeroOrMore(",", memberDef)
 def jsonObject():       return "{", Optional(jsonMembers), "}"
 def jsonFile():         return jsonObject, EOF
 
-    
+
 if __name__ == "__main__":
     testdata = """
     {
         "glossary": {
             "title": "example glossary",
-            "GlossDiv": { 
+            "GlossDiv": {
                 "title": "S",
-                "GlossList": 
+                "GlossList":
                     {
                     "ID": "SGML",
                     "SortAs": "SGML",
@@ -83,15 +83,13 @@ if __name__ == "__main__":
     }
     """
     try:
-        logging.basicConfig(level=logging.DEBUG)
-        
         # Creating parser from parser model.
-        parser = ParserPython(jsonFile)
-        
+        parser = ParserPython(jsonFile, debug=True)
+
         # Exporting parser model to dot file in order to visualise it.
         PMDOTExport().exportFile(parser.parser_model,
                 "json_parser_model.dot")
-        
+
         parse_tree = parser.parse(testdata)
 
         PTDOTExport().exportFile(parser.parse_tree,
@@ -99,4 +97,4 @@ if __name__ == "__main__":
 
     except NoMatch, e:
         print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))
-    
+

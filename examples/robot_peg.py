@@ -22,7 +22,6 @@
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
-import logging        
 from arpeggio.peg import ParserPEG
 
 # Grammar rules
@@ -49,7 +48,6 @@ semantic_actions = {
 
 if __name__ == "__main__":
     try:
-        logging.basicConfig(level=logging.DEBUG)
 
         # Program code
         input = '''
@@ -64,9 +62,9 @@ if __name__ == "__main__":
 
 
         # First we will make a parser - an instance of the robot parser model.
-        # Parser model is given in the form of PEG specification therefore we 
+        # Parser model is given in the form of PEG specification therefore we
         # are using ParserPEG class.
-        parser = ParserPEG(robot_grammar, 'program')
+        parser = ParserPEG(robot_grammar, 'program', debug=True)
 
         # Then we export it to a dot file in order to visualize it. This is
         # particularly handy for debugging purposes.
@@ -74,10 +72,10 @@ if __name__ == "__main__":
         # dot -O -Tjpg robot_peg_parse_tree_model.dot
         PMDOTExport().exportFile(parser.parser_model,
                         "robot_peg_parse_tree_model.dot")
-                
+
         # We create a parse tree out of textual input
         parse_tree = parser.parse(input)
-        
+
         # Then we export it to a dot file in order to visualize it.
         # dot -O -Tjpg robot_peg_parse_tree.dot
         PTDOTExport().exportFile(parse_tree,
@@ -87,6 +85,6 @@ if __name__ == "__main__":
         # In this case semantic analysis will evaluate expression and
         # returned value will be the final position of the robot.
         print "position = ", parser.getASG(sem_actions=semantic_actions)
-        
+
     except NoMatch, e:
         print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

@@ -22,10 +22,9 @@
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
-import logging        
 
 # Grammar rules
-def program():      return Kwd('begin'), ZeroOrMore(command), Kwd('end'), EndOfFile 
+def program():      return Kwd('begin'), ZeroOrMore(command), Kwd('end'), EndOfFile
 def command():      return [up, down, left, right]
 def up():           return 'up'
 def down():         return 'down'
@@ -36,35 +35,35 @@ def right():        return 'right'
 # Semantic actions
 class Up(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logging.debug("Going up")
-        return (0, 1)        
+        print "Going up"
+        return (0, 1)
 
 class Down(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logging.debug("Going down")
-        return (0, -1)        
+        print "Going down"
+        return (0, -1)
 
 class Left(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logging.debug("Going left")
-        return (-1, 0)        
-    
+        print "Going left"
+        return (-1, 0)
+
 class Right(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logging.debug("Going right")
-        return (1, 0)        
+        print "Going right"
+        return (1, 0)
 
 class Command(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logging.debug("Command")
-        return nodes[0]        
+        print "Command"
+        return nodes[0]
 
-    
+
 class Program(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logging.debug("Evaluating position")
+        print "Evaluating position"
         return reduce(lambda x, y: (x[0]+y[0], x[1]+y[1]), nodes[1:-2])
-    
+
 # Connecting rules with semantic actions
 program.sem = Program()
 command.sem = Command()
@@ -75,7 +74,6 @@ right.sem = Right()
 
 if __name__ == "__main__":
     try:
-        logging.basicConfig(level=logging.DEBUG)
 
         # Program code
         input = '''
@@ -90,9 +88,9 @@ if __name__ == "__main__":
 
 
         # First we will make a parser - an instance of the robot parser model.
-        # Parser model is given in the form of python constructs therefore we 
+        # Parser model is given in the form of python constructs therefore we
         # are using ParserPython class.
-        parser = ParserPython(program)
+        parser = ParserPython(program, debug=True)
 
         # Then we export it to a dot file in order to visualize it. This is
         # particularly handy for debugging purposes.
@@ -100,10 +98,10 @@ if __name__ == "__main__":
         # dot -O -Tjpg robot_parse_tree_model.dot
         PMDOTExport().exportFile(parser.parser_model,
                         "robot_parse_tree_model.dot")
-                
+
         # We create a parse tree out of textual input
         parse_tree = parser.parse(input)
-        
+
         # Then we export it to a dot file in order to visualize it.
         # dot -O -Tjpg robot_parse_tree.dot
         PTDOTExport().exportFile(parse_tree,
@@ -113,6 +111,6 @@ if __name__ == "__main__":
         # In this case semantic analysis will evaluate expression and
         # returned value will be the final position of the robot.
         print "position = ", parser.getASG()
-        
+
     except NoMatch, e:
         print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

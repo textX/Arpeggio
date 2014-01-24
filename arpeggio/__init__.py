@@ -12,9 +12,6 @@
 
 import re
 import bisect
-import logging
-
-logger = logging.getLogger('arpeggio')
 
 DEFAULT_WS = '\t\n\r '
 
@@ -135,7 +132,8 @@ class ParsingExpression(object):
                 node.clear_cache(processed)
 
     def _parse_intro(self, parser):
-        logger.debug("Parsing %s" % self.name)
+        if parser.debug:
+            print "Parsing %s" % self.name
         parser._skip_ws()
         self.c_pos = parser.position
 
@@ -146,8 +144,9 @@ class ParsingExpression(object):
         #If this position is already parsed by this parser expression than use
         #the result
         if self.c_pos in self.result_cache:
-            logger.debug("Result for [%s, %s] founded in result_cache." %
-                         (self, self.c_pos))
+            if parser.debug:
+                print "Result for [%s, %s] founded in result_cache." % \
+                         (self, self.c_pos)
             result, new_pos = self.result_cache[self.c_pos]
             parser.position = new_pos
             return result
@@ -426,11 +425,13 @@ class RegExMatch(Match):
         m = self.regex.match(parser.input[parser.position:])
         if m:
             parser.position += len(m.group())
-            logger.debug("Match %s at %d" % (m.group(), self.c_pos))
+            if parser.debug:
+                print "Match %s at %d" % (m.group(), self.c_pos)
             return Terminal(self.rule if self.root else '', self.c_pos,
                             m.group())
         else:
-            logger.debug("NoMatch at %d" % self.c_pos)
+            if parser.debug:
+                print "NoMatch at %d" % self.c_pos
             parser._nm_raise(self.root if self.root else self.name, self.c_pos,
                              parser)
 
@@ -449,11 +450,13 @@ class StrMatch(Match):
     def _parse(self, parser):
         if parser.input[parser.position:].startswith(self.to_match):
             parser.position += len(self.to_match)
-            logger.debug("Match %s at %d" % (self.to_match, self.c_pos))
+            if parser.debug:
+                print "Match %s at %d" % (self.to_match, self.c_pos)
             return Terminal(self.rule if self.root else '', self.c_pos,
                             self.to_match)
         else:
-            logger.debug("NoMatch at %d" % self.c_pos)
+            if parser.debug:
+                print "NoMatch at %d" % self.c_pos
             parser._nm_raise(self.to_match, self.c_pos, parser)
 
     def __str__(self):
@@ -491,7 +494,8 @@ class EndOfFile(Match):
         if len(parser.input) == parser.position:
             return Terminal(self.rule if self.root else '', self.c_pos, 'EOF')
         else:
-            logger.debug("EOF not matched.")
+            if parser.debug:
+                print "EOF not matched."
             parser._nm_raise(self.name, self.c_pos, parser)
 
 
@@ -600,16 +604,18 @@ class SemanticAction(object):
 
 
 class Parser(object):
-    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False):
+    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False, debug=False):
         '''
         @skipws     - if True whitespaces will not be part of parse tree.
         @ws         - rule for matching ws
         @reduce_tree - if true nonterminals with single child will be
                         eliminated.
+        @debug      - If true debug messages will get printed.
         '''
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
+        self.debug = debug
         self.comments_model = None
         self.sem_actions = {}
 
@@ -670,11 +676,13 @@ class Parser(object):
 
             return retval
 
-        logger.debug("ASG: First pass")
+        if parser.debug:
+            print "ASG: First pass"
         asg = tree_walk(self.parse_tree)
 
-        logger.debug("ASG: Second pass")
         # Second pass
+        if parser.debug:
+            print "ASG: Second pass"
         for sa_name, asg_node in for_second_pass:
             sem_actions[sa_name].second_pass(self, asg_node)
 
@@ -740,9 +748,8 @@ class Parser(object):
 
 
 class ParserPython(Parser):
-    def __init__(self, language_def, comment_def=None, skipws=True,
-                 ws=DEFAULT_WS, reduce_tree=False):
-        super(ParserPython, self).__init__(skipws, ws, reduce_tree)
+    def __init__(self, language_def, comment_def=None, *args, **kwargs):
+        super(ParserPython, self).__init__(*args, **kwargs)
 
         # PEG Abstract Syntax Graph
         self.parser_model = self._from_python(language_def)
@@ -777,11 +784,13 @@ class ParserPython(Parser):
             if callable(expression):  # Is this expression a parser rule?
                 rule = expression.__name__
                 if rule in __rule_cache:
-                    logger.debug("Rule %s founded in cache." % rule)
+                    if self.debug:
+                        print "Rule %s founded in cache." % rule
                     if isinstance(__rule_cache.get(rule), CrossRef):
                         self.__cross_refs += 1
-                        logger.debug("CrossRef usage: %s" %
-                                     __rule_cache.get(rule).rule_name)
+                        if self.debug:
+                            print "CrossRef usage: %s" % \
+                                   __rule_cache.get(rule).rule_name
                     return __rule_cache.get(rule)
 
                 expression_expression = expression()
@@ -803,8 +812,9 @@ class ParserPython(Parser):
 
                 # Update cache
                 __rule_cache[rule] = retval
-                logger.debug("New rule: %s -> %s" %
-                             (rule, retval.__class__.__name__))
+                if self.debug:
+                    print "New rule: %s -> %s" % \
+                          (rule, retval.__class__.__name__)
 
             elif isinstance(expression, Match):
                 retval = expression

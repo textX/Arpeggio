@@ -63,7 +63,7 @@ def flatten(_iterable):
     '''Flattening of python iterables.'''
     result = []
     for e in _iterable:
-        if hasattr(e, "__iter__") and not type(e) is str:
+        if hasattr(e, "__iter__") and not type(e) in [str, NonTerminal]:
             result.extend(flatten(e))
         else:
             result.append(e)
@@ -564,6 +564,12 @@ class NonTerminal(ParseTreeNode):
     @property
     def desc(self):
         return self.name
+
+    def __iter__(self):
+        return iter(self.nodes)
+
+    def __str__(self):
+        return "[ %s ]" % ", ".join([str(x) for x in self.nodes])
 
 
 # ----------------------------------------------------

@@ -793,11 +793,11 @@ class ParserPython(Parser):
                                    __rule_cache.get(rule).rule_name
                     return __rule_cache.get(rule)
 
-                expression_expression = expression()
-                if callable(expression_expression):
-                    raise GrammarError(
-                        "Rule element can't be just another rule in '%s'." %
-                        rule)
+                #expression_expression = expression()
+                #if callable(expression_expression):
+                    #raise GrammarError(
+                        #"Rule element '%s' can't be just another rule in '%s'." %
+                        #(expression_expression, rule))
 
                 # Semantic action for the rule
                 if hasattr(expression, "sem"):

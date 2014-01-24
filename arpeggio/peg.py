@@ -22,7 +22,7 @@ def ordered_choice():   return sequence, ZeroOrMore(SLASH, sequence)
 def sequence():         return OneOrMore(prefix)
 def prefix():           return Optional([AND,NOT]), sufix
 def sufix():            return expression, Optional([QUESTION, STAR, PLUS])
-def expression():       return [regex,(identifier, Not(LEFT_ARROW)), 
+def expression():       return [regex,(identifier, Not(LEFT_ARROW)),
                                 (OPEN, ordered_choice, CLOSE),
                                 literal]
 
@@ -60,7 +60,7 @@ class PEGSemanticAction(SemanticAction):
 class SemGrammar(SemanticAction):
     def first_pass(self, parser, node, nodes):
         return parser.peg_rules[parser.root_rule_name]
-                    
+
 class SemRule(PEGSemanticAction):
     def first_pass(self, parser, node, nodes):
         rule_name = nodes[0].value
@@ -70,11 +70,11 @@ class SemRule(PEGSemanticAction):
             retval = nodes[2]
         retval.rule = rule_name
         retval.root = True
-        
+
         if not hasattr(parser, "peg_rules"):
             parser.peg_rules = {}   # Used for linking phase
-            parser.peg_rules["EndOfFile"] = EndOfFile()        
-            
+            parser.peg_rules["EndOfFile"] = EndOfFile()
+
         parser.peg_rules[rule_name] = retval
         return retval
 
@@ -107,7 +107,7 @@ class SemPrefix(PEGSemanticAction):
                 retval.nodes = [nodes[1]]
         else:
             retval = nodes[0]
-            
+
         return retval
 
 class SemSufix(PEGSemanticAction):
@@ -127,7 +127,7 @@ class SemSufix(PEGSemanticAction):
                 retval.nodes = [nodes[0]]
         else:
             retval = nodes[0]
-            
+
         return retval
 
 class SemExpression(PEGSemanticAction):
@@ -142,12 +142,12 @@ class SemIdentifier(SemanticAction):
     def first_pass(self, parser, node, nodes):
         logger.debug("Identifier %s." % node.value)
         return node
-    
+
 class SemRegEx(SemanticAction):
     def first_pass(self, parser, node, nodes):
         logger.debug("RegEx %s." % nodes[2].value)
         return RegExMatch(nodes[2].value)
-    
+
 class SemLiteral(SemanticAction):
     def first_pass(self, parser, node, nodes):
         logger.debug("Literal: %s" % node.value)
@@ -173,21 +173,21 @@ identifier.sem = SemIdentifier()
 literal.sem = SemLiteral()
 for sem in [LEFT_ARROW, SLASH, STAR, QUESTION, PLUS, AND, NOT, OPEN, CLOSE]:
     sem.sem = SemTerminal()
-    
-    
+
+
 class ParserPEG(Parser):
-    def __init__(self, language_def, root_rule_name, comment_rule_name=None, skipws=True, ws=DEFAULT_WS):
-        super(ParserPEG, self).__init__(skipws, ws)
+    def __init__(self, language_def, root_rule_name, comment_rule_name=None, *args, **kwargs):
+        super(ParserPEG, self).__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
-        
+
         # PEG Abstract Syntax Graph
         self.parser_model = self._from_peg(language_def)
-                
+
         # Comments should be optional and there can be more of them
         if self.comments_model: # and not isinstance(self.comments_model, ZeroOrMore):
             self.comments_model.root = True
             self.comments_model.rule = comment_rule_name
-            
+
     def _parse(self):
         return self.parser_model.parse(self)
 
@@ -196,17 +196,17 @@ class ParserPEG(Parser):
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)
         return parser.getASG()
-    
+
 if __name__ == "__main__":
     try:
         logging.basicConfig(level=logging.DEBUG)
 
         parser = ParserPython(grammar, None)
-            
+
         f = open("peg_parser_model.dot", "w")
         f.write(str(DOTSerializator(parser.parser_model)))
         f.close()
-        
+
     except NoMatch, e:
         print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))
-            
+

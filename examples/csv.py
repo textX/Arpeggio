@@ -15,7 +15,7 @@ def field():                    return [quoted_field, field_content]
 def quoted_field():             return '"', field_content_quoted, '"'
 def field_content():            return _(r'([^,\n])+')
 def field_content_quoted():     return _(r'(("")|([^"]))+')
-def csvfile():                  return OneOrMore(ZeroOrMore(newline), record, OneOrMore(newline)), EndOfFile
+def csvfile():                  return OneOrMore([record, newline]), EndOfFile
 
 
 if __name__ == "__main__":
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     test_data = '''
 Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
 
-Unquoted test 2, "Quoted test 2", 23234, One Two Three, "343456.45"
+Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343456.45"
 Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
     '''
 

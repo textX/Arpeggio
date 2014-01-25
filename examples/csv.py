@@ -9,13 +9,12 @@ from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
 
-def newline():                  return _(r'\n+')
 def record():                   return field, ZeroOrMore(",", field)
 def field():                    return [quoted_field, field_content]
 def quoted_field():             return '"', field_content_quoted, '"'
 def field_content():            return _(r'([^,\n])+')
 def field_content_quoted():     return _(r'(("")|([^"]))+')
-def csvfile():                  return OneOrMore([record, newline]), EndOfFile
+def csvfile():                  return OneOrMore([record, '\n']), EndOfFile
 
 
 if __name__ == "__main__":

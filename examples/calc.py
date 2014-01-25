@@ -96,7 +96,7 @@ if __name__ == "__main__":
         parser = ParserPython(calc)
 
         # Then we export it to a dot file in order to visualise it. This is
-        # particulary handy for debugging purposes.
+        # particularly handy for debugging purposes.
         # We can make a jpg out of it using dot (part of graphviz) like this
         # dot -O -Tjpg calc_parse_tree_model.dot
         PMDOTExport().exportFile(parser.parser_model,

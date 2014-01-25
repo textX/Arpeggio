@@ -36,7 +36,7 @@ Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
 
         # Then we export it to a dot file in order to visualise it. This is
         # particularly handy for debugging purposes.
-        # We can make a jpg out of it using dot (part of graphviz) like this:
+        # We can make a png out of it using dot (part of graphviz) like this:
         # dot -O -Tpng calc_parse_tree_model.dot
         PMDOTExport().exportFile(parser.parser_model,
                                  "csv_parse_tree_model.dot")

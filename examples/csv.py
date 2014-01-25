@@ -28,7 +28,7 @@ Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
     '''
 
     try:
-        # First we will make a parser - an instance of the calc parser model.
+        # First we will make a parser - an instance of the CVS parser model.
         # Parser model is given in the form of python constructs therefore we
         # are using ParserPython class.
         # Skipping of whitespace will be done only for tabs and spaces. Newlines

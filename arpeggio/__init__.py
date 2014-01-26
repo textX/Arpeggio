@@ -55,6 +55,10 @@ class NoMatch(Exception):
         # By default when NoMatch is thrown we will go up the Parse Model Tree.
         self._up = True
 
+    def __str__(self):
+        return "Expected %s at position %s." % (self.value,
+                str(self.parser.pos_to_linecol(self.position)))
+
 
 def flatten(_iterable):
     '''Flattening of python iterables.'''

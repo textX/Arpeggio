@@ -47,7 +47,7 @@ class NoMatch(Exception):
     def __init__(self, value, position, parser):
         self.value = value
 
-        # Position in the input stream where error occured
+        # Position in the input stream where error occurred
         self.position = position
 
         self.parser = parser

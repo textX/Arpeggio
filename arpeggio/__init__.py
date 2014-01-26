@@ -317,7 +317,7 @@ class OneOrMore(Repetition):
 
 class SyntaxPredicate(ParsingExpression):
     '''
-    Base class for all syntax predicates (and, not).
+    Base class for all syntax predicates (and, not, empty).
     Predicates are parser expressions that will do the match but will not
     consume any input.
     '''
@@ -363,6 +363,14 @@ class Not(SyntaxPredicate):
                 return
         parser.position = self.c_pos
         parser._nm_raise(self.name, self.c_pos, parser)
+
+
+class Empty(SyntaxPredicate):
+    '''
+    This predicate will always succeed without consuming input.
+    '''
+    def _parse(self, parser):
+        pass
 
 
 class Match(ParsingExpression):

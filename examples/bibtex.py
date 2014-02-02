@@ -13,7 +13,6 @@ import sys
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
-import logging
 
 
 def bibfile():          return ZeroOrMore([bibentry, comment]), EndOfFile
@@ -29,7 +28,8 @@ def comment():          return _(r'[^@]+')
 class BibFileSem(SemanticAction):
     '''Just returns list of child nodes (bibentries).'''
     def first_pass(self, parser, node, nodes):
-        logging.debug("Processing Bibfile")
+        if parser.debug:
+            print "Processing Bibfile"
         return nodes[:-1]
 
 
@@ -37,7 +37,8 @@ class BibEntrySem(SemanticAction):
     '''Constructs a map where key is bibentry field name.
         Key is returned under 'bibkey' key. Type is returned under 'bibtype'.'''
     def first_pass(self, parser, node, nodes):
-        logging.debug("  Processing bibentry %s" % nodes[2])
+        if parser.debug:
+            print "  Processing bibentry %s" % nodes[2]
         bib_entry_map = {
             'bibtype': nodes[0].value,
             'bibkey': nodes[2].value
@@ -51,7 +52,8 @@ class BibEntrySem(SemanticAction):
 class FieldSem(SemanticAction):
     '''Constructs a tuple (fieldname, fieldvalue).'''
     def first_pass(self, parser, node, nodes):
-        logging.debug("    Processing field %s" % nodes[0])
+        if parser.debug:
+            print "    Processing field %s" % nodes[0]
         field = (nodes[0].value, nodes[3])
         return field
 
@@ -75,39 +77,34 @@ field.sem = FieldSem()
 fieldvalue.sem = FieldValueSem()
 
 if __name__ == "__main__":
-    try:
-        logging.basicConfig(level=logging.DEBUG)
+    # First we will make a parser - an instance of the bib parser model.
+    # Parser model is given in the form of python constructs therefore we
+    # are using ParserPython class.
+    parser = ParserPython(bibfile, reduce_tree=True, debug=True)
 
-        # First we will make a parser - an instance of the bib parser model.
-        # Parser model is given in the form of python constructs therefore we
-        # are using ParserPython class.
-        parser = ParserPython(bibfile, reduce_tree=True)
+    # Then we export it to a dot file in order to visualise it. This is
+    # particulary handy for debugging purposes.
+    # We can make a jpg out of it using dot (part of graphviz) like this
+    # dot -O -Tjpg calc_parse_tree_model.dot
+    PMDOTExport().exportFile(parser.parser_model,
+                    "bib_parse_tree_model.dot")
 
-        # Then we export it to a dot file in order to visualise it. This is
-        # particulary handy for debugging purposes.
-        # We can make a jpg out of it using dot (part of graphviz) like this
-        # dot -O -Tjpg calc_parse_tree_model.dot
-        PMDOTExport().exportFile(parser.parser_model,
-                        "bib_parse_tree_model.dot")
-
-        # First parameter is bibtex file
-        if len(sys.argv) > 1:
-            with open(sys.argv[1], "r") as bibtexfile:
-                bibtexfile_content = bibtexfile.read()
+    # First parameter is bibtex file
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], "r") as bibtexfile:
+            bibtexfile_content = bibtexfile.read()
 
 
-                # We create a parse tree or abstract syntax tree out of textual input
-                parse_tree = parser.parse(bibtexfile_content)
+            # We create a parse tree or abstract syntax tree out of textual input
+            parse_tree = parser.parse(bibtexfile_content)
 
-                # Then we export it to a dot file in order to visualise it.
-                PTDOTExport().exportFile(parse_tree,
-                                "bib_parse_tree.dot")
+            # Then we export it to a dot file in order to visualise it.
+            PTDOTExport().exportFile(parse_tree,
+                            "bib_parse_tree.dot")
 
-                # getASG will start semantic analysis.
-                # In this case semantic analysis will list of bibentry maps.
-                print parser.getASG()
-        else:
-            print "Usage: python bibtex.py file_to_parse"
+            # getASG will start semantic analysis.
+            # In this case semantic analysis will list of bibentry maps.
+            print parser.getASG()
+    else:
+        print "Usage: python bibtex.py file_to_parse"
 
-    except NoMatch, e:
-        print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

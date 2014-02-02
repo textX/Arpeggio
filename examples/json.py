@@ -36,7 +36,6 @@ value
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
-import logging
 
 def TRUE():     return "true"
 def FALSE():    return "false"

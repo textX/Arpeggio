@@ -13,72 +13,79 @@
 from arpeggio import *
 from arpeggio.export import PMDOTExport, PTDOTExport
 from arpeggio import RegExMatch as _
-import logging        
 
-def number():          return _(r'\d*\.\d*|\d+')
-def factor():           return [number, ("(", expression, ")")]
-def term():             return factor, ZeroOrMore(["*","/"], factor)
-def expression():       return Optional(["+","-"]), term, ZeroOrMore(["+", "-"], term)
-def calc():             return expression, EndOfFile
+def number():     return _(r'\d*\.\d*|\d+')
+def factor():     return Optional(["+","-"]), [number,
+                          ("(", expression, ")")]
+def term():       return factor, ZeroOrMore(["*","/"], factor)
+def expression(): return term, ZeroOrMore(["+", "-"], term)
+def calc():       return OneOrMore(expression), EndOfFile
+
 
 # Semantic actions
 class ToFloat(SemanticAction):
     '''Converts node value to float.'''
     def first_pass(self, parser, node, nodes):
-        logging.debug("Converting %s." % node.value)
-        return float(node.value)        
+        print "Converting %s." % node.value
+        return float(node.value)
 
 class Factor(SemanticAction):
     '''Removes parenthesis if exists and returns what was contained inside.'''
     def first_pass(self, parser, node, nodes):
-        logging.debug("Factor %s" % nodes)
-        if nodes[0] == "(":
-            return nodes[1]
-        else:
+        print "Factor %s" % nodes
+        if len(nodes) == 1:
             return nodes[0]
-        
+        sign = -1 if nodes[0] == '-' else 1
+        next = 0
+        if nodes[0] in ['+', '-']:
+            next = 1
+        if nodes[next] == '(':
+            return sign * nodes[next+1]
+        else:
+            return sign * nodes[next]
+
 class Term(SemanticAction):
     '''
     Divides or multiplies factors.
     Factor nodes will be already evaluated.
     '''
     def first_pass(self, parser, node, nodes):
-        logging.debug("Term %s" % nodes)
+        print "Term %s" % nodes
         term = nodes[0]
         for i in range(2, len(nodes), 2):
             if nodes[i-1]=="*":
                 term *= nodes[i]
             else:
                 term /= nodes[i]
-        logging.debug("Term = %f" % term)
+        print "Term = %f" % term
         return term
-                
+
 class Expr(SemanticAction):
     '''
     Adds or substracts terms.
     Term nodes will be already evaluated.
     '''
     def first_pass(self, parser, node, nodes):
-        logging.debug("Expression %s" % nodes)
+        print "Expression %s" % nodes
         expr = 0
         start = 0
         # Check for unary + or - operator
         if str(nodes[0]) in "+-":
             start = 1
-        
+
         for i in range(start, len(nodes), 2):
             if i and nodes[i-1]=="-":
                 expr -= nodes[i]
             else:
                 expr += nodes[i]
-        
-        logging.debug("Expression = %f" % expr)
+
+        print "Expression = %f" % expr
         return expr
-    
+
 class Calc(SemanticAction):
     def first_pass(self, parser, node, nodes):
         return nodes[0]
-    
+
 # Connecting rules with semantic actions
 number.sem = ToFloat()
 factor.sem = Factor()
@@ -88,10 +95,8 @@ calc.sem = Calc()
 
 if __name__ == "__main__":
     try:
-        logging.basicConfig(level=logging.DEBUG)
-
         # First we will make a parser - an instance of the calc parser model.
-        # Parser model is given in the form of python constructs therefore we 
+        # Parser model is given in the form of python constructs therefore we
         # are using ParserPython class.
         parser = ParserPython(calc)
 
@@ -101,13 +106,13 @@ if __name__ == "__main__":
         # dot -O -Tjpg calc_parse_tree_model.dot
         PMDOTExport().exportFile(parser.parser_model,
                         "calc_parse_tree_model.dot")
-                
+
         # An expression we want to evaluate
         input = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
-        
+
         # We create a parse tree or abstract syntax tree out of textual input
         parse_tree = parser.parse(input)
-        
+
         # Then we export it to a dot file in order to visualise it.
         PTDOTExport().exportFile(parse_tree,
                         "calc_parse_tree.dot")
@@ -116,6 +121,6 @@ if __name__ == "__main__":
         # In this case semantic analysis will evaluate expression and
         # returned value will be the result of the input expression.
         print "%s = %f" % (input, parser.getASG())
-        
+
     except NoMatch, e:
         print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

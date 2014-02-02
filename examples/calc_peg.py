@@ -24,9 +24,10 @@ from calc import ToFloat, Factor, Term, Expr, Calc
 # Grammar is defined using textual specification based on PEG language.
 calc_grammar = """
         number <- r'\d*\.\d*|\d+';
-        factor <- number / "(" expression ")";
+        factor <- ("+" / "-")?
+                  (number / "(" expression ")");
         term <- factor (( "*" / "/") factor)*;
-        expression <- ("+" / "-")? term (("+" / "-") term)*;
+        expression <- term (("+" / "-") term)*;
         calc <- expression EndOfFile;
 """
 

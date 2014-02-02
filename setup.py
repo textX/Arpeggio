@@ -12,7 +12,7 @@
 ###############################################################################
 
 __author__ = "Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>"
-__version__ = "0.1-dev"
+__version__ = "0.5"
 
 from setuptools import setup
 
@@ -37,7 +37,7 @@ setup(
     packages = ["arpeggio"],
     keywords = "parser packrat peg",
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
         'Intended Audience :: Science/Research',

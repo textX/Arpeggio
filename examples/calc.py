@@ -24,13 +24,17 @@ def calc():       return OneOrMore(expression), EndOfFile
 
 # Semantic actions
 class ToFloat(SemanticAction):
-    '''Converts node value to float.'''
+    """
+    Converts node value to float.
+    """
     def first_pass(self, parser, node, nodes):
         print "Converting %s." % node.value
         return float(node.value)
 
 class Factor(SemanticAction):
-    '''Removes parenthesis if exists and returns what was contained inside.'''
+    """
+    Removes parenthesis if exists and returns what was contained inside.
+    """
     def first_pass(self, parser, node, nodes):
         print "Factor %s" % nodes
         if len(nodes) == 1:
@@ -45,10 +49,10 @@ class Factor(SemanticAction):
             return sign * nodes[next]
 
 class Term(SemanticAction):
-    '''
+    """
     Divides or multiplies factors.
     Factor nodes will be already evaluated.
-    '''
+    """
     def first_pass(self, parser, node, nodes):
         print "Term %s" % nodes
         term = nodes[0]
@@ -61,10 +65,10 @@ class Term(SemanticAction):
         return term
 
 class Expr(SemanticAction):
-    '''
+    """
     Adds or substracts terms.
     Term nodes will be already evaluated.
-    '''
+    """
     def first_pass(self, parser, node, nodes):
         print "Expression %s" % nodes
         expr = 0

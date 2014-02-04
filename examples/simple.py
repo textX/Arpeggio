@@ -31,8 +31,8 @@ def simpleLanguage():   return function
 
 try:
 
-    # Parser instantiation. simpleLanguage is root definition and comment is
-    # grammar rule for comments.
+    # Parser instantiation. simpleLanguage is the definition of the root rule
+    # and comment is a grammar rule for comments.
     parser = ParserPython(simpleLanguage, comment, debug=True)
 
     # We save parser model to dot file in order to visualise it.

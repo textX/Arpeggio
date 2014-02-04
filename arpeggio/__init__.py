@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-#######################################################################
+################################################################################
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2009 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
-# This is implementation of packrat parser interpreter based on PEG grammars.
-# Parsers are defined using python language construction or PEG language.
-#######################################################################
+# This is an implementation of packrat parser interpreter based on PEG grammars.
+# Grammars are defined using Python language constructs or the PEG textual
+# notation.
+################################################################################
 
 import re
 import bisect
@@ -17,7 +18,9 @@ DEFAULT_WS = '\t\n\r '
 
 
 class ArpeggioError(Exception):
-    '''Base class for arpeggio errors.'''
+    """
+    Base class for arpeggio errors.
+    """
     def __init__(self, message):
         self.message = message
 
@@ -26,24 +29,29 @@ class ArpeggioError(Exception):
 
 
 class GrammarError(ArpeggioError):
-    '''
+    """
     Error raised during parser building phase used to indicate error in the
     grammar definition.
-    '''
+    """
 
 
 class SemanticError(ArpeggioError):
-    '''
+    """
     Error raised during the phase of semantic analysis used to indicate
     semantic error.
-    '''
+    """
 
 
 class NoMatch(Exception):
-    '''
+    """
     Exception raised by the Match classes during parsing to indicate that the
     match is not successful.
-    '''
+
+    Args:
+        value (str): A value
+        position (int):
+        parser (Parser): An instance of parser
+    """
     def __init__(self, value, position, parser):
         self.value = value
 
@@ -77,20 +85,18 @@ def flatten(_iterable):
 
 class ParsingExpression(object):
     """
-    Represents node of the Parser Model.
+    Represents the node of the Parser Model.
     Root parser expression node will create non-terminal parser tree node while
     non-root node will create list of terminals and non-terminals.
+
+    Attributes:
+        rule (str): The name of the parser rule if this is the root rule.
+        root (bool):  Does this parser expression represents the
+            root of the parser rule? The root parser rule will create
+            non-terminal node of the parse tree during parsing.
+        nodes (list of ParsingExpression): A list of child parser expressions.
     """
     def __init__(self, rule=None, root=False, nodes=None):
-        '''
-        @param rule - the name of the parser rule if this is the root of the
-                        parser rule.
-        @param root - Does this parser expression represents the
-                        root of the parser rule?
-                        The root parser rule will create non-terminal node of
-                        the parse tree during parsing.
-        @param nodes - list of child parser expression nodes.
-        '''
         # Memoization. Every node cache the parsing results for the given input
         # positions.
         self.result_cache = {}  # position -> parse tree
@@ -119,12 +125,12 @@ class ParsingExpression(object):
             return id(self)
 
     def clear_cache(self, processed=None):
-        '''
+        """
         Clears memoization cache. Should be called on input change.
 
         Args:
             processed (set): Set of processed nodes to prevent infinite loops.
-        '''
+        """
 
         self.result_cache = {}
         if not processed:
@@ -182,26 +188,26 @@ class ParsingExpression(object):
     #TODO: _nm_change_rule should be called from every parser expression parse
     #         method that can potentialy be the root parser rule.
     def _nm_change_rule(self, nm, parser):
-        '''
+        """
         Change rule for the given NoMatch object to a more generic if
         we did not consume any input and we are moving up the parser model
         tree. Used to report most generic language element expected at the
         place of the NoMatch exception.
-        '''
+        """
         if self.root and self.c_pos == nm.position and nm._up:
             nm.value = self.rule
 
 
 class Sequence(ParsingExpression):
-    '''
+    """
     Will match sequence of parser expressions in exact order they are defined.
-    '''
-    def __init__(self, elements=None, rule=None, root=False, nodes=None):
-        '''
-        @param elements - list used as a staging structure for python based
+
+    Attributes:
+        elements (list): A list used as a staging structure for python based
         grammar definition. Used in _from_python for building nodes list of
         child parser expressions.
-        '''
+    """
+    def __init__(self, elements=None, rule=None, root=False, nodes=None):
         super(Sequence, self).__init__(rule, root, nodes)
         self.elements = elements
 
@@ -220,10 +226,10 @@ class Sequence(ParsingExpression):
 
 
 class OrderedChoice(Sequence):
-    '''
+    """
     Will match one of the parser expressions specified. Parser will try to
     match expressions in the order they are defined.
-    '''
+    """
     def _parse(self, parser):
         result = None
         match = False
@@ -245,9 +251,9 @@ class OrderedChoice(Sequence):
 
 
 class Repetition(ParsingExpression):
-    '''
+    """
     Base class for all repetition-like parser expressions (?,*,+)
-    '''
+    """
     def __init__(self, *elements, **kwargs):
         super(Repetition, self).__init__(None)
         if len(elements) == 1:
@@ -261,10 +267,10 @@ class Repetition(ParsingExpression):
 
 
 class Optional(Repetition):
-    '''
+    """
     Optional will try to match parser expression specified buy will not fail in
     case match is not successful.
-    '''
+    """
     def _parse(self, parser):
         result = None
         try:
@@ -277,10 +283,10 @@ class Optional(Repetition):
 
 
 class ZeroOrMore(Repetition):
-    '''
+    """
     ZeroOrMore will try to match parser expression specified zero or more
     times. It will never fail.
-    '''
+    """
     def _parse(self, parser):
         results = []
         while True:
@@ -295,9 +301,9 @@ class ZeroOrMore(Repetition):
 
 
 class OneOrMore(Repetition):
-    '''
+    """
     OneOrMore will try to match parser expression specified one or more times.
-    '''
+    """
     def _parse(self, parser):
         results = []
         first = False
@@ -316,11 +322,11 @@ class OneOrMore(Repetition):
 
 
 class SyntaxPredicate(ParsingExpression):
-    '''
+    """
     Base class for all syntax predicates (and, not, empty).
     Predicates are parser expressions that will do the match but will not
     consume any input.
-    '''
+    """
     def __init__(self, *elements, **kwargs):
         if len(elements) == 1:
             elements = elements[0]
@@ -335,10 +341,10 @@ class SyntaxPredicate(ParsingExpression):
 
 
 class And(SyntaxPredicate):
-    '''
+    """
     This predicate will succeed if the specified expression matches current
     input.
-    '''
+    """
     def _parse(self, parser):
         for e in self.nodes:
             try:
@@ -350,10 +356,10 @@ class And(SyntaxPredicate):
 
 
 class Not(SyntaxPredicate):
-    '''
+    """
     This predicate will succeed if the specified expression doesn't match
     current input.
-    '''
+    """
     def _parse(self, parser):
         for e in self.nodes:
             try:
@@ -366,17 +372,17 @@ class Not(SyntaxPredicate):
 
 
 class Empty(SyntaxPredicate):
-    '''
+    """
     This predicate will always succeed without consuming input.
-    '''
+    """
     def _parse(self, parser):
         pass
 
 
 class Match(ParsingExpression):
-    '''
+    """
     Base class for all classes that will try to match something from the input.
-    '''
+    """
     def __init__(self, rule, root=False):
         super(Match, self).__init__(rule, root)
 
@@ -421,11 +427,12 @@ class Match(ParsingExpression):
 class RegExMatch(Match):
     '''
     This Match class will perform input matching based on Regular Expressions.
+
+    Args:
+        to_match (regex string): A regular expression string to match. It will be
+            used to create regular expression using re.compile.
     '''
     def __init__(self, to_match, rule=None, flags=None):
-        '''
-        @param to_match - regular expression string to match.
-        '''
         super(RegExMatch, self).__init__(rule)
         self.to_match = to_match
         if flags is not None:
@@ -449,13 +456,13 @@ class RegExMatch(Match):
 
 
 class StrMatch(Match):
-    '''
+    """
     This Match class will perform input matching by a string comparison.
-    '''
+
+    Args:
+        to_match (str): A string to match.
+    """
     def __init__(self, to_match, rule=None, root=False):
-        '''
-        @param to_match - string to match.
-        '''
         super(StrMatch, self).__init__(rule, root)
         self.to_match = to_match
 
@@ -481,9 +488,9 @@ class StrMatch(Match):
 # HACK: Kwd class is a bit hackish. Need to find a better way to
 #	introduce different classes of string tokens.
 class Kwd(StrMatch):
-    '''
-    Specialization of StrMatch to specify keywords of the language.
-    '''
+    """
+    A specialization of StrMatch to specify keywords of the language.
+    """
     def __init__(self, to_match):
         super(Kwd, self).__init__(to_match, rule=None)
         self.to_match = to_match
@@ -492,9 +499,9 @@ class Kwd(StrMatch):
 
 
 class EndOfFile(Match):
-    '''
-    Match class that will succeed in case end of input is reached.
-    '''
+    """
+    The Match class that will succeed in case end of input is reached.
+    """
     def __init__(self, rule=None):
         super(EndOfFile, self).__init__(rule)
 
@@ -520,19 +527,18 @@ def EOF():      return EndOfFile()
 # Parse Tree node classes
 
 class ParseTreeNode(object):
-    '''
+    """
     Abstract base class representing node of the Parse Tree.
     The node can be terminal(the leaf of the parse tree) or non-terminal.
-    '''
+
+    Attributes:
+        type (str): The name of the rule that created this node or empty
+            string in case this node is created by a non-root pexpression.
+        position (int): A position in the input stream where the match occurred.
+        error (bool): Is this a false parse tree node created during error recovery.
+        comments : A parse tree of comment(s) attached to this node.
+    """
     def __init__(self, type, position, error):
-        '''
-        @param type - the name of the rule that created this node or empty
-                        string in case this node is created by a non-root
-                        parser model node.
-        @param position - position in the input stream where match occurred.
-        @param error - is this a false parse tree node created during error
-                        recovery?
-        '''
         self.type = type
         self.position = position
         self.error = error
@@ -544,20 +550,20 @@ class ParseTreeNode(object):
 
 
 class Terminal(ParseTreeNode):
-    '''
+    """
     Leaf node of the Parse Tree. Represents matched string.
-    '''
+
+    Attributes:
+        value (str): Matched string at the given position or missing token
+            name in the case of an error node.
+    """
     def __init__(self, type, position, value, error=False):
-        '''
-        @param value - matched string or missing token name in case of an error
-                        node.
-        '''
         super(Terminal, self).__init__(type, position, error)
         self.value = value
 
     @property
     def desc(self):
-        return "%s \'%s\' [%s]" % (self.type, self.value, self.position)
+        return "%s '%s' [%s]" % (self.type, self.value, self.position)
 
     def __str__(self):
         return self.value
@@ -567,13 +573,14 @@ class Terminal(ParseTreeNode):
 
 
 class NonTerminal(ParseTreeNode):
-    '''
+    """
     Non-leaf node of the Parse Tree. Represents language syntax construction.
-    '''
+
+    Attributes:
+        nodes (list of ParseTreeNode): Children parse tree nodes.
+
+    """
     def __init__(self, type, position, nodes, error=False):
-        '''
-        @param nodes - child ParseTreeNode
-        '''
         super(NonTerminal, self).__init__(type, position, error)
         self.nodes = flatten([nodes])
 
@@ -593,7 +600,7 @@ class NonTerminal(ParseTreeNode):
 #
 
 class SemanticAction(object):
-    '''
+    """
     Semantic actions are executed during semantic analysis. They are in charge
     of producing Abstract Semantic Graph (ASG) out of the parse tree.
     Every non-terminal and terminal can have semantic action defined which will
@@ -603,11 +610,11 @@ class SemanticAction(object):
     if exists after the first pass. Second pass can be used for forward
     referencing, e.g. linking to the declaration registered in the first pass
     stage.
-    '''
+    """
     def first_pass(self, parser, node, nodes):
-        '''
+        """
         Called in the first pass of tree walk.
-        '''
+        """
         raise NotImplementedError()
 
 
@@ -616,14 +623,18 @@ class SemanticAction(object):
 
 
 class Parser(object):
+    """
+    Abstract base class for all parsers.
+
+    Attributes:
+        skipws (bool): Should the whitespace skipping be done.
+        ws (str): A string consisting of whitespace characters.
+        reduce_tree (bool): If true non-terminals with single child will be
+            eliminated from the parse tree.
+        debug (bool): If true debugging messages will be printed.
+        comments_model (a list of
+    """
     def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False, debug=False):
-        '''
-        @skipws     - if True whitespaces will not be part of parse tree.
-        @ws         - rule for matching ws
-        @reduce_tree - if true nonterminals with single child will be
-                        eliminated.
-        @debug      - If true debug messages will get printed.
-        '''
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
@@ -645,12 +656,14 @@ class Parser(object):
         return self.parse_tree
 
     def getASG(self, sem_actions=None):
-        '''
+        """
         Creates Abstract Semantic Graph (ASG) from the parse tree.
-        @param sem_actions - semantic actions dictionary to use for semantic
-                            analysis. Rule names are the keys and semantic
-                            action objects are values.
-        '''
+
+        Args:
+            sem_actions (dict): The semantic actions dictionary to use for semantic
+                analysis. Rule names are the keys and semantic action objects are
+                values.
+        """
         if not self.parse_tree:
             raise Exception("Parse tree is empty. You did call parse(), didn't you?")
 
@@ -666,11 +679,11 @@ class Parser(object):
         for_second_pass = []
 
         def tree_walk(node):
-            '''
+            """
             Walking the parse tree and calling first_pass for every registered
             semantic actions and creating list of object that needs to be
             called in the second pass.
-            '''
+            """
             nodes = []
             if isinstance(node, NonTerminal):
                 for n in node.nodes:
@@ -701,9 +714,9 @@ class Parser(object):
         return asg
 
     def pos_to_linecol(self, pos):
-        '''
+        """
         Calculate (line, column) tuple for the given position in the stream.
-        '''
+        """
         if not self.line_ends:
             try:
                 #TODO: Check this implementation on Windows.
@@ -726,9 +739,9 @@ class Parser(object):
         return line + 1, col + 1
 
     def _skip_ws(self):
-        '''
+        """
         Skiping whitespace characters.
-        '''
+        """
         if self.skipws:
             while self.position < len(self.input) and \
                     self.input[self.position] in self.ws:
@@ -743,11 +756,13 @@ class Parser(object):
             return comments
 
     def _nm_raise(self, *args):
-        '''
+        """
         Register new NoMatch object if the input is consumed
-        from the last NoMatch and raise last NoMatch
-        @param args - NoMatch instance or value, position, parser
-        '''
+        from the last NoMatch and raise last NoMatch.
+
+        Args:
+            args: A NoMatch instance or (value, position, parser)
+        """
         if not self._in_parse_comment:
             if len(args) == 1 and isinstance(args[0], NoMatch):
                 if self.nm is None or args[0].position > self.nm.position:
@@ -781,7 +796,9 @@ class ParserPython(Parser):
         Create parser model from the definition given in the form of python
         functions returning lists, tuples, callables, strings and
         ParsingExpression objects.
-        @returns - Parser Model (PEG Abstract Semantic Graph)
+
+        Returns:
+            Parser Model (PEG Abstract Semantic Graph)
         """
         __rule_cache = {"EndOfFile": EndOfFile()}
         __for_resolving = []  # Expressions that needs crossref resolvnih

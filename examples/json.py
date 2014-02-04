@@ -5,7 +5,7 @@
 # Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
-# This example is based on jsonParser.py from pyparsing project
+# This example is based on jsonParser.py from the pyparsing project
 # (see http://pyparsing.wikispaces.com/).
 ##############################################################################
 

@@ -12,9 +12,9 @@ from arpeggio import Terminal
 
 
 class Export(object):
-    '''
+    """
     Base class for all Exporters.
-    '''
+    """
 
     def __init__(self):
         super(Export, self).__init__()
@@ -30,13 +30,17 @@ class Export(object):
                                         # returned for the same adaptee object
 
     def export(self, obj):
-        '''Export of obj to a string.'''
+        """
+        Export of an obj to a string.
+        """
         self._outf = StringIO()
         self._export(obj)
         return self._outf.getvalue()
 
     def exportFile(self, obj, file_name):
-        '''Export of obj to a file.'''
+        """
+        Export of obj to a file.
+        """
         self._outf = open(file_name, "w")
         self._export(obj)
         self._outf.close()
@@ -47,15 +51,15 @@ class Export(object):
         self._outf.write(self._end())
 
     def _start(self):
-        '''
+        """
         Override this to specify the beginning of the graph representation.
-        '''
+        """
         return ""
 
     def _end(self):
-        '''
+        """
         Override this to specify the end of the graph representation.
-        '''
+        """
         return ""
 
 
@@ -63,12 +67,12 @@ class ExportAdapter(object):
     '''
     Base adapter class for the export support.
     Adapter should be defined for every graph type.
+
+    Attributes:
+        adaptee: A node to adapt.
+        export: An export object used as a context of the export.
     '''
     def __init__(self, node, export):
-        '''
-        @param node - node to adapt
-        @param export - export object used as a context of the export.
-        '''
         self.adaptee = node     # adaptee is adapted graph node
         self.export = export
 
@@ -78,29 +82,35 @@ class ExportAdapter(object):
 
 
 class DOTExportAdapter(ExportAdapter):
-    '''
+    """
     Base adapter class for the DOT export support.
-    '''
+    """
     @property
     def id(self):
-        '''Graph node unique identification.'''
+        """
+        Graph node unique identification.
+        """
         raise NotImplementedError()
 
     @property
     def desc(self):
-        '''Graph node textual description.'''
+        """
+        Graph node textual description.
+        """
         raise NotImplementedError()
 
     @property
     def children(self):
-        '''Children of the graph node.'''
+        """
+        Children of the graph node.
+        """
         raise NotImplementedError()
 
 
 class PMDOTExportAdapter(DOTExportAdapter):
-    '''
+    """
     Adapter for ParsingExpression graph types (parser model).
-    '''
+    """
     @property
     def id(self):
         return id(self.adaptee)
@@ -133,9 +143,9 @@ class PMDOTExportAdapter(DOTExportAdapter):
 
 
 class PTDOTExportAdapter(PMDOTExportAdapter):
-    '''
+    """
     Adapter for ParseTreeNode graph types.
-    '''
+    """
     @property
     def children(self):
         if isinstance(self.adaptee, Terminal):
@@ -150,9 +160,9 @@ class PTDOTExportAdapter(PMDOTExportAdapter):
 
 
 class DOTExport(Export):
-    '''
+    """
     Export to DOT language (part of GraphViz, see http://www.graphviz.org/)
-    '''
+    """
     def _render_node(self, node):
         if not node in self._render_set:
             self._render_set.add(node)
@@ -183,9 +193,9 @@ class DOTExport(Export):
 
 
 class PMDOTExport(DOTExport):
-    '''
-    Convenience DOTExport extension that uses ParserExpressionDOTExportAdapter
-    '''
+    """
+    A convenience DOTExport extension that uses ParserExpressionDOTExportAdapter
+    """
     def export(self, obj):
         return super(PMDOTExport, self).\
             export(PMDOTExportAdapter(obj, self))
@@ -196,9 +206,9 @@ class PMDOTExport(DOTExport):
 
 
 class PTDOTExport(DOTExport):
-    '''
-    Convenience DOTExport extension that uses PTDOTExportAdapter
-    '''
+    """
+    A convenience DOTExport extension that uses PTDOTExportAdapter
+    """
     def export(self, obj):
         return super(PTDOTExport, self).\
             export(PTDOTExportAdapter(obj, self))

@@ -26,7 +26,9 @@ def comment():          return _(r'[^@]+')
 
 # Semantic actions
 class BibFileSem(SemanticAction):
-    '''Just returns list of child nodes (bibentries).'''
+    """
+    Just returns list of child nodes (bibentries).
+    """
     def first_pass(self, parser, node, nodes):
         if parser.debug:
             print "Processing Bibfile"
@@ -34,8 +36,10 @@ class BibFileSem(SemanticAction):
 
 
 class BibEntrySem(SemanticAction):
-    '''Constructs a map where key is bibentry field name.
-        Key is returned under 'bibkey' key. Type is returned under 'bibtype'.'''
+    """
+    Constructs a map where key is bibentry field name.
+    Key is returned under 'bibkey' key. Type is returned under 'bibtype'.
+    """
     def first_pass(self, parser, node, nodes):
         if parser.debug:
             print "  Processing bibentry %s" % nodes[2]
@@ -50,7 +54,9 @@ class BibEntrySem(SemanticAction):
 
 
 class FieldSem(SemanticAction):
-    '''Constructs a tuple (fieldname, fieldvalue).'''
+    """
+    Constructs a tuple (fieldname, fieldvalue).
+    """
     def first_pass(self, parser, node, nodes):
         if parser.debug:
             print "    Processing field %s" % nodes[0]
@@ -59,7 +65,9 @@ class FieldSem(SemanticAction):
 
 
 class FieldValueSem(SemanticAction):
-    '''Serbian Serbian letters form latex encoding to Unicode.'''
+    """
+    Serbian Serbian letters form latex encoding to Unicode.
+    """
     def first_pass(self, parser, node, nodes):
         return node.value.replace(r"\'{c}", u"ć")\
                     .replace(r"\'{C}", u"Ć")\

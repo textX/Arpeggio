@@ -11,9 +11,6 @@ __all__ = ['ParserPEG']
 
 from arpeggio import *
 from arpeggio import RegExMatch as _
-import logging
-
-logger = logging.getLogger('arpeggio.peg')
 
 # PEG Grammar
 def grammar():          return OneOrMore(rule), EOF
@@ -95,7 +92,8 @@ class SemOrderedChoice(PEGSemanticAction):
 
 class SemPrefix(PEGSemanticAction):
     def first_pass(self, parser, node, nodes):
-        logger.debug("Prefix: %s " % str(nodes))
+        if parser.debug:
+            print "Prefix: %s " % str(nodes)
         if len(nodes)==2:
             if nodes[0] == NOT():
                 retval = Not()
@@ -112,9 +110,11 @@ class SemPrefix(PEGSemanticAction):
 
 class SemSufix(PEGSemanticAction):
     def first_pass(self, parser, node, nodes):
-        logger.debug("Sufix : %s" % str(nodes))
+        if parser.debug:
+            print "Sufix : %s" % str(nodes)
         if len(nodes) == 2:
-            logger.debug("Sufix : %s" % str(nodes[1]))
+            if parser.debug:
+                print "Sufix : %s" % str(nodes[1])
             if nodes[1] == STAR():
                 retval = ZeroOrMore(nodes[0])
             elif nodes[1] == QUESTION():
@@ -132,7 +132,8 @@ class SemSufix(PEGSemanticAction):
 
 class SemExpression(PEGSemanticAction):
     def first_pass(self, parser, node, nodes):
-        logger.debug("Expression : %s" % str(nodes))
+        if parser.debug:
+            print "Expression : %s" % str(nodes)
         if len(nodes)==1:
             return nodes[0]
         else:
@@ -140,17 +141,20 @@ class SemExpression(PEGSemanticAction):
 
 class SemIdentifier(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logger.debug("Identifier %s." % node.value)
+        if parser.debug:
+            print "Identifier %s." % node.value
         return node
 
 class SemRegEx(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logger.debug("RegEx %s." % nodes[2].value)
+        if parser.debug:
+            print "RegEx %s." % nodes[2].value
         return RegExMatch(nodes[2].value)
 
 class SemLiteral(SemanticAction):
     def first_pass(self, parser, node, nodes):
-        logger.debug("Literal: %s" % node.value)
+        if parser.debug:
+            print "Literal: %s" % node.value
         match_str = node.value[1:-1]
         match_str = match_str.replace("\\'", "'")
         match_str = match_str.replace("\\\\", "\\")
@@ -196,17 +200,4 @@ class ParserPEG(Parser):
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)
         return parser.getASG()
-
-if __name__ == "__main__":
-    try:
-        logging.basicConfig(level=logging.DEBUG)
-
-        parser = ParserPython(grammar, None)
-
-        f = open("peg_parser_model.dot", "w")
-        f.write(str(DOTSerializator(parser.parser_model)))
-        f.close()
-
-    except NoMatch, e:
-        print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))
 

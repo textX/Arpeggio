@@ -52,8 +52,8 @@ class NoMatch(Exception):
         position (int): A position in the input stream where exception occurred.
         parser (Parser): An instance of a parser.
     """
-    def __init__(self, value, position, parser):
-        self.value = value
+    def __init__(self, rule, position, parser):
+        self.rule = rule
 
         # Position in the input stream where error occurred
         self.position = position
@@ -64,7 +64,7 @@ class NoMatch(Exception):
         self._up = True
 
     def __str__(self):
-        return "Expected %s at position %s." % (self.value,
+        return "Expected %s at position %s." % (self.rule,
                 str(self.parser.pos_to_linecol(self.position)))
 
 
@@ -85,9 +85,8 @@ def flatten(_iterable):
 
 class ParsingExpression(object):
     """
+    An abstract class for all parsing expressions.
     Represents the node of the Parser Model.
-    Root parser expression node will create non-terminal parser tree node while
-    non-root node will create list of terminals and non-terminals.
 
     Attributes:
         rule (str): The name of the parser rule if this is the root rule.
@@ -195,7 +194,7 @@ class ParsingExpression(object):
         place of the NoMatch exception.
         """
         if self.root and self.c_pos == nm.position and nm._up:
-            nm.value = self.rule
+            nm.rule = self.rule
 
 
 class Sequence(ParsingExpression):
@@ -820,12 +819,6 @@ class ParserPython(Parser):
                         if self.debug:
                             print "CrossRef usage: %s" % c_rule.rule_name
                     return c_rule
-
-                #expression_expression = expression()
-                #if callable(expression_expression):
-                    #raise GrammarError(
-                        #"Rule element '%s' can't be just another rule in '%s'." %
-                        #(expression_expression, rule))
 
                 # Semantic action for the rule
                 if hasattr(expression, "sem"):

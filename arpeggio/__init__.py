@@ -54,10 +54,7 @@ class NoMatch(Exception):
     """
     def __init__(self, rule, position, parser):
         self.rule = rule
-
-        # Position in the input stream where error occurred
         self.position = position
-
         self.parser = parser
 
         # By default when NoMatch is thrown we will go up the Parser Model.
@@ -89,21 +86,32 @@ class ParsingExpression(object):
     Represents the node of the Parser Model.
 
     Attributes:
+        elements: A list (or other python object) used as a staging structure
+            for python based grammar definition. Used in _from_python for
+            building nodes list of child parser expressions.
         rule (str): The name of the parser rule if this is the root rule.
         root (bool):  Does this parser expression represents the
             root of the parser rule? The root parser rule will create
             non-terminal node of the parse tree during parsing.
         nodes (list of ParsingExpression): A list of child parser expressions.
     """
-    def __init__(self, rule=None, root=False, nodes=None):
+    def __init__(self, *elements, **kwargs):
+
+        if len(elements) == 1:
+            elements = elements[0]
+        self.elements = elements
+
+        self.rule = kwargs.get('rule')
+        self.root = kwargs.get('root', False)
+
+        nodes = kwargs.get('nodes', [])
+        if not hasattr(nodes, '__iter__'):
+            nodes = [nodes]
+        self.nodes = nodes
+
         # Memoization. Every node cache the parsing results for the given input
         # positions.
         self.result_cache = {}  # position -> parse tree
-        self.nodes = nodes
-        if nodes is None:
-            self.nodes = []  # child expressions
-        self.rule = rule
-        self.root = root
 
     @property
     def desc(self):
@@ -112,7 +120,7 @@ class ParsingExpression(object):
     @property
     def name(self):
         if self.root:
-            return "%s(%s)" % (self.__class__.__name__, self.rule)
+            return "%s(%s)" % (self.rule, self.__class__.__name__)
         else:
             return self.__class__.__name__
 
@@ -200,16 +208,7 @@ class ParsingExpression(object):
 class Sequence(ParsingExpression):
     """
     Will match sequence of parser expressions in exact order they are defined.
-
-    Attributes:
-        elements (list): A list used as a staging structure for python based
-        grammar definition. Used in _from_python for building nodes list of
-        child parser expressions.
     """
-    def __init__(self, elements=None, rule=None, root=False, nodes=None):
-        super(Sequence, self).__init__(rule, root, nodes)
-        self.elements = elements
-
     def _parse(self, parser):
         results = []
         try:
@@ -252,17 +251,6 @@ class Repetition(ParsingExpression):
     """
     Base class for all repetition-like parser expressions (?,*,+)
     """
-    def __init__(self, *elements, **kwargs):
-        super(Repetition, self).__init__(None)
-        if len(elements) == 1:
-            elements = elements[0]
-        self.elements = elements
-
-        nodes = kwargs.get('nodes', [])
-        if not hasattr(nodes, '__iter__'):
-            nodes = [nodes]
-        self.nodes = nodes
-
 
 class Optional(Repetition):
     """
@@ -325,18 +313,6 @@ class SyntaxPredicate(ParsingExpression):
     Predicates are parser expressions that will do the match but will not
     consume any input.
     """
-    def __init__(self, *elements, **kwargs):
-        if len(elements) == 1:
-            elements = elements[0]
-        self.elements = elements
-
-        nodes = kwargs.get('nodes', [])
-        if not hasattr(nodes, '__iter__'):
-            nodes = [nodes]
-        self.nodes = nodes
-
-        super(SyntaxPredicate, self).__init__(None)
-
 
 class And(SyntaxPredicate):
     """

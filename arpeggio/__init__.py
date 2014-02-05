@@ -48,9 +48,9 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        value (str): A value
-        position (int):
-        parser (Parser): An instance of parser
+        value (str): A name of the parsing expression or rule.
+        position (int): A position in the input stream where exception occurred.
+        parser (Parser): An instance of a parser.
     """
     def __init__(self, value, position, parser):
         self.value = value
@@ -60,7 +60,7 @@ class NoMatch(Exception):
 
         self.parser = parser
 
-        # By default when NoMatch is thrown we will go up the Parse Model Tree.
+        # By default when NoMatch is thrown we will go up the Parser Model.
         self._up = True
 
     def __str__(self):
@@ -190,8 +190,8 @@ class ParsingExpression(object):
     def _nm_change_rule(self, nm, parser):
         """
         Change rule for the given NoMatch object to a more generic if
-        we did not consume any input and we are moving up the parser model
-        tree. Used to report most generic language element expected at the
+        we did not consume any input and we are moving up the parser model.
+        Used to report most generic language element expected at the
         place of the NoMatch exception.
         """
         if self.root and self.c_pos == nm.position and nm._up:
@@ -632,7 +632,7 @@ class Parser(object):
         reduce_tree (bool): If true non-terminals with single child will be
             eliminated from the parse tree.
         debug (bool): If true debugging messages will be printed.
-        comments_model (a list of
+        comments_model: parser model for comments.
     """
     def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False, debug=False):
         self.skipws = skipws
@@ -647,7 +647,6 @@ class Parser(object):
 
     def parse(self, _input):
         self.position = 0  # Input position
-        self.nm_pos = 0  # Position for last NoMatch exception
         self.nm = None  # Last NoMatch exception
         self.line_ends = []
         self.input = _input
@@ -813,14 +812,14 @@ class ParserPython(Parser):
             if callable(expression):  # Is this expression a parser rule?
                 rule = expression.__name__
                 if rule in __rule_cache:
+                    c_rule = __rule_cache.get(rule)
                     if self.debug:
                         print "Rule %s founded in cache." % rule
-                    if isinstance(__rule_cache.get(rule), CrossRef):
+                    if isinstance(c_rule, CrossRef):
                         self.__cross_refs += 1
                         if self.debug:
-                            print "CrossRef usage: %s" % \
-                                   __rule_cache.get(rule).rule_name
-                    return __rule_cache.get(rule)
+                            print "CrossRef usage: %s" % c_rule.rule_name
+                    return c_rule
 
                 #expression_expression = expression()
                 #if callable(expression_expression):

@@ -243,7 +243,6 @@ class OrderedChoice(Sequence):
                 break
 
         if not match:
-            parser.position = self.c_pos  # Backtracking
             raise parser.nm
 
         return result

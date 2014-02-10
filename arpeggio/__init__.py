@@ -111,7 +111,7 @@ class ParsingExpression(object):
 
         # Memoization. Every node cache the parsing results for the given input
         # positions.
-        self.result_cache = {}  # position -> parse tree
+        self.result_cache = {}  # position -> parse tree at the position
 
     @property
     def desc(self):

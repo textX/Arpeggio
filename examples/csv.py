@@ -6,7 +6,7 @@
 # License: MIT License
 ##############################################################################
 from arpeggio import *
-from arpeggio.export import PMDOTExport, PTDOTExport
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 def record():                   return field, ZeroOrMore(",", field)
@@ -34,19 +34,20 @@ Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
         # have semantics in csv files. They are used to separate records.
         parser = ParserPython(csvfile, ws='\t ', reduce_tree=True, debug=True)
 
-        # Then we export it to a dot file in order to visualise it. This is
-        # particularly handy for debugging purposes.
+        # Then we export it to a dot file in order to visualise it.
+        # This step is optional but it is handy for debugging purposes.
         # We can make a png out of it using dot (part of graphviz) like this:
         # dot -O -Tpng calc_parse_tree_model.dot
-        PMDOTExport().exportFile(parser.parser_model,
+        PMDOTExporter().exportFile(parser.parser_model,
                                  "csv_parse_tree_model.dot")
 
         # Creating parse tree out of textual input
         parse_tree = parser.parse(test_data)
 
         # Then we export it to a dot file in order to visualise it.
+        # This is also optional.
         # dot -O -Tpng calc_parse_tree.dot
-        PTDOTExport().exportFile(parse_tree,
+        PTDOTExporter().exportFile(parse_tree,
                                  "csv_parse_tree.dot")
 
     except NoMatch, e:

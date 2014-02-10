@@ -20,8 +20,7 @@
 #######################################################################
 
 from arpeggio import *
-from arpeggio.export import PMDOTExport, PTDOTExport
-from arpeggio import RegExMatch as _
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio.peg import ParserPEG
 
 # Grammar rules
@@ -66,19 +65,19 @@ if __name__ == "__main__":
         # are using ParserPEG class.
         parser = ParserPEG(robot_grammar, 'program', debug=True)
 
-        # Then we export it to a dot file in order to visualize it. This is
-        # particularly handy for debugging purposes.
-        # We can make a jpg out of it using dot (part of graphviz) like this
-        # dot -O -Tjpg robot_peg_parse_tree_model.dot
-        PMDOTExport().exportFile(parser.parser_model,
-                        "robot_peg_parse_tree_model.dot")
+        # Then we export it to a dot file in order to visualize it.
+        # This step is optional but it is handy for debugging purposes.
+        # We can make a png out of it using dot (part of graphviz) like this
+        # dot -O -Tpng robot_peg_parser_model.dot
+        PMDOTExporter().exportFile(parser.parser_model,
+                        "robot_peg_parser_model.dot")
 
         # We create a parse tree out of textual input
         parse_tree = parser.parse(input)
 
         # Then we export it to a dot file in order to visualize it.
-        # dot -O -Tjpg robot_peg_parse_tree.dot
-        PTDOTExport().exportFile(parse_tree,
+        # dot -O -Tpng robot_peg_parse_tree.dot
+        PTDOTExporter().exportFile(parse_tree,
                         "robot_peg_parse_tree.dot")
 
         # getASG will start semantic analysis.

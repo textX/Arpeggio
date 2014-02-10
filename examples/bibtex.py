@@ -11,7 +11,7 @@
 
 import sys
 from arpeggio import *
-from arpeggio.export import PMDOTExport, PTDOTExport
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # particulary handy for debugging purposes.
     # We can make a jpg out of it using dot (part of graphviz) like this
     # dot -O -Tjpg calc_parse_tree_model.dot
-    PMDOTExport().exportFile(parser.parser_model,
+    PMDOTExporter().exportFile(parser.parser_model,
                     "bib_parse_tree_model.dot")
 
     # First parameter is bibtex file
@@ -107,7 +107,7 @@ if __name__ == "__main__":
             parse_tree = parser.parse(bibtexfile_content)
 
             # Then we export it to a dot file in order to visualise it.
-            PTDOTExport().exportFile(parse_tree,
+            PTDOTExporter().exportFile(parse_tree,
                             "bib_parse_tree.dot")
 
             # getASG will start semantic analysis.

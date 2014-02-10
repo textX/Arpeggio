@@ -15,7 +15,7 @@
 
 from arpeggio import *
 from arpeggio.peg import ParserPEG
-from arpeggio.export import PMDOTExport, PTDOTExport
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Semantic actions
 from calc import ToFloat, Factor, Term, Expr, Calc
@@ -48,7 +48,7 @@ try:
 
 
     # Then we export it to a dot file.
-    PMDOTExport().exportFile(parser.parser_model,
+    PMDOTExporter().exportFile(parser.parser_model,
                 "calc_peg_parser_model.dot")
 
     # An expression we want to evaluate
@@ -58,7 +58,7 @@ try:
     parse_tree = parser.parse(input)
 
     # We save it to dot file in order to visualise it.
-    PTDOTExport().exportFile(parse_tree,
+    PTDOTExporter().exportFile(parse_tree,
                     "calc_peg_parse_tree.dot")
 
     # getASG will start semantic analysis.

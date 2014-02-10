@@ -11,7 +11,7 @@
 #######################################################################
 
 from arpeggio import *
-from arpeggio.export import PMDOTExport, PTDOTExport
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 def number():     return _(r'\d*\.\d*|\d+')
@@ -104,21 +104,22 @@ if __name__ == "__main__":
         # are using ParserPython class.
         parser = ParserPython(calc)
 
-        # Then we export it to a dot file in order to visualise it. This is
-        # particularly handy for debugging purposes.
-        # We can make a jpg out of it using dot (part of graphviz) like this
-        # dot -O -Tjpg calc_parse_tree_model.dot
-        PMDOTExport().exportFile(parser.parser_model,
+        # Then we export it to a dot file in order to visualise it.
+        # This step is optional but it is handy for debugging purposes.
+        # We can make a png out of it using dot (part of graphviz) like this
+        # dot -O -Tpng calc_parse_tree_model.dot
+        PMDOTExporter().exportFile(parser.parser_model,
                         "calc_parse_tree_model.dot")
 
         # An expression we want to evaluate
         input = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
 
-        # We create a parse tree or abstract syntax tree out of textual input
+        # We create a parse tree out of textual input
         parse_tree = parser.parse(input)
 
         # Then we export it to a dot file in order to visualise it.
-        PTDOTExport().exportFile(parse_tree,
+        # This is also optional.
+        PTDOTExporter().exportFile(parse_tree,
                         "calc_parse_tree.dot")
 
         # getASG will start semantic analysis.

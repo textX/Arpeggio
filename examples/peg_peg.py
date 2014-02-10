@@ -11,7 +11,7 @@
 # grammar definition language.
 ##############################################################################
 from arpeggio import *
-from arpeggio.export import PMDOTExport, PTDOTExport
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio.peg import ParserPEG
 
 # Semantic actions
@@ -71,8 +71,8 @@ try:
     # create parser_model for parsing PEG based grammars
     parser = ParserPEG(peg_grammar, 'grammar', debug=True)
 
-    # Exporting parser model to dot file in order to visualise.
-    PMDOTExport().exportFile(parser.parser_model,
+    # Exporting parser model to dot file for visualization.
+    PMDOTExporter().exportFile(parser.parser_model,
                              "peg_peg_parser_model.dot")
 
     # Now we will use created parser to parse the same peg_grammar used for
@@ -80,7 +80,8 @@ try:
     # using PEG itself.
     parser.parse(peg_grammar)
 
-    PTDOTExport().exportFile(parser.parse_tree,
+    # Again we export parse tree in dot file for vizualization.
+    PTDOTExporter().exportFile(parser.parse_tree,
                              "peg_peg_parse_tree.dot")
 
     # ASG should be the same as parser.parser_model because semantic
@@ -89,7 +90,7 @@ try:
 
     # This graph should be the same as peg_peg_parser_model.dot because
     # they define the same parser.
-    PMDOTExport().exportFile(asg,
+    PMDOTExporter().exportFile(asg,
                              "peg_peg_asg.dot")
 
     # If we replace parser_mode with ASG constructed parser it will still

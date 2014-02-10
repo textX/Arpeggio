@@ -10,7 +10,7 @@
 #######################################################################
 
 from arpeggio import *
-from arpeggio.export import PMDOTExport, PTDOTExport
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 def comment():          return [_("//.*"), _("/\*.*\*/")]
@@ -36,13 +36,13 @@ try:
     parser = ParserPython(simpleLanguage, comment, debug=True)
 
     # We save parser model to dot file in order to visualise it.
-    # We can make a jpg out of it using dot (part of graphviz) like this
-    # dot -Tjpg -O simple_parser.dot
-    PMDOTExport().exportFile(parser.parser_model,
+    # We can make a png out of it using dot (part of graphviz) like this
+    # dot -Tpng -O simple_parser.dot
+    PMDOTExporter().exportFile(parser.parser_model,
             "simple_parser_model.dot")
 
     # Parser model for comments is handled as separate model
-    PMDOTExport().exportFile(parser.comments_model,
+    PMDOTExporter().exportFile(parser.comments_model,
             "simple_parser_comments.dot")
 
     input = """
@@ -57,7 +57,7 @@ try:
     """
     parse_tree = parser.parse(input)
 
-    PTDOTExport().exportFile(parse_tree,
+    PTDOTExporter().exportFile(parse_tree,
             "simple_parse_tree.dot")
 
 except NoMatch, e:

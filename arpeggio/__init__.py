@@ -152,19 +152,26 @@ class ParsingExpression(object):
         if parser.debug:
             print "Parsing %s" % self.name
         parser._skip_ws()
+
+        # Set the begining position in input stream of
+        # this parsing expression
         self.c_pos = parser.position
 
     def parse(self, parser):
         self._parse_intro(parser)
 
-        #Memoization.
-        #If this position is already parsed by this parser expression than use
-        #the result
-        if self.c_pos in self.result_cache:
+        # Current position could change in recursive calls
+        # so save it.
+        c_pos = self.c_pos
+
+        # Memoization.
+        # If this position is already parsed by this parser expression than use
+        # the result
+        if c_pos in self.result_cache:
             if parser.debug:
                 print "Result for [%s, %s] founded in result_cache." % \
                          (self, self.c_pos)
-            result, new_pos = self.result_cache[self.c_pos]
+            result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             return result
 
@@ -180,15 +187,15 @@ class ParsingExpression(object):
                     if self.root:
                         result = flatten(result)
                         if len(result) > 1:
-                            result = NonTerminal(self.rule, self.c_pos, result)
+                            result = NonTerminal(self.rule, c_pos, result)
                         else:
                             result = result[0]
             else:
                 if self.root:
-                    result = NonTerminal(self.rule, self.c_pos, result)
+                    result = NonTerminal(self.rule, c_pos, result)
 
         # Result caching for use by memoization.
-        self.result_cache[self.c_pos] = (result, parser.position)
+        self.result_cache[c_pos] = (result, parser.position)
 
         return result
 

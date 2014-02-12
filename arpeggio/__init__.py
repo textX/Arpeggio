@@ -383,6 +383,7 @@ class Combine(Decorator):
     def _parse(self, parser):
         results = []
 
+        old_in_lex_rule = parser._in_lex_rule
         parser._in_lex_rule = True
         self.c_pos = parser.position
         try:
@@ -398,7 +399,7 @@ class Combine(Decorator):
             parser.position = self.c_pos  # Backtracking
             raise
         finally:
-            parser._in_lex_rule = False
+            parser._in_lex_rule = old_in_lex_rule
 
         return results
 

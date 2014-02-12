@@ -6,8 +6,9 @@
 # Copyright: (c) 2013 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
-# This example demonstrates grammar for bibtex files.
+# This example demonstrates grammar and parser for bibtex files.
 #######################################################################
+import pprint
 
 import sys
 from arpeggio import *
@@ -15,14 +16,26 @@ from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 
-def bibfile():          return ZeroOrMore([bibentry, comment]), EndOfFile
-def bibentry():         return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
-def bibtype():          return _(r'@\w+')
-def bibkey():           return _(r'[^\s,]+'),
-def field():            return fieldname, "=", '"', fieldvalue, '"'
-def fieldname():        return _(r'\w+')
-def fieldvalue():       return _(r'[^"]*')
-def comment():          return _(r'[^@]+')
+# Grammar
+def bibfile():                  return ZeroOrMore([comment_entry, bibentry, comment]), EndOfFile
+def comment_entry():            return "@comment", "{", _(r'[^}]*'), "}"
+def bibentry():                 return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
+def field():                    return fieldname, "=", fieldvalue
+def fieldvalue():               return [fieldvalue_braces, fieldvalue_quotes]
+def fieldvalue_braces():        return "{", fieldvalue_braced_content, "}"
+def fieldvalue_quotes():        return '"', fieldvalue_quoted_content, '"'
+
+# Lexical rules
+def fieldname():                return _(r'[-\w]+')
+def comment():                  return _(r'[^@]+')
+def bibtype():                  return _(r'@\w+')
+def bibkey():                   return _(r'[^\s,]+')
+def fieldvalue_quoted_content():    return _(r'((\\")|[^"])*')
+def fieldvalue_braced_content():    return Combine(ZeroOrMore(Optional(And("{"), fieldvalue_inner),\
+                                                    fieldvalue_part))
+
+def fieldvalue_part():          return _(r'((\\")|[^{}])+')
+def fieldvalue_inner():         return "{", fieldvalue_braced_content, "}"
 
 # Semantic actions
 class BibFileSem(SemanticAction):
@@ -32,7 +45,9 @@ class BibFileSem(SemanticAction):
     def first_pass(self, parser, node, nodes):
         if parser.debug:
             print "Processing Bibfile"
-        return nodes[:-1]
+
+        # Return only dict nodes
+        return [x for x in nodes if type(x) is dict]
 
 
 class BibEntrySem(SemanticAction):
@@ -60,16 +75,18 @@ class FieldSem(SemanticAction):
     def first_pass(self, parser, node, nodes):
         if parser.debug:
             print "    Processing field %s" % nodes[0]
-        field = (nodes[0].value, nodes[3])
+        field = (nodes[0].value, nodes[2])
         return field
 
 
 class FieldValueSem(SemanticAction):
     """
     Serbian Serbian letters form latex encoding to Unicode.
+    Remove braces. Remove newlines.
     """
     def first_pass(self, parser, node, nodes):
-        return node.value.replace(r"\'{c}", u"ć")\
+        value = nodes[1].value
+        value = value.replace(r"\'{c}", u"ć")\
                     .replace(r"\'{C}", u"Ć")\
                     .replace(r"\v{c}", u"č")\
                     .replace(r"\v{C}", u"Č")\
@@ -77,18 +94,21 @@ class FieldValueSem(SemanticAction):
                     .replace(r"\v{Z}", u"Ž")\
                     .replace(r"\v{s}", u"š")\
                     .replace(r"\v{S}", u"Š")
+        value = re.sub("[\n{}]", '', value)
+        return value
 
 # Connecting rules with semantic actions
 bibfile.sem = BibFileSem()
 bibentry.sem = BibEntrySem()
 field.sem = FieldSem()
-fieldvalue.sem = FieldValueSem()
+fieldvalue_braces.sem = FieldValueSem()
+fieldvalue_quotes.sem = FieldValueSem()
 
 if __name__ == "__main__":
     # First we will make a parser - an instance of the bib parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
-    parser = ParserPython(bibfile, reduce_tree=True, debug=True)
+    parser = ParserPython(bibfile, reduce_tree=True)
 
     # Then we export it to a dot file in order to visualise it. This is
     # particulary handy for debugging purposes.
@@ -112,7 +132,11 @@ if __name__ == "__main__":
 
             # getASG will start semantic analysis.
             # In this case semantic analysis will list of bibentry maps.
-            print parser.getASG()
+            ast = parser.getASG()
+
+            pp = pprint.PrettyPrinter(indent=4)
+            pp.pprint(ast)
+
     else:
         print "Usage: python bibtex.py file_to_parse"
 

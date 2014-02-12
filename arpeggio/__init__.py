@@ -477,8 +477,7 @@ class RegExMatch(Match):
         else:
             if parser.debug:
                 print "NoMatch at %d" % self.c_pos
-            parser._nm_raise(self.root if self.root else self.name, self.c_pos,
-                             parser)
+            parser._nm_raise(self.name, self.c_pos, parser)
 
 
 class StrMatch(Match):

@@ -19,8 +19,10 @@ class TestParsingExpression(TestCase):
 
         parser = ParserPython(grammar)
 
-        parsed = str(parser.parse("a b c"))
-        self.assertEqual(parsed, "[ a, b, c ]")
+        parsed = parser.parse("a b c")
+
+        self.assertEqual(str(parsed), "abc")
+        self.assertEqual(repr(parsed), "[  'a' [0],  'b' [2],  'c' [4] ]")
 
     def test_ordered_choice(self):
 
@@ -28,11 +30,14 @@ class TestParsingExpression(TestCase):
 
         parser = ParserPython(grammar)
 
-        parsed = str(parser.parse("b"))
-        self.assertEqual(parsed, "[ b, EOF ]")
+        parsed = parser.parse("b")
 
-        parsed = str(parser.parse("c"))
-        self.assertEqual(parsed, "[ c, EOF ]")
+        self.assertEqual(str(parsed), "b")
+        self.assertEqual(repr(parsed), "[  'b' [0], EOF [1] ]")
+
+        parsed = parser.parse("c")
+        self.assertEqual(str(parsed), "c")
+        self.assertEqual(repr(parsed), "[  'c' [0], EOF [1] ]")
 
         self.assertRaises(NoMatch, lambda: parser.parse("ab"))
         self.assertRaises(NoMatch, lambda: parser.parse("bb"))
@@ -43,11 +48,15 @@ class TestParsingExpression(TestCase):
 
         parser = ParserPython(grammar)
 
-        parsed = str(parser.parse("aaaaaaa"))
-        self.assertEqual(parsed, "[ a, a, a, a, a, a, a, EOF ]")
+        parsed = parser.parse("aaaaaaa")
 
-        parsed = str(parser.parse(""))
-        self.assertEqual(parsed, "[ EOF ]")
+        self.assertEqual(str(parsed), "aaaaaaa")
+        self.assertEqual(repr(parsed), "[  'a' [0],  'a' [1],  'a' [2],  'a' [3],  'a' [4],  'a' [5],  'a' [6], EOF [7] ]")
+
+        parsed = parser.parse("")
+
+        self.assertEqual(str(parsed), "")
+        self.assertEqual(repr(parsed), "[ EOF [0] ]")
 
         self.assertRaises(NoMatch, lambda: parser.parse("bbb"))
 
@@ -57,8 +66,10 @@ class TestParsingExpression(TestCase):
 
         parser = ParserPython(grammar)
 
-        parsed = str(parser.parse("aaaaaaa"))
-        self.assertEqual(parsed, "[ a, a, a, a, a, a, a ]")
+        parsed = parser.parse("aaaaaaa")
+
+        self.assertEqual(str(parsed), "aaaaaaa")
+        self.assertEqual(repr(parsed), "[  'a' [0],  'a' [1],  'a' [2],  'a' [3],  'a' [4],  'a' [5],  'a' [6] ]")
 
         self.assertRaises(NoMatch, lambda: parser.parse(""))
         self.assertRaises(NoMatch, lambda: parser.parse("bbb"))
@@ -69,11 +80,15 @@ class TestParsingExpression(TestCase):
 
         parser = ParserPython(grammar)
 
-        parsed = str(parser.parse("ab"))
-        self.assertEqual(parsed, "[ a, b, EOF ]")
+        parsed = parser.parse("ab")
 
-        parsed = str(parser.parse("b"))
-        self.assertEqual(parsed, "[ b, EOF ]")
+        self.assertEqual(str(parsed), "ab")
+        self.assertEqual(repr(parsed), "[  'a' [0],  'b' [1], EOF [2] ]")
+
+        parsed = parser.parse("b")
+
+        self.assertEqual(str(parsed), "b")
+        self.assertEqual(repr(parsed),  "[  'b' [0], EOF [1] ]")
 
         self.assertRaises(NoMatch, lambda: parser.parse("aab"))
         self.assertRaises(NoMatch, lambda: parser.parse(""))
@@ -87,8 +102,9 @@ class TestParsingExpression(TestCase):
 
         parser = ParserPython(grammar)
 
-        parsed = str(parser.parse("ab"))
-        self.assertEqual(parsed, "[ a, b, EOF ]")
+        parsed = parser.parse("ab")
+        self.assertEqual(str(parsed), "ab")
+        self.assertEqual(repr(parsed), "[  'a' [0],  'b' [1], EOF [2] ]")
 
         # 'And' will try to match 'b' and fail so 'c' will never get matched
         self.assertRaises(NoMatch, lambda: parser.parse("ac"))
@@ -101,8 +117,10 @@ class TestParsingExpression(TestCase):
 
         parser = ParserPython(grammar)
 
-        parsed = str(parser.parse("ac"))
-        self.assertEqual(parsed, "[ a, c, EOF ]")
+        parsed = parser.parse("ac")
+
+        self.assertEqual(str(parsed), "ac")
+        self.assertEqual(repr(parsed), "[  'a' [0],  'c' [1], EOF [2] ]")
 
         # Not will will fail on 'b'
         self.assertRaises(NoMatch, lambda: parser.parse("ab"))

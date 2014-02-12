@@ -151,9 +151,12 @@ class ParsingExpression(object):
     def _parse_intro(self, parser):
         if parser.debug:
             print "Parsing %s" % self.name
-        parser._skip_ws()
 
-        # Set the begining position in input stream of
+        # Skip whitespaces if we are not in the lexical rule
+        if not parser._in_lex_rule:
+            parser._skip_ws()
+
+        # Set the begining position in the input stream of
         # this parsing expression
         self.c_pos = parser.position
 
@@ -165,7 +168,7 @@ class ParsingExpression(object):
         c_pos = self.c_pos
 
         # Memoization.
-        # If this position is already parsed by this parser expression than use
+        # If this position is already parsed by this parser expression use
         # the result
         if c_pos in self.result_cache:
             if parser.debug:
@@ -181,7 +184,9 @@ class ParsingExpression(object):
 
         result = self._parse(parser)
 
-        if result:
+        # Create terminal or non-terminal if result is not
+        # already a Terminal.
+        if result and not isinstance(result, Terminal):
             if parser.reduce_tree:
                 if isinstance(result, list):
                     if self.root:
@@ -360,6 +365,44 @@ class Empty(SyntaxPredicate):
         pass
 
 
+class Decorator(ParsingExpression):
+    """
+    Decorator are special kind of parsing expression used to mark
+    a containing pexpression and give it some special semantics.
+    For example, decorators are used to mark pexpression as lexical
+    rules (see :class:Lex).
+    """
+
+
+class Combine(Decorator):
+    """
+    This decorator defines pexpression that represents a lexeme rule.
+    This rules will always return a Terminal parse tree node.
+    Whitespaces will be preserved. Comments will not be matched.
+    """
+    def _parse(self, parser):
+        results = []
+
+        parser._in_lex_rule = True
+        self.c_pos = parser.position
+        try:
+            for parser_model_node in self.nodes:
+                results.append(parser_model_node.parse(parser))
+
+            results = flatten(results)
+
+            # Create terminal from result
+            return Terminal(self.rule if self.root else '', self.c_pos, \
+                              "".join([str(result) for result in results]))
+        except NoMatch:
+            parser.position = self.c_pos  # Backtracking
+            raise
+        finally:
+            parser._in_lex_rule = False
+
+        return results
+
+
 class Match(ParsingExpression):
     """
     Base class for all classes that will try to match something from the input.
@@ -375,14 +418,15 @@ class Match(ParsingExpression):
         self._parse_intro(parser)
         if parser._in_parse_comment:
             return self._parse(parser)
+
         comments = []
         try:
             match = self._parse(parser)
         except NoMatch, nm:
-            # If not matched try to match comment
+            # If not matched and not in lexical rule try to match comment
             #TODO: Comment handling refactoring. Should think of better way to
             # handle comments.
-            if parser.comments_model:
+            if not parser._in_lex_rule and parser.comments_model:
                 try:
                     parser._in_parse_comment = True
                     while True:
@@ -492,7 +536,7 @@ class EndOfFile(Match):
 
     def _parse(self, parser):
         if len(parser.input) == parser.position:
-            return Terminal(self.rule if self.root else '', self.c_pos, 'EOF')
+            return Terminal('EOF', self.c_pos, '')
         else:
             if parser.debug:
                 print "EOF not matched."
@@ -535,6 +579,8 @@ class Terminal(ParseTreeNode):
     Leaf node of the Parse Tree. Represents matched string.
 
     Attributes:
+        type (str): The name of the rule that created this terminal.
+        position (int): A position in the input stream where match occurred.
         value (str): Matched string at the given position or missing token
             name in the case of an error node.
     """
@@ -544,10 +590,16 @@ class Terminal(ParseTreeNode):
 
     @property
     def desc(self):
-        return "%s '%s' [%s]" % (self.type, self.value, self.position)
+        if self.value:
+            return "%s '%s' [%s]" % (self.type, self.value, self.position)
+        else:
+            return "%s [%s]" % (self.type, self.position)
 
     def __str__(self):
         return self.value
+
+    def __repr__(self):
+        return self.desc
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -573,7 +625,10 @@ class NonTerminal(ParseTreeNode):
         return iter(self.nodes)
 
     def __str__(self):
-        return "[ %s ]" % ", ".join([str(x) for x in self.nodes])
+        return "".join([str(x) for x in self.nodes])
+
+    def __repr__(self):
+        return "[ %s ]" % ", ".join([repr(x) for x in self.nodes])
 
 
 # ----------------------------------------------------
@@ -625,6 +680,7 @@ class Parser(object):
 
         self.parse_tree = None
         self._in_parse_comment = False
+        self._in_lex_rule = False
 
     def parse(self, _input):
         self.position = 0  # Input position
@@ -823,7 +879,8 @@ class ParserPython(Parser):
                 retval = expression
 
             elif isinstance(expression, Repetition) or \
-                    isinstance(expression, SyntaxPredicate):
+                    isinstance(expression, SyntaxPredicate) or \
+                    isinstance(expression, Decorator):
                 retval = expression
                 retval.nodes.append(inner_from_python(retval.elements))
                 if any((isinstance(x, CrossRef) for x in retval.nodes)):

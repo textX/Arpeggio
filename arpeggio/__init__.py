@@ -186,18 +186,16 @@ class ParsingExpression(object):
 
         # Create terminal or non-terminal if result is not
         # already a Terminal.
-        if result and not isinstance(result, Terminal):
+        if self.root and result and not isinstance(result, Terminal):
             if parser.reduce_tree:
                 if isinstance(result, list):
-                    if self.root:
-                        result = flatten(result)
-                        if len(result) > 1:
-                            result = NonTerminal(self.rule, c_pos, result)
-                        else:
-                            result = result[0]
+                    result = flatten(result)
+                    if len(result) == 1:
+                        result = result[0]
+                    else:
+                        result = NonTerminal(self.rule, c_pos, result)
             else:
-                if self.root:
-                    result = NonTerminal(self.rule, c_pos, result)
+                result = NonTerminal(self.rule, c_pos, result)
 
         # Result caching for use by memoization.
         self.result_cache[c_pos] = (result, parser.position)

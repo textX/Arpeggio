@@ -615,6 +615,9 @@ class NonTerminal(ParseTreeNode):
         super(NonTerminal, self).__init__(type, position, error)
         self.nodes = flatten([nodes])
 
+        # Child nodes cache. Used for lookup by rule name.
+        self._child_cache = {}
+
     @property
     def desc(self):
         return self.name
@@ -627,6 +630,26 @@ class NonTerminal(ParseTreeNode):
 
     def __repr__(self):
         return "[ %s ]" % ", ".join([repr(x) for x in self.nodes])
+
+    def __getattr__(self, item):
+        """
+        Find a child (non)terminal by the rule name.
+
+        Args:
+            item(str): The name of the child node.
+        """
+        # First check the cache
+        if item in self._child_cache:
+            return self._child_cache[item]
+
+        # If not found in the cache find it and store it in the
+        # cache for later.
+        for n in self.nodes:
+            if n.type == item:
+                self._child_cache[item] = n
+                return n
+
+        raise AttributeError
 
 
 # ----------------------------------------------------

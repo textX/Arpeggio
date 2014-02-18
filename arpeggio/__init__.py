@@ -741,18 +741,18 @@ class Parser(object):
             semantic actions and creating list of object that needs to be
             called in the second pass.
             """
-            nodes = []
+            children = []
             if isinstance(node, NonTerminal):
                 for n in node:
-                    nodes.append(tree_walk(n))
+                    children.append(tree_walk(n))
 
             if node.rule in sem_actions:
-                retval = sem_actions[node.rule].first_pass(self, node, nodes)
+                retval = sem_actions[node.rule].first_pass(self, node, children)
                 if hasattr(sem_actions[node.rule], "second_pass"):
                     for_second_pass.append((node.rule, retval))
             else:
                 if isinstance(node, NonTerminal):
-                    retval = NonTerminal(node.rule, node.position, nodes)
+                    retval = NonTerminal(node.rule, node.position, children)
                 else:
                     retval = node
 

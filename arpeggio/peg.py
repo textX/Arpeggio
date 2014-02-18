@@ -55,16 +55,16 @@ class PEGSemanticAction(SemanticAction):
                     raise SemanticError("Rule \"%s\" does not exists." % n)
 
 class SemGrammar(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         return parser.peg_rules[parser.root_rule_name]
 
 class SemRule(PEGSemanticAction):
-    def first_pass(self, parser, node, nodes):
-        rule_name = nodes[0].value
-        if len(nodes)>4:
-            retval = Sequence(nodes=nodes[2:-1])
+    def first_pass(self, parser, node, children):
+        rule_name = children[0].value
+        if len(children)>4:
+            retval = Sequence(nodes=children[2:-1])
         else:
-            retval = nodes[2]
+            retval = children[2]
         retval.rule = rule_name
         retval.root = True
 
@@ -76,83 +76,83 @@ class SemRule(PEGSemanticAction):
         return retval
 
 class SemSequence(PEGSemanticAction):
-    def first_pass(self, parser, node, nodes):
-        if len(nodes)>1:
-            return Sequence(nodes=nodes)
+    def first_pass(self, parser, node, children):
+        if len(children)>1:
+            return Sequence(nodes=children)
         else:
-             return nodes[0]
+             return children[0]
 
 class SemOrderedChoice(PEGSemanticAction):
-    def first_pass(self, parser, node, nodes):
-        if len(nodes)>1:
-            retval = OrderedChoice(nodes=nodes[::2])
+    def first_pass(self, parser, node, children):
+        if len(children)>1:
+            retval = OrderedChoice(nodes=children[::2])
         else:
-            retval = nodes[0]
+            retval = children[0]
         return retval
 
 class SemPrefix(PEGSemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
-            print "Prefix: %s " % str(nodes)
-        if len(nodes)==2:
-            if nodes[0] == NOT():
+            print "Prefix: %s " % str(children)
+        if len(children)==2:
+            if children[0] == NOT():
                 retval = Not()
             else:
                 retval = And()
-            if type(nodes[1]) is list:
-                retval.nodes = nodes[1]
+            if type(children[1]) is list:
+                retval.nodes = children[1]
             else:
-                retval.nodes = [nodes[1]]
+                retval.nodes = [children[1]]
         else:
-            retval = nodes[0]
+            retval = children[0]
 
         return retval
 
 class SemSufix(PEGSemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
-            print "Sufix : %s" % str(nodes)
-        if len(nodes) == 2:
+            print "Sufix : %s" % str(children)
+        if len(children) == 2:
             if parser.debug:
-                print "Sufix : %s" % str(nodes[1])
-            if nodes[1] == STAR():
-                retval = ZeroOrMore(nodes[0])
-            elif nodes[1] == QUESTION():
-                retval = Optional(nodes[0])
+                print "Sufix : %s" % str(children[1])
+            if children[1] == STAR():
+                retval = ZeroOrMore(children[0])
+            elif children[1] == QUESTION():
+                retval = Optional(children[0])
             else:
-                retval = OneOrMore(nodes[0])
-            if type(nodes[0]) is list:
-                retval.nodes = nodes[0]
+                retval = OneOrMore(children[0])
+            if type(children[0]) is list:
+                retval.nodes = children[0]
             else:
-                retval.nodes = [nodes[0]]
+                retval.nodes = [children[0]]
         else:
-            retval = nodes[0]
+            retval = children[0]
 
         return retval
 
 class SemExpression(PEGSemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
-            print "Expression : %s" % str(nodes)
-        if len(nodes)==1:
-            return nodes[0]
+            print "Expression : %s" % str(children)
+        if len(children)==1:
+            return children[0]
         else:
-            return nodes[1]
+            return children[1]
 
 class SemIdentifier(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
             print "Identifier %s." % node.value
         return node
 
 class SemRegEx(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
-            print "RegEx %s." % nodes[1].value
-        return RegExMatch(nodes[1].value)
+            print "RegEx %s." % children[1].value
+        return RegExMatch(children[1].value)
 
 class SemLiteral(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
             print "Literal: %s" % node.value
         match_str = node.value[1:-1]
@@ -161,7 +161,7 @@ class SemLiteral(SemanticAction):
         return StrMatch(match_str)
 
 class SemTerminal(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         return StrMatch(node.value)
 
 

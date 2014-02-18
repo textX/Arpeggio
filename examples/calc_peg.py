@@ -39,33 +39,28 @@ sem_actions = {
     "calc"   : Calc()
 }
 
-try:
 
-    # First we will make a parser - an instance of the calc parser model.
-    # Parser model is given in the form of PEG notation therefore we
-    # are using ParserPEG class. Root rule name (parsing expression) is "calc".
-    parser = ParserPEG(calc_grammar, "calc", debug=True)
+# First we will make a parser - an instance of the calc parser model.
+# Parser model is given in the form of PEG notation therefore we
+# are using ParserPEG class. Root rule name (parsing expression) is "calc".
+parser = ParserPEG(calc_grammar, "calc", debug=True)
 
 
-    # Then we export it to a dot file.
-    PMDOTExporter().exportFile(parser.parser_model,
-                "calc_peg_parser_model.dot")
+# Then we export it to a dot file.
+PMDOTExporter().exportFile(parser.parser_model, "calc_peg_parser_model.dot")
 
-    # An expression we want to evaluate
-    input = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
+# An expression we want to evaluate
+input = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
 
-    # Then parse tree is created out of the input expression.
-    parse_tree = parser.parse(input)
+# Then parse tree is created out of the input expression.
+parse_tree = parser.parse(input)
 
-    # We save it to dot file in order to visualise it.
-    PTDOTExporter().exportFile(parse_tree,
-                    "calc_peg_parse_tree.dot")
+# We save it to dot file in order to visualise it.
+PTDOTExporter().exportFile(parse_tree, "calc_peg_parse_tree.dot")
 
-    # getASG will start semantic analysis.
-    # In this case semantic analysis will evaluate expression and
-    # returned value will be evaluated result of the input expression.
-    # Semantic actions are supplied to the getASG function.
-    print "%s = %f" % (input, parser.getASG(sem_actions))
+# getASG will start semantic analysis.
+# In this case semantic analysis will evaluate expression and
+# returned value will be evaluated result of the input expression.
+# Semantic actions are supplied to the getASG function.
+print "%s = %f" % (input, parser.getASG(sem_actions))
 
-except NoMatch, e:
-    print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

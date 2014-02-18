@@ -49,7 +49,7 @@ peg_grammar = r"""
                 / ("(" ordered_choice ")") / literal;
 
  identifier <- r'[a-zA-Z_]([a-zA-Z_]|[0-9])*';
- regex <- 'r' '\'' r'(\\\'|[^\'])*' '\'';
+ regex <- 'r\'' r'(\\\'|[^\'])*' '\'';
  literal <- r'\'(\\\'|[^\'])*\'|"[^"]*"';
  LEFT_ARROW <- '<-';
  SLASH <- '/';
@@ -65,39 +65,34 @@ peg_grammar = r"""
 """
 
 
-try:
+# ParserPEG will use ParserPython to parse peg_grammar definition and
+# create parser_model for parsing PEG based grammars
+parser = ParserPEG(peg_grammar, 'grammar', debug=True)
 
-    # ParserPEG will use ParserPython to parse peg_grammar definition and
-    # create parser_model for parsing PEG based grammars
-    parser = ParserPEG(peg_grammar, 'grammar', debug=True)
+# Exporting parser model to dot file for visualization.
+PMDOTExporter().exportFile(parser.parser_model,
+                         "peg_peg_parser_model.dot")
 
-    # Exporting parser model to dot file for visualization.
-    PMDOTExporter().exportFile(parser.parser_model,
-                             "peg_peg_parser_model.dot")
+# Now we will use created parser to parse the same peg_grammar used for
+# parser initialization. We can parse peg_grammar because it is specified
+# using PEG itself.
+parser.parse(peg_grammar)
 
-    # Now we will use created parser to parse the same peg_grammar used for
-    # parser initialization. We can parse peg_grammar because it is specified
-    # using PEG itself.
-    parser.parse(peg_grammar)
+# Again we export parse tree in dot file for vizualization.
+PTDOTExporter().exportFile(parser.parse_tree,
+                         "peg_peg_parse_tree.dot")
 
-    # Again we export parse tree in dot file for vizualization.
-    PTDOTExporter().exportFile(parser.parse_tree,
-                             "peg_peg_parse_tree.dot")
+# ASG should be the same as parser.parser_model because semantic
+# actions will create PEG parser (tree of ParsingExpressions).
+asg = parser.getASG(sem_actions)
 
-    # ASG should be the same as parser.parser_model because semantic
-    # actions will create PEG parser (tree of ParsingExpressions).
-    asg = parser.getASG(sem_actions)
+# This graph should be the same as peg_peg_parser_model.dot because
+# they define the same parser.
+PMDOTExporter().exportFile(asg,
+                         "peg_peg_asg.dot")
 
-    # This graph should be the same as peg_peg_parser_model.dot because
-    # they define the same parser.
-    PMDOTExporter().exportFile(asg,
-                             "peg_peg_asg.dot")
+# If we replace parser_mode with ASG constructed parser it will still
+# parse PEG grammars
+parser.parser_model = asg
+parser.parse(peg_grammar)
 
-    # If we replace parser_mode with ASG constructed parser it will still
-    # parse PEG grammars
-    parser.parser_model = asg
-    parser.parse(peg_grammar)
-
-except NoMatch, e:
-    print "Expected %s at position %s." % \
-          (e.value, str(e.parser.pos_to_linecol(e.position)))

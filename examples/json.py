@@ -81,19 +81,16 @@ if __name__ == "__main__":
         }
     }
     """
-    try:
-        # Creating parser from parser model.
-        parser = ParserPython(jsonFile, debug=True)
+    # Creating parser from parser model.
+    parser = ParserPython(jsonFile, debug=True)
 
-        # Exporting parser model to dot file in order to visualise it.
-        PMDOTExporter().exportFile(parser.parser_model,
-                "json_parser_model.dot")
+    # Exporting parser model to dot file in order to visualise it.
+    PMDOTExporter().exportFile(parser.parser_model, "json_parser_model.dot")
 
-        parse_tree = parser.parse(testdata)
+    # Parse json string
+    parse_tree = parser.parse(testdata)
 
-        PTDOTExporter().exportFile(parser.parse_tree,
-                "json_parse_tree.dot")
+    # Export parse tree for visualization
+    PTDOTExporter().exportFile(parser.parse_tree, "json_parse_tree.dot")
 
-    except NoMatch, e:
-        print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))
 

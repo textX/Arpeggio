@@ -46,44 +46,41 @@ semantic_actions = {
 
 
 if __name__ == "__main__":
-    try:
 
-        # Program code
-        input = '''
-            begin
-                up
-                up
-                left
-                down
-                right
-            end
-        '''
+    # Program code
+    input = '''
+        begin
+            up
+            up
+            left
+            down
+            right
+        end
+    '''
 
 
-        # First we will make a parser - an instance of the robot parser model.
-        # Parser model is given in the form of PEG specification therefore we
-        # are using ParserPEG class.
-        parser = ParserPEG(robot_grammar, 'program', debug=True)
+    # First we will make a parser - an instance of the robot parser model.
+    # Parser model is given in the form of PEG specification therefore we
+    # are using ParserPEG class.
+    parser = ParserPEG(robot_grammar, 'program', debug=True)
 
-        # Then we export it to a dot file in order to visualize it.
-        # This step is optional but it is handy for debugging purposes.
-        # We can make a png out of it using dot (part of graphviz) like this
-        # dot -O -Tpng robot_peg_parser_model.dot
-        PMDOTExporter().exportFile(parser.parser_model,
-                        "robot_peg_parser_model.dot")
+    # Then we export it to a dot file in order to visualize it.
+    # This step is optional but it is handy for debugging purposes.
+    # We can make a png out of it using dot (part of graphviz) like this
+    # dot -O -Tpng robot_peg_parser_model.dot
+    PMDOTExporter().exportFile(parser.parser_model,
+                    "robot_peg_parser_model.dot")
 
-        # We create a parse tree out of textual input
-        parse_tree = parser.parse(input)
+    # We create a parse tree out of textual input
+    parse_tree = parser.parse(input)
 
-        # Then we export it to a dot file in order to visualize it.
-        # dot -O -Tpng robot_peg_parse_tree.dot
-        PTDOTExporter().exportFile(parse_tree,
-                        "robot_peg_parse_tree.dot")
+    # Then we export it to a dot file in order to visualize it.
+    # dot -O -Tpng robot_peg_parse_tree.dot
+    PTDOTExporter().exportFile(parse_tree,
+                    "robot_peg_parse_tree.dot")
 
-        # getASG will start semantic analysis.
-        # In this case semantic analysis will evaluate expression and
-        # returned value will be the final position of the robot.
-        print "position = ", parser.getASG(sem_actions=semantic_actions)
+    # getASG will start semantic analysis.
+    # In this case semantic analysis will evaluate expression and
+    # returned value will be the final position of the robot.
+    print "position = ", parser.getASG(sem_actions=semantic_actions)
 
-    except NoMatch, e:
-        print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

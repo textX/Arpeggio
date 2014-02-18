@@ -33,35 +33,35 @@ def right():        return 'right'
 
 # Semantic actions
 class Up(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         print "Going up"
         return (0, 1)
 
 class Down(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         print "Going down"
         return (0, -1)
 
 class Left(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         print "Going left"
         return (-1, 0)
 
 class Right(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         print "Going right"
         return (1, 0)
 
 class Command(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         print "Command"
         return nodes[0]
 
 
 class Program(SemanticAction):
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         print "Evaluating position"
-        return reduce(lambda x, y: (x[0]+y[0], x[1]+y[1]), nodes[1:-2])
+        return reduce(lambda x, y: (x[0]+y[0], x[1]+y[1]), children[1:-2])
 
 # Connecting rules with semantic actions
 program.sem = Program()
@@ -72,44 +72,41 @@ left.sem = Left()
 right.sem = Right()
 
 if __name__ == "__main__":
-    try:
 
-        # Program code
-        input = '''
-            begin
-                up
-                up
-                left
-                down
-                right
-            end
-        '''
+    # Program code
+    input = '''
+        begin
+            up
+            up
+            left
+            down
+            right
+        end
+    '''
 
 
-        # First we will make a parser - an instance of the robot parser model.
-        # Parser model is given in the form of python constructs therefore we
-        # are using ParserPython class.
-        parser = ParserPython(program, debug=True)
+    # First we will make a parser - an instance of the robot parser model.
+    # Parser model is given in the form of python constructs therefore we
+    # are using ParserPython class.
+    parser = ParserPython(program, debug=True)
 
-        # Then we export it to a dot file in order to visualize it.
-        # This step is optional but it is handy for debugging purposes.
-        # We can make a png out of it using dot (part of graphviz) like this
-        # dot -O -Tpng robot_parser_model.dot
-        PMDOTExporter().exportFile(parser.parser_model,
-                        "robot_parser_model.dot")
+    # Then we export it to a dot file in order to visualize it.
+    # This step is optional but it is handy for debugging purposes.
+    # We can make a png out of it using dot (part of graphviz) like this
+    # dot -O -Tpng robot_parser_model.dot
+    PMDOTExporter().exportFile(parser.parser_model,
+                    "robot_parser_model.dot")
 
-        # We create a parse tree out of textual input
-        parse_tree = parser.parse(input)
+    # We create a parse tree out of textual input
+    parse_tree = parser.parse(input)
 
-        # Then we export it to a dot file in order to visualize it.
-        # dot -O -Tpng robot_parse_tree.dot
-        PTDOTExporter().exportFile(parse_tree,
-                        "robot_parse_tree.dot")
+    # Then we export it to a dot file in order to visualize it.
+    # dot -O -Tpng robot_parse_tree.dot
+    PTDOTExporter().exportFile(parse_tree,
+                    "robot_parse_tree.dot")
 
-        # getASG will start semantic analysis.
-        # In this case semantic analysis will evaluate expression and
-        # returned value will be the final position of the robot.
-        print "position = ", parser.getASG()
+    # getASG will start semantic analysis.
+    # In this case semantic analysis will evaluate expression and
+    # returned value will be the final position of the robot.
+    print "position = ", parser.getASG()
 
-    except NoMatch, e:
-        print "Expected %s at position %s." % (e.value, str(e.parser.pos_to_linecol(e.position)))

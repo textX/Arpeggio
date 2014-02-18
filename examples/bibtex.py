@@ -42,12 +42,12 @@ class BibFileSem(SemanticAction):
     """
     Just returns list of child nodes (bibentries).
     """
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
             print "Processing Bibfile"
 
         # Return only dict nodes
-        return [x for x in nodes if type(x) is dict]
+        return [x for x in children if type(x) is dict]
 
 
 class BibEntrySem(SemanticAction):
@@ -55,14 +55,14 @@ class BibEntrySem(SemanticAction):
     Constructs a map where key is bibentry field name.
     Key is returned under 'bibkey' key. Type is returned under 'bibtype'.
     """
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
-            print "  Processing bibentry %s" % nodes[2]
+            print "  Processing bibentry %s" % children[2]
         bib_entry_map = {
-            'bibtype': nodes[0].value,
-            'bibkey': nodes[2].value
+            'bibtype': children[0].value,
+            'bibkey': children[2].value
         }
-        for field in nodes[3:]:
+        for field in children[3:]:
             if isinstance(field, tuple):
                 bib_entry_map[field[0]] = field[1]
         return bib_entry_map
@@ -72,10 +72,10 @@ class FieldSem(SemanticAction):
     """
     Constructs a tuple (fieldname, fieldvalue).
     """
-    def first_pass(self, parser, node, nodes):
+    def first_pass(self, parser, node, children):
         if parser.debug:
-            print "    Processing field %s" % nodes[0]
-        field = (nodes[0].value, nodes[2])
+            print "    Processing field %s" % children[0]
+        field = (children[0].value, children[2])
         return field
 
 
@@ -84,8 +84,8 @@ class FieldValueSem(SemanticAction):
     Serbian Serbian letters form latex encoding to Unicode.
     Remove braces. Remove newlines.
     """
-    def first_pass(self, parser, node, nodes):
-        value = nodes[1].value
+    def first_pass(self, parser, node, children):
+        value = children[1].value
         value = value.replace(r"\'{c}", u"ć")\
                     .replace(r"\'{C}", u"Ć")\
                     .replace(r"\v{c}", u"č")\
@@ -114,8 +114,7 @@ if __name__ == "__main__":
     # particulary handy for debugging purposes.
     # We can make a jpg out of it using dot (part of graphviz) like this
     # dot -O -Tjpg calc_parse_tree_model.dot
-    PMDOTExporter().exportFile(parser.parser_model,
-                    "bib_parse_tree_model.dot")
+    PMDOTExporter().exportFile(parser.parser_model, "bib_parse_tree_model.dot")
 
     # First parameter is bibtex file
     if len(sys.argv) > 1:
@@ -127,8 +126,7 @@ if __name__ == "__main__":
             parse_tree = parser.parse(bibtexfile_content)
 
             # Then we export it to a dot file in order to visualise it.
-            PTDOTExporter().exportFile(parse_tree,
-                            "bib_parse_tree.dot")
+            PTDOTExporter().exportFile(parse_tree, "bib_parse_tree.dot")
 
             # getASG will start semantic analysis.
             # In this case semantic analysis will list of bibentry maps.

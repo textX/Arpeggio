@@ -555,21 +555,21 @@ class ParseTreeNode(object):
     The node can be terminal(the leaf of the parse tree) or non-terminal.
 
     Attributes:
-        type (str): The name of the rule that created this node or empty
+        rule (str): The name of the rule that created this node or empty
             string in case this node is created by a non-root pexpression.
         position (int): A position in the input stream where the match occurred.
         error (bool): Is this a false parse tree node created during error recovery.
         comments : A parse tree of comment(s) attached to this node.
     """
-    def __init__(self, type, position, error):
-        self.type = type
+    def __init__(self, rule, position, error):
+        self.rule = rule
         self.position = position
         self.error = error
         self.comments = None
 
     @property
     def name(self):
-        return "%s [%s]" % (self.type, self.position)
+        return "%s [%s]" % (self.rule, self.position)
 
 
 class Terminal(ParseTreeNode):
@@ -577,21 +577,21 @@ class Terminal(ParseTreeNode):
     Leaf node of the Parse Tree. Represents matched string.
 
     Attributes:
-        type (str): The name of the rule that created this terminal.
+        rule (str): The name of the rule that created this terminal.
         position (int): A position in the input stream where match occurred.
         value (str): Matched string at the given position or missing token
             name in the case of an error node.
     """
-    def __init__(self, type, position, value, error=False):
-        super(Terminal, self).__init__(type, position, error)
+    def __init__(self, rule, position, value, error=False):
+        super(Terminal, self).__init__(rule, position, error)
         self.value = value
 
     @property
     def desc(self):
         if self.value:
-            return "%s '%s' [%s]" % (self.type, self.value, self.position)
+            return "%s '%s' [%s]" % (self.rule, self.value, self.position)
         else:
-            return "%s [%s]" % (self.type, self.position)
+            return "%s [%s]" % (self.rule, self.position)
 
     def __str__(self):
         return self.value
@@ -611,8 +611,8 @@ class NonTerminal(ParseTreeNode, list):
         nodes (list of ParseTreeNode): Children parse tree nodes.
 
     """
-    def __init__(self, type, position, nodes, error=False):
-        super(NonTerminal, self).__init__(type, position, error)
+    def __init__(self, rule, position, nodes, error=False):
+        super(NonTerminal, self).__init__(rule, position, error)
         self.extend(flatten([nodes]))
 
         # Child nodes cache. Used for lookup by rule name.
@@ -645,7 +645,7 @@ class NonTerminal(ParseTreeNode, list):
         # If not found in the cache find it and store it in the
         # cache for later.
         for n in self:
-            if n.type == item:
+            if n.rule == item:
                 self._child_cache[item] = n
                 return n
 
@@ -746,13 +746,13 @@ class Parser(object):
                 for n in node:
                     nodes.append(tree_walk(n))
 
-            if node.type in sem_actions:
-                retval = sem_actions[node.type].first_pass(self, node, nodes)
-                if hasattr(sem_actions[node.type], "second_pass"):
-                    for_second_pass.append((node.type, retval))
+            if node.rule in sem_actions:
+                retval = sem_actions[node.rule].first_pass(self, node, nodes)
+                if hasattr(sem_actions[node.rule], "second_pass"):
+                    for_second_pass.append((node.rule, retval))
             else:
                 if isinstance(node, NonTerminal):
-                    retval = NonTerminal(node.type, node.position, nodes)
+                    retval = NonTerminal(node.rule, node.position, nodes)
                 else:
                     retval = node
 

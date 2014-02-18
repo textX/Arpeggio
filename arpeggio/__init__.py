@@ -603,7 +603,7 @@ class Terminal(ParseTreeNode):
         return str(self) == str(other)
 
 
-class NonTerminal(ParseTreeNode):
+class NonTerminal(ParseTreeNode, list):
     """
     Non-leaf node of the Parse Tree. Represents language syntax construction.
 
@@ -613,7 +613,7 @@ class NonTerminal(ParseTreeNode):
     """
     def __init__(self, type, position, nodes, error=False):
         super(NonTerminal, self).__init__(type, position, error)
-        self.nodes = flatten([nodes])
+        self.extend(flatten([nodes]))
 
         # Child nodes cache. Used for lookup by rule name.
         self._child_cache = {}
@@ -622,14 +622,14 @@ class NonTerminal(ParseTreeNode):
     def desc(self):
         return self.name
 
-    def __iter__(self):
-        return iter(self.nodes)
+    # def __iter__(self):
+    #     return self
 
     def __str__(self):
-        return "".join([str(x) for x in self.nodes])
+        return "".join([str(x) for x in self])
 
     def __repr__(self):
-        return "[ %s ]" % ", ".join([repr(x) for x in self.nodes])
+        return "[ %s ]" % ", ".join([repr(x) for x in self])
 
     def __getattr__(self, item):
         """
@@ -644,7 +644,7 @@ class NonTerminal(ParseTreeNode):
 
         # If not found in the cache find it and store it in the
         # cache for later.
-        for n in self.nodes:
+        for n in self:
             if n.type == item:
                 self._child_cache[item] = n
                 return n
@@ -743,7 +743,7 @@ class Parser(object):
             """
             nodes = []
             if isinstance(node, NonTerminal):
-                for n in node.nodes:
+                for n in node:
                     nodes.append(tree_walk(n))
 
             if node.type in sem_actions:

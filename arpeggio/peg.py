@@ -23,7 +23,7 @@ def expression():       return [regex,(identifier, Not(LEFT_ARROW)),
                                 (OPEN, ordered_choice, CLOSE),
                                 literal]
 
-def regex():            return "r", "'", _(r"(\\\'|[^\'])*"),"'"
+def regex():            return "r'", _(r"(\\\'|[^\'])*"),"'"
 def identifier():       return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 #def literal():          return [_(r"\'(\\\'|[^\'])*\'"),_(r'"[^"]*"')]
 def literal():          return _(r'(\'(\\\'|[^\'])*\')|("[^"]*")')
@@ -148,8 +148,8 @@ class SemIdentifier(SemanticAction):
 class SemRegEx(SemanticAction):
     def first_pass(self, parser, node, nodes):
         if parser.debug:
-            print "RegEx %s." % nodes[2].value
-        return RegExMatch(nodes[2].value)
+            print "RegEx %s." % nodes[1].value
+        return RegExMatch(nodes[1].value)
 
 class SemLiteral(SemanticAction):
     def first_pass(self, parser, node, nodes):

@@ -38,7 +38,7 @@ class TestDecoratorCombine(TestCase):
         self.assertRaises(NoMatch, fail_nm)
 
         self.assertIsInstance(ptree1, NonTerminal)
-        self.assertIsInstance(ptree1.nodes[0], Terminal)
-        self.assertEqual(ptree1.nodes[0].value, "abbb")
+        self.assertIsInstance(ptree1[0], Terminal)
+        self.assertEqual(ptree1[0].value, "abbb")
 
 

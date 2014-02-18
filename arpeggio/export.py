@@ -153,7 +153,7 @@ class PTDOTExportAdapter(PMDOTExportAdapter):
         else:
             if not hasattr(self, "_neighbours"):
                 self._neighbours = []
-                for c, n in enumerate(self.adaptee.nodes):
+                for c, n in enumerate(self.adaptee):
                     adapter = PTDOTExportAdapter(n, self.export)
                     self._neighbours.append((str(c + 1), adapter))
             return self._neighbours

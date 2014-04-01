@@ -11,6 +11,7 @@
 # notation.
 ################################################################################
 
+from __future__ import print_function
 import re
 import bisect
 
@@ -150,7 +151,7 @@ class ParsingExpression(object):
 
     def _parse_intro(self, parser):
         if parser.debug:
-            print "Parsing %s" % self.name
+            print("Parsing {}".format(self.name))
 
         # Skip whitespaces if we are not in the lexical rule
         if not parser._in_lex_rule:
@@ -172,8 +173,7 @@ class ParsingExpression(object):
         # the result
         if c_pos in self.result_cache:
             if parser.debug:
-                print "Result for [%s, %s] founded in result_cache." % \
-                         (self, self.c_pos)
+                print("Result for [{}, {}] founded in result_cache.".format(self, self.c_pos))
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             return result
@@ -226,7 +226,7 @@ class Sequence(ParsingExpression):
                 result = e.parse(parser)
                 if result:
                     results.append(result)
-        except NoMatch, m:
+        except NoMatch as m:
             self._nm_change_rule(m, parser)
             raise
 
@@ -245,7 +245,7 @@ class OrderedChoice(Sequence):
             try:
                 result = e.parse(parser)
                 match = True
-            except NoMatch, m:
+            except NoMatch as m:
                 parser.position = self.c_pos  # Backtracking
                 self._nm_change_rule(m, parser)
             else:
@@ -273,7 +273,6 @@ class Optional(Repetition):
             result = self.nodes[0].parse(parser)
         except NoMatch:
             parser.position = self.c_pos  # Backtracking
-            pass
 
         return result
 
@@ -421,7 +420,7 @@ class Match(ParsingExpression):
         comments = []
         try:
             match = self._parse(parser)
-        except NoMatch, nm:
+        except NoMatch as nm:
             # If not matched and not in lexical rule try to match comment
             #TODO: Comment handling refactoring. Should think of better way to
             # handle comments.
@@ -469,12 +468,12 @@ class RegExMatch(Match):
         if m:
             parser.position += len(m.group())
             if parser.debug:
-                print "Match %s at %d" % (m.group(), self.c_pos)
+                print("Match {} at {}".format(m.group(), self.c_pos))
             return Terminal(self.rule if self.root else '', self.c_pos,
                             m.group())
         else:
             if parser.debug:
-                print "NoMatch at %d" % self.c_pos
+                print("NoMatch at {}".format(self.c_pos))
             parser._nm_raise(self.name, self.c_pos, parser)
 
 
@@ -493,12 +492,12 @@ class StrMatch(Match):
         if parser.input[parser.position:].startswith(self.to_match):
             parser.position += len(self.to_match)
             if parser.debug:
-                print "Match %s at %d" % (self.to_match, self.c_pos)
+                print("Match {} at {}".format(self.to_match, self.c_pos))
             return Terminal(self.rule if self.root else '', self.c_pos,
                             self.to_match)
         else:
             if parser.debug:
-                print "NoMatch at %d" % self.c_pos
+                print("NoMatch at {}".format(self.c_pos))
             parser._nm_raise(self.to_match, self.c_pos, parser)
 
     def __str__(self):
@@ -506,7 +505,10 @@ class StrMatch(Match):
 
     def __eq__(self, other):
         return self.to_match == str(other)
-
+    
+    def __hash__(self):
+        return hash(self.to_match)
+   
 
 # HACK: Kwd class is a bit hackish. Need to find a better way to
 #	introduce different classes of string tokens.
@@ -537,7 +539,7 @@ class EndOfFile(Match):
             return Terminal('EOF', self.c_pos, '')
         else:
             if parser.debug:
-                print "EOF not matched."
+                print("EOF not matched.")
             parser._nm_raise(self.name, self.c_pos, parser)
 
 
@@ -759,12 +761,12 @@ class Parser(object):
             return retval
 
         if self.debug:
-            print "ASG: First pass"
+            print("ASG: First pass")
         asg = tree_walk(self.parse_tree)
 
         # Second pass
         if self.debug:
-            print "ASG: Second pass"
+            print("ASG: Second pass")
         for sa_name, asg_node in for_second_pass:
             sem_actions[sa_name].second_pass(self, asg_node)
 
@@ -872,11 +874,11 @@ class ParserPython(Parser):
                 if rule in __rule_cache:
                     c_rule = __rule_cache.get(rule)
                     if self.debug:
-                        print "Rule %s founded in cache." % rule
+                        print("Rule {} founded in cache.".format(rule))
                     if isinstance(c_rule, CrossRef):
                         self.__cross_refs += 1
                         if self.debug:
-                            print "CrossRef usage: %s" % c_rule.rule_name
+                            print("CrossRef usage: {}".format(c_rule.rule_name))
                     return c_rule
 
                 # Semantic action for the rule
@@ -893,8 +895,8 @@ class ParserPython(Parser):
                 # Update cache
                 __rule_cache[rule] = retval
                 if self.debug:
-                    print "New rule: %s -> %s" % \
-                          (rule, retval.__class__.__name__)
+                    print("New rule: {} -> {}".format(rule, 
+                                                      retval.__class__.__name__))
 
             elif isinstance(expression, Match):
                 retval = expression

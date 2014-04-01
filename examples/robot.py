@@ -18,6 +18,7 @@
 #        right
 #    end
 #######################################################################
+from __future__ import print_function
 
 from arpeggio import *
 from arpeggio.export import PMDOTExporter, PTDOTExporter
@@ -34,34 +35,38 @@ def right():        return 'right'
 # Semantic actions
 class Up(SemanticAction):
     def first_pass(self, parser, node, children):
-        print "Going up"
+        print("Going up")
         return (0, 1)
 
 class Down(SemanticAction):
     def first_pass(self, parser, node, children):
-        print "Going down"
+        print("Going down")
         return (0, -1)
 
 class Left(SemanticAction):
     def first_pass(self, parser, node, children):
-        print "Going left"
+        print("Going left")
         return (-1, 0)
 
 class Right(SemanticAction):
     def first_pass(self, parser, node, children):
-        print "Going right"
+        print("Going right")
         return (1, 0)
 
 class Command(SemanticAction):
     def first_pass(self, parser, node, children):
-        print "Command"
-        return nodes[0]
+        print("Command")
+        return children[0]
 
 
 class Program(SemanticAction):
     def first_pass(self, parser, node, children):
-        print "Evaluating position"
-        return reduce(lambda x, y: (x[0]+y[0], x[1]+y[1]), children[1:-2])
+        print("Evaluating position")
+        position = [0, 0]
+        for move in children[1:-2]:
+            position[0] += move[0]
+            position[1] += move[1]
+        return position
 
 # Connecting rules with semantic actions
 program.sem = Program()
@@ -108,5 +113,5 @@ if __name__ == "__main__":
     # getASG will start semantic analysis.
     # In this case semantic analysis will evaluate expression and
     # returned value will be the final position of the robot.
-    print "position = ", parser.getASG()
+    print("position = ", parser.getASG())
 

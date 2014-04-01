@@ -8,8 +8,9 @@
 #
 # This example demonstrates grammar and parser for bibtex files.
 #######################################################################
-import pprint
+from __future__ import print_function
 
+import pprint
 import sys
 from arpeggio import *
 from arpeggio.export import PMDOTExporter, PTDOTExporter
@@ -44,7 +45,7 @@ class BibFileSem(SemanticAction):
     """
     def first_pass(self, parser, node, children):
         if parser.debug:
-            print "Processing Bibfile"
+            print("Processing Bibfile")
 
         # Return only dict nodes
         return [x for x in children if type(x) is dict]
@@ -57,7 +58,7 @@ class BibEntrySem(SemanticAction):
     """
     def first_pass(self, parser, node, children):
         if parser.debug:
-            print "  Processing bibentry %s" % children[2]
+            print("  Processing bibentry %s" % children[2])
         bib_entry_map = {
             'bibtype': children[0].value,
             'bibkey': children[2].value
@@ -74,7 +75,7 @@ class FieldSem(SemanticAction):
     """
     def first_pass(self, parser, node, children):
         if parser.debug:
-            print "    Processing field %s" % children[0]
+            print("    Processing field %s" % children[0])
         field = (children[0].value, children[2])
         return field
 
@@ -136,5 +137,5 @@ if __name__ == "__main__":
             pp.pprint(ast)
 
     else:
-        print "Usage: python bibtex.py file_to_parse"
+        print("Usage: python bibtex.py file_to_parse")
 

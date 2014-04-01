@@ -18,6 +18,7 @@
 #        right
 #    end
 #######################################################################
+from __future__ import print_function
 
 from arpeggio import *
 from arpeggio.export import PMDOTExporter, PTDOTExporter
@@ -82,5 +83,5 @@ if __name__ == "__main__":
     # getASG will start semantic analysis.
     # In this case semantic analysis will evaluate expression and
     # returned value will be the final position of the robot.
-    print "position = ", parser.getASG(sem_actions=semantic_actions)
+    print("position = ", parser.getASG(sem_actions=semantic_actions))
 

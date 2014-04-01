@@ -7,7 +7,7 @@
 # License: MIT License
 #######################################################################
 
-import StringIO
+import io
 from arpeggio import Terminal
 
 
@@ -32,7 +32,7 @@ class Exporter(object):
         """
         Export of an obj to a string.
         """
-        self._outf = StringIO()
+        self._outf = io.StringIO()
         self._export(obj)
         return self._outf.getvalue()
 

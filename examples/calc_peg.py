@@ -2,7 +2,7 @@
 # Name: calc_peg.py
 # Purpose: Simple expression evaluator example using PEG language
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example is functionally equivalent to calc.py. The difference is that
@@ -12,8 +12,8 @@
 # Parser model as well as parse tree exported to dot files should be
 # the same as parser model and parse tree generated in calc.py example.
 #######################################################################
+from __future__ import absolute_import
 
-from arpeggio import *
 from arpeggio.peg import ParserPEG
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 
@@ -50,17 +50,17 @@ parser = ParserPEG(calc_grammar, "calc", debug=True)
 PMDOTExporter().exportFile(parser.parser_model, "calc_peg_parser_model.dot")
 
 # An expression we want to evaluate
-input = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
+input_expr = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
 
-# Then parse tree is created out of the input expression.
-parse_tree = parser.parse(input)
+# Then parse tree is created out of the input_expr expression.
+parse_tree = parser.parse(input_expr)
 
 # We save it to dot file in order to visualise it.
 PTDOTExporter().exportFile(parse_tree, "calc_peg_parse_tree.dot")
 
 # getASG will start semantic analysis.
 # In this case semantic analysis will evaluate expression and
-# returned value will be evaluated result of the input expression.
+# returned value will be evaluated result of the input_expr expression.
 # Semantic actions are supplied to the getASG function.
-print "%s = %f" % (input, parser.getASG(sem_actions))
+print("{} = {}".format(input_expr, parser.getASG(sem_actions)))
 

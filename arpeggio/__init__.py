@@ -151,38 +151,47 @@ class ParsingExpression(object):
 
     def _parse_intro(self, parser):
         if parser.debug:
-            print("Parsing {}".format(self.name))
+            print(">> Entering rule {}".format(self.name))
 
         # Skip whitespaces if we are not in the lexical rule
         if not parser._in_lex_rule:
             parser._skip_ws()
 
-        # Set the begining position in the input stream of
-        # this parsing expression
-        self.c_pos = parser.position
+#         # Set the beginning position in the input stream of
+#         # this parsing expression
+#         self.c_pos = parser.position
 
     def parse(self, parser):
         self._parse_intro(parser)
 
         # Current position could change in recursive calls
         # so save it.
-        c_pos = self.c_pos
+        c_pos = parser.position
 
         # Memoization.
         # If this position is already parsed by this parser expression use
         # the result
         if c_pos in self.result_cache:
-            if parser.debug:
-                print("Result for [{}, {}] founded in result_cache.".format(self, self.c_pos))
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
+            if parser.debug:
+                print("** Cache hit for [{}, {}] = '{}'".format(self.name, c_pos, unicode(result)))
+            if parser.debug:
+                print("<< Leaving rule {}".format(self.name))
             return result
 
         # We are descending down
         if parser.nm:
             parser.nm._up = False
 
-        result = self._parse(parser)
+        try:
+            result = self._parse(parser)
+        except NoMatch:
+            parser.position = c_pos  # Backtracking
+            raise
+        finally:
+            if parser.debug:
+                print("<< Leaving rule {}".format(self.name))
 
         # Create terminal or non-terminal if result is not
         # already a Terminal.
@@ -211,7 +220,7 @@ class ParsingExpression(object):
         Used to report most generic language element expected at the
         place of the NoMatch exception.
         """
-        if self.root and self.c_pos == nm.position and nm._up:
+        if self.root and parser.position == nm.position and nm._up:
             nm.rule = self.rule
 
 
@@ -227,6 +236,7 @@ class Sequence(ParsingExpression):
                 if result:
                     results.append(result)
         except NoMatch as m:
+#             parser.position = self.c_pos  # Backtracking
             self._nm_change_rule(m, parser)
             raise
 
@@ -241,12 +251,13 @@ class OrderedChoice(Sequence):
     def _parse(self, parser):
         result = None
         match = False
+        c_pos = parser.position
         for e in self.nodes:
             try:
                 result = e.parse(parser)
                 match = True
             except NoMatch as m:
-                parser.position = self.c_pos  # Backtracking
+                parser.position = c_pos  # Backtracking
                 self._nm_change_rule(m, parser)
             else:
                 break
@@ -269,10 +280,11 @@ class Optional(Repetition):
     """
     def _parse(self, parser):
         result = None
+        c_pos = parser.position
         try:
             result = self.nodes[0].parse(parser)
         except NoMatch:
-            parser.position = self.c_pos  # Backtracking
+            parser.position = c_pos  # Backtracking
 
         return result
 
@@ -286,10 +298,10 @@ class ZeroOrMore(Repetition):
         results = []
         while True:
             try:
-                self.c_pos = parser.position
+                c_pos = parser.position
                 results.append(self.nodes[0].parse(parser))
             except NoMatch:
-                parser.position = self.c_pos  # Backtracking
+                parser.position = c_pos  # Backtracking
                 break
 
         return results
@@ -304,11 +316,11 @@ class OneOrMore(Repetition):
         first = False
         while True:
             try:
-                self.c_pos = parser.position
+                c_pos = parser.position
                 results.append(self.nodes[0].parse(parser))
                 first = True
             except NoMatch:
-                parser.position = self.c_pos  # Backtracking
+                parser.position = c_pos  # Backtracking
                 if not first:
                     raise
                 break
@@ -323,19 +335,21 @@ class SyntaxPredicate(ParsingExpression):
     consume any input.
     """
 
+
 class And(SyntaxPredicate):
     """
     This predicate will succeed if the specified expression matches current
     input.
     """
     def _parse(self, parser):
+        c_pos = parser.position
         for e in self.nodes:
             try:
                 e.parse(parser)
             except NoMatch:
-                parser.position = self.c_pos
+                parser.position = c_pos
                 raise
-        parser.position = self.c_pos
+        parser.position = c_pos
 
 
 class Not(SyntaxPredicate):
@@ -344,14 +358,15 @@ class Not(SyntaxPredicate):
     current input.
     """
     def _parse(self, parser):
+        c_pos = parser.position
         for e in self.nodes:
             try:
                 e.parse(parser)
             except NoMatch:
-                parser.position = self.c_pos
+                parser.position = c_pos
                 return
-        parser.position = self.c_pos
-        parser._nm_raise(self.name, self.c_pos, parser)
+        parser.position = c_pos
+        parser._nm_raise(self.name, c_pos, parser)
 
 
 class Empty(SyntaxPredicate):
@@ -382,7 +397,7 @@ class Combine(Decorator):
 
         old_in_lex_rule = parser._in_lex_rule
         parser._in_lex_rule = True
-        self.c_pos = parser.position
+        c_pos = parser.position
         try:
             for parser_model_node in self.nodes:
                 results.append(parser_model_node.parse(parser))
@@ -390,10 +405,10 @@ class Combine(Decorator):
             results = flatten(results)
 
             # Create terminal from result
-            return Terminal(self.rule if self.root else '', self.c_pos, \
+            return Terminal(self.rule if self.root else '', c_pos, \
                               "".join([str(result) for result in results]))
         except NoMatch:
-            parser.position = self.c_pos  # Backtracking
+            parser.position = c_pos  # Backtracking
             raise
         finally:
             parser._in_lex_rule = old_in_lex_rule
@@ -411,11 +426,13 @@ class Match(ParsingExpression):
     @property
     def name(self):
         return "%s(%s)" % (self.__class__.__name__, self.to_match)
-
+    
     def parse(self, parser):
         self._parse_intro(parser)
         if parser._in_parse_comment:
             return self._parse(parser)
+        
+        c_pos = parser.position
 
         comments = []
         try:
@@ -434,7 +451,7 @@ class Match(ParsingExpression):
                     # If comment match successfull try terminal match again
                     if comments:
                         match = self._parse(parser)
-                        match.comments = NonTerminal('comment', self.c_pos,
+                        match.comments = NonTerminal('comment', c_pos,
                                                      comments)
                     else:
                         parser._nm_raise(nm)
@@ -464,17 +481,19 @@ class RegExMatch(Match):
             self.regex = re.compile(to_match)
 
     def _parse(self, parser):
-        m = self.regex.match(parser.input[parser.position:])
+        c_pos = parser.position
+        m = self.regex.match(parser.input[c_pos:])
         if m:
-            parser.position += len(m.group())
             if parser.debug:
-                print("Match {} at {}".format(m.group(), self.c_pos))
-            return Terminal(self.rule if self.root else '', self.c_pos,
+                print("++ Match '%s' at %d => '%s'" % (m.group(), \
+                            c_pos, parser.context(len(m.group()))))
+            parser.position += len(m.group())
+            return Terminal(self.rule if self.root else '', c_pos,
                             m.group())
         else:
             if parser.debug:
-                print("NoMatch at {}".format(self.c_pos))
-            parser._nm_raise(self.name, self.c_pos, parser)
+                print("-- NoMatch at {}".format(c_pos))
+            parser._nm_raise(self.name, c_pos, parser)
 
 
 class StrMatch(Match):
@@ -489,16 +508,18 @@ class StrMatch(Match):
         self.to_match = to_match
 
     def _parse(self, parser):
-        if parser.input[parser.position:].startswith(self.to_match):
-            parser.position += len(self.to_match)
+        c_pos = parser.position
+        if parser.input[c_pos:].startswith(self.to_match):
             if parser.debug:
-                print("Match {} at {}".format(self.to_match, self.c_pos))
-            return Terminal(self.rule if self.root else '', self.c_pos,
+                print("++ Match '{}' at {} => '{}'".format(self.to_match,\
+                        c_pos, parser.context(len(self.to_match))))
+            parser.position += len(self.to_match)
+            return Terminal(self.rule if self.root else '', c_pos,
                             self.to_match)
         else:
             if parser.debug:
-                print("NoMatch at {}".format(self.c_pos))
-            parser._nm_raise(self.to_match, self.c_pos, parser)
+                print("-- NoMatch at {}".format(c_pos))
+            parser._nm_raise(self.to_match, c_pos, parser)
 
     def __str__(self):
         return self.to_match
@@ -535,12 +556,13 @@ class EndOfFile(Match):
         return "EOF"
 
     def _parse(self, parser):
-        if len(parser.input) == parser.position:
-            return Terminal('EOF', self.c_pos, '')
+        c_pos = parser.position
+        if len(parser.input) == c_pos:
+            return Terminal('** EOF', c_pos, '')
         else:
             if parser.debug:
-                print("EOF not matched.")
-            parser._nm_raise(self.name, self.c_pos, parser)
+                print("!! EOF not matched.")
+            parser._nm_raise(self.name, c_pos, parser)
 
 
 def EOF():      return EndOfFile()
@@ -796,6 +818,27 @@ class Parser(object):
             if self.input[self.line_ends[line - 1]] in '\n\r':
                 col -= 1
         return line + 1, col + 1
+    
+    def context(self, length=None, position=None):
+        """
+        Returns current context substring, i.e. the substring around current
+        position.
+        Args:
+            length(int): If given used to mark with asterisk a length chars from
+                current position.
+            position(int): The position in the input stream.
+        """
+        if not position:
+            position = self.position
+        if length:
+            return "{}*{}*{}".format(
+                str(self.input[max(position - 10, 0):position]),
+                str(self.input[position:position + length]),
+                str(self.input[position + length:position+10]))
+        else:
+            return "{}*{}".format(
+                str(self.input[max(position - 10, 0):position]),
+                str(self.input[position:position + 10]))
 
     def _skip_ws(self):
         """

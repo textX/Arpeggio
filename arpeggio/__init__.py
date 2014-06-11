@@ -62,8 +62,9 @@ class NoMatch(Exception):
         self._up = True
 
     def __str__(self):
-        return "Expected %s at position %s." % (self.rule,
-                str(self.parser.pos_to_linecol(self.position)))
+        return "Expected '{}' at position {} => '{}'.".format(self.rule,
+                str(self.parser.pos_to_linecol(self.position)),
+                self.parser.context(position=self.position))
 
 
 def flatten(_iterable):
@@ -203,7 +204,7 @@ class ParsingExpression(object):
         return result
 
     #TODO: _nm_change_rule should be called from every parser expression parse
-    #         method that can potentialy be the root parser rule.
+    #         method that can potentially be the root parser rule.
     def _nm_change_rule(self, nm, parser):
         """
         Change rule for the given NoMatch object to a more generic if
@@ -261,6 +262,7 @@ class Repetition(ParsingExpression):
     """
     Base class for all repetition-like parser expressions (?,*,+)
     """
+
 
 class Optional(Repetition):
     """
@@ -431,7 +433,7 @@ class Match(ParsingExpression):
                         comments.append(parser.comments_model.parse(parser))
                         parser._skip_ws()
                 except NoMatch:
-                    # If comment match successfull try terminal match again
+                    # If comment match successfully try terminal match again
                     if comments:
                         match = self._parse(parser)
                         match.comments = NonTerminal('comment', self.c_pos,

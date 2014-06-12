@@ -177,7 +177,7 @@ class ParsingExpression(object):
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             if parser.debug:
-                print("** Cache hit for [{}, {}] = '{}'".format(self.name, c_pos, unicode(result)))
+                print("** Cache hit for [{}, {}] = '{}'".format(self.name, c_pos, str(result)))
             if parser.debug:
                 print("<< Leaving rule {}".format(self.name))
             return result
@@ -653,7 +653,7 @@ class NonTerminal(ParseTreeNode, list):
     #     return self
 
     def __str__(self):
-        return "".join([str(x) for x in self])
+        return " | ".join([str(x) for x in self])
 
     def __repr__(self):
         return "[ %s ]" % ", ".join([repr(x) for x in self])
@@ -733,14 +733,14 @@ class Parser(object):
     Abstract base class for all parsers.
 
     Attributes:
-        skipws (bool): Should the whitespace skipping be done.
+        skipws (bool): Should the whitespace skipping be done. Default is True.
         ws (str): A string consisting of whitespace characters.
         reduce_tree (bool): If true non-terminals with single child will be
-            eliminated from the parse tree.
+            eliminated from the parse tree. Default is True.
         debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
     """
-    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False, debug=False):
+    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=True, debug=False):
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
@@ -790,10 +790,18 @@ class Parser(object):
             semantic actions and creating list of object that needs to be
             called in the second pass.
             """
+            if self.debug:
+                print("Walking down ", node.name, "  type:", type(node), "str:", str(node))
             children = []
             if isinstance(node, NonTerminal):
                 for n in node:
                     children.append(tree_walk(n))
+
+            if self.debug:
+                print("Visiting ", node.name, "= '", str(node), "'  type:", type(node), \
+                      "len:", len(node) if isinstance(node, list) else "")
+                for i, a in enumerate(children):
+                    print ("\t%d:"%(i+1), str(a), "type:", type(a))
 
             if node.rule in sem_actions:
                 retval = sem_actions[node.rule].first_pass(self, node, children)
@@ -809,6 +817,8 @@ class Parser(object):
                 else:
                     retval = node
 
+            if self.debug:
+                print("\tResolved to = ", str(retval), "  type:", type(retval))
             return retval
 
         if self.debug:

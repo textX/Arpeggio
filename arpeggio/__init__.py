@@ -11,9 +11,10 @@
 # notation.
 ################################################################################
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import re
 import bisect
+from arpeggio.utils import isstr
 
 DEFAULT_WS = '\t\n\r '
 
@@ -697,8 +698,30 @@ class SemanticAction(object):
     def first_pass(self, parser, node, nodes):
         """
         Called in the first pass of tree walk.
+        This is the default implementation used if no semantic action is defined.
         """
-        raise NotImplementedError()
+        # Special case. If only one child exist return it.
+        if len(nodes)==1:
+            retval = nodes[0]
+        else:
+            # If there is only one non-string child return
+            # that by default. This will support e.g. bracket
+            # removals.
+            last_non_str = None
+            for c in nodes:
+                if not isstr(c):
+                    if last_non_str is None:
+                        last_non_str = c
+                    else:
+                        # If there is multiple non-string objects
+                        # by default convert non-terminal to unicode
+                        retval = str(node)
+                        break
+            else:
+                # Return the only non-string child
+                retval = last_non_str 
+                
+        return retval
 
 
 # ----------------------------------------------------
@@ -777,8 +800,12 @@ class Parser(object):
                 if hasattr(sem_actions[node.rule], "second_pass"):
                     for_second_pass.append((node.rule, retval))
             else:
-                if isinstance(node, NonTerminal):
-                    retval = NonTerminal(node.rule, node.position, children)
+                # If no rule is present use some sane defaults
+                if isinstance(node, Terminal):
+                    # Convert Terminal node to str
+                    retval = str(node)
+                elif isinstance(node, NonTerminal):
+                    retval = SemanticAction().first_pass(self, node, children)
                 else:
                     retval = node
 

@@ -49,21 +49,23 @@ class PEGSemanticAction(SemanticAction):
     def second_pass(self, parser, node):
         if isinstance(node, Terminal):
             return
-        for i,n in enumerate(node.nodes):
+        for i, n in enumerate(node.nodes):
             if isinstance(n, Terminal):
                 if n.value in parser.peg_rules:
                     node.nodes[i] = parser.peg_rules[n.value]
                 else:
                     raise SemanticError("Rule \"%s\" does not exists." % n)
 
+
 class SemGrammar(SemanticAction):
     def first_pass(self, parser, node, children):
         return parser.peg_rules[parser.root_rule_name]
 
+
 class SemRule(PEGSemanticAction):
     def first_pass(self, parser, node, children):
         rule_name = children[0].value
-        if len(children)>4:
+        if len(children) > 4:
             retval = Sequence(nodes=children[2:-1])
         else:
             retval = children[2]
@@ -77,26 +79,29 @@ class SemRule(PEGSemanticAction):
         parser.peg_rules[rule_name] = retval
         return retval
 
+
 class SemSequence(PEGSemanticAction):
     def first_pass(self, parser, node, children):
-        if len(children)>1:
+        if len(children) > 1:
             return Sequence(nodes=children)
         else:
             return children[0]
 
+
 class SemOrderedChoice(PEGSemanticAction):
     def first_pass(self, parser, node, children):
-        if len(children)>1:
+        if len(children) > 1:
             retval = OrderedChoice(nodes=children[::2])
         else:
             retval = children[0]
         return retval
 
+
 class SemPrefix(PEGSemanticAction):
     def first_pass(self, parser, node, children):
         if parser.debug:
             print("Prefix: {} ".format(str(children)))
-        if len(children)==2:
+        if len(children) == 2:
             if children[0] == NOT():
                 retval = Not()
             else:
@@ -109,6 +114,7 @@ class SemPrefix(PEGSemanticAction):
             retval = children[0]
 
         return retval
+
 
 class SemSufix(PEGSemanticAction):
     def first_pass(self, parser, node, children):
@@ -132,14 +138,16 @@ class SemSufix(PEGSemanticAction):
 
         return retval
 
+
 class SemExpression(PEGSemanticAction):
     def first_pass(self, parser, node, children):
         if parser.debug:
             print("Expression : {}".format(str(children)))
-        if len(children)==1:
+        if len(children) == 1:
             return children[0]
         else:
             return children[1]
+
 
 class SemIdentifier(SemanticAction):
     def first_pass(self, parser, node, children):
@@ -147,11 +155,13 @@ class SemIdentifier(SemanticAction):
             print("Identifier {}.".format(node.value))
         return node
 
+
 class SemRegEx(SemanticAction):
     def first_pass(self, parser, node, children):
         if parser.debug:
             print("RegEx {}.".format(children[1].value))
         return RegExMatch(children[1].value)
+
 
 class SemLiteral(SemanticAction):
     def first_pass(self, parser, node, children):
@@ -161,6 +171,7 @@ class SemLiteral(SemanticAction):
         match_str = match_str.replace("\\'", "'")
         match_str = match_str.replace("\\\\", "\\")
         return StrMatch(match_str)
+
 
 class SemTerminal(SemanticAction):
     def first_pass(self, parser, node, children):
@@ -182,7 +193,8 @@ for sem in [LEFT_ARROW, SLASH, STAR, QUESTION, PLUS, AND, NOT, OPEN, CLOSE]:
 
 
 class ParserPEG(Parser):
-    def __init__(self, language_def, root_rule_name, comment_rule_name=None, *args, **kwargs):
+    def __init__(self, language_def, root_rule_name, comment_rule_name=None,
+                 *args, **kwargs):
         super(ParserPEG, self).__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
 
@@ -202,4 +214,3 @@ class ParserPEG(Parser):
         parser.root_rule_name = self.root_rule_name
         parser.parse(language_def)
         return parser.getASG()
-

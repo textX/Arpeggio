@@ -485,6 +485,9 @@ class RegExMatch(Match):
         else:
             self.regex = re.compile(to_match)
 
+    def __str__(self):
+        return self.to_match
+
     def _parse(self, parser):
         c_pos = parser.position
         m = self.regex.match(parser.input[c_pos:])
@@ -706,9 +709,12 @@ class SemanticAction(object):
         This is the default implementation used if no semantic action is
         defined.
         """
+        retval = None
         if isinstance(node, Terminal):
             # Default for Terminal is to convert to string.
-            retval = str(node)
+            # EOF will return None
+            if not node.rule == '** EOF':
+                retval = str(node)
         else:
             retval = node
             # Special case. If only one child exist return it.
@@ -802,13 +808,18 @@ class Parser(object):
             semantic actions and creating list of object that needs to be
             called in the second pass.
             """
+            retval = None
+
             if self.debug:
                 print("Walking down ", node.name, "  type:",
                       type(node), "str:", str(node))
+
             children = []
             if isinstance(node, NonTerminal):
                 for n in node:
-                    children.append(tree_walk(n))
+                    child = tree_walk(n)
+                    if child is not None:
+                        children.append(child)
 
             if self.debug:
                 print("Visiting ", node.name, "= '", str(node),
@@ -818,15 +829,24 @@ class Parser(object):
                     print ("\t%d:" % (i + 1), str(a), "type:", type(a))
 
             if node.rule in sem_actions:
-                retval = sem_actions[node.rule].first_pass(self,
-                                                           node, children)
-                if hasattr(sem_actions[node.rule], "second_pass"):
+                sem_action = sem_actions[node.rule]
+                retval = sem_action.first_pass(self, node, children)
+
+                if hasattr(sem_action, "second_pass"):
                     for_second_pass.append((node.rule, retval))
+
+                if self.debug:
+                    print("\tApplying semantic action ", type(sem_action))
+
             else:
                 # If no rule is present use some sane defaults
+                if self.debug:
+                    print("\tApplying default semantic action.")
+
                 if isinstance(node, Terminal):
                     # Convert Terminal node to str
-                    retval = str(node)
+                    if not node.rule == '** EOF':
+                        retval = str(node)
                 elif isinstance(node, NonTerminal):
                     retval = SemanticAction().first_pass(self, node, children)
                 else:

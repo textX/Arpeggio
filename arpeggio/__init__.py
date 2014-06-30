@@ -706,27 +706,32 @@ class SemanticAction(object):
         This is the default implementation used if no semantic action is
         defined.
         """
-        # Special case. If only one child exist return it.
-        if len(nodes)==1:
-            retval = nodes[0]
+        if isinstance(node, Terminal):
+            # Default for Terminal is to convert to string.
+            retval = str(node)
         else:
-            # If there is only one non-string child return
-            # that by default. This will support e.g. bracket
-            # removals.
-            last_non_str = None
-            for c in nodes:
-                if not isstr(c):
-                    if last_non_str is None:
-                        last_non_str = c
-                    else:
-                        # If there is multiple non-string objects
-                        # by default convert non-terminal to unicode
-                        retval = str(node)
-                        break
+            retval = node
+            # Special case. If only one child exist return it.
+            if len(nodes) == 1:
+                retval = nodes[0]
             else:
-                # Return the only non-string child
-                retval = last_non_str 
                 # If there is only one non-string child return
+                # that by default. This will support e.g. bracket
+                # removals.
+                last_non_str = None
+                for c in nodes:
+                    if not isstr(c):
+                        if last_non_str is None:
+                            last_non_str = c
+                        else:
+                            # If there is multiple non-string objects
+                            # by default convert non-terminal to unicode
+                            retval = str(node)
+                            break
+                else:
+                    # Return the only non-string child
+                    retval = last_non_str
+
         return retval
 
 

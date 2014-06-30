@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-################################################################################
+###############################################################################
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2009 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
-# This is an implementation of packrat parser interpreter based on PEG grammars.
-# Grammars are defined using Python language constructs or the PEG textual
-# notation.
-################################################################################
+# This is an implementation of packrat parser interpreter based on PEG
+# grammars. Grammars are defined using Python language constructs or the PEG
+# textual notation.
+###############################################################################
 
 from __future__ import print_function, unicode_literals
 import re
@@ -51,7 +51,8 @@ class NoMatch(Exception):
 
     Args:
         value (str): A name of the parsing expression or rule.
-        position (int): A position in the input stream where exception occurred.
+        position (int): A position in the input stream where exception
+            occurred.
         parser (Parser): An instance of a parser.
     """
     def __init__(self, rule, position, parser):
@@ -177,7 +178,8 @@ class ParsingExpression(object):
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             if parser.debug:
-                print("** Cache hit for [{}, {}] = '{}'".format(self.name, c_pos, str(result)))
+                print("** Cache hit for [{}, {}] = '{}'"
+                      .format(self.name, c_pos, str(result)))
             if parser.debug:
                 print("<< Leaving rule {}".format(self.name))
             return result
@@ -429,12 +431,12 @@ class Match(ParsingExpression):
     @property
     def name(self):
         return "%s(%s)" % (self.__class__.__name__, self.to_match)
-    
+
     def parse(self, parser):
         self._parse_intro(parser)
         if parser._in_parse_comment:
             return self._parse(parser)
-        
+
         c_pos = parser.position
 
         comments = []
@@ -472,8 +474,8 @@ class RegExMatch(Match):
     This Match class will perform input matching based on Regular Expressions.
 
     Args:
-        to_match (regex string): A regular expression string to match. It will be
-            used to create regular expression using re.compile.
+        to_match (regex string): A regular expression string to match.
+            It will be used to create regular expression using re.compile.
     '''
     def __init__(self, to_match, rule=None, flags=None):
         super(RegExMatch, self).__init__(rule)
@@ -529,10 +531,10 @@ class StrMatch(Match):
 
     def __eq__(self, other):
         return self.to_match == str(other)
-    
+
     def __hash__(self):
         return hash(self.to_match)
-   
+
 
 # HACK: Kwd class is a bit hackish. Need to find a better way to
 #	introduce different classes of string tokens.
@@ -568,7 +570,8 @@ class EndOfFile(Match):
             parser._nm_raise(self.name, c_pos, parser)
 
 
-def EOF():      return EndOfFile()
+def EOF():
+    return EndOfFile()
 
 # ---------------------------------------------------------
 
@@ -584,8 +587,10 @@ class ParseTreeNode(object):
     Attributes:
         rule (str): The name of the rule that created this node or empty
             string in case this node is created by a non-root pexpression.
-        position (int): A position in the input stream where the match occurred.
-        error (bool): Is this a false parse tree node created during error recovery.
+        position (int): A position in the input stream where the match
+            occurred.
+        error (bool): Is this a false parse tree node created during error
+            recovery.
         comments : A parse tree of comment(s) attached to this node.
     """
     def __init__(self, rule, position, error):
@@ -698,7 +703,8 @@ class SemanticAction(object):
     def first_pass(self, parser, node, nodes):
         """
         Called in the first pass of tree walk.
-        This is the default implementation used if no semantic action is defined.
+        This is the default implementation used if no semantic action is
+        defined.
         """
         # Special case. If only one child exist return it.
         if len(nodes)==1:
@@ -720,7 +726,7 @@ class SemanticAction(object):
             else:
                 # Return the only non-string child
                 retval = last_non_str 
-                
+                # If there is only one non-string child return
         return retval
 
 
@@ -740,7 +746,8 @@ class Parser(object):
         debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
     """
-    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=True, debug=False):
+    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=True,
+                 debug=False):
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
@@ -766,9 +773,9 @@ class Parser(object):
         Creates Abstract Semantic Graph (ASG) from the parse tree.
 
         Args:
-            sem_actions (dict): The semantic actions dictionary to use for semantic
-                analysis. Rule names are the keys and semantic action objects are
-                values.
+            sem_actions (dict): The semantic actions dictionary to use for
+                semantic analysis. Rule names are the keys and semantic action
+                objects are values.
         """
         if not self.parse_tree:
             raise Exception("Parse tree is empty. You did call parse(), didn't you?")
@@ -791,20 +798,23 @@ class Parser(object):
             called in the second pass.
             """
             if self.debug:
-                print("Walking down ", node.name, "  type:", type(node), "str:", str(node))
+                print("Walking down ", node.name, "  type:",
+                      type(node), "str:", str(node))
             children = []
             if isinstance(node, NonTerminal):
                 for n in node:
                     children.append(tree_walk(n))
 
             if self.debug:
-                print("Visiting ", node.name, "= '", str(node), "'  type:", type(node), \
+                print("Visiting ", node.name, "= '", str(node),
+                      "'  type:", type(node), \
                       "len:", len(node) if isinstance(node, list) else "")
                 for i, a in enumerate(children):
-                    print ("\t%d:"%(i+1), str(a), "type:", type(a))
+                    print ("\t%d:" % (i + 1), str(a), "type:", type(a))
 
             if node.rule in sem_actions:
-                retval = sem_actions[node.rule].first_pass(self, node, children)
+                retval = sem_actions[node.rule].first_pass(self,
+                                                           node, children)
                 if hasattr(sem_actions[node.rule], "second_pass"):
                     for_second_pass.append((node.rule, retval))
             else:
@@ -857,14 +867,14 @@ class Parser(object):
             if self.input[self.line_ends[line - 1]] in '\n\r':
                 col -= 1
         return line + 1, col + 1
-    
+
     def context(self, length=None, position=None):
         """
         Returns current context substring, i.e. the substring around current
         position.
         Args:
-            length(int): If given used to mark with asterisk a length chars from
-                current position.
+            length(int): If given used to mark with asterisk a length chars
+                from the current position.
             position(int): The position in the input stream.
         """
         if not position:
@@ -873,7 +883,7 @@ class Parser(object):
             return "{}*{}*{}".format(
                 str(self.input[max(position - 10, 0):position]),
                 str(self.input[position:position + length]),
-                str(self.input[position + length:position+10]))
+                str(self.input[position + length:position + 10]))
         else:
             return "{}*{}".format(
                 str(self.input[max(position - 10, 0):position]),
@@ -960,7 +970,8 @@ class ParserPython(Parser):
                     if isinstance(c_rule, CrossRef):
                         self.__cross_refs += 1
                         if self.debug:
-                            print("CrossRef usage: {}".format(c_rule.rule_name))
+                            print("CrossRef usage: {}"
+                                  .format(c_rule.rule_name))
                     return c_rule
 
                 # Semantic action for the rule
@@ -977,8 +988,8 @@ class ParserPython(Parser):
                 # Update cache
                 __rule_cache[rule] = retval
                 if self.debug:
-                    print("New rule: {} -> {}".format(rule, 
-                                                      retval.__class__.__name__))
+                    print("New rule: {} -> {}"
+                          .format(rule, retval.__class__.__name__))
 
             elif isinstance(expression, Match):
                 retval = expression

@@ -47,15 +47,6 @@ def expression():       return [regex,(rule_identifier, Not(LEFT_ARROW)),
 # ------------------------------------------------------------------
 # PEG Semantic Actions
 
-class RuleReference(object):
-    '''
-    Used for rule reference resolving in the second
-    pass of the semantic analysis.
-    '''
-    def __init__(self, rule_name):
-        self.rule_name = rule_name
-
-
 class PEGSemanticAction(SemanticAction):
     def _resolve(self, parser, rule_name):
         if rule_name in parser.peg_rules:
@@ -67,11 +58,11 @@ class PEGSemanticAction(SemanticAction):
                                 .format(rule_name))
 
     def second_pass(self, parser, node):
-        if isinstance(node, RuleReference):
+        if isinstance(node, CrossRef):
             return self._resolve(parser, node.rule_name)
         elif isinstance(node, ParsingExpression):
-            for i, n in node.nodes.items():
-                if isinstance(n, RuleReference):
+            for i, n in enumerate(node.nodes):
+                if isinstance(n, CrossRef):
                     node[i] = self._resolve(parser, n.rule_name)
             return node
         else:

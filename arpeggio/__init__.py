@@ -964,6 +964,14 @@ class Parser(object):
         raise self.nm
 
 
+class CrossRef(object):
+    '''
+    Used for rule reference resolving.
+    '''
+    def __init__(self, rule_name):
+        self.rule_name = rule_name
+
+
 class ParserPython(Parser):
     def __init__(self, language_def, comment_def=None, *args, **kwargs):
         super(ParserPython, self).__init__(*args, **kwargs)
@@ -993,10 +1001,6 @@ class ParserPython(Parser):
         __rule_cache = {"EndOfFile": EndOfFile()}
         __for_resolving = []  # Expressions that needs crossref resolvnih
         self.__cross_refs = 0
-
-        class CrossRef(object):
-            def __init__(self, rule_name):
-                self.rule_name = rule_name
 
         def inner_from_python(expression):
             retval = None

@@ -829,7 +829,7 @@ class Parser(object):
 
             if self.debug:
                 print("Walking down ", node.name, "  type:",
-                      type(node), "str:", str(node))
+                      type(node).__name__, "str:", str(node))
 
             children = []
             if isinstance(node, NonTerminal):
@@ -839,11 +839,11 @@ class Parser(object):
                         children.append(child)
 
             if self.debug:
-                print("Visiting ", node.name, "= '", str(node),
-                      "'  type:", type(node), \
+                print("Applying ", node.name, "= '", str(node),
+                      "'  type:", type(node).__name__, \
                       "len:", len(node) if isinstance(node, list) else "")
                 for i, a in enumerate(children):
-                    print ("\t%d:" % (i + 1), str(a), "type:", type(a))
+                    print ("\t%d:" % (i + 1), str(a), "type:", type(a).__name__)
 
             if node.rule in sem_actions:
                 sem_action = sem_actions[node.rule]

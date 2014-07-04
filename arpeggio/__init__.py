@@ -135,6 +135,22 @@ class ParsingExpression(object):
         else:
             return id(self)
 
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @nodes.setter
+    def nodes(self, n):
+        self._nodes = n
+
+        # Default terminal suppression support.
+        # StrMatch created terminals will be marked
+        # for suppression if they are matched inside a sequence.
+        if type(self) == Sequence:
+            for node in self.nodes:
+                if isinstance(node, StrMatch):
+                    node.suppress = True
+
     def clear_cache(self, processed=None):
         """
         Clears memoization cache. Should be called on input change.
@@ -514,6 +530,7 @@ class StrMatch(Match):
     def __init__(self, to_match, rule=None, root=False):
         super(StrMatch, self).__init__(rule, root)
         self.to_match = to_match
+        self.suppress = False
 
     def _parse(self, parser):
         c_pos = parser.position
@@ -523,7 +540,7 @@ class StrMatch(Match):
                         c_pos, parser.context(len(self.to_match))))
             parser.position += len(self.to_match)
             return Terminal(self.rule if self.root else '', c_pos,
-                            self.to_match)
+                            self.to_match, suppress=self.suppress)
         else:
             if parser.debug:
                 print("-- NoMatch at {}".format(c_pos))
@@ -566,7 +583,7 @@ class EndOfFile(Match):
     def _parse(self, parser):
         c_pos = parser.position
         if len(parser.input) == c_pos:
-            return Terminal('** EOF', c_pos, '')
+            return Terminal('** EOF', c_pos, '', suppress=True)
         else:
             if parser.debug:
                 print("!! EOF not matched.")
@@ -616,10 +633,13 @@ class Terminal(ParseTreeNode):
         position (int): A position in the input stream where match occurred.
         value (str): Matched string at the given position or missing token
             name in the case of an error node.
+        suppress(bool): If True this terminal can be ignored in semantic
+            analysis.
     """
-    def __init__(self, rule, position, value, error=False):
+    def __init__(self, rule, position, value, error=False, suppress=False):
         super(Terminal, self).__init__(rule, position, error)
         self.value = value
+        self.suppress = suppress
 
     @property
     def desc(self):
@@ -709,12 +729,10 @@ class SemanticAction(object):
         This is the default implementation used if no semantic action is
         defined.
         """
-        retval = None
         if isinstance(node, Terminal):
-            # Default for Terminal is to convert to string.
-            # EOF will return None
-            if not node.rule == '** EOF':
-                retval = str(node)
+            # Default for Terminal is to keep it unless suppress flag
+            # is set.
+            retval = str(node) if not node.suppress else None
         else:
             retval = node
             # Special case. If only one child exist return it.
@@ -808,7 +826,6 @@ class Parser(object):
             semantic actions and creating list of object that needs to be
             called in the second pass.
             """
-            retval = None
 
             if self.debug:
                 print("Walking down ", node.name, "  type:",
@@ -843,17 +860,14 @@ class Parser(object):
                 if self.debug:
                     print("\tApplying default semantic action.")
 
-                if isinstance(node, Terminal):
-                    # Convert Terminal node to str
-                    if not node.rule == '** EOF':
-                        retval = str(node)
-                elif isinstance(node, NonTerminal):
-                    retval = SemanticAction().first_pass(self, node, children)
-                else:
-                    retval = node
+                retval = SemanticAction().first_pass(self, node, children)
 
             if self.debug:
-                print("\tResolved to = ", str(retval), "  type:", type(retval))
+                if retval is None:
+                    print("\tSuppressed.")
+                else:
+                    print("\tResolved to = ", str(retval),
+                          "  type:", type(retval).__name__)
             return retval
 
         if self.debug:

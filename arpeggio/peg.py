@@ -74,7 +74,6 @@ class PEGSemanticAction(SemanticAction):
 
 class SemGrammar(SemanticAction):
     def first_pass(self, parser, node, children):
-        print(parser.peg_rules)
         return parser.peg_rules[parser.root_rule_name]
 
 
@@ -208,7 +207,7 @@ class ParserPEG(Parser):
         return self.parser_model.parse(self)
 
     def _from_peg(self, language_def):
-        parser = ParserPython(grammar, comment, reduce_tree=False, debug=True)
+        parser = ParserPython(grammar, comment, reduce_tree=False)
         parser.root_rule_name = self.root_rule_name
         parser.parse(language_def)
 

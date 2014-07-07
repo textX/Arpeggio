@@ -22,7 +22,7 @@ class TestDecoratorCombine(TestCase):
         # This will result in Terminal node
         def my_rule():  return Combine(ZeroOrMore("a"), OneOrMore("b"))
 
-        parser = ParserPython(root, debug=True)
+        parser = ParserPython(root)
 
         input1 = "abbb."
 

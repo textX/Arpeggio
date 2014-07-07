@@ -12,7 +12,7 @@ from unittest import TestCase
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Grammar
-from arpeggio import Optional, ZeroOrMore, OneOrMore, EndOfFile, ParserPython, Sequence, NonTerminal
+from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF , ParserPython, Sequence, NonTerminal
 from arpeggio import RegExMatch as _
 
 
@@ -21,7 +21,7 @@ def factor():     return Optional(["+","-"]), [number,
                                                ("(", expression, ")")]
 def term():       return factor, ZeroOrMore(["*","/"], factor)
 def expression(): return term, ZeroOrMore(["+", "-"], term)
-def calc():       return OneOrMore(expression), EndOfFile
+def calc():       return OneOrMore(expression), EOF
 
 
 class TestPythonParser(TestCase):

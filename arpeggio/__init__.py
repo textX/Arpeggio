@@ -15,6 +15,7 @@ from __future__ import print_function, unicode_literals
 import re
 import bisect
 from arpeggio.utils import isstr
+import types
 
 DEFAULT_WS = '\t\n\r '
 
@@ -1004,7 +1005,7 @@ class ParserPython(Parser):
 
         def inner_from_python(expression):
             retval = None
-            if callable(expression):  # Is this expression a parser rule?
+            if type(expression) == types.FunctionType:  # Is this expression a parser rule?
                 rule = expression.__name__
                 if rule in __rule_cache:
                     c_rule = __rule_cache.get(rule)
@@ -1024,7 +1025,12 @@ class ParserPython(Parser):
                 # Register rule cross-ref to support recursion
                 __rule_cache[rule] = CrossRef(rule)
 
-                retval = inner_from_python(expression())
+                curr_expr = expression
+                while type(curr_expr) == types.FunctionType:
+                    # If function directly returns another function
+                    # go into until non-function is returned.
+                    curr_expr = curr_expr()
+                retval = inner_from_python(curr_expr)
                 retval.rule = rule
                 retval.root = True
 

@@ -584,7 +584,7 @@ class EndOfFile(Match):
     def _parse(self, parser):
         c_pos = parser.position
         if len(parser.input) == c_pos:
-            return Terminal('** EOF', c_pos, '', suppress=True)
+            return Terminal('EOF', c_pos, '', suppress=True)
         else:
             if parser.debug:
                 print("!! EOF not matched.")

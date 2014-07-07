@@ -24,7 +24,7 @@ from arpeggio import *
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Grammar rules
-def program():      return Kwd('begin'), ZeroOrMore(command), Kwd('end'), EndOfFile
+def program():      return Kwd('begin'), ZeroOrMore(command), Kwd('end'), EOF
 def command():      return [up, down, left, right]
 def up():           return 'up'
 def down():         return 'down'
@@ -38,20 +38,24 @@ class Up(SemanticAction):
         print("Going up")
         return (0, 1)
 
+
 class Down(SemanticAction):
     def first_pass(self, parser, node, children):
         print("Going down")
         return (0, -1)
+
 
 class Left(SemanticAction):
     def first_pass(self, parser, node, children):
         print("Going left")
         return (-1, 0)
 
+
 class Right(SemanticAction):
     def first_pass(self, parser, node, children):
         print("Going right")
         return (1, 0)
+
 
 class Command(SemanticAction):
     def first_pass(self, parser, node, children):
@@ -79,7 +83,7 @@ right.sem = Right()
 if __name__ == "__main__":
 
     # Program code
-    input = '''
+    input_program = '''
         begin
             up
             up
@@ -88,7 +92,6 @@ if __name__ == "__main__":
             right
         end
     '''
-
 
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of python constructs therefore we
@@ -103,7 +106,7 @@ if __name__ == "__main__":
                     "robot_parser_model.dot")
 
     # We create a parse tree out of textual input
-    parse_tree = parser.parse(input)
+    parse_tree = parser.parse(input_program)
 
     # Then we export it to a dot file in order to visualize it.
     # dot -O -Tpng robot_parse_tree.dot
@@ -114,4 +117,3 @@ if __name__ == "__main__":
     # In this case semantic analysis will evaluate expression and
     # returned value will be the final position of the robot.
     print("position = ", parser.getASG())
-

@@ -18,7 +18,7 @@ from arpeggio.peg import ParserPEG
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Semantic actions
-from calc import ToFloat, Factor, Term, Expr, Calc
+from calc import ToFloat, Factor, Term, Expr 
 
 # Grammar is defined using textual specification based on PEG language.
 calc_grammar = """
@@ -36,7 +36,6 @@ sem_actions = {
     "factor" : Factor(),
     "term"   : Term(),
     "expression" : Expr(),
-    "calc"   : Calc()
 }
 
 

@@ -10,7 +10,8 @@
 # notation.
 #######################################################################
 
-from arpeggio import Optional, ZeroOrMore, OneOrMore, EndOfFile, SemanticAction, ParserPython
+from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, SemanticAction,\
+    ParserPython
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
@@ -19,7 +20,7 @@ def factor():     return Optional(["+","-"]), [number,
                           ("(", expression, ")")]
 def term():       return factor, ZeroOrMore(["*","/"], factor)
 def expression(): return term, ZeroOrMore(["+", "-"], term)
-def calc():       return OneOrMore(expression), EndOfFile
+def calc():       return OneOrMore(expression), EOF
 
 
 # Semantic actions
@@ -30,6 +31,7 @@ class ToFloat(SemanticAction):
     def first_pass(self, parser, node, children):
         print("Converting {}.".format(node.value))
         return float(node.value)
+
 
 class Factor(SemanticAction):
     """
@@ -43,10 +45,8 @@ class Factor(SemanticAction):
         next_chd = 0
         if children[0] in ['+', '-']:
             next_chd = 1
-        if children[next_chd] == '(':
-            return sign * children[next_chd+1]
-        else:
-            return sign * children[next_chd]
+        return sign * children[next_chd]
+
 
 class Term(SemanticAction):
     """
@@ -57,12 +57,13 @@ class Term(SemanticAction):
         print("Term {}".format(children))
         term = children[0]
         for i in range(2, len(children), 2):
-            if children[i-1]=="*":
+            if children[i-1] == "*":
                 term *= children[i]
             else:
                 term /= children[i]
         print("Term = {}".format(term))
         return term
+
 
 class Expr(SemanticAction):
     """
@@ -78,7 +79,7 @@ class Expr(SemanticAction):
             start = 1
 
         for i in range(start, len(children), 2):
-            if i and children[i-1]=="-":
+            if i and children[i - 1] == "-":
                 expr -= children[i]
             else:
                 expr += children[i]
@@ -86,16 +87,12 @@ class Expr(SemanticAction):
         print("Expression = {}".format(expr))
         return expr
 
-class Calc(SemanticAction):
-    def first_pass(self, parser, node, children):
-        return children[0]
 
 # Connecting rules with semantic actions
 number.sem = ToFloat()
 factor.sem = Factor()
 term.sem = Term()
 expression.sem = Expr()
-calc.sem = Calc()
 
 if __name__ == "__main__":
 
@@ -108,7 +105,8 @@ if __name__ == "__main__":
     # This step is optional but it is handy for debugging purposes.
     # We can make a png out of it using dot (part of graphviz) like this
     # dot -O -Tpng calc_parse_tree_model.dot
-    PMDOTExporter().exportFile(parser.parser_model, "calc_parse_tree_model.dot")
+    PMDOTExporter().exportFile(parser.parser_model,
+                               "calc_parse_tree_model.dot")
 
     # An expression we want to evaluate
     input_expr = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
@@ -124,4 +122,3 @@ if __name__ == "__main__":
     # In this case semantic analysis will evaluate expression and
     # returned value will be the result of the input_expr expression.
     print("{} = {}".format(input_expr, parser.getASG()))
-

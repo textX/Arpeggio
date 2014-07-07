@@ -92,5 +92,3 @@ if __name__ == "__main__":
 
     # Export parse tree for visualization
     PTDOTExporter().exportFile(parser.parse_tree, "json_parse_tree.dot")
-
-

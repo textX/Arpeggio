@@ -18,7 +18,7 @@ from arpeggio import RegExMatch as _
 
 
 # Grammar
-def bibfile():                  return ZeroOrMore([comment_entry, bibentry, comment]), EndOfFile
+def bibfile():                  return ZeroOrMore([comment_entry, bibentry, comment]), EOF
 def comment_entry():            return "@comment", "{", _(r'[^}]*'), "}"
 def bibentry():                 return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
 def field():                    return fieldname, "=", fieldvalue
@@ -37,6 +37,7 @@ def fieldvalue_braced_content():    return Combine(ZeroOrMore(Optional(And("{"),
 
 def fieldvalue_part():          return _(r'((\\")|[^{}])+')
 def fieldvalue_inner():         return "{", fieldvalue_braced_content, "}"
+
 
 # Semantic actions
 class BibFileSem(SemanticAction):
@@ -122,11 +123,11 @@ if __name__ == "__main__":
         with open(sys.argv[1], "r") as bibtexfile:
             bibtexfile_content = bibtexfile.read()
 
-
-            # We create a parse tree or abstract syntax tree out of textual input
+            # We create a parse tree or abstract syntax tree out of
+            # textual input
             parse_tree = parser.parse(bibtexfile_content)
 
-            # Then we export it to a dot file in order to visualise it.
+            # Then we export it to a dot file in order to visualize it.
             PTDOTExporter().exportFile(parse_tree, "bib_parse_tree.dot")
 
             # getASG will start semantic analysis.
@@ -138,4 +139,3 @@ if __name__ == "__main__":
 
     else:
         print("Usage: python bibtex.py file_to_parse")
-

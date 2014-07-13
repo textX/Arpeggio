@@ -776,7 +776,7 @@ class Parser(object):
         debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
     """
-    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=True,
+    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False,
                  debug=False):
         self.skipws = skipws
         self.ws = ws

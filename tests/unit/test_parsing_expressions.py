@@ -56,7 +56,7 @@ class TestParsingExpression(TestCase):
         parsed = parser.parse("")
 
         self.assertEqual(str(parsed), "")
-        self.assertEqual(repr(parsed), "EOF [0]")
+        self.assertEqual(repr(parsed), "[ EOF [0] ]")
 
         self.assertRaises(NoMatch, lambda: parser.parse("bbb"))
 

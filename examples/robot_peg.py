@@ -26,7 +26,7 @@ from arpeggio.peg import ParserPEG
 
 # Grammar rules
 robot_grammar = '''
-program <- 'begin' (command)* 'end' EndOfFile;
+program <- 'begin' (command)* 'end' EOF;
 command <- UP/DOWN/LEFT/RIGHT;
 UP <- 'up';
 DOWN <- 'down';

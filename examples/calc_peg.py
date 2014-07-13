@@ -27,7 +27,7 @@ calc_grammar = """
                   (number / "(" expression ")");
         term <- factor (( "*" / "/") factor)*;
         expression <- term (("+" / "-") term)*;
-        calc <- expression+ EndOfFile;
+        calc <- expression+ EOF;
 """
 
 # Rules are mapped to semantic actions

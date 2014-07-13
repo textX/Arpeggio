@@ -89,7 +89,7 @@ class SemRule(PEGSemanticAction):
 
         if not hasattr(parser, "peg_rules"):
             parser.peg_rules = {}   # Used for linking phase
-            parser.peg_rules["EndOfFile"] = EndOfFile()
+            parser.peg_rules["EOF"] = EndOfFile()
 
         # Keep a map of parser rules for cross reference
         # resolving.

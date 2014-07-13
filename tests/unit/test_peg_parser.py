@@ -17,7 +17,7 @@ grammar = '''
               (number / "(" expression ")");
     term <- factor (( "*" / "/") factor)*;
     expression <- term (("+" / "-") term)*;
-    calc <- expression+ EndOfFile;
+    calc <- expression+ EOF;
 '''
 
 class TestPEGParser(TestCase):

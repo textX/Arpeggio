@@ -447,7 +447,10 @@ class Match(ParsingExpression):
 
     @property
     def name(self):
-        return "%s(%s)" % (self.__class__.__name__, self.to_match)
+        if self.root:
+            return "%s=%s(%s)" % (self.rule, self.__class__.__name__, self.to_match)
+        else:
+            return "%s(%s)" % (self.__class__.__name__, self.to_match)
 
     def parse(self, parser):
         self._parse_intro(parser)

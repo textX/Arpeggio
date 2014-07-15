@@ -1,28 +1,13 @@
-Arpeggio is done or influenced by the following free tehnologies.
-
-Python Programming Language (http://www.python.org)
-    - Arpeggio is implemented 100% in Python programming language.
-    
-PyPEG - a PEG Parser-Interpreter in Python (http://www.fdik.org/pyPEG/)
-    - PyPEG is a parser interpreter based on PEG grammars like Arpeggio but
-        with different design and implementation approach and different goals in mind.
-        The idea of Arpeggio parser definition using Python language constructs is
-        taken from the PyPEG project. Arpeggio also supports parser definition using PEG
-        textual notation.
-    
-pyparsing (http://pyparsing.wikispaces.com/)
-    - pyparsing is IMO currently the most advanced parser written 100% in python.
-        Currently there is no much similarity between pyparsing and Arpeggio but
-        there are some nice features and ideas from pyparsing that I think would be nice to 
-        have implemented in Arpeggio.
-    
+Arpeggio is implemented using or influenced by the following free tehnologies:
+ - Python Programming Language (http://www.python.org)
+ - PyPEG v1.x (http://fdik.org/pyPEG/) and pyparsing (http://pyparsing.wikispaces.com/) for ideas and inspiration.    
 
 Although not directly related to Arpeggio I wish also to thank to the 
 following free software projects that makes the development of Arpeggio (and some other 
 projects I am working on) easier and more fun:
 
-- Arch Linux (http://www.archlinux.org/) - Linux distro that I'm using on my dev machine.
-- Editra (http://www.editra.org/) - Nice programmer's editor written in Python and wxWidgets.
-- Mercurial (www.selenic.com/mercurial/) - Distributed version control system written in Python.
+- Arch Linux (http://www.archlinux.org/) - Fantastic Linux distro for sw development
+- PyDev (http://pydev.org/) - Python plugin for Eclipse
+- Git (http://git-scm.com/) - Distributed version control system
 
 ... and many more 

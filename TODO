@@ -1,14 +1,8 @@
 Arpeggio parser - TODO
 ----------------------
-Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-Copyright: (c) Igor R. Dejanovic, 2009-2014
-Licence: MIT Licence
 
 Some stuff that should be done in the near future:
 - Documentation
-- Support for Python 3
-- Lexical rules
-- Semantic action simplification
 - Left recursion support 
 - Error recovery.
     This is the essential requirement for the Arpeggio because IDE usage is the main

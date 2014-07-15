@@ -1,7 +1,18 @@
 Changelog for Arpeggio
-Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-Copyright: (c) Igor R. Dejanovic, 2009
-Licence: MIT Licence
+======================
+
+Development version (on master branch)
+    - Better semantic action debugging output.
+    - Tests reorganization and cleanup.
+    - Examples cleanup.
+    - Reference resolving unification in parser constructions.
+    - Default semantic actions and automatic terminal suppressing during semantic analysis.
+    - PEG language support refactoring and code cleaning.
+
+2014-06-06  Release 0.6
+    - Support for Python 3 (issue #7)
+    - Matched rules available as attributes of non-terminals (issue #2)
+    - Lexical rules support (issue #6). Implemented as Combine decorator.
 
 2014-02-02 Release 0.5
     - Bugfixes

@@ -144,14 +144,6 @@ class ParsingExpression(object):
     def nodes(self, n):
         self._nodes = n
 
-        # Default terminal suppression support.
-        # StrMatch created terminals will be marked
-        # for suppression if they are matched inside a sequence.
-        if type(self) == Sequence:
-            for node in self.nodes:
-                if isinstance(node, StrMatch):
-                    node.suppress = True
-
     def clear_cache(self, processed=None):
         """
         Clears memoization cache. Should be called on input change.
@@ -205,12 +197,22 @@ class ParsingExpression(object):
         if parser.nm:
             parser.nm._up = False
 
+
+        # Remember last parsing expression and set this as
+        # the new last.
+        _last_pexpression = parser._last_pexpression
+        parser._last_pexpression = self
         try:
             result = self._parse(parser)
+
         except NoMatch:
             parser.position = c_pos  # Backtracking
             raise
+
         finally:
+            # Recover last parsing expression.
+            parser._last_pexpression = _last_pexpression
+
             if parser.debug:
                 print("<< Leaving rule {}".format(self.name))
 
@@ -534,7 +536,6 @@ class StrMatch(Match):
     def __init__(self, to_match, rule=None, root=False):
         super(StrMatch, self).__init__(rule, root)
         self.to_match = to_match
-        self.suppress = False
 
     def _parse(self, parser):
         c_pos = parser.position
@@ -543,8 +544,12 @@ class StrMatch(Match):
                 print("++ Match '{}' at {} => '{}'".format(self.to_match,\
                         c_pos, parser.context(len(self.to_match))))
             parser.position += len(self.to_match)
+
+            # If this match is inside sequence than mark for suppression
+            suppress = type(parser._last_pexpression) is Sequence
+
             return Terminal(self.rule if self.root else '', c_pos,
-                            self.to_match, suppress=self.suppress)
+                            self.to_match, suppress=suppress)
         else:
             if parser.debug:
                 print("-- NoMatch at {}".format(c_pos))
@@ -734,8 +739,8 @@ class SemanticAction(object):
         defined.
         """
         if isinstance(node, Terminal):
-            # Default for Terminal is to keep it unless suppress flag
-            # is set.
+            # Default for Terminal is to convert to string unless suppress flag
+            # is set in which case it is suppressed by setting to None.
             retval = str(node) if not node.suppress else None
         else:
             retval = node
@@ -790,7 +795,13 @@ class Parser(object):
 
         self.parse_tree = None
         self._in_parse_comment = False
+
+        # Are we in lexical rule. If so do not
+        # skip whitespaces.
         self._in_lex_rule = False
+
+        # Last parsing expression traversed
+        self._last_pexpression = None
 
     def parse(self, _input):
         self.position = 0  # Input position
@@ -854,6 +865,8 @@ class Parser(object):
                 retval = sem_action.first_pass(self, node, children)
 
                 if hasattr(sem_action, "second_pass"):
+                    if (node.rule, retval) in for_second_pass:
+                        print("Existing:", retval)
                     for_second_pass.append((node.rule, retval))
 
                 if self.debug:
@@ -972,8 +985,9 @@ class CrossRef(object):
     '''
     Used for rule reference resolving.
     '''
-    def __init__(self, rule_name):
+    def __init__(self, rule_name, position=-1):
         self.rule_name = rule_name
+        self.position = position
 
 
 class ParserPython(Parser):

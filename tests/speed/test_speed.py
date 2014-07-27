@@ -12,14 +12,14 @@ import timeit, sys
 if __name__ == "__main__":
 
     setup = '''
-from arpeggio import OneOrMore, ZeroOrMore, EndOfFile, ParserPython, Optional
+from arpeggio import OneOrMore, ZeroOrMore, EOF, ParserPython, Optional
 from arpeggio import RegExMatch as _
 
 def number():           return _(r'\d*\.\d*|\d+')
 def factor():           return [(Optional(["+","-"]), number), ("(", expression, ")")]
 def term():             return factor, ZeroOrMore(["*","/"], factor)
 def expression():       return term, ZeroOrMore(["+", "-"], term)
-def calcfile():         return OneOrMore(expression), EndOfFile
+def calcfile():         return OneOrMore(expression), EOF
 
 parser = ParserPython(calcfile, reduce_tree=True)
 with open("input.txt", "r") as f:

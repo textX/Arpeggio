@@ -61,12 +61,11 @@ class BibEntrySem(SemanticAction):
         if parser.debug:
             print("  Processing bibentry %s" % children[2])
         bib_entry_map = {
-            'bibtype': children[0].value,
-            'bibkey': children[2].value
+            'bibtype': children[0],
+            'bibkey': children[1]
         }
-        for field in children[3:]:
-            if isinstance(field, tuple):
-                bib_entry_map[field[0]] = field[1]
+        for field in children[2:]:
+            bib_entry_map[field[0]] = field[1]
         return bib_entry_map
 
 
@@ -77,7 +76,7 @@ class FieldSem(SemanticAction):
     def first_pass(self, parser, node, children):
         if parser.debug:
             print("    Processing field %s" % children[0])
-        field = (children[0].value, children[2])
+        field = (children[0], children[1])
         return field
 
 
@@ -87,7 +86,7 @@ class FieldValueSem(SemanticAction):
     Remove braces. Remove newlines.
     """
     def first_pass(self, parser, node, children):
-        value = children[1].value
+        value = children[0].value
         value = value.replace(r"\'{c}", u"ć")\
                     .replace(r"\'{C}", u"Ć")\
                     .replace(r"\v{c}", u"č")\

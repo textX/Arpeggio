@@ -16,8 +16,7 @@ from arpeggio.peg import ParserPEG
 
 # Semantic actions
 from arpeggio.peg import SemGrammar, SemRule, SemOrderedChoice, SemSequence,\
-    SemPrefix, SemSufix, SemExpression, SemRegEx, SemIdentifier, SemLiteral,\
-    SemTerminal
+    SemPrefix, SemSufix, SemExpression, SemRegEx, SemStrMatch, SemRuleCrossRef
 
 sem_actions = {
     "grammar":         SemGrammar(),
@@ -28,29 +27,26 @@ sem_actions = {
     "sufix":           SemSufix(),
     "expression":      SemExpression(),
     "regex":           SemRegEx(),
-    "identifier":      SemIdentifier(),
-    "literal":         SemLiteral()
+    "str_match":       SemStrMatch(),
+    "rule_crossref":   SemRuleCrossRef()
 }
-
-for sem in ["LEFT_ARROW", "SLASH", "STAR", "QUESTION", "PLUS", "AND", "NOT",
-            "OPEN", "CLOSE"]:
-    sem_actions[sem] = SemTerminal()
 
 
 # PEG defined using PEG itself.
 peg_grammar = r"""
- grammar <- rule+ EndOfFile;
- rule <- identifier LEFT_ARROW ordered_choice ';';
+ grammar <- rule+ EOF;
+ rule <- rule_name LEFT_ARROW ordered_choice ';';
  ordered_choice <- sequence (SLASH sequence)*;
  sequence <- prefix+;
  prefix <- (AND/NOT)? sufix;
  sufix <- expression (QUESTION/STAR/PLUS)?;
- expression <- regex / (identifier !LEFT_ARROW)
-                / ("(" ordered_choice ")") / literal;
+ expression <- regex / rule_crossref
+                / (OPEN ordered_choice CLOSE) / str_match;
 
- identifier <- r'[a-zA-Z_]([a-zA-Z_]|[0-9])*';
+ rule_name <- r'[a-zA-Z_]([a-zA-Z_]|[0-9])*';
+ rule_crossref <- rule_name;
  regex <- 'r\'' r'(\\\'|[^\'])*' '\'';
- literal <- r'\'(\\\'|[^\'])*\'|"[^"]*"';
+ str_match <- r'\'(\\\'|[^\'])*\'|"[^"]*"';
  LEFT_ARROW <- '<-';
  SLASH <- '/';
  AND <- '&';
@@ -78,7 +74,7 @@ PMDOTExporter().exportFile(parser.parser_model,
 # using PEG itself.
 parser.parse(peg_grammar)
 
-# Again we export parse tree in dot file for vizualization.
+# Again we export parse tree in dot file for visualization.
 PTDOTExporter().exportFile(parser.parse_tree,
                          "peg_peg_parse_tree.dot")
 
@@ -95,4 +91,3 @@ PMDOTExporter().exportFile(asg,
 # parse PEG grammars
 parser.parser_model = asg
 parser.parse(peg_grammar)
-

@@ -7,8 +7,8 @@
 # License: MIT License
 #######################################################################
 
+import pytest
 import os
-from unittest import TestCase
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Grammar
@@ -24,32 +24,30 @@ def expression(): return term, ZeroOrMore(["+", "-"], term)
 def calc():       return OneOrMore(expression), EOF
 
 
-class TestPythonParser(TestCase):
-
-    def setUp(self):
-        """
-        Create parser
-        """
-        self.parser = ParserPython(calc)
-
-    def test_export_parser_model(self):
-        """
-        Testing parser model export
-        """
-
-        PMDOTExporter().exportFile(self.parser.parser_model,
-                                "test_exporter_parser_model.dot")
-
-        self.assertTrue(os.path.exists("test_exporter_parser_model.dot"))
+@pytest.fixture
+def parser():
+    return ParserPython(calc)
 
 
-    def test_export_parse_tree(self):
-        """
-        Testing parse tree export.
-        """
+def test_export_parser_model(parser):
+    """
+    Testing parser model export
+    """
 
-        parse_tree = self.parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
-        PTDOTExporter().exportFile(parse_tree,
-                                   "test_exporter_parse_tree.dot")
+    PMDOTExporter().exportFile(parser.parser_model,
+                            "test_exporter_parser_model.dot")
 
-        self.assertTrue(os.path.exists("test_exporter_parse_tree.dot"))
+    assert os.path.exists("test_exporter_parser_model.dot")
+
+
+def test_export_parse_tree(parser):
+    """
+    Testing parse tree export.
+    """
+
+    parse_tree = parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
+    PTDOTExporter().exportFile(parse_tree,
+                                "test_exporter_parse_tree.dot")
+
+    assert os.path.exists("test_exporter_parse_tree.dot")
+

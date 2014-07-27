@@ -7,7 +7,7 @@
 # License: MIT License
 #######################################################################
 
-from unittest import TestCase
+import pytest
 
 # Grammar
 from arpeggio import ParserPython, ZeroOrMore
@@ -18,16 +18,13 @@ def bar(): return "c"
 def baz(): return "d"
 
 
+def test_lookup_single():
 
-class TestPEGParser(TestCase):
+    parser = ParserPython(foo)
 
-    def test_lookup_single(self):
+    result = parser.parse("a c b d")
 
-        parser = ParserPython(foo)
-
-        result = parser.parse("a c b d")
-
-        self.assertTrue(hasattr(result, "bar"))
-        self.assertTrue(hasattr(result, "baz"))
-        self.assertTrue(not hasattr(result, "unexisting"))
+    assert hasattr(result, "bar")
+    assert hasattr(result, "baz")
+    assert not hasattr(result, "unexisting")
 

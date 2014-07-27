@@ -8,37 +8,33 @@
 # Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from unittest import TestCase
+import pytest
 from arpeggio import ParserPython, ZeroOrMore, OneOrMore, NonTerminal, Terminal, NoMatch, Combine
 from arpeggio.peg import ParserPEG
 
 
-class TestDecoratorCombine(TestCase):
+def test_combine_python():
 
-    def test_combine_python(self):
+    # This will result in NonTerminal node
+    def root():     return my_rule(), "."
+    # This will result in Terminal node
+    def my_rule():  return Combine(ZeroOrMore("a"), OneOrMore("b"))
 
-        # This will result in NonTerminal node
-        def root():     return my_rule(), "."
-        # This will result in Terminal node
-        def my_rule():  return Combine(ZeroOrMore("a"), OneOrMore("b"))
+    parser = ParserPython(root)
 
-        parser = ParserPython(root)
+    input1 = "abbb."
 
-        input1 = "abbb."
+    # Whitespaces are preserved in lexical rules so the following input
+    # should not be recognized.
+    input2 = "a b bb."
 
-        # Whitespaces are preserved in lexical rules so the following input
-        # should not be recognized.
-        input2 = "a b bb."
+    ptree1 = parser.parse(input1)
 
-        ptree1 = parser.parse(input1)
+    with pytest.raises(NoMatch):
+        ptree2 = parser.parse(input2)
 
-        def fail_nm():
-            ptree2 = parser.parse(input2)
-
-        self.assertRaises(NoMatch, fail_nm)
-
-        self.assertIsInstance(ptree1, NonTerminal)
-        self.assertIsInstance(ptree1[0], Terminal)
-        self.assertEqual(ptree1[0].value, "abbb")
+    assert isinstance(ptree1, NonTerminal)
+    assert isinstance(ptree1[0], Terminal)
+    assert ptree1[0].value == "abbb"
 
 

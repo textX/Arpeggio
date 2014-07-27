@@ -1043,7 +1043,7 @@ class ParserPython(Parser):
                 __rule_cache[rule] = CrossRef(rule)
 
                 curr_expr = expression
-                while type(curr_expr) == types.FunctionType:
+                while type(curr_expr) is types.FunctionType:
                     # If function directly returns another function
                     # go into until non-function is returned.
                     curr_expr = curr_expr()

@@ -8,8 +8,10 @@
 #######################################################################
 
 from __future__ import print_function
+import copy
 from arpeggio import *
 from arpeggio import RegExMatch as _
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 __all__ = ['ParserPEG']
 
@@ -47,11 +49,19 @@ def expression():       return [regex, rule_crossref,
 # PEG Semantic Actions
 
 class PEGSemanticAction(SemanticAction):
+
     def _resolve(self, parser, rule_name):
+
         if rule_name in parser.peg_rules:
+            resolved_rule = parser.peg_rules[rule_name]
+            if type(resolved_rule) is CrossRef:
+                resolved_rule = self._resolve(parser, resolved_rule.rule_name)
+
             if parser.debug:
-                print("Resolving reference {}".format(rule_name))
-            return parser.peg_rules[rule_name]
+                print("Resolving: CrossRef {} => {}".format(rule_name, 
+                    resolved_rule.name))
+
+            return resolved_rule
         else:
             raise SemanticError("Rule \"{}\" does not exists."
                                 .format(rule_name))
@@ -60,14 +70,30 @@ class PEGSemanticAction(SemanticAction):
         '''
         Resolving cross-references in second pass.
         '''
-        if isinstance(node, CrossRef):
-            return self._resolve(parser, node.rule_name)
-        elif isinstance(node, ParsingExpression):
+        print("Second pass:", type(node), str(node))
+
+        if isinstance(node, ParsingExpression):
+
             for i, n in enumerate(node.nodes):
                 if isinstance(n, CrossRef):
-                    node.nodes[i] = self._resolve(parser, n.rule_name)
+                    resolved_rule = self._resolve(parser, n.rule_name)
+
+                    # If resolved rule hasn't got the same name it
+                    # should be cloned and preserved in the peg_rules cache
+                    if resolved_rule.rule != n.rule_name:
+                        resolved_rule = copy.copy(resolved_rule)
+                        resolved_rule.rule = n.rule_name
+                        parser.peg_rules[resolved_rule.rule] = resolved_rule
+
+                        if parser.debug:
+                            print("Resolving: cloned to {} = > {}"\
+                                    .format(resolved_rule.rule, resolved_rule.name))
+
+                    node.nodes[i] = resolved_rule
+
             return node
-        else:
+
+        elif not isinstance(node, CrossRef):
             raise SemanticError("Invalid type '{}'({}) after first pass."
                                 .format(type(node), str(node)))
 
@@ -94,7 +120,6 @@ class SemRule(PEGSemanticAction):
         # Keep a map of parser rules for cross reference
         # resolving.
         parser.peg_rules[rule_name] = retval
-
         return retval
 
 

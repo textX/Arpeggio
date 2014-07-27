@@ -189,7 +189,6 @@ class ParsingExpression(object):
             if parser.debug:
                 print("** Cache hit for [{}, {}] = '{}'"
                       .format(self.name, c_pos, str(result)))
-            if parser.debug:
                 print("<< Leaving rule {}".format(self.name))
             return result
 
@@ -259,7 +258,6 @@ class Sequence(ParsingExpression):
                 if result:
                     results.append(result)
         except NoMatch as m:
-#             parser.position = self.c_pos  # Backtracking
             self._nm_change_rule(m, parser)
             raise
 

@@ -136,14 +136,6 @@ class ParsingExpression(object):
         else:
             return id(self)
 
-    @property
-    def nodes(self):
-        return self._nodes
-
-    @nodes.setter
-    def nodes(self, n):
-        self._nodes = n
-
     def clear_cache(self, processed=None):
         """
         Clears memoization cache. Should be called on input change.

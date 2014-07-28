@@ -29,7 +29,8 @@ class ToFloat(SemanticAction):
     Converts node value to float.
     """
     def first_pass(self, parser, node, children):
-        print("Converting {}.".format(node.value))
+        if parser.debug:
+            print("Converting {}.".format(node.value))
         return float(node.value)
 
 
@@ -38,7 +39,8 @@ class Factor(SemanticAction):
     Removes parenthesis if exists and returns what was contained inside.
     """
     def first_pass(self, parser, node, children):
-        print("Factor {}".format(children))
+        if parser.debug:
+            print("Factor {}".format(children))
         if len(children) == 1:
             return children[0]
         sign = -1 if children[0] == '-' else 1
@@ -54,14 +56,16 @@ class Term(SemanticAction):
     Factor nodes will be already evaluated.
     """
     def first_pass(self, parser, node, children):
-        print("Term {}".format(children))
+        if parser.debug:
+            print("Term {}".format(children))
         term = children[0]
         for i in range(2, len(children), 2):
             if children[i-1] == "*":
                 term *= children[i]
             else:
                 term /= children[i]
-        print("Term = {}".format(term))
+        if parser.debug:
+            print("Term = {}".format(term))
         return term
 
 
@@ -71,7 +75,8 @@ class Expr(SemanticAction):
     Term nodes will be already evaluated.
     """
     def first_pass(self, parser, node, children):
-        print("Expression {}".format(children))
+        if parser.debug:
+            print("Expression {}".format(children))
         expr = 0
         start = 0
         # Check for unary + or - operator
@@ -84,7 +89,9 @@ class Expr(SemanticAction):
             else:
                 expr += children[i]
 
-        print("Expression = {}".format(expr))
+        if parser.debug:
+            print("Expression = {}".format(expr))
+
         return expr
 
 
@@ -94,19 +101,19 @@ factor.sem = Factor()
 term.sem = Term()
 expression.sem = Expr()
 
-if __name__ == "__main__":
-
+def main(debug=False):
     # First we will make a parser - an instance of the calc parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
-    parser = ParserPython(calc)
+    parser = ParserPython(calc, debug=debug)
 
-    # Then we export it to a dot file in order to visualise it.
-    # This step is optional but it is handy for debugging purposes.
-    # We can make a png out of it using dot (part of graphviz) like this
-    # dot -O -Tpng calc_parse_tree_model.dot
-    PMDOTExporter().exportFile(parser.parser_model,
-                               "calc_parse_tree_model.dot")
+    if debug:
+        # Then we export it to a dot file in order to visualise it.
+        # This step is optional but it is handy for debugging purposes.
+        # We can make a png out of it using dot (part of graphviz) like this
+        # dot -O -Tpng calc_parse_tree_model.dot
+        PMDOTExporter().exportFile(parser.parser_model,
+                                "calc_parse_tree_model.dot")
 
     # An expression we want to evaluate
     input_expr = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
@@ -114,11 +121,19 @@ if __name__ == "__main__":
     # We create a parse tree out of textual input_expr
     parse_tree = parser.parse(input_expr)
 
-    # Then we export it to a dot file in order to visualise it.
-    # This is also optional.
-    PTDOTExporter().exportFile(parse_tree, "calc_parse_tree.dot")
+    if debug:
+        # Then we export it to a dot file in order to visualise it.
+        # This is also optional.
+        PTDOTExporter().exportFile(parse_tree, "calc_parse_tree.dot")
 
-    # getASG will start semantic analysis.
-    # In this case semantic analysis will evaluate expression and
-    # returned value will be the result of the input_expr expression.
-    print("{} = {}".format(input_expr, parser.getASG()))
+    result = parser.getASG()
+
+    if debug:
+        # getASG will start semantic analysis.
+        # In this case semantic analysis will evaluate expression and
+        # returned value will be the result of the input_expr expression.
+        print("{} = {}".format(input_expr, result))
+
+if __name__ == "__main__":
+    main(debug=True)
+

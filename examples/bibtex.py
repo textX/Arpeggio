@@ -3,7 +3,7 @@
 # Name: bibtex.py
 # Purpose: Parser for bibtex files
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2013 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2013-2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example demonstrates grammar and parser for bibtex files.
@@ -11,7 +11,7 @@
 from __future__ import print_function
 
 import pprint
-import sys
+import sys, os
 from arpeggio import *
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
@@ -105,36 +105,44 @@ field.sem = FieldSem()
 fieldvalue_braces.sem = FieldValueSem()
 fieldvalue_quotes.sem = FieldValueSem()
 
-if __name__ == "__main__":
+def main(debug=False, file_name=None):
     # First we will make a parser - an instance of the bib parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
     parser = ParserPython(bibfile, reduce_tree=True)
 
-    # Then we export it to a dot file in order to visualise it. This is
-    # particulary handy for debugging purposes.
-    # We can make a jpg out of it using dot (part of graphviz) like this
-    # dot -O -Tjpg calc_parse_tree_model.dot
-    PMDOTExporter().exportFile(parser.parser_model, "bib_parse_tree_model.dot")
+    if debug:
+        # Then we export it to a dot file in order to visualise it. This is
+        # particulary handy for debugging purposes.
+        # We can make a jpg out of it using dot (part of graphviz) like this
+        # dot -O -Tjpg calc_parse_tree_model.dot
+        PMDOTExporter().exportFile(parser.parser_model, "bib_parse_tree_model.dot")
 
+    if not file_name:
+        file_name = os.path.join(os.path.dirname(__file__), 'bibtex_example.bib')
+
+    with open(file_name, "r") as bibtexfile:
+        bibtexfile_content = bibtexfile.read()
+
+    # We create a parse tree or abstract syntax tree out of
+    # textual input
+    parse_tree = parser.parse(bibtexfile_content)
+
+    if debug:
+        # Then we export it to a dot file in order to visualize it.
+        PTDOTExporter().exportFile(parse_tree, "bib_parse_tree.dot")
+
+    # getASG will start semantic analysis.
+    # In this case semantic analysis will list of bibentry maps.
+    ast = parser.getASG()
+
+    return ast
+
+if __name__ == "__main__":
     # First parameter is bibtex file
     if len(sys.argv) > 1:
-        with open(sys.argv[1], "r") as bibtexfile:
-            bibtexfile_content = bibtexfile.read()
-
-            # We create a parse tree or abstract syntax tree out of
-            # textual input
-            parse_tree = parser.parse(bibtexfile_content)
-
-            # Then we export it to a dot file in order to visualize it.
-            PTDOTExporter().exportFile(parse_tree, "bib_parse_tree.dot")
-
-            # getASG will start semantic analysis.
-            # In this case semantic analysis will list of bibentry maps.
-            ast = parser.getASG()
-
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(ast)
-
+        entries = main(debug=True, file_name=sys.argv[1])
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(entries)
     else:
         print("Usage: python bibtex.py file_to_parse")

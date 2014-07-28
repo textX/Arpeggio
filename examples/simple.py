@@ -30,19 +30,6 @@ def functioncall():     return symbol, "(", expressionlist, ")"
 def function():         return Kwd("function"), symbol, parameterlist, block
 def simpleLanguage():   return function
 
-
-# Parser instantiation. simpleLanguage is the definition of the root rule
-# and comment is a grammar rule for comments.
-parser = ParserPython(simpleLanguage, comment, debug=True)
-
-# We save parser model to dot file in order to visualise it.
-# We can make a png out of it using dot (part of graphviz) like this
-# dot -Tpng -O simple_parser.dot
-PMDOTExporter().exportFile(parser.parser_model, "simple_parser_model.dot")
-
-# Parser model for comments is handled as separate model
-PMDOTExporter().exportFile(parser.comments_model, "simple_parser_comments.dot")
-
 input = """
     function fak(n) {
         if (n==0) {
@@ -53,8 +40,29 @@ input = """
         };
     }
 """
-parse_tree = parser.parse(input)
 
-# Export parse tree for visualization
-PTDOTExporter().exportFile(parse_tree, "simple_parse_tree.dot")
+def main(debug=False):
+
+    # Parser instantiation. simpleLanguage is the definition of the root rule
+    # and comment is a grammar rule for comments.
+    parser = ParserPython(simpleLanguage, comment, debug=debug)
+
+    if debug:
+        # We save parser model to dot file in order to visualise it.
+        # We can make a png out of it using dot (part of graphviz) like this
+        # dot -Tpng -O simple_parser.dot
+        PMDOTExporter().exportFile(parser.parser_model, "simple_parser_model.dot")
+
+        # Parser model for comments is handled as separate model
+        PMDOTExporter().exportFile(parser.comments_model, "simple_parser_comments.dot")
+
+    parse_tree = parser.parse(input)
+
+    if debug:
+        # Export parse tree for visualization
+        PTDOTExporter().exportFile(parse_tree, "simple_parse_tree.dot")
+
+
+if __name__ == "__main__":
+    main(debug=True)
 

@@ -2,7 +2,7 @@
 # Name: json.py
 # Purpose: Implementation of a simple JSON parser in arpeggio.
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example is based on jsonParser.py from the pyparsing project
@@ -51,44 +51,51 @@ def jsonObject():       return "{", Optional(jsonMembers), "}"
 def jsonFile():         return jsonObject, EOF
 
 
-if __name__ == "__main__":
-    testdata = """
-    {
-        "glossary": {
-            "title": "example glossary",
-            "GlossDiv": {
-                "title": "S",
-                "GlossList":
-                    {
-                    "ID": "SGML",
-                    "SortAs": "SGML",
-                    "GlossTerm": "Standard Generalized Markup Language",
-                    "TrueValue": true,
-                    "FalseValue": false,
-                    "Gravity": -9.8,
-                    "LargestPrimeLessThan100": 97,
-                    "AvogadroNumber": 6.02E23,
-                    "EvenPrimesGreaterThan2": null,
-                    "PrimesLessThan10" : [2,3,5,7],
-                    "Acronym": "SGML",
-                    "Abbrev": "ISO 8879:1986",
-                    "GlossDef": "A meta-markup language, used to create markup languages such as DocBook.",
-                    "GlossSeeAlso": ["GML", "XML", "markup"],
-                    "EmptyDict":  {},
-                    "EmptyList" : []
-                    }
-            }
+testdata = """
+{
+    "glossary": {
+        "title": "example glossary",
+        "GlossDiv": {
+            "title": "S",
+            "GlossList":
+                {
+                "ID": "SGML",
+                "SortAs": "SGML",
+                "GlossTerm": "Standard Generalized Markup Language",
+                "TrueValue": true,
+                "FalseValue": false,
+                "Gravity": -9.8,
+                "LargestPrimeLessThan100": 97,
+                "AvogadroNumber": 6.02E23,
+                "EvenPrimesGreaterThan2": null,
+                "PrimesLessThan10" : [2,3,5,7],
+                "Acronym": "SGML",
+                "Abbrev": "ISO 8879:1986",
+                "GlossDef": "A meta-markup language, used to create markup languages such as DocBook.",
+                "GlossSeeAlso": ["GML", "XML", "markup"],
+                "EmptyDict":  {},
+                "EmptyList" : []
+                }
         }
     }
-    """
-    # Creating parser from parser model.
-    parser = ParserPython(jsonFile, debug=True)
+}
+"""
 
-    # Exporting parser model to dot file in order to visualise it.
-    PMDOTExporter().exportFile(parser.parser_model, "json_parser_model.dot")
+def main(debug=False):
+    # Creating parser from parser model.
+    parser = ParserPython(jsonFile, debug=debug)
+
+    if debug:
+        # Exporting parser model to dot file in order to visualise it.
+        PMDOTExporter().exportFile(parser.parser_model, "json_parser_model.dot")
 
     # Parse json string
     parse_tree = parser.parse(testdata)
 
-    # Export parse tree for visualization
-    PTDOTExporter().exportFile(parser.parse_tree, "json_parse_tree.dot")
+    if debug:
+        # Export parse tree for visualization
+        PTDOTExporter().exportFile(parser.parse_tree, "json_parse_tree.dot")
+
+if __name__ == "__main__":
+    main(debug=True)
+

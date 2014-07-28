@@ -35,37 +35,43 @@ def right():        return 'right'
 # Semantic actions
 class Up(SemanticAction):
     def first_pass(self, parser, node, children):
-        print("Going up")
+        if parser.debug:
+            print("Going up")
         return (0, 1)
 
 
 class Down(SemanticAction):
     def first_pass(self, parser, node, children):
-        print("Going down")
+        if parser.debug:
+            print("Going down")
         return (0, -1)
 
 
 class Left(SemanticAction):
     def first_pass(self, parser, node, children):
-        print("Going left")
+        if parser.debug:
+            print("Going left")
         return (-1, 0)
 
 
 class Right(SemanticAction):
     def first_pass(self, parser, node, children):
-        print("Going right")
+        if parser.debug:
+            print("Going right")
         return (1, 0)
 
 
 class Command(SemanticAction):
     def first_pass(self, parser, node, children):
-        print("Command")
+        if parser.debug:
+            print("Command")
         return children[0]
 
 
 class Program(SemanticAction):
     def first_pass(self, parser, node, children):
-        print("Evaluating position")
+        if parser.debug:
+            print("Evaluating position")
         position = [0, 0]
         for move in children[1:-2]:
             position[0] += move[0]
@@ -80,8 +86,7 @@ down.sem = Down()
 left.sem = Left()
 right.sem = Right()
 
-if __name__ == "__main__":
-
+def main(debug=False):
     # Program code
     input_program = '''
         begin
@@ -96,24 +101,33 @@ if __name__ == "__main__":
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
-    parser = ParserPython(program, debug=True)
+    parser = ParserPython(program, debug=debug)
 
-    # Then we export it to a dot file in order to visualize it.
-    # This step is optional but it is handy for debugging purposes.
-    # We can make a png out of it using dot (part of graphviz) like this
-    # dot -O -Tpng robot_parser_model.dot
-    PMDOTExporter().exportFile(parser.parser_model,
-                    "robot_parser_model.dot")
+    if debug:
+        # Then we export it to a dot file in order to visualize it.
+        # This step is optional but it is handy for debugging purposes.
+        # We can make a png out of it using dot (part of graphviz) like this
+        # dot -O -Tpng robot_parser_model.dot
+        PMDOTExporter().exportFile(parser.parser_model,
+                        "robot_parser_model.dot")
 
     # We create a parse tree out of textual input
     parse_tree = parser.parse(input_program)
 
-    # Then we export it to a dot file in order to visualize it.
-    # dot -O -Tpng robot_parse_tree.dot
-    PTDOTExporter().exportFile(parse_tree,
-                    "robot_parse_tree.dot")
+    if debug:
+        # Then we export it to a dot file in order to visualize it.
+        # dot -O -Tpng robot_parse_tree.dot
+        PTDOTExporter().exportFile(parse_tree,
+                        "robot_parse_tree.dot")
 
     # getASG will start semantic analysis.
     # In this case semantic analysis will evaluate expression and
     # returned value will be the final position of the robot.
-    print("position = ", parser.getASG())
+    result = parser.getASG()
+
+    if debug:
+        print("position = ", result)
+
+if __name__ == "__main__":
+    main(debug=True)
+

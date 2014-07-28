@@ -60,34 +60,43 @@ peg_grammar = r"""
  comment <- '//' r'.*\n';
 """
 
+def main(debug=False):
 
-# ParserPEG will use ParserPython to parse peg_grammar definition and
-# create parser_model for parsing PEG based grammars
-parser = ParserPEG(peg_grammar, 'grammar', debug=True)
+    # ParserPEG will use ParserPython to parse peg_grammar definition and
+    # create parser_model for parsing PEG based grammars
+    parser = ParserPEG(peg_grammar, 'grammar', debug=debug)
 
-# Exporting parser model to dot file for visualization.
-PMDOTExporter().exportFile(parser.parser_model,
-                         "peg_peg_parser_model.dot")
 
-# Now we will use created parser to parse the same peg_grammar used for
-# parser initialization. We can parse peg_grammar because it is specified
-# using PEG itself.
-parser.parse(peg_grammar)
+    if debug:
+        # Exporting parser model to dot file for visualization.
+        PMDOTExporter().exportFile(parser.parser_model,
+                                "peg_peg_parser_model.dot")
 
-# Again we export parse tree in dot file for visualization.
-PTDOTExporter().exportFile(parser.parse_tree,
-                         "peg_peg_parse_tree.dot")
+    # Now we will use created parser to parse the same peg_grammar used for
+    # parser initialization. We can parse peg_grammar because it is specified
+    # using PEG itself.
+    parser.parse(peg_grammar)
 
-# ASG should be the same as parser.parser_model because semantic
-# actions will create PEG parser (tree of ParsingExpressions).
-asg = parser.getASG(sem_actions)
+    if debug:
+        # Again we export parse tree in dot file for visualization.
+        PTDOTExporter().exportFile(parser.parse_tree,
+                                "peg_peg_parse_tree.dot")
 
-# This graph should be the same as peg_peg_parser_model.dot because
-# they define the same parser.
-PMDOTExporter().exportFile(asg,
-                         "peg_peg_asg.dot")
+    # ASG should be the same as parser.parser_model because semantic
+    # actions will create PEG parser (tree of ParsingExpressions).
+    asg = parser.getASG(sem_actions)
 
-# If we replace parser_mode with ASG constructed parser it will still
-# parse PEG grammars
-parser.parser_model = asg
-parser.parse(peg_grammar)
+    if debug:
+        # This graph should be the same as peg_peg_parser_model.dot because
+        # they define the same parser.
+        PMDOTExporter().exportFile(asg,
+                                "peg_peg_asg.dot")
+
+    # If we replace parser_mode with ASG constructed parser it will still
+    # parse PEG grammars
+    parser.parser_model = asg
+    parser.parse(peg_grammar)
+
+if __name__ == '__main__':
+    main(debug=True)
+

@@ -70,7 +70,8 @@ class PEGSemanticAction(SemanticAction):
         '''
         Resolving cross-references in second pass.
         '''
-        print("Second pass:", type(node), str(node))
+        if parser.debug:
+            print("Second pass:", type(node), str(node))
 
         if isinstance(node, ParsingExpression):
 

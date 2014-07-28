@@ -855,8 +855,6 @@ class Parser(object):
                 retval = sem_action.first_pass(self, node, children)
 
                 if hasattr(sem_action, "second_pass"):
-                    if (node.rule, retval) in for_second_pass:
-                        print("Existing:", retval)
                     for_second_pass.append((node.rule, retval))
 
                 if self.debug:

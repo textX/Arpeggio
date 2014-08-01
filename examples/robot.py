@@ -73,7 +73,7 @@ class Program(SemanticAction):
         if parser.debug:
             print("Evaluating position")
         position = [0, 0]
-        for move in children[1:-2]:
+        for move in children:
             position[0] += move[0]
             position[1] += move[1]
         return position

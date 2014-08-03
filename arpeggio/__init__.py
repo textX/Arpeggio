@@ -488,14 +488,25 @@ class RegExMatch(Match):
     Args:
         to_match (regex string): A regular expression string to match.
             It will be used to create regular expression using re.compile.
+        ignore_case(bool): If case insensitive match is needed.
+            Default is None to support propagation from global parser setting.
+        multiline(bool): If regex matching is in multiline mode.
+            Default is None to support propagation from global parser setting.
+
     '''
-    def __init__(self, to_match, rule=None, flags=None):
+    def __init__(self, to_match, rule=None, ignore_case=None, multiline=None):
         super(RegExMatch, self).__init__(rule)
         self.to_match = to_match
-        if flags is not None:
-            self.regex = re.compile(to_match, flags)
-        else:
-            self.regex = re.compile(to_match)
+        self.ignore_case = ignore_case
+        self.multiline = multiline
+
+    def compile(self):
+        flags = 0
+        if self.ignore_case:
+            flags |= re.IGNORECASE
+        if self.multiline:
+            flags |= re.MULTILINE
+        self.regex = re.compile(self.to_match, flags)
 
     def __str__(self):
         return self.to_match
@@ -522,14 +533,22 @@ class StrMatch(Match):
 
     Args:
         to_match (str): A string to match.
+        ignore_case(bool): If case insensitive match is needed.
+            Default is None to support propagation from global parser setting.
     """
-    def __init__(self, to_match, rule=None, root=False):
+    def __init__(self, to_match, rule=None, root=False, ignore_case=None):
         super(StrMatch, self).__init__(rule, root)
         self.to_match = to_match
+        self.ignore_case = ignore_case
 
     def _parse(self, parser):
         c_pos = parser.position
-        if parser.input[c_pos:].startswith(self.to_match):
+        input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
+        if self.ignore_case:
+            match = input_frag.lower()==self.to_match.lower()
+        else:
+            match = input_frag == self.to_match
+        if match:
             if parser.debug:
                 print("++ Match '{}' at {} => '{}'".format(self.to_match,\
                         c_pos, parser.context(len(self.to_match))))
@@ -771,14 +790,20 @@ class Parser(object):
         ws (str): A string consisting of whitespace characters.
         reduce_tree (bool): If true non-terminals with single child will be
             eliminated from the parse tree. Default is True.
+        multiline(bool): If RegExMatch is going to match in multiline mode
+            (default=False).
+        ignore_case(bool): If case is ignored (default=False)
         debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
+
     """
     def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False,
-                 debug=False):
+                 debug=False, multiline=False, ignore_case=False):
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
+        self.ignore_case = ignore_case
+        self.multiline = multiline
         self.debug = debug
         self.comments_model = None
         self.sem_actions = {}
@@ -1045,6 +1070,23 @@ class ParserPython(Parser):
                     print("New rule: {} -> {}"
                           .format(rule, retval.__class__.__name__))
 
+            elif isinstance(expression, StrMatch):
+                if expression.ignore_case is None:
+                    expression.ignore_case = self.ignore_case
+                retval = expression
+
+            elif isinstance(expression, RegExMatch):
+                # Regular expression are not compiled yet
+                # to support global settings propagation from
+                # parser.
+                if expression.ignore_case is None:
+                    expression.ignore_case = self.ignore_case
+                if expression.multiline is None:
+                    expression.multiline = self.multiline
+                expression.compile()
+
+                retval = expression
+
             elif isinstance(expression, Match):
                 retval = expression
 
@@ -1067,7 +1109,7 @@ class ParserPython(Parser):
                     __for_resolving.append(retval)
 
             elif type(expression) is str:
-                retval = StrMatch(expression)
+                retval = StrMatch(expression, ignore_case=self.ignore_case)
 
             else:
                 raise GrammarError("Unrecognized grammar element '%s'." %

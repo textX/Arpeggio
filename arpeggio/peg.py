@@ -192,15 +192,18 @@ class SemRuleCrossRef(SemanticAction):
 
 class SemRegEx(SemanticAction):
     def first_pass(self, parser, node, children):
-        return RegExMatch(children[0])
-
+        match = RegExMatch(children[0],
+                ignore_case=parser.ignore_case,
+                multiline=parser.multiline)
+        match.compile()
+        return match
 
 class SemStrMatch(SemanticAction):
     def first_pass(self, parser, node, children):
         match_str = node.value[1:-1]
         match_str = match_str.replace("\\'", "'")
         match_str = match_str.replace("\\\\", "\\")
-        return StrMatch(match_str)
+        return StrMatch(match_str, ignore_case=parser.ignore_case)
 
 
 grammar.sem = SemGrammar()

@@ -193,8 +193,7 @@ class SemRuleCrossRef(SemanticAction):
 class SemRegEx(SemanticAction):
     def first_pass(self, parser, node, children):
         match = RegExMatch(children[0],
-                ignore_case=parser.ignore_case,
-                multiline=parser.multiline)
+                ignore_case=parser.ignore_case)
         match.compile()
         return match
 

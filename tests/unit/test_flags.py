@@ -15,11 +15,10 @@ from arpeggio import RegExMatch as _
 from arpeggio import NoMatch
 
 
-def foo():    return 'r', bar, baz, Optional(buz), Optional(ml), EOF
+def foo():    return 'r', bar, baz, Optional(buz), EOF
 def bar():      return 'BAR'
 def baz():      return _(r'1\w+')
 def buz():      return _(r'Aba*', ignore_case=True)
-def ml():       return _(r'//.*$', multiline=True)
 
 @pytest.fixture
 def parser_ci():
@@ -38,11 +37,6 @@ def test_parse_tree_nonci(parser_nonci):
     input_str = "R bar 1baz"
     with pytest.raises(NoMatch):
         parser_nonci.parse(input_str)
-
-def test_parse_multiline(parser_ci):
-    input_str = """r bar 1baz //adfadsfadf asdfadsfadsf adfadf"""
-    parse_tree = parser_ci.parse(input_str)
-    assert parse_tree is not None
 
 def test_flags_override(parser_nonci):
     # Parser is not case insensitive

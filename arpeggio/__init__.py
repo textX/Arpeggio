@@ -490,22 +490,17 @@ class RegExMatch(Match):
             It will be used to create regular expression using re.compile.
         ignore_case(bool): If case insensitive match is needed.
             Default is None to support propagation from global parser setting.
-        multiline(bool): If regex matching is in multiline mode.
-            Default is None to support propagation from global parser setting.
 
     '''
-    def __init__(self, to_match, rule=None, ignore_case=None, multiline=None):
+    def __init__(self, to_match, rule=None, ignore_case=None):
         super(RegExMatch, self).__init__(rule)
         self.to_match = to_match
         self.ignore_case = ignore_case
-        self.multiline = multiline
 
     def compile(self):
-        flags = 0
+        flags = re.MULTILINE
         if self.ignore_case:
             flags |= re.IGNORECASE
-        if self.multiline:
-            flags |= re.MULTILINE
         self.regex = re.compile(self.to_match, flags)
 
     def __str__(self):
@@ -790,20 +785,17 @@ class Parser(object):
         ws (str): A string consisting of whitespace characters.
         reduce_tree (bool): If true non-terminals with single child will be
             eliminated from the parse tree. Default is True.
-        multiline(bool): If RegExMatch is going to match in multiline mode
-            (default=False).
         ignore_case(bool): If case is ignored (default=False)
         debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
 
     """
     def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False,
-                 debug=False, multiline=False, ignore_case=False):
+                 debug=False, ignore_case=False):
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
         self.ignore_case = ignore_case
-        self.multiline = multiline
         self.debug = debug
         self.comments_model = None
         self.sem_actions = {}
@@ -1081,8 +1073,6 @@ class ParserPython(Parser):
                 # parser.
                 if expression.ignore_case is None:
                     expression.ignore_case = self.ignore_case
-                if expression.multiline is None:
-                    expression.multiline = self.multiline
                 expression.compile()
 
                 retval = expression

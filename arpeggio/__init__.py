@@ -157,9 +157,31 @@ class ParsingExpression(object):
         if parser.debug:
             print(">> Entering rule {}".format(self.name))
 
-        # Skip whitespaces if we are not in the lexical rule
+        if parser._in_parse_intro:
+            # Do not recurse in parse_intro
+            return
+
+        # Skip whitespaces and parse comments if we are not
+        # in the lexical rule
         if not parser._in_lex_rule:
             parser._skip_ws()
+            parser._in_parse_intro = True
+            if parser.comments_model and not parser._in_parse_comment:
+                parser._in_parse_comment = True
+                try:
+                    while True:
+                        parser.comments.append(
+                                parser.comments_model.parse(parser))
+                        parser._skip_ws()
+                except NoMatch:
+                    # NoMatch in comment matching is perfectly
+                    # legal and no action should be taken.
+                    pass
+
+                finally:
+                    parser._in_parse_comment = False
+
+            parser._in_parse_intro = False
 
     def parse(self, parser):
         self._parse_intro(parser)
@@ -450,37 +472,13 @@ class Match(ParsingExpression):
 
     def parse(self, parser):
         self._parse_intro(parser)
-        if parser._in_parse_comment:
-            return self._parse(parser)
 
         c_pos = parser.position
 
-        comments = []
         try:
             match = self._parse(parser)
         except NoMatch as nm:
-            # If not matched and not in lexical rule try to match comment
-            #TODO: Comment handling refactoring. Should think of better way to
-            # handle comments.
-            if not parser._in_lex_rule and parser.comments_model:
-                try:
-                    parser._in_parse_comment = True
-                    while True:
-                        comments.append(parser.comments_model.parse(parser))
-                        parser._skip_ws()
-                except NoMatch:
-                    # If comment match successfully try terminal match again
-                    if comments:
-                        match = self._parse(parser)
-                        match.comments = NonTerminal('comment', c_pos,
-                                                     comments)
-                    else:
-                        parser._nm_raise(nm)
-                finally:
-                    parser._in_parse_comment = False
-
-            else:
-                parser._nm_raise(nm)
+            parser._nm_raise(nm)
 
         return match
 
@@ -543,6 +541,8 @@ class StrMatch(Match):
     def _parse(self, parser):
         c_pos = parser.position
         input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
+        if parser.debug:
+            print ("Input = ", input_frag)
         if self.ignore_case:
             match = input_frag.lower()==self.to_match.lower()
         else:
@@ -792,6 +792,7 @@ class Parser(object):
         ignore_case(bool): If case is ignored (default=False)
         debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
+        comments(list): A list of ParseTreeNode for matched comments.
 
     """
     def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False,
@@ -802,10 +803,12 @@ class Parser(object):
         self.ignore_case = ignore_case
         self.debug = debug
         self.comments_model = None
+        self.comments = []
         self.sem_actions = {}
 
         self.parse_tree = None
         self._in_parse_comment = False
+        self._in_parse_intro = False
 
         # Are we in lexical rule. If so do not
         # skip whitespaces.
@@ -979,14 +982,13 @@ class Parser(object):
         Args:
             args: A NoMatch instance or (value, position, parser)
         """
-        if not self._in_parse_comment:
-            if len(args) == 1 and isinstance(args[0], NoMatch):
-                if self.nm is None or args[0].position > self.nm.position:
-                    self.nm = args[0]
-            else:
-                value, position, parser = args
-                if self.nm is None or position > self.nm.position:
-                    self.nm = NoMatch(value, position, parser)
+        if len(args) == 1 and isinstance(args[0], NoMatch):
+            if self.nm is None or args[0].position > self.nm.position:
+                self.nm = args[0]
+        else:
+            value, position, parser = args
+            if self.nm is None or position > self.nm.position:
+                self.nm = NoMatch(value, position, parser)
         raise self.nm
 
 

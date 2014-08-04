@@ -86,7 +86,7 @@ class FieldValueSem(SemanticAction):
     Remove braces. Remove newlines.
     """
     def first_pass(self, parser, node, children):
-        value = children[0].value
+        value = children[0]
         value = value.replace(r"\'{c}", u"ć")\
                     .replace(r"\'{C}", u"Ć")\
                     .replace(r"\v{c}", u"č")\

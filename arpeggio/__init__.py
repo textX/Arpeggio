@@ -677,24 +677,31 @@ class Terminal(ParseTreeNode):
 class NonTerminal(ParseTreeNode, list):
     """
     Non-leaf node of the Parse Tree. Represents language syntax construction.
+    At the same time used in ParseTreeNode navigation expressions.
+    See test_ptnode_navigation_expressions.py for examples of navigation expressions.
 
     Attributes:
         nodes (list of ParseTreeNode): Children parse tree nodes.
+        _filtered (bool): Is this NT a dynamically created filtered NT.
+            This is used internally.
 
     """
-    def __init__(self, rule, position, nodes, error=False):
+    def __init__(self, rule, position, nodes, error=False, _filtered=False):
         super(NonTerminal, self).__init__(rule, position, error)
         self.extend(flatten([nodes]))
+        self._filtered = _filtered
 
-        # Child nodes cache. Used for lookup by rule name.
-        self._child_cache = {}
+        # Navigation expression cache. Used for lookup by rule name.
+        self._expr_cache = {}
+
+    @property
+    def value(self):
+        """Terminal protocol."""
+        return str(self)
 
     @property
     def desc(self):
         return self.name
-
-    # def __iter__(self):
-    #     return self
 
     def __str__(self):
         return " | ".join([str(x) for x in self])
@@ -702,25 +709,41 @@ class NonTerminal(ParseTreeNode, list):
     def __repr__(self):
         return "[ %s ]" % ", ".join([repr(x) for x in self])
 
-    def __getattr__(self, item):
+    def __getattr__(self, rule_name):
         """
         Find a child (non)terminal by the rule name.
 
         Args:
-            item(str): The name of the child node.
+            rule_name(str): The name of the rule that is referenced from
+                this node rule.
         """
+        # Prevent infinite recursion
+        if rule_name == '_expr_cache':
+            raise AttributeError
+
         # First check the cache
-        if item in self._child_cache:
-            return self._child_cache[item]
+        if rule_name in self._expr_cache:
+            return self._expr_cache[rule_name]
 
-        # If not found in the cache find it and store it in the
-        # cache for later.
+        # If result is not found in the cache collect all nodes
+        # with the given rule name and create new NonTerminal
+        # and cache it for later access.
+        nodes = []
         for n in self:
-            if n.rule == item:
-                self._child_cache[item] = n
-                return n
+            if self._filtered:
+                # For filtered NT rule_name is a rule on
+                # each of its children
+                for m in n:
+                    if m.rule == rule_name:
+                        nodes.append(m)
+            else:
+                if n.rule == rule_name:
+                    nodes.append(n)
 
-        raise AttributeError
+        # For expression NonTerminals instances position does not have any sense.
+        result = NonTerminal(rule=rule_name, position=None, nodes=nodes, _filtered=True)
+        self._expr_cache[rule_name] = result
+        return result
 
 
 # ----------------------------------------------------

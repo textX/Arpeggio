@@ -161,10 +161,6 @@ class ParsingExpression(object):
         if not parser._in_lex_rule:
             parser._skip_ws()
 
-#         # Set the beginning position in the input stream of
-#         # this parsing expression
-#         self.c_pos = parser.position
-
     def parse(self, parser):
         self._parse_intro(parser)
 

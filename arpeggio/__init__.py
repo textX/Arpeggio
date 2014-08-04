@@ -292,7 +292,7 @@ class OrderedChoice(Sequence):
         c_pos = parser.position
         for e in self.nodes:
             try:
-                result = e.parse(parser)
+                result = [e.parse(parser)]
                 match = True
             except NoMatch as m:
                 parser.position = c_pos  # Backtracking

@@ -825,7 +825,7 @@ class Parser(object):
         self.parse_tree = self._parse()
         return self.parse_tree
 
-    def getASG(self, sem_actions=None):
+    def getASG(self, sem_actions=None, defaults=True):
         """
         Creates Abstract Semantic Graph (ASG) from the parse tree.
 
@@ -833,6 +833,8 @@ class Parser(object):
             sem_actions (dict): The semantic actions dictionary to use for
                 semantic analysis. Rule names are the keys and semantic action
                 objects are values.
+            defaults (bool): If True a default semantic action will be applied in
+                case no action is defined for the node.
         """
         if not self.parse_tree:
             raise Exception("Parse tree is empty. You did call parse(), didn't you?")
@@ -884,11 +886,15 @@ class Parser(object):
                     print("\tApplying semantic action ", type(sem_action))
 
             else:
-                # If no rule is present use some sane defaults
-                if self.debug:
-                    print("\tApplying default semantic action.")
+                if defaults:
+                    # If no rule is present use some sane defaults
+                    if self.debug:
+                        print("\tApplying default semantic action.")
 
-                retval = SemanticAction().first_pass(self, node, children)
+                    retval = SemanticAction().first_pass(self, node, children)
+
+                else:
+                    retval = node
 
             if self.debug:
                 if retval is None:

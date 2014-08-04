@@ -157,15 +157,12 @@ class ParsingExpression(object):
         if parser.debug:
             print(">> Entering rule {}".format(self.name))
 
-        if parser._in_parse_intro:
-            # Do not recurse in parse_intro
-            return
+        parser._in_parse_intro = True
 
         # Skip whitespaces and parse comments if we are not
         # in the lexical rule
         if not parser._in_lex_rule:
             parser._skip_ws()
-            parser._in_parse_intro = True
             if parser.comments_model and not parser._in_parse_comment:
                 parser._in_parse_comment = True
                 try:
@@ -181,10 +178,12 @@ class ParsingExpression(object):
                 finally:
                     parser._in_parse_comment = False
 
-            parser._in_parse_intro = False
+        parser._in_parse_intro = False
 
     def parse(self, parser):
-        self._parse_intro(parser)
+
+        if not parser._in_parse_intro:
+            self._parse_intro(parser)
 
         # Current position could change in recursive calls
         # so save it.

@@ -55,6 +55,10 @@ def test_lookup_single():
     assert result.bar.bum[0].rule == 'bum'
     assert result.bar.bum[1].position == 18
 
+    # Access to terminal
+    assert result.bar.bum[-1][0].value == 'bum'
+    assert result.bar2.bla[0].value == 'bla'
+
     # The same for all bla from all bar2
     assert len(result.bar2.bla) == 1
 

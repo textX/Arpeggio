@@ -178,6 +178,12 @@ class ParsingExpression(object):
                 print("** Cache hit for [{}, {}] = '{}'"
                       .format(self.name, c_pos, str(result)))
                 print("<< Leaving rule {}".format(self.name))
+
+            # If NoMatch is recorded at this position raise.
+            if isinstance(result, NoMatch):
+                parser._nm_raise(result)
+
+            # else return cached result
             return result
 
         # We are descending down
@@ -192,8 +198,10 @@ class ParsingExpression(object):
         try:
             result = self._parse(parser)
 
-        except NoMatch:
+        except NoMatch as e:
             parser.position = c_pos  # Backtracking
+            # Memoize NoMatch at this position for this rule
+            self.result_cache[c_pos] = (e, c_pos)
             raise
 
         finally:

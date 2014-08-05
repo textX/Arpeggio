@@ -798,6 +798,41 @@ class SemanticAction(object):
         return retval
 
 
+class SemanticActionResults(object):
+    """
+    Used in first_pass call to supply results of semantic analysis
+    of children parse tree nodes.
+    Enables dot access by the name of the rule similar to NonTerminal
+    tree navigation.
+    Enables index access as well as iteration.
+    """
+    def __init__(self):
+        self.results = {}
+        self.results_list = []
+
+    def append_result(self, name, result):
+        if name:
+            if not name in self.results:
+                self.results[name] = []
+            self.results[name].append(result)
+
+        self.results_list.append(result)
+
+    def __getitem__(self, key):
+        return self.results_list[key]
+
+    def __iter__(self):
+        return iter(self.results_list)
+
+    def __len__(self):
+        return len(self.results_list)
+
+    def __getattr__(self, attr_name):
+        if attr_name in ['results', 'results_list']:
+            raise AttributeError
+
+        return self.results.get(attr_name, [])
+
 # ----------------------------------------------------
 # Parsers
 
@@ -884,12 +919,12 @@ class Parser(object):
                 print("Walking down ", node.name, "  type:",
                       type(node).__name__, "str:", str(node))
 
-            children = []
+            children = SemanticActionResults()
             if isinstance(node, NonTerminal):
                 for n in node:
                     child = tree_walk(n)
                     if child is not None:
-                        children.append(child)
+                        children.append_result(n.rule, child)
 
             if self.debug:
                 print("Processing ", node.name, "= '", str(node),

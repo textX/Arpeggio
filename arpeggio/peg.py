@@ -127,7 +127,7 @@ class SemRule(PEGSemanticAction):
 class SemSequence(PEGSemanticAction):
     def first_pass(self, parser, node, children):
         if len(children) > 1:
-            return Sequence(nodes=children)
+            return Sequence(nodes=children[:])
         else:
             # If only one child rule exists reduce.
             return children[0]
@@ -136,7 +136,7 @@ class SemSequence(PEGSemanticAction):
 class SemOrderedChoice(PEGSemanticAction):
     def first_pass(self, parser, node, children):
         if len(children) > 1:
-            retval = OrderedChoice(nodes=children)
+            retval = OrderedChoice(nodes=children[:])
         else:
             # If only one child rule exists reduce.
             retval = children[0]

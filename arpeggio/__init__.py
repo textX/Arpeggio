@@ -892,7 +892,7 @@ class Parser(object):
                         children.append(child)
 
             if self.debug:
-                print("Applying ", node.name, "= '", str(node),
+                print("Processing ", node.name, "= '", str(node),
                       "'  type:", type(node).__name__, \
                       "len:", len(node) if isinstance(node, list) else "")
                 for i, a in enumerate(children):

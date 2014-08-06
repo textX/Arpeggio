@@ -269,12 +269,14 @@ class Sequence(ParsingExpression):
     """
     def _parse(self, parser):
         results = []
+        c_pos = parser.position
         try:
             for e in self.nodes:
                 result = e.parse(parser)
                 if result:
                     results.append(result)
         except NoMatch as m:
+            parser.position = c_pos # Backtracking
             self._nm_change_rule(m, parser)
             raise
 

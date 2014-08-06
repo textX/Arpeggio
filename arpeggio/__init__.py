@@ -51,7 +51,7 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        value (str): A name of the parsing expression or rule.
+        rule (str): A name of the rule.
         position (int): A position in the input stream where exception
             occurred.
         parser (Parser): An instance of a parser.

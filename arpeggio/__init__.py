@@ -835,6 +835,22 @@ class SemanticActionResults(object):
 
         return self.results.get(attr_name, [])
 
+
+# Common semantic actions
+class SemanticActionSingleChild(SemanticAction):
+    def first_pass(self, parser, node, children):
+        return children[0]
+
+
+class SemanticActionBodyWithBraces(SemanticAction):
+    def first_pass(self, parser, node, children):
+        return children[1:-1]
+
+
+class SemanticActionToString(SemanticAction):
+    def first_pass(self, parser, node, children):
+        return str(node)
+
 # ----------------------------------------------------
 # Parsers
 

@@ -1047,13 +1047,16 @@ class Parser(object):
         Args:
             args: A NoMatch instance or (value, position, parser)
         """
-        if len(args) == 1 and isinstance(args[0], NoMatch):
-            if self.nm is None or args[0].position > self.nm.position:
-                self.nm = args[0]
-        else:
-            value, position, parser = args
-            if self.nm is None or position > self.nm.position:
-                self.nm = NoMatch(value, position, parser)
+        # Do not report NoMatch for comments matching.
+        # Use last exception instead.
+        if not self._in_parse_comment or self.nm is None:
+            if len(args) == 1 and isinstance(args[0], NoMatch):
+                if self.nm is None or args[0].position > self.nm.position:
+                    self.nm = args[0]
+            else:
+                rule, position, parser = args
+                if self.nm is None or position > self.nm.position:
+                    self.nm = NoMatch(rule, position, parser)
         raise self.nm
 
 

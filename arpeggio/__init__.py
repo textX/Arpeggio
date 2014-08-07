@@ -800,7 +800,7 @@ class SemanticAction(object):
         return retval
 
 
-class SemanticActionResults(object):
+class SemanticActionResults(list):
     """
     Used in first_pass call to supply results of semantic analysis
     of children parse tree nodes.
@@ -810,7 +810,6 @@ class SemanticActionResults(object):
     """
     def __init__(self):
         self.results = {}
-        self.results_list = []
 
     def append_result(self, name, result):
         if name:
@@ -818,19 +817,10 @@ class SemanticActionResults(object):
                 self.results[name] = []
             self.results[name].append(result)
 
-        self.results_list.append(result)
-
-    def __getitem__(self, key):
-        return self.results_list[key]
-
-    def __iter__(self):
-        return iter(self.results_list)
-
-    def __len__(self):
-        return len(self.results_list)
+        self.append(result)
 
     def __getattr__(self, attr_name):
-        if attr_name in ['results', 'results_list']:
+        if attr_name == 'results':
             raise AttributeError
 
         return self.results.get(attr_name, [])

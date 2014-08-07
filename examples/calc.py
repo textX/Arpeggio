@@ -23,82 +23,73 @@ def calc():       return OneOrMore(expression), EOF
 
 
 # Semantic actions
-class ToFloat(SemanticAction):
+def to_floatSA(parser, node, children):
     """
     Converts node value to float.
     """
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Converting {}.".format(node.value))
-        return float(node.value)
+    if parser.debug:
+        print("Converting {}.".format(node.value))
+    return float(node.value)
 
-
-class Factor(SemanticAction):
+def factorSA(parser, node, children):
     """
     Removes parenthesis if exists and returns what was contained inside.
     """
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Factor {}".format(children))
-        if len(children) == 1:
-            return children[0]
-        sign = -1 if children[0] == '-' else 1
-        next_chd = 0
-        if children[0] in ['+', '-']:
-            next_chd = 1
-        return sign * children[next_chd]
+    if parser.debug:
+        print("Factor {}".format(children))
+    if len(children) == 1:
+        return children[0]
+    sign = -1 if children[0] == '-' else 1
+    return sign * children[-1]
 
-
-class Term(SemanticAction):
+def termSA(parser, node, children):
     """
     Divides or multiplies factors.
     Factor nodes will be already evaluated.
     """
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Term {}".format(children))
-        term = children[0]
-        for i in range(2, len(children), 2):
-            if children[i-1] == "*":
-                term *= children[i]
-            else:
-                term /= children[i]
-        if parser.debug:
-            print("Term = {}".format(term))
-        return term
+    if parser.debug:
+        print("Term {}".format(children))
+    term = children[0]
+    for i in range(2, len(children), 2):
+        if children[i-1] == "*":
+            term *= children[i]
+        else:
+            term /= children[i]
+    if parser.debug:
+        print("Term = {}".format(term))
+    return term
 
 
-class Expr(SemanticAction):
+def exprSA(parser, node, children):
     """
     Adds or substracts terms.
     Term nodes will be already evaluated.
     """
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Expression {}".format(children))
-        expr = 0
-        start = 0
-        # Check for unary + or - operator
-        if str(children[0]) in "+-":
-            start = 1
+    if parser.debug:
+        print("Expression {}".format(children))
+    expr = 0
+    start = 0
+    # Check for unary + or - operator
+    if str(children[0]) in "+-":
+        start = 1
 
-        for i in range(start, len(children), 2):
-            if i and children[i - 1] == "-":
-                expr -= children[i]
-            else:
-                expr += children[i]
+    for i in range(start, len(children), 2):
+        if i and children[i - 1] == "-":
+            expr -= children[i]
+        else:
+            expr += children[i]
 
-        if parser.debug:
-            print("Expression = {}".format(expr))
+    if parser.debug:
+        print("Expression = {}".format(expr))
 
-        return expr
+    return expr
 
 
 # Connecting rules with semantic actions
-number.sem = ToFloat()
-factor.sem = Factor()
-term.sem = Term()
-expression.sem = Expr()
+number.sem = to_floatSA
+factor.sem = factorSA
+term.sem = termSA
+expression.sem = exprSA
 
 def main(debug=False):
     # First we will make a parser - an instance of the calc parser model.

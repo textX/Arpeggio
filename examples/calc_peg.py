@@ -17,7 +17,7 @@ from __future__ import absolute_import
 from arpeggio.peg import ParserPEG
 
 # Semantic actions
-from calc import ToFloat, Factor, Term, Expr 
+from calc import to_floatSA, factorSA, termSA, exprSA
 
 # Grammar is defined using textual specification based on PEG language.
 calc_grammar = """
@@ -31,10 +31,10 @@ calc_grammar = """
 
 # Rules are mapped to semantic actions
 sem_actions = {
-    "number" : ToFloat(),
-    "factor" : Factor(),
-    "term"   : Term(),
-    "expression" : Expr(),
+    "number" : to_floatSA,
+    "factor" : factorSA,
+    "term"   : termSA,
+    "expression" : exprSA,
 }
 
 def main(debug=False):

@@ -951,7 +951,10 @@ class Parser(object):
 
             if node.rule in sem_actions:
                 sem_action = sem_actions[node.rule]
-                retval = sem_action.first_pass(self, node, children)
+                if type(sem_action) is types.FunctionType:
+                    retval = sem_action(self, node, children)
+                else:
+                    retval = sem_action.first_pass(self, node, children)
 
                 if hasattr(sem_action, "second_pass"):
                     for_second_pass.append((node.rule, retval))

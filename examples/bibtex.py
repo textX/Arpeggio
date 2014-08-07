@@ -129,6 +129,9 @@ def main(debug=False, file_name=None):
 if __name__ == "__main__":
     # First parameter is bibtex file
     if len(sys.argv) > 1:
+        # In debug mode dot (graphviz) files for parser model
+        # and parse tree will be created for visualization.
+        # Checkout current folder for .dot files.
         entries = main(debug=True, file_name=sys.argv[1])
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(entries)

@@ -64,6 +64,9 @@ def main(debug=False):
 
     # ParserPEG will use ParserPython to parse peg_grammar definition and
     # create parser_model for parsing PEG based grammars
+    # In debug mode dot (graphviz) files for parser model
+    # and parse tree will be created for visualization.
+    # Checkout current folder for .dot files.
     parser = ParserPEG(peg_grammar, 'peggrammar', debug=debug)
 
     # Now we will use created parser to parse the same peg_grammar used for

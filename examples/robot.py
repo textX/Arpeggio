@@ -114,5 +114,8 @@ def main(debug=False):
         print("position = ", result)
 
 if __name__ == "__main__":
+    # In debug mode dot (graphviz) files for parser model
+    # and parse tree will be created for visualization.
+    # Checkout current folder for .dot files.
     main(debug=True)
 

@@ -81,14 +81,14 @@ class PEGSemanticAction(SemanticAction):
 
                     # If resolved rule hasn't got the same name it
                     # should be cloned and preserved in the peg_rules cache
-                    if resolved_rule.rule != n.rule_name:
+                    if resolved_rule.rule_name != n.rule_name:
                         resolved_rule = copy.copy(resolved_rule)
-                        resolved_rule.rule = n.rule_name
-                        parser.peg_rules[resolved_rule.rule] = resolved_rule
+                        resolved_rule.rule_name = n.rule_name
+                        parser.peg_rules[resolved_rule.rule_name] = resolved_rule
 
                         if parser.debug:
                             print("Resolving: cloned to {} = > {}"\
-                                    .format(resolved_rule.rule, resolved_rule.name))
+                                    .format(resolved_rule.rule_name, resolved_rule.name))
 
                     node.nodes[i] = resolved_rule
 
@@ -111,7 +111,7 @@ class SemRule(PEGSemanticAction):
             retval = Sequence(nodes=children[1:])
         else:
             retval = children[1]
-        retval.rule = rule_name
+        retval.rule_name = rule_name
         retval.root = True
 
         if not hasattr(parser, "peg_rules"):
@@ -230,14 +230,14 @@ class ParserPEG(Parser):
         # visualization
         if self.debug:
             from arpeggio.export import PMDOTExporter
-            root_rule = self.parser_model.rule
+            root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(self.parser_model,
                                     "{}_peg_parser_model.dot".format(root_rule))
 
         # Comments should be optional and there can be more of them
         if self.comments_model: # and not isinstance(self.comments_model, ZeroOrMore):
             self.comments_model.root = True
-            self.comments_model.rule = comment_rule_name
+            self.comments_model.rule_name = comment_rule_name
 
     def _parse(self):
         return self.parser_model.parse(self)

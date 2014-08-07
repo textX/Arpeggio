@@ -34,9 +34,9 @@ def test_lookup_single():
     assert isinstance(result, ParseTreeNode)
     assert isinstance(result.bar, NonTerminal)
     # dot access
-    assert result.bar.rule == 'bar'
+    assert result.bar.rule_name == 'bar'
     # Index access
-    assert result[1].rule == 'bar'
+    assert result[1].rule_name == 'bar'
 
     # There are six children from result
     assert len(result) == 6
@@ -52,7 +52,7 @@ def test_lookup_single():
     # For example this returns all bum from all bar in result
     assert len(result.bar.bum) == 2
     # Verify that proper bum are returned
-    assert result.bar.bum[0].rule == 'bum'
+    assert result.bar.bum[0].rule_name == 'bum'
     assert result.bar.bum[1].position == 18
 
     # Access to terminal

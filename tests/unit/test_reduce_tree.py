@@ -31,21 +31,21 @@ def test_reduce_tree():
 
 #    PTDOTExporter().exportFile(result, 'test_reduce_tree_pt.dot')
 
-    assert result[0].rule == 'first'
+    assert result[0].rule_name == 'first'
     assert isinstance(result[0], NonTerminal)
-    assert result[3].rule == 'first'
-    assert result[0][0].rule == 'fourth'
+    assert result[3].rule_name == 'first'
+    assert result[0][0].rule_name == 'fourth'
     # Check reduction for direct OrderedChoice
-    assert result[2][0].rule == 'third'
+    assert result[2][0].rule_name == 'third'
 
     parser = ParserPython(grammar, reduce_tree=True)
     result = parser.parse(input)
 
     # PTDOTExporter().exportFile(result, 'test_reduce_tree_pt.dot')
 
-    assert result[0].rule == 'fourth'
+    assert result[0].rule_name == 'fourth'
     assert isinstance(result[0], Terminal)
-    assert result[3].rule == 'fourth'
+    assert result[3].rule_name == 'fourth'
     # Check reduction for direct OrderedChoice
-    assert result[2][0].rule == 'third_str'
+    assert result[2][0].rule_name == 'third_str'
 

@@ -24,7 +24,7 @@ def test_construct_parser():
 
     parser = ParserPEG(grammar, 'calc')
 
-    assert parser.parser_model.rule == 'calc'
+    assert parser.parser_model.rule_name == 'calc'
     assert isinstance(parser.parser_model, Sequence)
     assert parser.parser_model.nodes[0].name  == 'OneOrMore'
 

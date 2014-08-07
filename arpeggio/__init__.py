@@ -51,13 +51,13 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        rule (str): A name of the rule.
+        rule_name (str): A name of the rule.
         position (int): A position in the input stream where exception
             occurred.
         parser (Parser): An instance of a parser.
     """
-    def __init__(self, rule, position, parser):
-        self.rule = rule
+    def __init__(self, rule_name, position, parser):
+        self.rule_name = rule_name
         self.position = position
         self.parser = parser
 
@@ -65,7 +65,7 @@ class NoMatch(Exception):
         self._up = True
 
     def __str__(self):
-        return "Expected '{}' at position {} => '{}'.".format(self.rule,
+        return "Expected '{}' at position {} => '{}'.".format(self.rule_name,
                 str(self.parser.pos_to_linecol(self.position)),
                 self.parser.context(position=self.position))
 
@@ -94,7 +94,7 @@ class ParsingExpression(object):
         elements: A list (or other python object) used as a staging structure
             for python based grammar definition. Used in _from_python for
             building nodes list of child parser expressions.
-        rule (str): The name of the parser rule if this is the root rule.
+        rule_name (str): The name of the parser rule if this is the root rule.
         root (bool):  Does this parser expression represents the
             root of the parser rule? The root parser rule will create
             non-terminal node of the parse tree during parsing.
@@ -106,7 +106,7 @@ class ParsingExpression(object):
             elements = elements[0]
         self.elements = elements
 
-        self.rule = kwargs.get('rule')
+        self.rule_name = kwargs.get('rule_name', '')
         self.root = kwargs.get('root', False)
 
         nodes = kwargs.get('nodes', [])
@@ -125,14 +125,14 @@ class ParsingExpression(object):
     @property
     def name(self):
         if self.root:
-            return "%s=%s" % (self.rule, self.__class__.__name__)
+            return "%s=%s" % (self.rule_name, self.__class__.__name__)
         else:
             return self.__class__.__name__
 
     @property
     def id(self):
         if self.root:
-            return self.rule
+            return self.rule_name
         else:
             return id(self)
 
@@ -241,9 +241,9 @@ class ParsingExpression(object):
                     if len(result) == 1:
                         result = result[0]
                     else:
-                        result = NonTerminal(self.rule, c_pos, result)
+                        result = NonTerminal(self, c_pos, result)
             else:
-                result = NonTerminal(self.rule, c_pos, result)
+                result = NonTerminal(self, c_pos, result)
 
         # Result caching for use by memoization.
         self.result_cache[c_pos] = (result, parser.position)
@@ -260,7 +260,7 @@ class ParsingExpression(object):
         place of the NoMatch exception.
         """
         if self.root and parser.position == nm.position and nm._up:
-            nm.rule = self.rule
+            nm.rule_name = self.rule_name
 
 
 class Sequence(ParsingExpression):
@@ -446,7 +446,7 @@ class Combine(Decorator):
             results = flatten(results)
 
             # Create terminal from result
-            return Terminal(self.rule if self.root else '', c_pos, \
+            return Terminal(self, c_pos, \
                               "".join([str(result) for result in results]))
         except NoMatch:
             parser.position = c_pos  # Backtracking
@@ -461,13 +461,13 @@ class Match(ParsingExpression):
     """
     Base class for all classes that will try to match something from the input.
     """
-    def __init__(self, rule, root=False):
-        super(Match, self).__init__(rule=rule, root=root)
+    def __init__(self, rule_name, root=False):
+        super(Match, self).__init__(rule_name=rule_name, root=root)
 
     @property
     def name(self):
         if self.root:
-            return "%s=%s(%s)" % (self.rule, self.__class__.__name__, self.to_match)
+            return "%s=%s(%s)" % (self.rule_name, self.__class__.__name__, self.to_match)
         else:
             return "%s(%s)" % (self.__class__.__name__, self.to_match)
 
@@ -495,8 +495,8 @@ class RegExMatch(Match):
             Default is None to support propagation from global parser setting.
 
     '''
-    def __init__(self, to_match, rule=None, root=False, ignore_case=None):
-        super(RegExMatch, self).__init__(rule, root)
+    def __init__(self, to_match, rule_name='', root=False, ignore_case=None):
+        super(RegExMatch, self).__init__(rule_name, root)
         self.to_match = to_match
         self.ignore_case = ignore_case
 
@@ -517,8 +517,7 @@ class RegExMatch(Match):
                 print("++ Match '%s' at %d => '%s'" % (m.group(), \
                             c_pos, parser.context(len(m.group()))))
             parser.position += len(m.group())
-            return Terminal(self.rule if self.root else '', c_pos,
-                            m.group())
+            return Terminal(self, c_pos, m.group())
         else:
             if parser.debug:
                 print("-- NoMatch at {}".format(c_pos))
@@ -534,8 +533,8 @@ class StrMatch(Match):
         ignore_case(bool): If case insensitive match is needed.
             Default is None to support propagation from global parser setting.
     """
-    def __init__(self, to_match, rule=None, root=False, ignore_case=None):
-        super(StrMatch, self).__init__(rule, root)
+    def __init__(self, to_match, rule_name='', root=False, ignore_case=None):
+        super(StrMatch, self).__init__(rule_name, root)
         self.to_match = to_match
         self.ignore_case = ignore_case
 
@@ -557,8 +556,7 @@ class StrMatch(Match):
             # If this match is inside sequence than mark for suppression
             suppress = type(parser._last_pexpression) is Sequence
 
-            return Terminal(self.rule if self.root else '', c_pos,
-                            self.to_match, suppress=suppress)
+            return Terminal(self, c_pos, self.to_match, suppress=suppress)
         else:
             if parser.debug:
                 print("-- NoMatch at {}".format(c_pos))
@@ -584,15 +582,15 @@ class Kwd(StrMatch):
         super(Kwd, self).__init__(to_match, rule=None)
         self.to_match = to_match
         self.root = True
-        self.rule = 'keyword'
+        self.rule_name = 'keyword'
 
 
 class EndOfFile(Match):
     """
     The Match class that will succeed in case end of input is reached.
     """
-    def __init__(self, rule=None):
-        super(EndOfFile, self).__init__(rule)
+    def __init__(self):
+        super(EndOfFile, self).__init__("EOF")
 
     @property
     def name(self):
@@ -601,7 +599,7 @@ class EndOfFile(Match):
     def _parse(self, parser):
         c_pos = parser.position
         if len(parser.input) == c_pos:
-            return Terminal('EOF', c_pos, '', suppress=True)
+            return Terminal(EOF(), c_pos, '', suppress=True)
         else:
             if parser.debug:
                 print("!! EOF not matched.")
@@ -623,8 +621,9 @@ class ParseTreeNode(object):
     The node can be terminal(the leaf of the parse tree) or non-terminal.
 
     Attributes:
-        rule (str): The name of the rule that created this node or empty
-            string in case this node is created by a non-root pexpression.
+        rule (ParsingExpression): The rule that created this node.
+        rule_name (str): The name of the rule that created this node if root rule
+            or empty string otherwise.
         position (int): A position in the input stream where the match
             occurred.
         error (bool): Is this a false parse tree node created during error
@@ -632,14 +631,17 @@ class ParseTreeNode(object):
         comments : A parse tree of comment(s) attached to this node.
     """
     def __init__(self, rule, position, error):
+        assert rule
+        assert rule.rule_name is not None
         self.rule = rule
+        self.rule_name = rule.rule_name
         self.position = position
         self.error = error
         self.comments = None
 
     @property
     def name(self):
-        return "%s [%s]" % (self.rule, self.position)
+        return "%s [%s]" % (self.rule_name, self.position)
 
 
 class Terminal(ParseTreeNode):
@@ -647,7 +649,7 @@ class Terminal(ParseTreeNode):
     Leaf node of the Parse Tree. Represents matched string.
 
     Attributes:
-        rule (str): The name of the rule that created this terminal.
+        rule (ParsingExpression): The rule that created this terminal.
         position (int): A position in the input stream where match occurred.
         value (str): Matched string at the given position or missing token
             name in the case of an error node.
@@ -662,9 +664,9 @@ class Terminal(ParseTreeNode):
     @property
     def desc(self):
         if self.value:
-            return "%s '%s' [%s]" % (self.rule, self.value, self.position)
+            return "%s '%s' [%s]" % (self.rule_name, self.value, self.position)
         else:
-            return "%s [%s]" % (self.rule, self.position)
+            return "%s [%s]" % (self.rule_name, self.position)
 
     def __str__(self):
         return self.value
@@ -720,7 +722,8 @@ class NonTerminal(ParseTreeNode, list):
                 this node rule.
         """
         # Prevent infinite recursion
-        if rule_name == '_expr_cache':
+        if rule_name in ['_expr_cache', '_filtered', 'rule', 'rule_name', 
+                'position', 'append', 'extend']:
             raise AttributeError
 
         # First check the cache
@@ -731,19 +734,22 @@ class NonTerminal(ParseTreeNode, list):
         # with the given rule name and create new NonTerminal
         # and cache it for later access.
         nodes = []
+        rule = None
         for n in self:
             if self._filtered:
                 # For filtered NT rule_name is a rule on
                 # each of its children
                 for m in n:
-                    if m.rule == rule_name:
+                    if m.rule_name == rule_name:
                         nodes.append(m)
+                        rule = m.rule
             else:
-                if n.rule == rule_name:
+                if n.rule_name == rule_name:
                     nodes.append(n)
+                    rule = n.rule
 
         # For expression NonTerminals instances position does not have any sense.
-        result = NonTerminal(rule=rule_name, position=None, nodes=nodes, _filtered=True)
+        result = NonTerminal(rule=rule, position=None, nodes=nodes, _filtered=True)
         self._expr_cache[rule_name] = result
         return result
 
@@ -894,9 +900,9 @@ class Parser(object):
         # visualization
         if self.debug:
             from arpeggio.export import PTDOTExporter
-            root_rule = self.parse_tree.rule
+            root_rule_name = self.parse_tree.rule_name
             PTDOTExporter().exportFile(self.parse_tree,
-                                    "{}_parse_tree.dot".format(root_rule))
+                                    "{}_parse_tree.dot".format(root_rule_name))
         return self.parse_tree
 
     def getASG(self, sem_actions=None, defaults=True):
@@ -940,7 +946,7 @@ class Parser(object):
                 for n in node:
                     child = tree_walk(n)
                     if child is not None:
-                        children.append_result(n.rule, child)
+                        children.append_result(n.rule_name, child)
 
             if self.debug:
                 print("Processing ", node.name, "= '", str(node),
@@ -949,15 +955,15 @@ class Parser(object):
                 for i, a in enumerate(children):
                     print ("\t%d:" % (i + 1), unicode(a), "type:", type(a).__name__)
 
-            if node.rule in sem_actions:
-                sem_action = sem_actions[node.rule]
+            if node.rule_name in sem_actions:
+                sem_action = sem_actions[node.rule_name]
                 if type(sem_action) is types.FunctionType:
                     retval = sem_action(self, node, children)
                 else:
                     retval = sem_action.first_pass(self, node, children)
 
                 if hasattr(sem_action, "second_pass"):
-                    for_second_pass.append((node.rule, retval))
+                    for_second_pass.append((node.rule_name, retval))
 
                 if self.debug:
                     print("\tApplying semantic action ", type(sem_action))
@@ -1071,9 +1077,9 @@ class Parser(object):
                 if self.nm is None or args[0].position > self.nm.position:
                     self.nm = args[0]
             else:
-                rule, position, parser = args
+                rule_name, position, parser = args
                 if self.nm is None or position > self.nm.position:
-                    self.nm = NoMatch(rule, position, parser)
+                    self.nm = NoMatch(rule_name, position, parser)
         raise self.nm
 
 
@@ -1106,7 +1112,7 @@ class ParserPython(Parser):
         # Comments should be optional and there can be more of them
         if self.comments_model:  # and not isinstance(self.comments_model, ZeroOrMore):
             self.comments_model.root = True
-            self.comments_model.rule = comment_def.__name__
+            self.comments_model.rule_name = comment_def.__name__
 
     def _parse(self):
         return self.parser_model.parse(self)
@@ -1127,11 +1133,11 @@ class ParserPython(Parser):
         def inner_from_python(expression):
             retval = None
             if type(expression) == types.FunctionType:  # Is this expression a parser rule?
-                rule = expression.__name__
-                if rule in __rule_cache:
-                    c_rule = __rule_cache.get(rule)
+                rule_name = expression.__name__
+                if rule_name in __rule_cache:
+                    c_rule = __rule_cache.get(rule_name)
                     if self.debug:
-                        print("Rule {} founded in cache.".format(rule))
+                        print("Rule {} founded in cache.".format(rule_name))
                     if isinstance(c_rule, CrossRef):
                         self.__cross_refs += 1
                         if self.debug:
@@ -1141,10 +1147,10 @@ class ParserPython(Parser):
 
                 # Semantic action for the rule
                 if hasattr(expression, "sem"):
-                    self.sem_actions[rule] = expression.sem
+                    self.sem_actions[rule_name] = expression.sem
 
                 # Register rule cross-ref to support recursion
-                __rule_cache[rule] = CrossRef(rule)
+                __rule_cache[rule_name] = CrossRef(rule_name)
 
                 curr_expr = expression
                 while type(curr_expr) is types.FunctionType:
@@ -1152,14 +1158,14 @@ class ParserPython(Parser):
                     # go into until non-function is returned.
                     curr_expr = curr_expr()
                 retval = inner_from_python(curr_expr)
-                retval.rule = rule
+                retval.rule_name = rule_name
                 retval.root = True
 
                 # Update cache
-                __rule_cache[rule] = retval
+                __rule_cache[rule_name] = retval
                 if self.debug:
                     print("New rule: {} -> {}"
-                          .format(rule, retval.__class__.__name__))
+                          .format(rule_name, retval.__class__.__name__))
 
             elif isinstance(expression, StrMatch):
                 if expression.ignore_case is None:

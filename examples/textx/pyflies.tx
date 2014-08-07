@@ -1,5 +1,5 @@
 /*
-  This is a TextX definition of pyFlies DSL for Reaction Time test
+  This is a TextX specification of pyFlies DSL for Reaction Time test
   experiments definition.
   Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
   Copyright: (c) 2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
@@ -21,7 +21,7 @@ TestType:
 ;
 
 TestParam:
-  name=ID TestParamValue label=TestParamLabel?
+  name=ID TestParamValue
 ;
 
 TestParamValue:
@@ -34,7 +34,7 @@ TestParamLabel:
 
 
 Block:
-  Intro|Test|Sequence|Randomize
+  Intro|Test|Sequence|Randomize|Subject
 ;
 
 Experiment:
@@ -63,6 +63,20 @@ Intro:
   /====*/
   content=/([^=][^=]?[^=]?)*/
   /====*/
+;
+
+Subject:
+  'subject' '{'
+    attribute+=SubjectAttribute
+  '}'
+;
+
+SubjectAttribute:
+  name=ID type=("int"|"string"|"float"|Enum)  label=STRING?
+;
+
+Enum:
+  '[' values+={ID ','} ']'
 ;
 
 // Special rule for comments

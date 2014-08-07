@@ -49,7 +49,7 @@ experiment {
   # Variable_name, type, optional label
   # Type can be: str, int, float or enumerated list
   subject {
-    full_name str "First and last name"
+    full_name string "First and last name"
     age int
     gender [Male, Female] "Gender"
   }

@@ -13,7 +13,7 @@
 from collections import namedtuple
 
 from arpeggio import StrMatch, Optional, ZeroOrMore, OneOrMore, Sequence,\
-    OrderedChoice, RegExMatch, EOF,\
+    OrderedChoice, RegExMatch, NoMatch, EOF,\
     SemanticAction,ParserPython, Combine, Parser, SemanticActionSingleChild,\
     SemanticActionBodyWithBraces
 from arpeggio.export import PMDOTExporter, PTDOTExporter
@@ -42,7 +42,7 @@ def repeat_operator():      return ['*', '?', '+']
 def assignment():           return attribute, assignment_op, assignment_rhs
 def attribute():            return ident
 def assignment_op():        return ["=", "*=", "+=", "?="]
-def assignment_rhs():       return [rule_ref, list_match, terminal_match]
+def assignment_rhs():       return [rule_ref, list_match, terminal_match, bracketed_choice]
 
 # Match
 def match():                return [terminal_match, list_match, rule_ref]
@@ -57,8 +57,8 @@ def list_separator():       return terminal_match
 # Rule reference
 def rule_ref():             return [rule_match, rule_link]
 def rule_match():           return ident
-def rule_link():            return '[', rule_choice, ']'
-def rule_choice():          return rule_name, ZeroOrMore('|', rule_name)
+def rule_link():            return '[', rule_name, ']'
+#def rule_choice():          return rule_name, ZeroOrMore('|', rule_name)
 def rule_name():            return ident
 
 def ident():                return _(r'\w+')
@@ -70,6 +70,11 @@ def comment_line():         return _(r'//.*$')
 def comment_block():        return _(r'/\*(.|\n)*?\*/')
 
 
+# Special rules - primitive types
+ID      = _(r'[^\d\W]\w*\b', rule='ID', root=True)
+INT     = _(r'[-+]?[0-9]+', rule='INT', root=True)
+FLOAT   = _(r'[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?', 'FLOAT', root=True)
+STRING  = _(r'("[^"]*")|(\'[^\']*\')', 'STRING', root=True)
 
 class RuleMatchCrossRef(object):
     """Helper class used for cross reference resolving."""
@@ -78,7 +83,16 @@ class RuleMatchCrossRef(object):
         self.position = position
 
 
-class TextXSemanticError(Exception):
+# TextX Exceptions
+class TextXError(Exception):
+    pass
+
+
+class TextXSemanticError(TextXError):
+    pass
+
+
+class TextXSyntaxError(TextXError):
     pass
 
 
@@ -94,11 +108,18 @@ class TextXModelSA(SemanticAction):
             """
             def __init__(self, *args, **kwargs):
                 super(TextXLanguageParser, self).__init__(*args, **kwargs)
-                self.parser_model = Sequence(nodes=children[:], rule='model', root=True)
+
+                # By default first rule is starting rule
+                self.parser_model = children[0]
                 self.comments_model = parser._peg_rules.get('__comment', None)
 
+                self.debug = parser.debug
+
             def _parse(self):
-                return self.parser_model.parse(self)
+                try:
+                    return self.parser_model.parse(self)
+                except NoMatch as e:
+                    raise TextXSyntaxError(str(e))
 
         textx_parser = TextXLanguageParser()
 
@@ -152,98 +173,113 @@ class TextXModelSA(SemanticAction):
 
         return textx_parser
 
-
-class MetaClassSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        rule_name, rule = children
-
-        # Do some name mangling for comment rule
-        # to prevent refererencing from other rules
-        if rule_name.lower() == "comment":
-            rule_name = "__comment"
-
-        parser._peg_rules[rule_name] = rule
-        return rule
-
-
-class MetaClassNameSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        class Meta(object):
-            """Dynamic metaclass."""
-            pass
-        name = str(node)
-        cls = Meta
-        cls.__name__ = name
-        # TODO: Attributes and inheritance
-        parser._metaclasses[name] = cls
-        parser._current_metaclass = cls
-
-        # First rule will be the root of the meta-model
-        if not parser.root_rule_name:
-            parser.root_rule_name = name
-
-        return name
-
-
-class SequenceSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        return Sequence(nodes=children[:])
-
-
-class ChoiceSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        return OrderedChoice(nodes=children[:])
-
-
-class AssignmentSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        #TODO: Register assignment on metaclass
-        return children[2]
-
-
-class ExprSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        if children[1] == '?':
-            return Optional(nodes=[children[0]])
-        elif children[1] == '*':
-            return ZeroOrMore(nodes=[children[0]])
-        elif children[1] == '+':
-            return OneOrMore(nodes=[children[0]])
-        else:
-            TextXSemanticError('Unknown repetition operand "{}" at {}'\
-                    .format(children[1], str(parser.pos_to_linecol(node[1].position))))
-
-
-class StrMatchSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        return StrMatch(children[0], ignore_case=parser.ignore_case)
-
-
-class REMatchSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        to_match = children[0]
-        print("TOMATCH:", to_match)
-        regex = RegExMatch(to_match, ignore_case=parser.ignore_case)
-        regex.compile()
-        return regex
-
-
-class RuleMatchSA(SemanticAction):
-    def first_pass(self, parser, node, children):
-        return RuleMatchCrossRef(str(node), node.position)
-
-
-
 textx_model.sem = TextXModelSA()
-metaclass.sem = MetaClassSA()
-metaclass_name.sem = MetaClassNameSA()
-sequence.sem = SequenceSA()
-choice.sem = ChoiceSA()
+
+
+def metaclass_SA(parser, node, children):
+    rule_name, rule = children
+    rule.rule = rule_name
+    rule.root = True
+
+    # Do some name mangling for comment rule
+    # to prevent refererencing from other rules
+    if rule_name.lower() == "comment":
+        rule_name = "__comment"
+
+    parser._peg_rules[rule_name] = rule
+    return rule
+metaclass.sem = metaclass_SA
+
+def metaclass_name_SA(parser, node, children):
+    class Meta(object):
+        """Dynamic metaclass."""
+        pass
+    name = str(node)
+    cls = Meta
+    cls.__name__ = name
+    # TODO: Attributes and inheritance
+    parser._metaclasses[name] = cls
+    parser._current_metaclass = cls
+
+    # First rule will be the root of the meta-model
+    if not parser.root_rule_name:
+        parser.root_rule_name = name
+
+    return name
+metaclass_name.sem = metaclass_name_SA
+
+def sequence_SA(parser, node, children):
+    return Sequence(nodes=children[:])
+sequence.sem = sequence_SA
+
+def choice_SA(parser, node, children):
+    return OrderedChoice(nodes=children[:])
+choice.sem = choice_SA
+
+def assignment_SA(parser, node, children):
+    #TODO: Register assignment on metaclass
+    # Implement semantic for addition
+    rhs = children[2]
+    op = children[1]
+    if op == '+=':
+        return OneOrMore(nodes=[rhs])
+    elif op == '*=':
+        return ZeroOrMore(nodes=[rhs])
+    elif op == '?=':
+        return Optional(nodes=[rhs])
+    else:
+        return children[2]
+assignment.sem = assignment_SA
+
+def expr_SA(parser, node, children):
+    if children[1] == '?':
+        return Optional(nodes=[children[0]])
+    elif children[1] == '*':
+        return ZeroOrMore(nodes=[children[0]])
+    elif children[1] == '+':
+        return OneOrMore(nodes=[children[0]])
+    else:
+        TextXSemanticError('Unknown repetition operand "{}" at {}'\
+                .format(children[1], str(parser.pos_to_linecol(node[1].position))))
+expr.sem = expr_SA
+
+def str_match_SA(parser, node, children):
+    return StrMatch(children[0], ignore_case=parser.ignore_case)
+str_match.sem = str_match_SA
+
+def re_match_SA(parser, node, children):
+    to_match = children[0]
+    regex = RegExMatch(to_match, ignore_case=parser.ignore_case)
+    try:
+        regex.compile()
+    except Exception as e:
+        raise TextXSyntaxError("{} at {}".format(str(e),\
+            str(parser.pos_to_linecol(node[1].position))))
+    return regex
+re_match.sem = re_match_SA
+
+def rule_match_SA(parser, node, children):
+    return RuleMatchCrossRef(str(node), node.position)
+rule_match.sem = rule_match_SA
+
+def rule_link_SA(parser, node, children):
+    # TODO: In analisys during model parsing this will be a link to some other object
+    # identified by target metaclass ID
+    return ID
+rule_link.sem = rule_link_SA
+
+def list_match_SA(parser, node, children):
+    if len(children)==1:
+        return children[0]
+    else:
+        match = children[0]
+        separator = children[1]
+        return Sequence(nodes=[children[0],
+                ZeroOrMore(nodes=Sequence(nodes=[separator, match]))])
+list_match.sem = list_match_SA
+
+# Default actions
 bracketed_choice.sem = SemanticActionSingleChild()
-expr.sem = ExprSA()
-str_match.sem = StrMatchSA()
-re_match.sem = REMatchSA()
-rule_match.sem = RuleMatchSA()
 
 
 def get_parser(language_def, ignore_case=True, debug=False):
@@ -254,11 +290,10 @@ def get_parser(language_def, ignore_case=True, debug=False):
     # This is used during parser construction phase.
     parser._metaclasses = {}
     parser._peg_rules = {
-            # Special rules - primitive types
-            'ID': _(r'[^\d\W]\w*\b'),
-            'INT': _(r'[-+]?[0-9]+'),
-            'FLOAT': _(r'[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?'),
-            'STRING': _(r'("[^"]*")|(\'[^\']*\')')
+            'ID': ID,
+            'INT': INT,
+            'FLOAT': FLOAT,
+            'STRING': STRING,
             }
     for regex in parser._peg_rules.values():
         regex.compile()
@@ -266,7 +301,10 @@ def get_parser(language_def, ignore_case=True, debug=False):
     parser.root_rule_name = None
 
     # Parse language description with TextX parser
-    parse_tree = parser.parse(language_def)
+    try:
+        parse_tree = parser.parse(language_def)
+    except NoMatch as e:
+        raise TextXSyntaxError(str(e))
 
     # Construct new parser based on the given language description.
     # This parser will have semantic actions in place to create

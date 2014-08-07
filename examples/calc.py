@@ -12,7 +12,6 @@
 
 from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, SemanticAction,\
     ParserPython
-from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 def number():     return _(r'\d*\.\d*|\d+')
@@ -107,24 +106,11 @@ def main(debug=False):
     # are using ParserPython class.
     parser = ParserPython(calc, debug=debug)
 
-    if debug:
-        # Then we export it to a dot file in order to visualise it.
-        # This step is optional but it is handy for debugging purposes.
-        # We can make a png out of it using dot (part of graphviz) like this
-        # dot -O -Tpng calc_parse_tree_model.dot
-        PMDOTExporter().exportFile(parser.parser_model,
-                                "calc_parse_tree_model.dot")
-
     # An expression we want to evaluate
     input_expr = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
 
     # We create a parse tree out of textual input_expr
     parse_tree = parser.parse(input_expr)
-
-    if debug:
-        # Then we export it to a dot file in order to visualise it.
-        # This is also optional.
-        PTDOTExporter().exportFile(parse_tree, "calc_parse_tree.dot")
 
     result = parser.getASG()
 

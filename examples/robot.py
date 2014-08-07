@@ -2,7 +2,7 @@
 # Name: robot.py
 # Purpose: Simple DSL for defining robot movement.
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2011 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2011-2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example is inspired by an example from LISA tool (http://labraj.uni-mb.si/lisa/)
@@ -21,10 +21,9 @@
 from __future__ import print_function
 
 from arpeggio import *
-from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Grammar rules
-def program():      return Kwd('begin'), ZeroOrMore(command), Kwd('end'), EOF
+def robot():      return Kwd('begin'), ZeroOrMore(command), Kwd('end'), EOF
 def command():      return [up, down, left, right]
 def up():           return 'up'
 def down():         return 'down'
@@ -68,7 +67,7 @@ class Command(SemanticAction):
         return children[0]
 
 
-class Program(SemanticAction):
+class Robot(SemanticAction):
     def first_pass(self, parser, node, children):
         if parser.debug:
             print("Evaluating position")
@@ -79,7 +78,7 @@ class Program(SemanticAction):
         return position
 
 # Connecting rules with semantic actions
-program.sem = Program()
+robot.sem = Robot()
 command.sem = Command()
 up.sem = Up()
 down.sem = Down()
@@ -101,24 +100,10 @@ def main(debug=False):
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
-    parser = ParserPython(program, debug=debug)
-
-    if debug:
-        # Then we export it to a dot file in order to visualize it.
-        # This step is optional but it is handy for debugging purposes.
-        # We can make a png out of it using dot (part of graphviz) like this
-        # dot -O -Tpng robot_parser_model.dot
-        PMDOTExporter().exportFile(parser.parser_model,
-                        "robot_parser_model.dot")
+    parser = ParserPython(robot, debug=debug)
 
     # We create a parse tree out of textual input
     parse_tree = parser.parse(input_program)
-
-    if debug:
-        # Then we export it to a dot file in order to visualize it.
-        # dot -O -Tpng robot_parse_tree.dot
-        PTDOTExporter().exportFile(parse_tree,
-                        "robot_parse_tree.dot")
 
     # getASG will start semantic analysis.
     # In this case semantic analysis will evaluate expression and

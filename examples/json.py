@@ -34,7 +34,6 @@ value
 """
 
 from arpeggio import *
-from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 def TRUE():     return "true"
@@ -85,16 +84,8 @@ def main(debug=False):
     # Creating parser from parser model.
     parser = ParserPython(jsonFile, debug=debug)
 
-    if debug:
-        # Exporting parser model to dot file in order to visualise it.
-        PMDOTExporter().exportFile(parser.parser_model, "json_parser_model.dot")
-
     # Parse json string
     parse_tree = parser.parse(testdata)
-
-    if debug:
-        # Export parse tree for visualization
-        PTDOTExporter().exportFile(parser.parse_tree, "json_parse_tree.dot")
 
 if __name__ == "__main__":
     main(debug=True)

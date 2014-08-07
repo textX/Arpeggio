@@ -19,7 +19,7 @@ from arpeggio.peg import SemGrammar, SemRule, SemOrderedChoice, SemSequence,\
     SemPrefix, SemSufix, SemExpression, SemRegEx, SemStrMatch, SemRuleCrossRef
 
 sem_actions = {
-    "grammar":         SemGrammar(),
+    "peggrammar":         SemGrammar(),
     "rule":            SemRule(),
     "ordered_choice":  SemOrderedChoice(),
     "sequence":        SemSequence(),
@@ -34,7 +34,7 @@ sem_actions = {
 
 # PEG defined using PEG itself.
 peg_grammar = r"""
- grammar <- rule+ EOF;
+ peggrammar <- rule+ EOF;
  rule <- rule_name LEFT_ARROW ordered_choice ';';
  ordered_choice <- sequence (SLASH sequence)*;
  sequence <- prefix+;
@@ -64,23 +64,12 @@ def main(debug=False):
 
     # ParserPEG will use ParserPython to parse peg_grammar definition and
     # create parser_model for parsing PEG based grammars
-    parser = ParserPEG(peg_grammar, 'grammar', debug=debug)
-
-
-    if debug:
-        # Exporting parser model to dot file for visualization.
-        PMDOTExporter().exportFile(parser.parser_model,
-                                "peg_peg_parser_model.dot")
+    parser = ParserPEG(peg_grammar, 'peggrammar', debug=debug)
 
     # Now we will use created parser to parse the same peg_grammar used for
     # parser initialization. We can parse peg_grammar because it is specified
     # using PEG itself.
     parser.parse(peg_grammar)
-
-    if debug:
-        # Again we export parse tree in dot file for visualization.
-        PTDOTExporter().exportFile(parser.parse_tree,
-                                "peg_peg_parse_tree.dot")
 
     # ASG should be the same as parser.parser_model because semantic
     # actions will create PEG parser (tree of ParsingExpressions).

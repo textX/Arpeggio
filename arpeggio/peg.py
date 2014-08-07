@@ -34,7 +34,7 @@ def str_match():        return _(r'(\'(\\\'|[^\'])*\')|("[^"]*")')
 def comment():          return "//", _(".*\n")
 
 # PEG syntax rules
-def grammar():          return OneOrMore(rule), EOF
+def peggrammar():      return OneOrMore(rule), EOF
 def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
 def ordered_choice():   return sequence, ZeroOrMore(SLASH, sequence)
 def sequence():         return OneOrMore(prefix)
@@ -205,7 +205,7 @@ class SemStrMatch(SemanticAction):
         return StrMatch(match_str, ignore_case=parser.ignore_case)
 
 
-grammar.sem = SemGrammar()
+peggrammar.sem = SemGrammar()
 rule.sem = SemRule()
 ordered_choice.sem = SemOrderedChoice()
 sequence.sem = SemSequence()
@@ -226,6 +226,14 @@ class ParserPEG(Parser):
         # PEG Abstract Syntax Graph
         self.parser_model = self._from_peg(language_def)
 
+        # In debug mode export parser model to dot for
+        # visualization
+        if self.debug:
+            from arpeggio.export import PMDOTExporter
+            root_rule = self.parser_model.rule
+            PMDOTExporter().exportFile(self.parser_model,
+                                    "{}_peg_parser_model.dot".format(root_rule))
+
         # Comments should be optional and there can be more of them
         if self.comments_model: # and not isinstance(self.comments_model, ZeroOrMore):
             self.comments_model.root = True
@@ -235,7 +243,7 @@ class ParserPEG(Parser):
         return self.parser_model.parse(self)
 
     def _from_peg(self, language_def):
-        parser = ParserPython(grammar, comment, reduce_tree=False)
+        parser = ParserPython(peggrammar, comment, reduce_tree=False, debug=self.debug)
         parser.root_rule_name = self.root_rule_name
         parser.parse(language_def)
 

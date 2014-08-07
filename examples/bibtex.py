@@ -13,7 +13,6 @@ from __future__ import print_function
 import pprint
 import sys, os
 from arpeggio import *
-from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
 
@@ -59,7 +58,7 @@ class BibEntrySem(SemanticAction):
     """
     def first_pass(self, parser, node, children):
         if parser.debug:
-            print("  Processing bibentry %s" % children[2])
+            print("  Processing bibentry %s" % children[1])
         bib_entry_map = {
             'bibtype': children[0],
             'bibkey': children[1]
@@ -109,14 +108,7 @@ def main(debug=False, file_name=None):
     # First we will make a parser - an instance of the bib parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
-    parser = ParserPython(bibfile, reduce_tree=True)
-
-    if debug:
-        # Then we export it to a dot file in order to visualise it. This is
-        # particulary handy for debugging purposes.
-        # We can make a jpg out of it using dot (part of graphviz) like this
-        # dot -O -Tjpg calc_parse_tree_model.dot
-        PMDOTExporter().exportFile(parser.parser_model, "bib_parse_tree_model.dot")
+    parser = ParserPython(bibfile, reduce_tree=True, debug=debug)
 
     if not file_name:
         file_name = os.path.join(os.path.dirname(__file__), 'bibtex_example.bib')
@@ -127,10 +119,6 @@ def main(debug=False, file_name=None):
     # We create a parse tree or abstract syntax tree out of
     # textual input
     parse_tree = parser.parse(bibtexfile_content)
-
-    if debug:
-        # Then we export it to a dot file in order to visualize it.
-        PTDOTExporter().exportFile(parse_tree, "bib_parse_tree.dot")
 
     # getASG will start semantic analysis.
     # In this case semantic analysis will list of bibentry maps.

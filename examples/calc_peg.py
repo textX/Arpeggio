@@ -15,7 +15,6 @@
 from __future__ import absolute_import
 
 from arpeggio.peg import ParserPEG
-from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Semantic actions
 from calc import ToFloat, Factor, Term, Expr 
@@ -45,19 +44,11 @@ def main(debug=False):
     # are using ParserPEG class. Root rule name (parsing expression) is "calc".
     parser = ParserPEG(calc_grammar, "calc", debug=debug)
 
-    if debug:
-        # Then we export it to a dot file.
-        PMDOTExporter().exportFile(parser.parser_model, "calc_peg_parser_model.dot")
-
     # An expression we want to evaluate
     input_expr = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
 
     # Then parse tree is created out of the input_expr expression.
     parse_tree = parser.parse(input_expr)
-
-    if debug:
-        # We save it to dot file in order to visualise it.
-        PTDOTExporter().exportFile(parse_tree, "calc_peg_parse_tree.dot")
 
     result = parser.getASG(sem_actions)
 

@@ -899,6 +899,14 @@ class Parser(object):
         self.input = _input
         self.parser_model.clear_cache()
         self.parse_tree = self._parse()
+
+        # In debug mode export parse tree to dot file for
+        # visualization
+        if self.debug:
+            from arpeggio.export import PTDOTExporter
+            root_rule = self.parse_tree.rule
+            PTDOTExporter().exportFile(self.parse_tree,
+                                    "{}_parse_tree.dot".format(root_rule))
         return self.parse_tree
 
     def getASG(self, sem_actions=None, defaults=True):
@@ -1093,6 +1101,14 @@ class ParserPython(Parser):
         self.parser_model = self._from_python(language_def)
         self.comments_model = self._from_python(comment_def) \
             if comment_def else None
+
+        # In debug mode export parser model to dot for
+        # visualization
+        if self.debug:
+            from arpeggio.export import PMDOTExporter
+            root_rule = language_def.__name__
+            PMDOTExporter().exportFile(self.parser_model,
+                                    "{}_parser_model.dot".format(root_rule))
 
         # Comments should be optional and there can be more of them
         if self.comments_model:  # and not isinstance(self.comments_model, ZeroOrMore):

@@ -125,7 +125,7 @@ class ParsingExpression(object):
     @property
     def name(self):
         if self.root:
-            return "%s(%s)" % (self.rule, self.__class__.__name__)
+            return "%s=%s" % (self.rule, self.__class__.__name__)
         else:
             return self.__class__.__name__
 
@@ -462,7 +462,7 @@ class Match(ParsingExpression):
     Base class for all classes that will try to match something from the input.
     """
     def __init__(self, rule, root=False):
-        super(Match, self).__init__(rule, root)
+        super(Match, self).__init__(rule=rule, root=root)
 
     @property
     def name(self):
@@ -495,8 +495,8 @@ class RegExMatch(Match):
             Default is None to support propagation from global parser setting.
 
     '''
-    def __init__(self, to_match, rule=None, ignore_case=None):
-        super(RegExMatch, self).__init__(rule)
+    def __init__(self, to_match, rule=None, root=False, ignore_case=None):
+        super(RegExMatch, self).__init__(rule, root)
         self.to_match = to_match
         self.ignore_case = ignore_case
 

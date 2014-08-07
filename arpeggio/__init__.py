@@ -947,7 +947,7 @@ class Parser(object):
                       "'  type:", type(node).__name__, \
                       "len:", len(node) if isinstance(node, list) else "")
                 for i, a in enumerate(children):
-                    print ("\t%d:" % (i + 1), str(a), "type:", type(a).__name__)
+                    print ("\t%d:" % (i + 1), unicode(a), "type:", type(a).__name__)
 
             if node.rule in sem_actions:
                 sem_action = sem_actions[node.rule]
@@ -974,7 +974,7 @@ class Parser(object):
                 if retval is None:
                     print("\tSuppressed.")
                 else:
-                    print("\tResolved to = ", str(retval),
+                    print("\tResolved to = ", unicode(retval),
                           "  type:", type(retval).__name__)
             return retval
 

@@ -966,7 +966,10 @@ class Parser(object):
                     for_second_pass.append((node.rule_name, retval))
 
                 if self.debug:
-                    print("\tApplying semantic action ", type(sem_action))
+                    action_name = sem_action.__name__ \
+                            if hasattr(sem_action, '__name__') \
+                            else sem_action.__class__.__name__
+                    print("\tApplying semantic action ", action_name)
 
             else:
                 if defaults:

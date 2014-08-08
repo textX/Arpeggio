@@ -51,21 +51,31 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        rule_name (str): A name of the rule.
+        rule (ParserExpression): A rule that is the source of exception.
         position (int): A position in the input stream where exception
             occurred.
         parser (Parser): An instance of a parser.
+        exp_str(str): What is expected? If not given it is deduced from the rule.
     """
-    def __init__(self, rule_name, position, parser):
-        self.rule_name = rule_name
+    def __init__(self, rule, position, parser, exp_str=None):
+        self.rule = rule
         self.position = position
         self.parser = parser
+        self.exp_str = exp_str
+
+        if not exp_str:
+            if self.rule.root:
+                self.exp_str = rule.rule_name
+            elif isinstance(self.rule, Match):
+                self.exp_str = rule.to_match
+            else:
+                self.exp_str = self.rule.name
 
         # By default when NoMatch is thrown we will go up the Parser Model.
         self._up = True
 
     def __str__(self):
-        return "Expected '{}' at position {} => '{}'.".format(self.rule_name,
+        return "Expected '{}' at position {} => '{}'.".format(self.exp_str,
                 str(self.parser.pos_to_linecol(self.position)),
                 self.parser.context(position=self.position))
 
@@ -407,7 +417,7 @@ class Not(SyntaxPredicate):
                 parser.position = c_pos
                 return
         parser.position = c_pos
-        parser._nm_raise(self.name, c_pos, parser)
+        parser._nm_raise(self, c_pos, parser)
 
 
 class Empty(SyntaxPredicate):
@@ -521,7 +531,7 @@ class RegExMatch(Match):
         else:
             if parser.debug:
                 print("-- NoMatch at {}".format(c_pos))
-            parser._nm_raise(self.name, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
 
 class StrMatch(Match):
@@ -560,7 +570,7 @@ class StrMatch(Match):
         else:
             if parser.debug:
                 print("-- NoMatch at {}".format(c_pos))
-            parser._nm_raise(self.to_match, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
     def __str__(self):
         return self.to_match
@@ -579,7 +589,7 @@ class Kwd(StrMatch):
     A specialization of StrMatch to specify keywords of the language.
     """
     def __init__(self, to_match):
-        super(Kwd, self).__init__(to_match, rule=None)
+        super(Kwd, self).__init__(to_match)
         self.to_match = to_match
         self.root = True
         self.rule_name = 'keyword'
@@ -603,7 +613,7 @@ class EndOfFile(Match):
         else:
             if parser.debug:
                 print("!! EOF not matched.")
-            parser._nm_raise(self.name, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
 
 def EOF():
@@ -1080,9 +1090,9 @@ class Parser(object):
                 if self.nm is None or args[0].position > self.nm.position:
                     self.nm = args[0]
             else:
-                rule_name, position, parser = args
+                rule, position, parser = args
                 if self.nm is None or position > self.nm.position:
-                    self.nm = NoMatch(rule_name, position, parser)
+                    self.nm = NoMatch(rule, position, parser)
         raise self.nm
 
 

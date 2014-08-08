@@ -22,7 +22,10 @@ def main(debug=False):
         pyflies_input = f.read()
     parse_tree = parser.parse(pyflies_input)
 
-    result = parser.getASG()
+    # Construct model from the parse_tree
+    model = parser.get_model()
+    print(model)
+
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

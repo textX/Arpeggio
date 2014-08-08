@@ -15,7 +15,7 @@ from collections import namedtuple
 from arpeggio import StrMatch, Optional, ZeroOrMore, OneOrMore, Sequence,\
     OrderedChoice, RegExMatch, NoMatch, EOF,\
     SemanticAction,ParserPython, Combine, Parser, SemanticActionSingleChild,\
-    SemanticActionBodyWithBraces
+    SemanticActionBodyWithBraces, Terminal
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
@@ -71,10 +71,19 @@ def comment_block():        return _(r'/\*(.|\n)*?\*/')
 
 
 # Special rules - primitive types
-ID      = _(r'[^\d\W]\w*\b', rule='ID', root=True)
-INT     = _(r'[-+]?[0-9]+', rule='INT', root=True)
+ID      = _(r'[^\d\W]\w*\b', rule_name='ID', root=True)
+BOOL    = _(r'true|false|0|1', rule_name='BOOL', root=True)
+INT     = _(r'[-+]?[0-9]+', rule_name='INT', root=True)
 FLOAT   = _(r'[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?', 'FLOAT', root=True)
 STRING  = _(r'("[^"]*")|(\'[^\']*\')', 'STRING', root=True)
+
+def convert(value, _type):
+    return {
+            'BOOL'  : lambda x: bool(x),
+            'INT'   : lambda x: int(x),
+            'FLOAT' : lambda x: float(x)
+            }.get(_type, lambda x: x)(value)
+
 
 class RuleMatchCrossRef(object):
     """Helper class used for cross reference resolving."""
@@ -113,6 +122,11 @@ class TextXModelSA(SemanticAction):
                 self.parser_model = children[0]
                 self.comments_model = parser._peg_rules.get('__comment', None)
 
+                # Stack for metaclass instances
+                self._inst_stack = []
+                # Dict for cross-ref resolving
+                self._instances = {}
+
                 self.debug = parser.debug
 
             def _parse(self):
@@ -120,6 +134,10 @@ class TextXModelSA(SemanticAction):
                     return self.parser_model.parse(self)
                 except NoMatch as e:
                     raise TextXSyntaxError(str(e))
+
+            def get_model(self):
+                return parse_tree_to_objgraph(self, self.parse_tree)
+
 
         textx_parser = TextXLanguageParser()
 
@@ -178,8 +196,8 @@ textx_model.sem = TextXModelSA()
 
 def metaclass_SA(parser, node, children):
     rule_name, rule = children
-    rule.rule = rule_name
-    rule.root = True
+    rule = Sequence(nodes=[rule], rule_name=rule_name,
+            root=True)
 
     # Do some name mangling for comment rule
     # to prevent refererencing from other rules
@@ -193,10 +211,20 @@ metaclass.sem = metaclass_SA
 def metaclass_name_SA(parser, node, children):
     class Meta(object):
         """Dynamic metaclass."""
-        pass
+        def __str__(self):
+            s = "MetaClass: {}\n".format(self.__class__.__name__)
+            for attr in self.__dict__:
+                if not attr.startswith('_'):
+                    value = getattr(self, attr)
+                    if type(value) is not list:
+                        s+="\t{} = {}\n".format(attr, str(value))
+                    else:
+                        s+="["+",".join([str(x) for x in value]) + "]"
+            return s
     name = str(node)
     cls = Meta
     cls.__name__ = name
+    cls.__attrib = {}
     # TODO: Attributes and inheritance
     parser._metaclasses[name] = cls
     parser._current_metaclass = cls
@@ -217,18 +245,46 @@ def choice_SA(parser, node, children):
 choice.sem = choice_SA
 
 def assignment_SA(parser, node, children):
-    #TODO: Register assignment on metaclass
-    # Implement semantic for addition
-    rhs = children[2]
+    """
+    Create parser rule for addition and register attribute types
+    on metaclass.
+    """
+    attr_name = children[0]
     op = children[1]
+    rhs = children[2]
+    mclass = parser._current_metaclass
+    if attr_name in mclass.__attrib:
+        raise TextXSemanticError('Multiple assignment to the same attribute "{}" at {}'\
+                .format(attr_name, parser.pos_to_linecol(node.position)))
     if op == '+=':
-        return OneOrMore(nodes=[rhs])
+        assignment_rule = OneOrMore(nodes=[rhs],
+                rule_name='__asgn_oneormore', root=True)
+        mclass.__attrib[attr_name] = list
     elif op == '*=':
-        return ZeroOrMore(nodes=[rhs])
+        assignment_rule = ZeroOrMore(nodes=[rhs],
+                rule_name='__asgn_zeroormore', root=True)
+        mclass.__attrib[attr_name] = list
     elif op == '?=':
-        return Optional(nodes=[rhs])
+        assignment_rule = Optional(nodes=[rhs],
+                rule_name='__asgn_optional', root=True)
+        mclass.__attrib[attr_name] = bool
     else:
-        return children[2]
+        assignment_rule = Sequence(nodes=[rhs],
+                rule_name='__asgn_plain', root=True)
+        # Determine type for proper initialization
+        if rhs.rule_name == 'INT':
+            mclass.__attrib[attr_name] = int
+        elif rhs.rule_name == 'FLOAT':
+            mclass.__attrib[attr_name] = float
+        elif rhs.rule_name == 'BOOL':
+            mclass.__attrib[attr_name] = bool
+        elif rhs.rule_name == 'STRING':
+            mclass.__attrib[attr_name] = str
+        else:
+            mclass.__attrib[attr_name] = None
+
+    assignment_rule._attr_name = attr_name
+    return assignment_rule
 assignment.sem = assignment_SA
 
 def expr_SA(parser, node, children):
@@ -274,6 +330,7 @@ def list_match_SA(parser, node, children):
     else:
         match = children[0]
         separator = children[1]
+        separator.rule_name = 'sep'
         return Sequence(nodes=[children[0],
                 ZeroOrMore(nodes=Sequence(nodes=[separator, match]))])
 list_match.sem = list_match_SA
@@ -281,6 +338,89 @@ list_match.sem = list_match_SA
 # Default actions
 bracketed_choice.sem = SemanticActionSingleChild()
 
+
+def parse_tree_to_objgraph(parser, parse_tree):
+    """
+    Transforms parse_tree to object graph representing model in a
+    new language.
+    """
+
+    def process_node(node):
+        if isinstance(node, Terminal):
+            return convert(node.value, node.rule_name)
+
+        assert node.rule.root, "{}".format(node.rule.rule_name)
+        # If this node is created by some root rule
+        # create metaclass instance.
+        inst = None
+        if not node.rule_name.startswith('__asgn'):
+            # If not assignment
+            # Create metaclass instance
+            mclass = parser._metaclasses[node.rule_name]
+
+            # If there is no attributes collected it is an abstract rule
+            # Skip it.
+            if not mclass.__attrib:
+                return process_node(node[0])
+
+            inst = mclass()
+            # Initialize attributes
+            for attr_name, constructor in mclass.__attrib.items():
+                init_value = constructor() if constructor else None
+                setattr(inst, attr_name, init_value)
+
+            parser._inst_stack.append(inst)
+
+            for n in node:
+                process_node(n)
+
+        else:
+            # Handle assignments
+            attr_name = node.rule._attr_name
+            op = node.rule_name.split('_')[-1]
+            i = parser._inst_stack[-1]
+
+            print('ASSIGNMENT', op, attr_name)
+
+            if op == 'optional':
+                setattr(i, attr_name, True)
+
+            elif op == 'plain':
+                attr = getattr(i, attr_name)
+                # Recurse and convert value to proper type
+                value = convert(process_node(node[0]), node[0].rule_name)
+                if type(attr) is list:
+                    attr.append(value)
+                else:
+                    setattr(i, attr_name, value)
+
+            elif op in ['oneormore', 'zeroormore']:
+                for n in node:
+                    # If the node is separator skip
+                    if n.rule_name != 'sep':
+                        # Convert node to proper type
+                        # Rule links will be resolved later
+                        value = convert(process_node(node[0]), node[0].rule_name)
+                        getattr(i, attr_name).append(value)
+            else:
+                # This shouldn't happen
+                assert False
+
+
+        # Special case for 'name' attrib. It is used for cross-referencing
+        if hasattr(inst, 'name') and inst.name:
+            inst.__name__ = inst.name
+            parser._instances[inst.name] = inst
+
+        if inst:
+            parser._inst_stack.pop()
+
+        return inst
+
+    model = process_node(parse_tree)
+    assert not parser._inst_stack
+
+    return model
 
 def get_parser(language_def, ignore_case=True, debug=False):
     # First create parser for TextX descriptions
@@ -294,6 +434,7 @@ def get_parser(language_def, ignore_case=True, debug=False):
             'INT': INT,
             'FLOAT': FLOAT,
             'STRING': STRING,
+            'BOOL': BOOL,
             }
     for regex in parser._peg_rules.values():
         regex.compile()
@@ -307,8 +448,6 @@ def get_parser(language_def, ignore_case=True, debug=False):
         raise TextXSyntaxError(str(e))
 
     # Construct new parser based on the given language description.
-    # This parser will have semantic actions in place to create
-    # object model from the textx textual representations.
     lang_parser = parser.getASG()
 
     if debug:
@@ -317,5 +456,7 @@ def get_parser(language_def, ignore_case=True, debug=False):
                 "{}_parser_model.dot".format(parser.root_rule_name))
 
     return lang_parser
+
+
 
 

@@ -7,7 +7,11 @@
 */
 
 PyFliesModel:
-  TestDef* Experiment
+  elements+=ModelElement
+;
+
+ModelElement:
+  TestDef|Experiment
 ;
 
 TestDef:
@@ -21,12 +25,12 @@ TestType:
 ;
 
 TestParam:
-  name=ID TestParamValue
+  name=ID value=(ID|FLOAT|INT|STRING)
 ;
 
-TestParamValue:
-  (value=ID|FLOAT|INT|STRING)|( '[' value+={ID ","} ']')
-;
+/* TestParamValue: */
+/*   (value=ID|FLOAT|INT|STRING)|( '[' value+={ID ","} ']') */
+/* ; */
 
 TestParamLabel:
   label = STRING

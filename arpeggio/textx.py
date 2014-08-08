@@ -15,7 +15,7 @@ from collections import namedtuple
 from arpeggio import StrMatch, Optional, ZeroOrMore, OneOrMore, Sequence,\
     OrderedChoice, RegExMatch, NoMatch, EOF,\
     SemanticAction,ParserPython, Combine, Parser, SemanticActionSingleChild,\
-    SemanticActionBodyWithBraces, Terminal
+    SemanticActionBodyWithBraces, Terminal, ParsingExpression
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio import RegExMatch as _
 
@@ -149,43 +149,37 @@ class TextXModelSA(SemanticAction):
     def second_pass(self, parser, textx_parser):
         """Cross reference resolving for parser model."""
 
+        if parser.debug:
+            print("RESOLVING XTEXT PARSER: second_pass")
+
         resolved_set = set()
 
         def resolve(node):
             """Recursively resolve peg rule references."""
-            if node in resolved_set or not hasattr(node, 'nodes'):
-                return
-
-            resolved_set.add(node)
 
             def _inner_resolve(rule):
-                if type(rule) == RuleMatchCrossRef:
-                    if rule.rule_name in textx_parser._peg_rules:
-                        rule_name = rule.rule_name
-                        rule = textx_parser._peg_rules[rule.rule_name]
+                if parser.debug:
+                    print("Resolving rule: {}".format(rule))
 
-                        # Cached rule may be crossref also.
-                        while type(rule) == RuleMatchCrossRef:
-                            rule_name = rule.rule_name
-                            rule = _inner_resolve(rule)
-                            # Rewrite rule in the rules map
-                            textx_parser._peg_rules[rule_name] = rule
+                if type(rule) == RuleMatchCrossRef:
+                    rule_name = rule.rule_name
+                    if rule_name in textx_parser._peg_rules:
+                        rule = textx_parser._peg_rules[rule_name]
+                    else:
+                        raise TextXSemanticError('Unexisting rule "{}" at position {}.'\
+                                .format(rule.rule_name, parser.pos_to_linecol(rule.position)))
+
+                assert isinstance(rule, ParsingExpression), type(rule)
+                # Recurse
+                for idx, child in enumerate(rule.nodes):
+                    if not child in resolved_set:
+                        resolved_set.add(rule)
+                        rule.nodes[idx] = _inner_resolve(child)
 
                 return rule
 
-            for idx, rule in enumerate(node.nodes):
-                # If crossref resolve
-                if type(rule) == RuleMatchCrossRef:
-                    rule = _inner_resolve(rule)
-                    node.nodes[idx] = _inner_resolve(rule)
-
-                # If still unresolved raise exception
-                if type(rule) == RuleMatchCrossRef:
-                    raise TextXSemanticError('Unexisting rule "{}" at position {}.'\
-                            .format(rule.rule_name, parser.pos_to_linecol(rule.position)))
-
-                # Depth-First processing
-                resolve(rule)
+            resolved_set.add(node)
+            _inner_resolve(node)
 
         resolve(textx_parser.parser_model)
 

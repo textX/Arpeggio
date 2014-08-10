@@ -245,17 +245,18 @@ class ParsingExpression(object):
             if parser.debug:
                 print("<< Leaving rule {}".format(self.name))
 
-        # Create terminal or non-terminal if result is not
-        # already a Terminal.
+        # For root rules flatten non-terminal/list
         if self.root and result and not isinstance(result, Terminal):
-            if parser.reduce_tree:
-                if isinstance(result, list):
-                    result = flatten(result)
-                    if len(result) == 1:
-                        result = result[0]
-                    else:
-                        result = NonTerminal(self, c_pos, result)
-            else:
+            if not isinstance(result, NonTerminal):
+                result = flatten(result)
+
+            # Tree reduction will eliminate Non-terminal with single child.
+            if parser.reduce_tree and len(result) == 1:
+                result = result[0]
+
+            # If the result is not parse tree node it must be a plain list
+            # so create a new NonTerminal.
+            if not isinstance(result, ParseTreeNode):
                 result = NonTerminal(self, c_pos, result)
 
         # Result caching for use by memoization.

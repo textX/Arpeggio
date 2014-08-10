@@ -464,8 +464,6 @@ class Combine(Decorator):
         finally:
             parser._in_lex_rule = old_in_lex_rule
 
-        return results
-
 
 class Match(ParsingExpression):
     """

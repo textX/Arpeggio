@@ -206,8 +206,8 @@ class ParsingExpression(object):
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             if parser.debug:
-                print("** Cache hit for [{}, {}] = '{}'"
-                      .format(self.name, c_pos, str(result)))
+                print("** Cache hit for [{}, {}] = '{}' : new_pos={}"
+                      .format(self.name, c_pos, str(result), str(new_pos)))
                 print("<< Leaving rule {}".format(self.name))
 
             # If NoMatch is recorded at this position raise.

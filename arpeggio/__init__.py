@@ -64,7 +64,10 @@ class NoMatch(Exception):
         self.exp_str = exp_str
 
         if not exp_str:
-            if self.rule.root:
+            if hasattr(self.rule, '_exp_str'):
+                # Rule may override error message
+                self.exp_str = self.rule._exp_str
+            elif self.rule.root:
                 self.exp_str = rule.rule_name
             elif isinstance(self.rule, Match):
                 self.exp_str = rule.to_match

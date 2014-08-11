@@ -30,9 +30,9 @@ def metaclass():            return metaclass_name, ":", choice, ';'
 def metaclass_name():       return ident
 
 def choice():               return sequence, ZeroOrMore("|", sequence)
-def sequence():             return OneOrMore(expr)
+def sequence():             return OneOrMore([assignment, expr])
 
-def expr():                 return [assignment, terminal_match, rule_match,
+def expr():                 return [terminal_match, rule_match,
                                     bracketed_choice],\
                                     Optional(repeat_operator)
 def bracketed_choice():     return '(', choice, ')'
@@ -42,8 +42,8 @@ def repeat_operator():      return ['*', '?', '+']
 def assignment():           return attribute, assignment_op, assignment_rhs
 def attribute():            return ident
 def assignment_op():        return ["=", "*=", "+=", "?="]
-def assignment_rhs():       return [rule_ref, list_match, terminal_match, bracketed_choice]
-
+def assignment_rhs():       return [rule_ref, list_match, terminal_match, bracketed_choice], \
+                                    Optional(repeat_operator)
 # Match
 def match():                return [terminal_match, list_match, rule_ref]
 def terminal_match():       return [str_match, re_match]
@@ -92,6 +92,10 @@ class RuleMatchCrossRef(object):
         self.position = position
 
 
+class TextXMetaClass(object):
+    pass
+
+
 # TextX Exceptions
 class TextXError(Exception):
     pass
@@ -119,7 +123,9 @@ class TextXModelSA(SemanticAction):
                 super(TextXLanguageParser, self).__init__(*args, **kwargs)
 
                 # By default first rule is starting rule
-                self.parser_model = children[0]
+                # and must be followed by the EOF
+                self.parser_model = Sequence(nodes=[children[0], EOF()],\
+                        rule_name='ModelFile', root=True)
                 self.comments_model = parser._peg_rules.get('__comment', None)
 
                 # Stack for metaclass instances
@@ -136,7 +142,11 @@ class TextXModelSA(SemanticAction):
                     raise TextXSyntaxError(str(e))
 
             def get_model(self):
-                return parse_tree_to_objgraph(self, self.parse_tree)
+                if self.debug:
+                    print("*** MODEL ***")
+                # Transform parse tree to model. Skip root node which
+                # represents the whole file ending in EOF.
+                return parse_tree_to_objgraph(self, self.parse_tree[0])
 
 
         textx_parser = TextXLanguageParser()
@@ -181,6 +191,9 @@ class TextXModelSA(SemanticAction):
             resolved_set.add(node)
             _inner_resolve(node)
 
+        if parser.debug:
+            print("CROSS-REFS RESOLVING")
+
         resolve(textx_parser.parser_model)
 
         return textx_parser
@@ -191,7 +204,7 @@ textx_model.sem = TextXModelSA()
 def metaclass_SA(parser, node, children):
     rule_name, rule = children
     rule = Sequence(nodes=[rule], rule_name=rule_name,
-            root=True)
+             root=True)
 
     # Do some name mangling for comment rule
     # to prevent refererencing from other rules
@@ -203,10 +216,10 @@ def metaclass_SA(parser, node, children):
 metaclass.sem = metaclass_SA
 
 def metaclass_name_SA(parser, node, children):
-    class Meta(object):
+    class Meta(TextXMetaClass):
         """Dynamic metaclass."""
         def __str__(self):
-            s = "MetaClass: {}\n".format(self.__class__.__name__)
+            s = "{{MetaClass: {}\n".format(self.__class__.__name__)
             for attr in self.__dict__:
                 if not attr.startswith('_'):
                     value = getattr(self, attr)
@@ -214,7 +227,7 @@ def metaclass_name_SA(parser, node, children):
                         s+="\t{} = {}\n".format(attr, str(value))
                     else:
                         s+="["+",".join([str(x) for x in value]) + "]"
-            return s
+            return "{}}}".format(s)
     name = str(node)
     cls = Meta
     cls.__name__ = name
@@ -222,6 +235,9 @@ def metaclass_name_SA(parser, node, children):
     # TODO: Attributes and inheritance
     parser._metaclasses[name] = cls
     parser._current_metaclass = cls
+
+    if parser.debug:
+        print("Creating metaclass: {}".format(name))
 
     # First rule will be the root of the meta-model
     if not parser.root_rule_name:
@@ -238,6 +254,20 @@ def choice_SA(parser, node, children):
     return OrderedChoice(nodes=children[:])
 choice.sem = choice_SA
 
+def assignment_rhs_SA(parser, node, children):
+    rule = children[0]
+    if len(children)==1:
+        return rule
+
+    rep_op = children[1]
+    if rep_op == '?':
+        return Optional(nodes=[rule])
+    elif rep_op == '*':
+        return ZeroOrMore(nodes=[rule])
+    else:
+        return OneOrMore(nodes=[rule])
+assignment_rhs.sem = assignment_rhs_SA
+
 def assignment_SA(parser, node, children):
     """
     Create parser rule for addition and register attribute types
@@ -246,6 +276,10 @@ def assignment_SA(parser, node, children):
     attr_name = children[0]
     op = children[1]
     rhs = children[2]
+
+    if parser.debug:
+        print("Processing assignment {}{}...".format(attr_name, op))
+
     mclass = parser._current_metaclass
     if attr_name in mclass.__attrib:
         raise TextXSemanticError('Multiple assignment to the same attribute "{}" at {}'\
@@ -278,19 +312,21 @@ def assignment_SA(parser, node, children):
             mclass.__attrib[attr_name] = None
 
     assignment_rule._attr_name = attr_name
+    assignment_rule._exp_str = attr_name    # For nice error reporting
     return assignment_rule
 assignment.sem = assignment_SA
 
 def expr_SA(parser, node, children):
-    if children[1] == '?':
-        return Optional(nodes=[children[0]])
-    elif children[1] == '*':
-        return ZeroOrMore(nodes=[children[0]])
-    elif children[1] == '+':
-        return OneOrMore(nodes=[children[0]])
-    else:
-        TextXSemanticError('Unknown repetition operand "{}" at {}'\
-                .format(children[1], str(parser.pos_to_linecol(node[1].position))))
+    if len(children)>1:
+        if children[1] == '?':
+            return Optional(nodes=[children[0]])
+        elif children[1] == '*':
+            return ZeroOrMore(nodes=[children[0]])
+        elif children[1] == '+':
+            return OneOrMore(nodes=[children[0]])
+        else:
+            TextXSemanticError('Unknown repetition operand "{}" at {}'\
+                    .format(children[1], str(parser.pos_to_linecol(node[1].position))))
 expr.sem = expr_SA
 
 def str_match_SA(parser, node, children):
@@ -343,7 +379,7 @@ def parse_tree_to_objgraph(parser, parse_tree):
         if isinstance(node, Terminal):
             return convert(node.value, node.rule_name)
 
-        assert node.rule.root, "{}".format(node.rule.rule_name)
+        assert node.rule.root, "Not a root node: {}".format(node.rule.rule_name)
         # If this node is created by some root rule
         # create metaclass instance.
         inst = None
@@ -357,6 +393,9 @@ def parse_tree_to_objgraph(parser, parse_tree):
             if not mclass.__attrib:
                 return process_node(node[0])
 
+            if parser.debug:
+                print("CREATING INSTANCE {}".format(node.rule_name))
+
             inst = mclass()
             # Initialize attributes
             for attr_name, constructor in mclass.__attrib.items():
@@ -366,6 +405,8 @@ def parse_tree_to_objgraph(parser, parse_tree):
             parser._inst_stack.append(inst)
 
             for n in node:
+                if parser.debug:
+                    print("Recursing into {} = '{}'".format(type(n).__name__, str(n)))
                 process_node(n)
 
         else:
@@ -374,15 +415,22 @@ def parse_tree_to_objgraph(parser, parse_tree):
             op = node.rule_name.split('_')[-1]
             i = parser._inst_stack[-1]
 
-            print('ASSIGNMENT', op, attr_name)
+            if parser.debug:
+                print('Handling assignment: {} {}...'.format(op, attr_name))
 
             if op == 'optional':
                 setattr(i, attr_name, True)
 
             elif op == 'plain':
                 attr = getattr(i, attr_name)
+                if attr and type(attr) is not list:
+                    raise TextXSemanticError("Multiple assignments to meta-attribute {} at {}"\
+                            .format(attr_name, parser.pos_to_linecol(node.position)))
+
                 # Recurse and convert value to proper type
                 value = convert(process_node(node[0]), node[0].rule_name)
+                if parser.debug:
+                    print("{} = {}".format(attr_name, value))
                 if type(attr) is list:
                     attr.append(value)
                 else:
@@ -394,20 +442,27 @@ def parse_tree_to_objgraph(parser, parse_tree):
                     if n.rule_name != 'sep':
                         # Convert node to proper type
                         # Rule links will be resolved later
-                        value = convert(process_node(node[0]), node[0].rule_name)
+                        value = convert(process_node(n), n.rule_name)
+                        if parser.debug:
+                            print("{}:{}[] = {}".format(type(i).__name__, 
+                                attr_name, value))
                         getattr(i, attr_name).append(value)
             else:
                 # This shouldn't happen
                 assert False
-
 
         # Special case for 'name' attrib. It is used for cross-referencing
         if hasattr(inst, 'name') and inst.name:
             inst.__name__ = inst.name
             parser._instances[inst.name] = inst
 
-        if inst:
-            parser._inst_stack.pop()
+        if inst is not None:
+            assert isinstance(inst, TextXMetaClass), type(inst)
+            old = parser._inst_stack.pop()
+            if parser.debug:
+                old_str = "{}(name={})".format(type(old).__name__, old.name)  \
+                        if hasattr(old, 'name') else type(old).__name__
+                print("LEAVING INSTANCE {}".format(old_str))
 
         return inst
 
@@ -417,6 +472,10 @@ def parse_tree_to_objgraph(parser, parse_tree):
     return model
 
 def get_parser(language_def, ignore_case=True, debug=False):
+
+    if debug:
+        print("*** TEXTX PARSER ***")
+
     # First create parser for TextX descriptions
     parser = ParserPython(textx_model, comment_def=comment,
             ignore_case=ignore_case, reduce_tree=True, debug=debug)

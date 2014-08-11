@@ -16,6 +16,17 @@ from arpeggio.export import PMDOTExporter, PTDOTExporter
 __all__ = ['ParserPEG']
 
 
+# PEG syntax rules
+def peggrammar():       return OneOrMore(rule), EOF
+def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
+def ordered_choice():   return sequence, ZeroOrMore(SLASH, sequence)
+def sequence():         return OneOrMore(prefix)
+def prefix():           return Optional([AND,NOT]), sufix
+def sufix():            return expression, Optional([QUESTION, STAR, PLUS])
+def expression():       return [regex, rule_crossref,
+                                (OPEN, ordered_choice, CLOSE),
+                                str_match]
+
 # PEG Lexical rules
 def LEFT_ARROW():       return "<-"
 def SLASH():            return "/"
@@ -33,38 +44,49 @@ def rule_crossref():    return rule_name
 def str_match():        return _(r'(\'(\\\'|[^\'])*\')|("[^"]*")')
 def comment():          return "//", _(".*\n")
 
-# PEG syntax rules
-def peggrammar():      return OneOrMore(rule), EOF
-def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
-def ordered_choice():   return sequence, ZeroOrMore(SLASH, sequence)
-def sequence():         return OneOrMore(prefix)
-def prefix():           return Optional([AND,NOT]), sufix
-def sufix():            return expression, Optional([QUESTION, STAR, PLUS])
-def expression():       return [regex, rule_crossref,
-                                (OPEN, ordered_choice, CLOSE),
-                                str_match]
-
-
 # ------------------------------------------------------------------
 # PEG Semantic Actions
 
-class PEGSemanticAction(SemanticAction):
+class SemGrammar(SemanticAction):
 
-    def _resolve(self, parser, rule_name):
+    def first_pass(self, parser, node, children):
+        return parser.peg_rules[parser.root_rule_name]
 
-        if rule_name in parser.peg_rules:
-            resolved_rule = parser.peg_rules[rule_name]
-            if type(resolved_rule) is CrossRef:
-                resolved_rule = self._resolve(parser, resolved_rule.rule_name)
+    def _resolve(self, parser, node):
 
-            if parser.debug:
-                print("Resolving: CrossRef {} => {}".format(rule_name, 
-                    resolved_rule.name))
+        def get_rule_by_name(rule_name):
+            if rule_name in parser.peg_rules:
+                return parser.peg_rules[rule_name]
+            else:
+                raise SemanticError("Rule \"{}\" does not exists."
+                                    .format(n.rule_name))
 
-            return resolved_rule
-        else:
-            raise SemanticError("Rule \"{}\" does not exists."
-                                .format(rule_name))
+        for i, n in enumerate(node.nodes):
+            if isinstance(n, CrossRef):
+                rule_name = n.rule_name
+                if parser.debug:
+                    print("Resolving crossref {}".format(rule_name))
+                resolved_rule = get_rule_by_name(rule_name)
+                while type(resolved_rule) is CrossRef:
+                    target_rule = resolved_rule.rule_name
+                    resolved_rule = get_rule_by_name(target_rule)
+                # If resolved rule hasn't got the same name it
+                # should be cloned and preserved in the peg_rules cache
+                if resolved_rule.rule_name != rule_name:
+                    resolved_rule = copy.copy(resolved_rule)
+                    resolved_rule.rule_name = rule_name
+                    parser.peg_rules[rule_name] = resolved_rule
+
+                    if parser.debug:
+                        print("Resolving: cloned to {} = > {}"\
+                                .format(resolved_rule.rule_name, resolved_rule.name))
+                node.nodes[i] = resolved_rule
+            else:
+                resolved_rule = n
+
+            if not resolved_rule in self.resolved:
+                self.resolved.add(resolved_rule)
+                self._resolve(parser, resolved_rule)
 
     def second_pass(self, parser, node):
         '''
@@ -73,148 +95,106 @@ class PEGSemanticAction(SemanticAction):
         if parser.debug:
             print("Second pass:", type(node), str(node))
 
-        if isinstance(node, ParsingExpression):
-
-            for i, n in enumerate(node.nodes):
-                if isinstance(n, CrossRef):
-                    resolved_rule = self._resolve(parser, n.rule_name)
-
-                    # If resolved rule hasn't got the same name it
-                    # should be cloned and preserved in the peg_rules cache
-                    if resolved_rule.rule_name != n.rule_name:
-                        resolved_rule = copy.copy(resolved_rule)
-                        resolved_rule.rule_name = n.rule_name
-                        parser.peg_rules[resolved_rule.rule_name] = resolved_rule
-
-                        if parser.debug:
-                            print("Resolving: cloned to {} = > {}"\
-                                    .format(resolved_rule.rule_name, resolved_rule.name))
-
-                    node.nodes[i] = resolved_rule
-
-            return node
-
-        elif not isinstance(node, CrossRef):
-            raise SemanticError("Invalid type '{}'({}) after first pass."
-                                .format(type(node), str(node)))
+        self.resolved = set()
+        self._resolve(parser, node)
+        return node
+peggrammar.sem = SemGrammar()
 
 
-class SemGrammar(SemanticAction):
-    def first_pass(self, parser, node, children):
-        return parser.peg_rules[parser.root_rule_name]
+def sem_rule(parser, node, children):
+    rule_name = children[0]
+    if len(children) > 2:
+        retval = Sequence(nodes=children[1:])
+    else:
+        retval = children[1]
 
-
-class SemRule(PEGSemanticAction):
-    def first_pass(self, parser, node, children):
-        rule_name = children[0]
-        if len(children) > 2:
-            retval = Sequence(nodes=children[1:])
-        else:
-            retval = children[1]
+    # CrossRef already has rule_name set
+    # that attrib is a target rule name
+    if type(retval) is not CrossRef:
         retval.rule_name = rule_name
         retval.root = True
 
-        if not hasattr(parser, "peg_rules"):
-            parser.peg_rules = {}   # Used for linking phase
-            parser.peg_rules["EOF"] = EndOfFile()
+    if not hasattr(parser, "peg_rules"):
+        parser.peg_rules = {}   # Used for linking phase
+        parser.peg_rules["EOF"] = EndOfFile()
 
-        # Keep a map of parser rules for cross reference
-        # resolving.
-        parser.peg_rules[rule_name] = retval
-        return retval
+    # Keep a map of parser rules for cross reference
+    # resolving.
+    parser.peg_rules[rule_name] = retval
+    return retval
+rule.sem = sem_rule
 
-
-class SemSequence(PEGSemanticAction):
-    def first_pass(self, parser, node, children):
-        if len(children) > 1:
-            return Sequence(nodes=children[:])
-        else:
-            # If only one child rule exists reduce.
-            return children[0]
-
-
-class SemOrderedChoice(PEGSemanticAction):
-    def first_pass(self, parser, node, children):
-        if len(children) > 1:
-            retval = OrderedChoice(nodes=children[:])
-        else:
-            # If only one child rule exists reduce.
-            retval = children[0]
-        return retval
-
-
-class SemPrefix(PEGSemanticAction):
-    def first_pass(self, parser, node, children):
-        if len(children) == 2:
-            if children[0] == NOT():
-                retval = Not()
-            else:
-                retval = And()
-            if type(children[1]) is list:
-                retval.nodes = children[1]
-            else:
-                retval.nodes = [children[1]]
-        else:
-            # If there is no optional prefix reduce.
-            retval = children[0]
-
-        return retval
-
-
-class SemSufix(PEGSemanticAction):
-    def first_pass(self, parser, node, children):
-        if len(children) == 2:
-            if children[1] == STAR():
-                retval = ZeroOrMore(children[0])
-            elif children[1] == QUESTION():
-                retval = Optional(children[0])
-            else:
-                retval = OneOrMore(children[0])
-            if type(children[0]) is list:
-                retval.nodes = children[0]
-            else:
-                retval.nodes = [children[0]]
-        else:
-            retval = children[0]
-
-        return retval
-
-
-class SemExpression(PEGSemanticAction):
-    def first_pass(self, parser, node, children):
+def sem_sequence(parser, node, children):
+    if len(children) > 1:
+        return Sequence(nodes=children[:])
+    else:
+        # If only one child rule exists reduce.
         return children[0]
+sequence.sem = sem_sequence
 
+def sem_ordered_choice(parser, node, children):
+    if len(children) > 1:
+        retval = OrderedChoice(nodes=children[:])
+    else:
+        # If only one child rule exists reduce.
+        retval = children[0]
+    return retval
+ordered_choice.sem = sem_ordered_choice
 
-class SemRuleCrossRef(SemanticAction):
-    def first_pass(self, parser, node, children):
-        return CrossRef(node.value)
+def sem_prefix(parser, node, children):
+    if len(children) == 2:
+        if children[0] == NOT():
+            retval = Not()
+        else:
+            retval = And()
+        if type(children[1]) is list:
+            retval.nodes = children[1]
+        else:
+            retval.nodes = [children[1]]
+    else:
+        # If there is no optional prefix reduce.
+        retval = children[0]
 
+    return retval
+prefix.sem = sem_prefix
 
-class SemRegEx(SemanticAction):
-    def first_pass(self, parser, node, children):
-        match = RegExMatch(children[0],
-                ignore_case=parser.ignore_case)
-        match.compile()
-        return match
+def sem_sufix(parser, node, children):
+    if len(children) == 2:
+        if children[1] == STAR():
+            retval = ZeroOrMore(children[0])
+        elif children[1] == QUESTION():
+            retval = Optional(children[0])
+        else:
+            retval = OneOrMore(children[0])
+        if type(children[0]) is list:
+            retval.nodes = children[0]
+        else:
+            retval.nodes = [children[0]]
+    else:
+        retval = children[0]
 
-class SemStrMatch(SemanticAction):
-    def first_pass(self, parser, node, children):
-        match_str = node.value[1:-1]
-        match_str = match_str.replace("\\'", "'")
-        match_str = match_str.replace("\\\\", "\\")
-        return StrMatch(match_str, ignore_case=parser.ignore_case)
+    return retval
+sufix.sem = sem_sufix
 
+def sem_rule_crossref(parser, node, children):
+    return CrossRef(node.value)
+rule_crossref.sem = sem_rule_crossref
 
-peggrammar.sem = SemGrammar()
-rule.sem = SemRule()
-ordered_choice.sem = SemOrderedChoice()
-sequence.sem = SemSequence()
-prefix.sem = SemPrefix()
-sufix.sem = SemSufix()
-expression.sem = SemExpression()
-rule_crossref.sem = SemRuleCrossRef()
-regex.sem = SemRegEx()
-str_match.sem = SemStrMatch()
+def sem_regex(parser, node, children):
+    match = RegExMatch(children[0],
+            ignore_case=parser.ignore_case)
+    match.compile()
+    return match
+regex.sem = sem_regex
+
+def sem_strmatch(parser, node, children):
+    match_str = node.value[1:-1]
+    match_str = match_str.replace("\\'", "'")
+    match_str = match_str.replace("\\\\", "\\")
+    return StrMatch(match_str, ignore_case=parser.ignore_case)
+str_match.sem = sem_strmatch
+
+expression.sem = SemanticActionSingleChild()
 
 
 class ParserPEG(Parser):

@@ -59,7 +59,7 @@ class SemGrammar(SemanticAction):
                 return parser.peg_rules[rule_name]
             else:
                 raise SemanticError("Rule \"{}\" does not exists."
-                                    .format(n.rule_name))
+                                    .format(rule_name))
 
         for i, n in enumerate(node.nodes):
             if isinstance(n, CrossRef):

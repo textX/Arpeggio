@@ -15,20 +15,20 @@ from arpeggio.export import PMDOTExporter, PTDOTExporter
 from arpeggio.peg import ParserPEG
 
 # Semantic actions
-from arpeggio.peg import SemGrammar, SemRule, SemOrderedChoice, SemSequence,\
-    SemPrefix, SemSufix, SemExpression, SemRegEx, SemStrMatch, SemRuleCrossRef
+from arpeggio.peg import SemGrammar, sem_rule, sem_sequence, sem_ordered_choice,\
+        sem_sufix, sem_prefix, sem_strmatch, sem_regex, sem_rule_crossref
 
 sem_actions = {
-    "peggrammar":         SemGrammar(),
-    "rule":            SemRule(),
-    "ordered_choice":  SemOrderedChoice(),
-    "sequence":        SemSequence(),
-    "prefix":          SemPrefix(),
-    "sufix":           SemSufix(),
-    "expression":      SemExpression(),
-    "regex":           SemRegEx(),
-    "str_match":       SemStrMatch(),
-    "rule_crossref":   SemRuleCrossRef()
+    "peggrammar":      SemGrammar(),
+    "rule":            sem_rule,
+    "ordered_choice":  sem_ordered_choice,
+    "sequence":        sem_sequence,
+    "prefix":          sem_prefix,
+    "sufix":           sem_sufix,
+    "expression":      SemanticActionSingleChild(),
+    "regex":           sem_regex,
+    "str_match":       sem_strmatch,
+    "rule_crossref":   sem_rule_crossref
 }
 
 

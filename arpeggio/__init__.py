@@ -917,6 +917,17 @@ class Parser(object):
                                     "{}_parse_tree.dot".format(root_rule_name))
         return self.parse_tree
 
+    def parse_file(self, file_name):
+        """
+        Parses content from the given file.
+        Args:
+            file_name(str): A file name.
+        """
+        with open(file_name, 'r') as f:
+            content = f.read()
+
+        return self.parse(content)
+
     def getASG(self, sem_actions=None, defaults=True):
         """
         Creates Abstract Semantic Graph (ASG) from the parse tree.

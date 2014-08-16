@@ -4,7 +4,7 @@
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # Arpeggio is an implementation of packrat parser interpreter based on PEG grammars.
@@ -23,7 +23,7 @@ AUTHOR = 'Igor R. Dejanovic'
 AUTHOR_EMAIL = 'igor DOT dejanovic AT gmail DOT com'
 LICENSE = 'MIT'
 URL = 'https://github.com/igordejanovic/Arpeggio'
-DOWNLOAD_URL = 'https://github.com/igordejanovic/Arpeggio/tarball/v0.7'
+DOWNLOAD_URL = 'https://github.com/igordejanovic/Arpeggio/archive/v0.7.tar.gz'
 
 setup(
     name = NAME,
@@ -35,6 +35,7 @@ setup(
     maintainer_email = AUTHOR_EMAIL,
     license = LICENSE,
     url = URL,
+    download_url = DOWNLOAD_URL,
     packages = ["arpeggio"],
     keywords = "parser packrat peg",
     classifiers=[

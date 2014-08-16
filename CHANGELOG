@@ -1,7 +1,8 @@
 Changelog for Arpeggio
 ======================
 
-Development version (on master branch)
+2014-08-16 Release 0.7
+    - Parse tree navigation
     - Better semantic action debugging output.
     - Tests reorganization and cleanup.
     - Examples cleanup.

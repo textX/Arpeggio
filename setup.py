@@ -23,7 +23,7 @@ AUTHOR = 'Igor R. Dejanovic'
 AUTHOR_EMAIL = 'igor DOT dejanovic AT gmail DOT com'
 LICENSE = 'MIT'
 URL = 'https://github.com/igordejanovic/Arpeggio'
-DOWNLOAD_URL = 'https://github.com/igordejanovic/Arpeggio/tarball/v0.7.0'
+DOWNLOAD_URL = 'https://github.com/igordejanovic/Arpeggio/tarball/v0.7'
 
 setup(
     name = NAME,

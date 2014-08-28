@@ -56,8 +56,10 @@ class NoMatch(Exception):
             occurred.
         parser (Parser): An instance of a parser.
         exp_str(str): What is expected? If not given it is deduced from the rule.
+        soft(bool): Used to indicate soft no match exception.
     """
-    def __init__(self, rule, position, parser, exp_str=None):
+    def __init__(self, rule, position, parser, exp_str=None, soft=False):
+        self.soft = soft
         self.rule = rule
         self.position = position
         self.parser = parser
@@ -78,9 +80,10 @@ class NoMatch(Exception):
         self._up = True
 
     def __str__(self):
-        return "Expected '{}' at position {} => '{}'.".format(self.exp_str,
-                str(self.parser.pos_to_linecol(self.position)),
-                self.parser.context(position=self.position))
+        return "Expected '{}' at position {} => '{}'."\
+            .format(self.exp_str,
+                    str(self.parser.pos_to_linecol(self.position)),
+                    self.parser.context(position=self.position))
 
 
 def flatten(_iterable):
@@ -273,8 +276,10 @@ class ParsingExpression(object):
         Used to report most generic language element expected at the
         place of the NoMatch exception.
         """
-        if self.root and parser.position == nm.position and nm._up:
-            nm.rule_name = self.rule_name
+        # We do not take into accout soft no match exceptions.
+        if not nm.soft:
+            if self.root and parser.position == nm.position and nm._up:
+                nm.rule_name = self.rule_name
 
 
 class Sequence(ParsingExpression):
@@ -284,11 +289,25 @@ class Sequence(ParsingExpression):
     def _parse(self, parser):
         results = []
         c_pos = parser.position
+        seq_len = len(self.nodes)
         try:
             for e in self.nodes:
-                result = e.parse(parser)
-                if result:
-                    results.append(result)
+                result = None
+                try:
+                    result = e.parse(parser)
+                    if result:
+                        results.append(result)
+                except NoMatch as e:
+                    # Soft NoMatches are OK in sequences
+                    # but if all elements of sequence return soft
+                    # no match than this sequence must raise a
+                    # soft NoMatch also.
+                    if not e.soft:
+                        raise
+                    seq_len -= 1
+                    if seq_len == 0:
+                        raise
+
         except NoMatch as m:
             parser.position = c_pos # Backtracking
             self._nm_change_rule(m, parser)
@@ -330,16 +349,18 @@ class Repetition(ParsingExpression):
 
 class Optional(Repetition):
     """
-    Optional will try to match parser expression specified buy will not fail in
-    case match is not successful.
+    Optional will try to match parser expression specified and will
+    fail softly in case match is not successful.
     """
     def _parse(self, parser):
         result = None
         c_pos = parser.position
         try:
             result = self.nodes[0].parse(parser)
-        except NoMatch:
+        except NoMatch as e:
             parser.position = c_pos  # Backtracking
+            raise NoMatch(e.rule, e.position, e.parser,
+                            exp_str=e.exp_str, soft=True)
 
         return result
 
@@ -355,9 +376,12 @@ class ZeroOrMore(Repetition):
             try:
                 c_pos = parser.position
                 results.append(self.nodes[0].parse(parser))
-            except NoMatch:
+            except NoMatch as e:
                 parser.position = c_pos  # Backtracking
-                break
+                if results:
+                    break
+                raise NoMatch(e.rule, e.position, e.parser,
+                              exp_str=e.exp_str, soft=True)
 
         return results
 
@@ -1100,8 +1124,10 @@ class Parser(object):
         # Use last exception instead.
         if not self._in_parse_comment or self.nm is None:
             if len(args) == 1 and isinstance(args[0], NoMatch):
-                if self.nm is None or args[0].position > self.nm.position:
-                    self.nm = args[0]
+                # Do not report soft failures
+                if not args[0].soft:
+                    if self.nm is None or args[0].position > self.nm.position:
+                        self.nm = args[0]
             else:
                 rule, position, parser = args
                 if self.nm is None or position > self.nm.position:

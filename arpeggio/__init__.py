@@ -930,6 +930,7 @@ class Parser(object):
         self.line_ends = []
         self.input = _input
         self.parser_model.clear_cache()
+        self.comments_model.clear_cache()
         self.parse_tree = self._parse()
 
         # In debug mode export parse tree to dot file for

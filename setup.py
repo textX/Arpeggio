@@ -46,10 +46,10 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Software Development :: Interpreters',
         'Topic :: Software Development :: Compilers',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        'Programming Language :: Python'
         ]
 
 )

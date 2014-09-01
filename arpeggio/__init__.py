@@ -356,7 +356,7 @@ class Optional(Repetition):
         result = None
         c_pos = parser.position
         try:
-            result = self.nodes[0].parse(parser)
+            result = [self.nodes[0].parse(parser)]
         except NoMatch as e:
             parser.position = c_pos  # Backtracking
             raise NoMatch(e.rule, e.position, e.parser,

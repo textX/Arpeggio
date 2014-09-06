@@ -172,7 +172,8 @@ class ParsingExpression(object):
 
     def _parse_intro(self, parser):
         if parser.debug:
-            print(">> Entering rule {}".format(self.name))
+            print(">> Entering rule {} in {} at position {} => {}".format(
+                self.name, parser.in_rule, parser.position, parser.context()))
 
         parser._in_parse_intro = True
 
@@ -215,7 +216,7 @@ class ParsingExpression(object):
             if parser.debug:
                 print("** Cache hit for [{}, {}] = '{}' : new_pos={}"
                       .format(self.name, c_pos, str(result), str(new_pos)))
-                print("<< Leaving rule {}".format(self.name))
+                # print("<< Leaving rule {}".format(self.name))
 
             # If NoMatch is recorded at this position raise.
             if isinstance(result, NoMatch):
@@ -233,6 +234,15 @@ class ParsingExpression(object):
         # the new last.
         _last_pexpression = parser._last_pexpression
         parser._last_pexpression = self
+
+        if self.rule_name:
+            # If we are entering root rule
+            # remember previous root rule name and set
+            # this one on the parser to be available for
+            # debugging messages
+            previous_root_rule_name = parser.in_rule
+            parser.in_rule = self.rule_name
+
         try:
             result = self._parse(parser)
 
@@ -248,6 +258,10 @@ class ParsingExpression(object):
 
             if parser.debug:
                 print("<< Leaving rule {}".format(self.name))
+
+            # If leaving root rule restore previous root rule name.
+            if self.rule_name:
+                parser.in_rule = previous_root_rule_name
 
         # For root rules flatten non-terminal/list
         if self.root and result and not isinstance(result, Terminal):
@@ -833,7 +847,9 @@ class SemanticAction(object):
                             last_non_str = c
                         else:
                             # If there is multiple non-string objects
-                            # by default convert non-terminal to unicode
+                            # by default convert non-terminal to string
+                            if parser.debug:
+                                print("*** Warning: Multiple non-string objects found in applying default semantic action. Converting non-terminal to string.")
                             retval = str(node)
                             break
                 else:
@@ -915,6 +931,11 @@ class Parser(object):
         self.sem_actions = {}
 
         self.parse_tree = None
+
+        # Keep track of root rule we are currently in.
+        # Used for debugging purposes
+        self.in_rule = ''
+
         self._in_parse_comment = False
         self._in_parse_intro = False
 
@@ -1089,14 +1110,16 @@ class Parser(object):
         if not position:
             position = self.position
         if length:
-            return "{}*{}*{}".format(
+            retval = "{}*{}*{}".format(
                 str(self.input[max(position - 10, 0):position]),
                 str(self.input[position:position + length]),
                 str(self.input[position + length:position + 10]))
         else:
-            return "{}*{}".format(
+            retval = "{}*{}".format(
                 str(self.input[max(position - 10, 0):position]),
                 str(self.input[position:position + 10]))
+
+        return retval.replace('\n', ' ').replace('\r', '')
 
     def _skip_ws(self):
         """

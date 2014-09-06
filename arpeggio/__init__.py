@@ -71,7 +71,8 @@ class NoMatch(Exception):
                 self.exp_str = self.rule._exp_str
             elif self.rule.root:
                 self.exp_str = rule.rule_name
-            elif isinstance(self.rule, Match):
+            elif isinstance(self.rule, Match) and \
+                    not isinstance(self.rule, EndOfFile):
                 self.exp_str = rule.to_match
             else:
                 self.exp_str = self.rule.name

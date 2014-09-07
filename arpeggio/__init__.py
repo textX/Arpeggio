@@ -359,7 +359,16 @@ class OrderedChoice(Sequence):
 class Repetition(ParsingExpression):
     """
     Base class for all repetition-like parser expressions (?,*,+)
+    Args:
+        eolterm(bool): Flag that indicates that end of line should
+            terminate repetition match.
     """
+    def __init__(self, *elements, **kwargs):
+        super(Repetition, self).__init__(*elements, **kwargs)
+        if 'eolterm' in kwargs:
+            self.eolterm = kwargs['eolterm']
+        else:
+            self.eolterm = False
 
 
 class Optional(Repetition):
@@ -387,12 +396,22 @@ class ZeroOrMore(Repetition):
     """
     def _parse(self, parser):
         results = []
+
+        # Remember current eolterm and set eolterm of
+        # this repetition
+        old_eolterm = parser.eolterm
+        parser.eolterm = self.eolterm
+
         while True:
             try:
                 c_pos = parser.position
                 results.append(self.nodes[0].parse(parser))
             except NoMatch as e:
                 parser.position = c_pos  # Backtracking
+
+                # Restore previous eolterm
+                parser.eolterm = old_eolterm
+
                 if results:
                     break
                 raise NoMatch(e.rule, e.position, e.parser,
@@ -408,6 +427,12 @@ class OneOrMore(Repetition):
     def _parse(self, parser):
         results = []
         first = False
+
+        # Remember current eolterm and set eolterm of
+        # this repetition
+        old_eolterm = parser.eolterm
+        parser.eolterm = self.eolterm
+
         while True:
             try:
                 c_pos = parser.position
@@ -415,6 +440,10 @@ class OneOrMore(Repetition):
                 first = True
             except NoMatch:
                 parser.position = c_pos  # Backtracking
+
+                # Restore previous eolterm
+                parser.eolterm = old_eolterm
+
                 if not first:
                     raise
                 break
@@ -921,6 +950,11 @@ class Parser(object):
     """
     def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False,
                  debug=False, ignore_case=False):
+
+        # Used to indicate state in which parser should not
+        # treat newlines as whitespaces.
+        self._eolterm = False
+
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
@@ -945,6 +979,32 @@ class Parser(object):
 
         # Last parsing expression traversed
         self._last_pexpression = None
+
+    @property
+    def ws(self):
+        return self._ws
+
+    @ws.setter
+    def ws(self, new_value):
+        self._real_ws = new_value
+        self._ws = new_value
+        if self.eolterm:
+            self._ws = self._ws.replace('\n', '').replace('\r', '')
+
+    @property
+    def eolterm(self):
+        return self._eolterm
+
+    @eolterm.setter
+    def eolterm(self, new_value):
+        # Toggle newline char in ws on eolterm property set.
+        # During eolterm state parser should not treat
+        # newline as a whitespace.
+        self._eolterm = new_value
+        if self._eolterm:
+            self._ws = self._ws.replace('\n', '').replace('\r', '')
+        else:
+            self._ws = self._real_ws
 
     def parse(self, _input):
         self.position = 0  # Input position

@@ -55,7 +55,8 @@ class NoMatch(Exception):
         position (int): A position in the input stream where exception
             occurred.
         parser (Parser): An instance of a parser.
-        exp_str(str): What is expected? If not given it is deduced from the rule.
+        exp_str(str): What is expected? If not given it is deduced from
+            the rule.
         soft(bool): Used to indicate soft no match exception.
     """
     def __init__(self, rule, position, parser, exp_str=None, soft=False):
@@ -186,7 +187,7 @@ class ParsingExpression(object):
                 try:
                     while True:
                         parser.comments.append(
-                                parser.comments_model.parse(parser))
+                            parser.comments_model.parse(parser))
                         parser._skip_ws()
                 except NoMatch:
                     # NoMatch in comment matching is perfectly
@@ -228,7 +229,6 @@ class ParsingExpression(object):
         # We are descending down
         if parser.nm:
             parser.nm._up = False
-
 
         # Remember last parsing expression and set this as
         # the new last.
@@ -282,7 +282,7 @@ class ParsingExpression(object):
 
         return result
 
-    #TODO: _nm_change_rule should be called from every parser expression parse
+    # TODO: _nm_change_rule should be called from every parser expression parse
     #         method that can potentially be the root parser rule.
     def _nm_change_rule(self, nm, parser):
         """
@@ -324,7 +324,7 @@ class Sequence(ParsingExpression):
                         raise
 
         except NoMatch as m:
-            parser.position = c_pos # Backtracking
+            parser.position = c_pos     # Backtracking
             self._nm_change_rule(m, parser)
             raise
 
@@ -384,7 +384,7 @@ class Optional(Repetition):
         except NoMatch as e:
             parser.position = c_pos  # Backtracking
             raise NoMatch(e.rule, e.position, e.parser,
-                            exp_str=e.exp_str, soft=True)
+                          exp_str=e.exp_str, soft=True)
 
         return result
 
@@ -528,8 +528,8 @@ class Combine(Decorator):
             results = flatten(results)
 
             # Create terminal from result
-            return Terminal(self, c_pos, \
-                              "".join([str(result) for result in results]))
+            return Terminal(self, c_pos,
+                            "".join([str(result) for result in results]))
         except NoMatch:
             parser.position = c_pos  # Backtracking
             raise
@@ -547,14 +547,13 @@ class Match(ParsingExpression):
     @property
     def name(self):
         if self.root:
-            return "%s=%s(%s)" % (self.rule_name, self.__class__.__name__, self.to_match)
+            return "%s=%s(%s)" % (self.rule_name, self.__class__.__name__,
+                                  self.to_match)
         else:
             return "%s(%s)" % (self.__class__.__name__, self.to_match)
 
     def parse(self, parser):
         self._parse_intro(parser)
-
-        c_pos = parser.position
 
         try:
             match = self._parse(parser)
@@ -594,8 +593,8 @@ class RegExMatch(Match):
         m = self.regex.match(parser.input[c_pos:])
         if m:
             if parser.debug:
-                print("++ Match '%s' at %d => '%s'" % (m.group(), \
-                            c_pos, parser.context(len(m.group()))))
+                print("++ Match '%s' at %d => '%s'" % (m.group(),
+                      c_pos, parser.context(len(m.group()))))
             parser.position += len(m.group())
             return Terminal(self, c_pos, m.group())
         else:
@@ -622,15 +621,15 @@ class StrMatch(Match):
         c_pos = parser.position
         input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
         if parser.debug:
-            print ("Input = ", input_frag)
+            print("Input = ", input_frag)
         if self.ignore_case:
-            match = input_frag.lower()==self.to_match.lower()
+            match = input_frag.lower() == self.to_match.lower()
         else:
             match = input_frag == self.to_match
         if match:
             if parser.debug:
-                print("++ Match '{}' at {} => '{}'".format(self.to_match,\
-                        c_pos, parser.context(len(self.to_match))))
+                print("++ Match '{}' at {} => '{}'".format(self.to_match,
+                      c_pos, parser.context(len(self.to_match))))
             parser.position += len(self.to_match)
 
             # If this match is inside sequence than mark for suppression
@@ -653,7 +652,7 @@ class StrMatch(Match):
 
 
 # HACK: Kwd class is a bit hackish. Need to find a better way to
-#	introduce different classes of string tokens.
+#       introduce different classes of string tokens.
 class Kwd(StrMatch):
     """
     A specialization of StrMatch to specify keywords of the language.
@@ -692,7 +691,7 @@ def EOF():
 # ---------------------------------------------------------
 
 
-#---------------------------------------------------
+# ---------------------------------------------------
 # Parse Tree node classes
 
 class ParseTreeNode(object):
@@ -702,8 +701,8 @@ class ParseTreeNode(object):
 
     Attributes:
         rule (ParsingExpression): The rule that created this node.
-        rule_name (str): The name of the rule that created this node if root rule
-            or empty string otherwise.
+        rule_name (str): The name of the rule that created this node if
+            root rule or empty string otherwise.
         position (int): A position in the input stream where the match
             occurred.
         error (bool): Is this a false parse tree node created during error
@@ -762,7 +761,8 @@ class NonTerminal(ParseTreeNode, list):
     """
     Non-leaf node of the Parse Tree. Represents language syntax construction.
     At the same time used in ParseTreeNode navigation expressions.
-    See test_ptnode_navigation_expressions.py for examples of navigation expressions.
+    See test_ptnode_navigation_expressions.py for examples of navigation
+    expressions.
 
     Attributes:
         nodes (list of ParseTreeNode): Children parse tree nodes.
@@ -802,8 +802,8 @@ class NonTerminal(ParseTreeNode, list):
                 this node rule.
         """
         # Prevent infinite recursion
-        if rule_name in ['_expr_cache', '_filtered', 'rule', 'rule_name', 
-                'position', 'append', 'extend']:
+        if rule_name in ['_expr_cache', '_filtered', 'rule', 'rule_name',
+                         'position', 'append', 'extend']:
             raise AttributeError
 
         # First check the cache
@@ -828,8 +828,10 @@ class NonTerminal(ParseTreeNode, list):
                     nodes.append(n)
                     rule = n.rule
 
-        # For expression NonTerminals instances position does not have any sense.
-        result = NonTerminal(rule=rule, position=None, nodes=nodes, _filtered=True)
+        # For expression NonTerminals instances position does not have
+        # any sense.
+        result = NonTerminal(rule=rule, position=None, nodes=nodes,
+                             _filtered=True)
         self._expr_cache[rule_name] = result
         return result
 
@@ -901,7 +903,7 @@ class SemanticActionResults(list):
 
     def append_result(self, name, result):
         if name:
-            if not name in self.results:
+            if name not in self.results:
                 self.results[name] = []
             self.results[name].append(result)
 
@@ -1021,8 +1023,8 @@ class Parser(object):
         if self.debug:
             from arpeggio.export import PTDOTExporter
             root_rule_name = self.parse_tree.rule_name
-            PTDOTExporter().exportFile(self.parse_tree,
-                                    "{}_parse_tree.dot".format(root_rule_name))
+            PTDOTExporter().exportFile(
+                self.parse_tree, "{}_parse_tree.dot".format(root_rule_name))
         return self.parse_tree
 
     def parse_file(self, file_name):
@@ -1044,11 +1046,12 @@ class Parser(object):
             sem_actions (dict): The semantic actions dictionary to use for
                 semantic analysis. Rule names are the keys and semantic action
                 objects are values.
-            defaults (bool): If True a default semantic action will be applied in
-                case no action is defined for the node.
+            defaults (bool): If True a default semantic action will be
+                applied in case no action is defined for the node.
         """
         if not self.parse_tree:
-            raise Exception("Parse tree is empty. You did call parse(), didn't you?")
+            raise Exception(
+                "Parse tree is empty. You did call parse(), didn't you?")
 
         if sem_actions is None:
             if not self.sem_actions:
@@ -1081,14 +1084,14 @@ class Parser(object):
 
             if self.debug:
                 print("Processing ", node.name, "= '", str(node),
-                      "'  type:", type(node).__name__, \
+                      "'  type:", type(node).__name__,
                       "len:", len(node) if isinstance(node, list) else "")
                 for i, a in enumerate(children):
-                    print ("\t%d:" % (i + 1), unicode(a), "type:", type(a).__name__)
+                    print("\t%d:" % (i + 1), str(a), "type:", type(a).__name__)
 
             if node.rule_name in sem_actions:
                 sem_action = sem_actions[node.rule_name]
-                if type(sem_action) is types.FunctionType:
+                if isinstance(sem_action, types.FunctionType):
                     retval = sem_action(self, node, children)
                 else:
                     retval = sem_action.first_pass(self, node, children)
@@ -1098,8 +1101,8 @@ class Parser(object):
 
                 if self.debug:
                     action_name = sem_action.__name__ \
-                            if hasattr(sem_action, '__name__') \
-                            else sem_action.__class__.__name__
+                        if hasattr(sem_action, '__name__') \
+                        else sem_action.__class__.__name__
                     print("\tApplying semantic action ", action_name)
 
             else:
@@ -1117,7 +1120,7 @@ class Parser(object):
                 if retval is None:
                     print("\tSuppressed.")
                 else:
-                    print("\tResolved to = ", unicode(retval),
+                    print("\tResolved to = ", str(retval),
                           "  type:", type(retval).__name__)
             return retval
 
@@ -1139,7 +1142,7 @@ class Parser(object):
         """
         if not self.line_ends:
             try:
-                #TODO: Check this implementation on Windows.
+                # TODO: Check this implementation on Windows.
                 self.line_ends.append(self.input.index("\n"))
                 while True:
                     try:
@@ -1245,10 +1248,10 @@ class ParserPython(Parser):
             from arpeggio.export import PMDOTExporter
             root_rule = language_def.__name__
             PMDOTExporter().exportFile(self.parser_model,
-                                    "{}_parser_model.dot".format(root_rule))
+                                       "{}_parser_model.dot".format(root_rule))
 
         # Comments should be optional and there can be more of them
-        if self.comments_model:  # and not isinstance(self.comments_model, ZeroOrMore):
+        if self.comments_model:
             self.comments_model.root = True
             self.comments_model.rule_name = comment_def.__name__
 
@@ -1270,7 +1273,8 @@ class ParserPython(Parser):
 
         def inner_from_python(expression):
             retval = None
-            if type(expression) == types.FunctionType:  # Is this expression a parser rule?
+            if isinstance(expression, types.FunctionType):
+                # If this expression is a parser rule
                 rule_name = expression.__name__
                 if rule_name in __rule_cache:
                     c_rule = __rule_cache.get(rule_name)
@@ -1291,7 +1295,7 @@ class ParserPython(Parser):
                 __rule_cache[rule_name] = CrossRef(rule_name)
 
                 curr_expr = expression
-                while type(curr_expr) is types.FunctionType:
+                while isinstance(curr_expr, types.FunctionType):
                     # If function directly returns another function
                     # go into until non-function is returned.
                     curr_expr = curr_expr()

@@ -397,10 +397,11 @@ class ZeroOrMore(Repetition):
     def _parse(self, parser):
         results = []
 
-        # Remember current eolterm and set eolterm of
-        # this repetition
-        old_eolterm = parser.eolterm
-        parser.eolterm = self.eolterm
+        if self.eolterm:
+            # Remember current eolterm and set eolterm of
+            # this repetition
+            old_eolterm = parser.eolterm
+            parser.eolterm = self.eolterm
 
         while True:
             try:
@@ -409,8 +410,9 @@ class ZeroOrMore(Repetition):
             except NoMatch as e:
                 parser.position = c_pos  # Backtracking
 
-                # Restore previous eolterm
-                parser.eolterm = old_eolterm
+                if self.eolterm:
+                    # Restore previous eolterm
+                    parser.eolterm = old_eolterm
 
                 if results:
                     break
@@ -428,10 +430,11 @@ class OneOrMore(Repetition):
         results = []
         first = False
 
-        # Remember current eolterm and set eolterm of
-        # this repetition
-        old_eolterm = parser.eolterm
-        parser.eolterm = self.eolterm
+        if self.eolterm:
+            # Remember current eolterm and set eolterm of
+            # this repetition
+            old_eolterm = parser.eolterm
+            parser.eolterm = self.eolterm
 
         while True:
             try:
@@ -441,8 +444,9 @@ class OneOrMore(Repetition):
             except NoMatch:
                 parser.position = c_pos  # Backtracking
 
-                # Restore previous eolterm
-                parser.eolterm = old_eolterm
+                if self.eolterm:
+                    # Restore previous eolterm
+                    parser.eolterm = old_eolterm
 
                 if not first:
                     raise

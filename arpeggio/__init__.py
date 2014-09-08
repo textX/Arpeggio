@@ -576,18 +576,22 @@ class RegExMatch(Match):
             It will be used to create regular expression using re.compile.
         ignore_case(bool): If case insensitive match is needed.
             Default is None to support propagation from global parser setting.
+        str_repr(str): A string that is used to represent this regex.
 
     '''
-    def __init__(self, to_match, rule_name='', root=False, ignore_case=None):
+    def __init__(self, to_match, rule_name='', root=False, ignore_case=None,
+                 str_repr=None):
         super(RegExMatch, self).__init__(rule_name, root)
-        self.to_match = to_match
+        self.to_match_regex = to_match
         self.ignore_case = ignore_case
+
+        self.to_match = str_repr if str_repr is not None else to_match
 
     def compile(self):
         flags = re.MULTILINE
         if self.ignore_case:
             flags |= re.IGNORECASE
-        self.regex = re.compile(self.to_match, flags)
+        self.regex = re.compile(self.to_match_regex, flags)
 
     def __str__(self):
         return self.to_match

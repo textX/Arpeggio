@@ -1220,15 +1220,23 @@ class Parser(object):
         # Do not report NoMatch for comments matching.
         # Use last exception instead.
         if not self._in_parse_comment or self.nm is None:
+            # Non-comment nm will override comment nm
+            if self.nm is not None:
+                override = self.nm._in_comment and not self._in_parse_comment
+            else:
+                override = True
+
             if len(args) == 1 and isinstance(args[0], NoMatch):
                 # Do not report soft failures
                 if not args[0].soft:
-                    if self.nm is None or args[0].position > self.nm.position:
+                    if override or args[0].position > self.nm.position:
                         self.nm = args[0]
+                        self.nm._in_comment = self._in_parse_comment
             else:
                 rule, position, parser = args
-                if self.nm is None or position > self.nm.position:
+                if override or position > self.nm.position:
                     self.nm = NoMatch(rule, position, parser)
+                    self.nm._in_comment = self._in_parse_comment
         raise self.nm
 
 

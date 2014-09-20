@@ -18,7 +18,11 @@ INSTALLATION
 ------------
 
 Arpeggio is written in Python programming language and distributed with setuptools support.
-Install it with the following command::
+Install it with from pypi with the following command::
+
+    pip install Arpeggio
+
+Or from source with::
 
     python setup.py install
 

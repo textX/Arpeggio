@@ -12,6 +12,7 @@
 ###############################################################################
 
 from __future__ import print_function, unicode_literals
+import codecs
 import re
 import bisect
 from arpeggio.utils import isstr
@@ -1041,7 +1042,7 @@ class Parser(object):
         Args:
             file_name(str): A file name.
         """
-        with open(file_name, 'r') as f:
+        with codecs.open(file_name, 'r', 'utf-8') as f:
             content = f.read()
 
         return self.parse(content)

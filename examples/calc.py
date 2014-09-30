@@ -10,6 +10,12 @@
 # notation.
 #######################################################################
 
+from __future__ import unicode_literals, print_function
+try:
+    text=unicode
+except:
+    text=str
+
 from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, SemanticAction,\
     ParserPython
 from arpeggio import RegExMatch as _
@@ -70,7 +76,7 @@ def exprSA(parser, node, children):
     expr = 0
     start = 0
     # Check for unary + or - operator
-    if str(children[0]) in "+-":
+    if text(children[0]) in "+-":
         start = 1
 
     for i in range(start, len(children), 2):

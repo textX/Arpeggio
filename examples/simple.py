@@ -9,6 +9,7 @@
 # It is taken and adapted from pyPEG project (see http://www.fdik.org/pyPEG/).
 #######################################################################
 
+from __future__ import unicode_literals
 from arpeggio import *
 from arpeggio import RegExMatch as _
 

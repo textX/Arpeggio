@@ -7,12 +7,13 @@
 # License: MIT License
 #######################################################################
 
+from __future__ import unicode_literals
 import pytest
 import os
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Grammar
-from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF , ParserPython, Sequence, NonTerminal
+from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, ParserPython
 from arpeggio import RegExMatch as _
 
 

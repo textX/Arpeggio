@@ -5,6 +5,8 @@
 # Copyright: (c) 2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 ##############################################################################
+
+from __future__ import unicode_literals
 from arpeggio import *
 from arpeggio import RegExMatch as _
 

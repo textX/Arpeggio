@@ -12,6 +12,12 @@
 ###############################################################################
 
 from __future__ import print_function, unicode_literals
+import sys
+if sys.version < '3':
+    text = unicode
+else:
+    text = str
+
 import codecs
 import re
 import bisect
@@ -85,15 +91,18 @@ class NoMatch(Exception):
     def __str__(self):
         return "Expected '{}' at position {} => '{}'."\
             .format(self.exp_str,
-                    str(self.parser.pos_to_linecol(self.position)),
+                    text(self.parser.pos_to_linecol(self.position)),
                     self.parser.context(position=self.position))
+
+    def __unicode__(self):
+        return self.__str__()
 
 
 def flatten(_iterable):
     '''Flattening of python iterables.'''
     result = []
     for e in _iterable:
-        if hasattr(e, "__iter__") and not type(e) in [str, NonTerminal]:
+        if hasattr(e, "__iter__") and not type(e) in [text, NonTerminal]:
             result.extend(flatten(e))
         else:
             result.append(e)
@@ -217,7 +226,7 @@ class ParsingExpression(object):
             parser.position = new_pos
             if parser.debug:
                 print("** Cache hit for [{}, {}] = '{}' : new_pos={}"
-                      .format(self.name, c_pos, str(result), str(new_pos)))
+                      .format(self.name, c_pos, text(result), text(new_pos)))
                 # print("<< Leaving rule {}".format(self.name))
 
             # If NoMatch is recorded at this position raise.
@@ -534,7 +543,7 @@ class Combine(Decorator):
 
             # Create terminal from result
             return Terminal(self, c_pos,
-                            "".join([str(result) for result in results]))
+                            "".join([text(result) for result in results]))
         except NoMatch:
             parser.position = c_pos  # Backtracking
             raise
@@ -597,6 +606,9 @@ class RegExMatch(Match):
     def __str__(self):
         return self.to_match
 
+    def __unicode__(self):
+        return self.__str__()
+
     def _parse(self, parser):
         c_pos = parser.position
         m = self.regex.match(parser.input[c_pos:])
@@ -653,8 +665,11 @@ class StrMatch(Match):
     def __str__(self):
         return self.to_match
 
+    def __unicode__(self):
+        return self.__str__()
+
     def __eq__(self, other):
-        return self.to_match == str(other)
+        return self.to_match == text(other)
 
     def __hash__(self):
         return hash(self.to_match)
@@ -759,11 +774,14 @@ class Terminal(ParseTreeNode):
     def __str__(self):
         return self.value
 
+    def __unicode__(self):
+        return self.__str__()
+
     def __repr__(self):
         return self.desc
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        return text(self) == text(other)
 
 
 class NonTerminal(ParseTreeNode, list):
@@ -790,7 +808,7 @@ class NonTerminal(ParseTreeNode, list):
     @property
     def value(self):
         """Terminal protocol."""
-        return str(self)
+        return text(self)
 
     @property
     def desc(self):
@@ -798,6 +816,9 @@ class NonTerminal(ParseTreeNode, list):
 
     def __str__(self):
         return " | ".join([str(x) for x in self])
+
+    def __unicode__(self):
+        return self.__str__()
 
     def __repr__(self):
         return "[ %s ]" % ", ".join([repr(x) for x in self])
@@ -870,7 +891,7 @@ class SemanticAction(object):
         if isinstance(node, Terminal):
             # Default for Terminal is to convert to string unless suppress flag
             # is set in which case it is suppressed by setting to None.
-            retval = str(node) if not node.suppress else None
+            retval = text(node) if not node.suppress else None
         else:
             retval = node
             # Special case. If only one child exist return it.
@@ -890,7 +911,7 @@ class SemanticAction(object):
                             # by default convert non-terminal to string
                             if parser.debug:
                                 print("*** Warning: Multiple non-string objects found in applying default semantic action. Converting non-terminal to string.")
-                            retval = str(node)
+                            retval = text(node)
                             break
                 else:
                     # Return the only non-string child
@@ -938,7 +959,7 @@ class SemanticActionBodyWithBraces(SemanticAction):
 
 class SemanticActionToString(SemanticAction):
     def first_pass(self, parser, node, children):
-        return str(node)
+        return text(node)
 
 # ----------------------------------------------------
 # Parsers
@@ -1082,7 +1103,7 @@ class Parser(object):
 
             if self.debug:
                 print("Walking down ", node.name, "  type:",
-                      type(node).__name__, "str:", str(node))
+                      type(node).__name__, "str:", text(node))
 
             children = SemanticActionResults()
             if isinstance(node, NonTerminal):
@@ -1092,11 +1113,11 @@ class Parser(object):
                         children.append_result(n.rule_name, child)
 
             if self.debug:
-                print("Processing ", node.name, "= '", str(node),
+                print("Processing ", node.name, "= '", text(node),
                       "'  type:", type(node).__name__,
                       "len:", len(node) if isinstance(node, list) else "")
                 for i, a in enumerate(children):
-                    print("\t%d:" % (i + 1), str(a), "type:", type(a).__name__)
+                    print("\t%d:" % (i + 1), text(a), "type:", type(a).__name__)
 
             if node.rule_name in sem_actions:
                 sem_action = sem_actions[node.rule_name]
@@ -1129,7 +1150,7 @@ class Parser(object):
                 if retval is None:
                     print("\tSuppressed.")
                 else:
-                    print("\tResolved to = ", str(retval),
+                    print("\tResolved to = ", text(retval),
                           "  type:", type(retval).__name__)
             return retval
 
@@ -1183,13 +1204,13 @@ class Parser(object):
             position = self.position
         if length:
             retval = "{}*{}*{}".format(
-                str(self.input[max(position - 10, 0):position]),
-                str(self.input[position:position + length]),
-                str(self.input[position + length:position + 10]))
+                text(self.input[max(position - 10, 0):position]),
+                text(self.input[position:position + length]),
+                text(self.input[position + length:position + 10]))
         else:
             retval = "{}*{}".format(
-                str(self.input[max(position - 10, 0):position]),
-                str(self.input[position:position + 10]))
+                text(self.input[max(position - 10, 0):position]),
+                text(self.input[position:position + 10]))
 
         return retval.replace('\n', ' ').replace('\r', '')
 
@@ -1362,12 +1383,12 @@ class ParserPython(Parser):
                 if any((isinstance(x, CrossRef) for x in retval.nodes)):
                     __for_resolving.append(retval)
 
-            elif type(expression) is str:
+            elif type(expression) is text:
                 retval = StrMatch(expression, ignore_case=self.ignore_case)
 
             else:
                 raise GrammarError("Unrecognized grammar element '%s'." %
-                                   str(expression))
+                                   text(expression))
 
             return retval
 

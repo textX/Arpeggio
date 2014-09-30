@@ -8,7 +8,7 @@
 #
 # This example demonstrates grammar and parser for bibtex files.
 #######################################################################
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import pprint
 import sys, os
@@ -113,7 +113,7 @@ def main(debug=False, file_name=None):
     if not file_name:
         file_name = os.path.join(os.path.dirname(__file__), 'bibtex_example.bib')
 
-    with open(file_name, "r") as bibtexfile:
+    with codecs.open(file_name, "r", encoding="utf-8") as bibtexfile:
         bibtexfile_content = bibtexfile.read()
 
     # We create a parse tree or abstract syntax tree out of

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+import pytest
 from arpeggio import SemanticAction, ParserPython
 
 def test_direct_rule_call():

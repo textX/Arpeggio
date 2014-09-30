@@ -7,11 +7,17 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
+import sys
+if sys.version < '3':
+    text = unicode
+else:
+    text = str
+
 import copy
 from arpeggio import *
 from arpeggio import RegExMatch as _
-from arpeggio.export import PMDOTExporter, PTDOTExporter
+#from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 __all__ = ['ParserPEG']
 
@@ -93,7 +99,7 @@ class SemGrammar(SemanticAction):
         Resolving cross-references in second pass.
         '''
         if parser.debug:
-            print("Second pass:", type(node), str(node))
+            print("Second pass:", type(node), text(node))
 
         self.resolved = set()
         self._resolve(parser, node)

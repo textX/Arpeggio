@@ -9,6 +9,7 @@
 # (see http://pyparsing.wikispaces.com/).
 ##############################################################################
 
+from __future__ import unicode_literals
 
 json_bnf = """
 object

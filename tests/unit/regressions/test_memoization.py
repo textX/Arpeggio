@@ -1,4 +1,5 @@
-from StringIO import StringIO
+from __future__ import unicode_literals
+import pytest
 import sys
 from arpeggio import ParserPython
 

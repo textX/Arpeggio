@@ -10,13 +10,16 @@
 # This example demonstrates building PEG parser using PEG based grammar of PEG
 # grammar definition language.
 ##############################################################################
+
+from __future__ import unicode_literals
+
 from arpeggio import *
-from arpeggio.export import PMDOTExporter, PTDOTExporter
+from arpeggio.export import PMDOTExporter
 from arpeggio.peg import ParserPEG
 
 # Semantic actions
 from arpeggio.peg import SemGrammar, sem_rule, sem_sequence, sem_ordered_choice,\
-        sem_sufix, sem_prefix, sem_strmatch, sem_regex, sem_rule_crossref
+    sem_sufix, sem_prefix, sem_strmatch, sem_regex, sem_rule_crossref
 
 sem_actions = {
     "peggrammar":      SemGrammar(),
@@ -60,6 +63,7 @@ peg_grammar = r"""
  comment <- '//' r'.*\n';
 """
 
+
 def main(debug=False):
 
     # ParserPEG will use ParserPython to parse peg_grammar definition and
@@ -82,7 +86,7 @@ def main(debug=False):
         # This graph should be the same as peg_peg_parser_model.dot because
         # they define the same parser.
         PMDOTExporter().exportFile(asg,
-                                "peg_peg_asg.dot")
+                                   "peg_peg_asg.dot")
 
     # If we replace parser_mode with ASG constructed parser it will still
     # parse PEG grammars

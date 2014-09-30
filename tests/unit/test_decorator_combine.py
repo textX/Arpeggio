@@ -8,6 +8,8 @@
 # Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
+
+from __future__ import unicode_literals
 import pytest
 from arpeggio import ParserPython, ZeroOrMore, OneOrMore, NonTerminal, Terminal, NoMatch, Combine
 from arpeggio.peg import ParserPEG

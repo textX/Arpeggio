@@ -7,6 +7,7 @@
 # License: MIT License
 #######################################################################
 
+from __future__ import unicode_literals
 import pytest
 
 # Grammar

@@ -1,6 +1,10 @@
 Changelog for Arpeggio
 ======================
 
+* Development
+  - Support for unicode in grammars.
+  - Python 2/3 compatibility for unicodes.
+
 * 2014-09-20 Release 0.8
 
   - Support for eolterm modifier in repetitions.

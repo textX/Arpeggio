@@ -14,19 +14,19 @@
 #######################################################################
 from __future__ import absolute_import, unicode_literals, print_function
 
-from arpeggio.peg import ParserPEG
+from arpeggio.cleanpeg import ParserPEG
 
 # Semantic actions
 from calc import to_floatSA, factorSA, termSA, exprSA
 
 # Grammar is defined using textual specification based on PEG language.
 calc_grammar = """
-        number <- r'\d*\.\d*|\d+';
-        factor <- ("+" / "-")?
-                  (number / "(" expression ")");
-        term <- factor (( "*" / "/") factor)*;
-        expression <- term (("+" / "-") term)*;
-        calc <- expression+ EOF;
+        number = r'\d*\.\d*|\d+'
+        factor = ("+" / "-")?
+                  (number / "(" expression ")")
+        term = factor (( "*" / "/") factor)*
+        expression = term (("+" / "-") term)*
+        calc = expression+ EOF
 """
 
 # Rules are mapped to semantic actions

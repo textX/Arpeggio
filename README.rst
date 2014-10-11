@@ -38,7 +38,9 @@ Quick start
 
 1. Write a grammar. There are several ways to do that:
 
-a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as::
+a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as:
+
+.. code:: python
 
   from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF
   from arpeggio import RegExMatch as _
@@ -53,7 +55,9 @@ a) The canonical grammar format uses Python statements and expressions. Each rul
   The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
   For terminal matches use plain strings or regular expressions.
 
-b) The same grammar could also be written using traditional textual PEG syntax like this::
+b) The same grammar could also be written using traditional textual PEG syntax like this:
+
+::
 
   number <- r'\d*\.\d*|\d+';  // this is a comment
   factor <- ("+" / "-")?
@@ -62,7 +66,9 @@ b) The same grammar could also be written using traditional textual PEG syntax l
   expression <- term (("+" / "-") term)*;
   calc <- expression+ EOF;
 
-c) Or similar syntax but a little bit more readable like this::
+c) Or similar syntax but a little bit more readable like this:
+
+::
 
   number = r'\d*\.\d*|\d+'    # this is a comment
   factor = ("+" / "-")?
@@ -73,14 +79,18 @@ c) Or similar syntax but a little bit more readable like this::
 
 The second and third options are implemented using canonical first form. Feel free to implement your own grammar syntax if you don't like these (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
 
-2. Instantiate a parser. Parser works as grammar interpreter. There is no code generation::
+2. Instantiate a parser. Parser works as grammar interpreter. There is no code generation.
+
+.. code:: python
 
     from arpeggio import ParserPython
     parser = ParserPython(calc)   # calc is the root rule of your grammar
                                   # Use param debug=True for verbose debugging messages and
                                   # grammar and parse tree visualization using graphviz and dot
 
-3. Parse your inputs::
+3. Parse your inputs.
+
+.. code:: python
 
     parse_tree = parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
 
@@ -99,7 +109,7 @@ And here is an image rendered for parse tree for the above parsed calc expressio
 |calc_parse_tree.dot|
 
 .. |calc_parser_model.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parser_model.dot.png
-  :scale: 50 %
+  :height: 200px
 .. |calc_parse_tree.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
 
 OVERVIEW

@@ -38,7 +38,7 @@ Quick start
 
 #. First write a grammar. There are several ways to do that:
 
-  #. The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as::
+  a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as::
 
     from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF
     from arpeggio import RegExMatch as _
@@ -53,23 +53,23 @@ Quick start
     The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
     For terminal matches use plain strings or regular expressions.
 
-  #. The same grammar could also be written using traditional textual PEG syntax like this::
+  b) The same grammar could also be written using traditional textual PEG syntax like this::
 
-      number <- r'\d*\.\d*|\d+';  // this is a comment
-      factor <- ("+" / "-")?
-                (number / "(" expression ")");
-      term <- factor (( "*" / "/") factor)*;
-      expression <- term (("+" / "-") term)*;
-      calc <- expression+ EOF;
+    number <- r'\d*\.\d*|\d+';  // this is a comment
+    factor <- ("+" / "-")?
+              (number / "(" expression ")");
+    term <- factor (( "*" / "/") factor)*;
+    expression <- term (("+" / "-") term)*;
+    calc <- expression+ EOF;
 
-  #. Or similar syntax but a little bit more readable like this::
+  c) Or similar syntax but a little bit more readable like this::
 
-      number = r'\d*\.\d*|\d+'    # this is a comment
-      factor = ("+" / "-")?
-                (number / "(" expression ")")
-      term = factor (( "*" / "/") factor)*
-      expression = term (("+" / "-") term)*
-      calc = expression+ EOF
+    number = r'\d*\.\d*|\d+'    # this is a comment
+    factor = ("+" / "-")?
+              (number / "(" expression ")")
+    term = factor (( "*" / "/") factor)*
+    expression = term (("+" / "-") term)*
+    calc = expression+ EOF
 
   The second and third options are implemented using canonical first form. Feel free to implement your own grammar syntax if you don't like these (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
 

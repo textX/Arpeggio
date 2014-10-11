@@ -38,7 +38,7 @@ Quick start
 
 1. Write a grammar. There are several ways to do that:
 
-a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as:
+1.a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as:
 
 .. code:: python
 
@@ -52,10 +52,10 @@ a) The canonical grammar format uses Python statements and expressions. Each rul
   def expression(): return term, ZeroOrMore(["+", "-"], term)
   def calc():       return OneOrMore(expression), EOF
 
-  The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
-  For terminal matches use plain strings or regular expressions.
+The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
+For terminal matches use plain strings or regular expressions.
 
-b) The same grammar could also be written using traditional textual PEG syntax like this:
+1.b) The same grammar could also be written using traditional textual PEG syntax like this:
 
 ::
 
@@ -66,7 +66,7 @@ b) The same grammar could also be written using traditional textual PEG syntax l
   expression <- term (("+" / "-") term)*;
   calc <- expression+ EOF;
 
-c) Or similar syntax but a little bit more readable like this:
+1.c) Or similar syntax but a little bit more readable like this:
 
 ::
 
@@ -102,61 +102,12 @@ To debug your grammar set :code:`debug` parameter to :code:`True`. A verbose deb
 
 Here is an image rendered using graphviz of parser model for 'calc' grammar.
 
-|calc_parser_model.dot|
+.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parser_model.dot.png
+  :scale: 50%
 
 And here is an image rendered for parse tree for the above parsed calc expression.
 
-|calc_parse_tree.dot|
-
-.. |calc_parser_model.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parser_model.dot.png
-  :height: 200px
-.. |calc_parse_tree.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
-
-OVERVIEW
---------
-
-Here is a basic explanation of how arpeggio works and the definition of some terms
-used in the arpeggio project.
-
-Language grammar is specified using PEG's textual notation (similar to EBNF) or
-python language constructs (lists, tuples, functions...). Parser is directly modeled
-by the given grammar so this grammar representation,
-whether in textual or python form, is referred to as "the parser model".
-
-Parser is constructed out of the parser model.
-Parser is a graph of python objects where each object is an instance of a class
-which represents parsing expressions from PEG (e.g. Sequence, OrderedChoice, ZeroOrMore).
-This graph is referred to as "the parser model instance" or just "the parser model".
-
-Arpeggio works in interpreter mode. There is no parser code generation.
-Given the language grammar Arpeggio will create parser on the fly.
-Once constructed, the parser can be used to parse different input strings.
-We can think of Arpeggio as the PEG grammar interpreter.
-It reads PEG "programs" and executes them.
-
-This design choice requires some upfront work during an initialization phase so Arpeggio
-may not be well suited for one-shot parsing where the parser needs to be initialized
-every time parsing is performed and the speed is of the utmost importance.
-Arpeggio is designed to be used in integrated development environments where the parser
-is constructed once (usually during IDE start-up) and used many times.
-
-Once constructed, parser can be used to transform input text to a tree 
-representation where the tree structure must adhere to the parser model (grammar).
-This tree representation is called "the parse tree".
-After construction of the parse tree it is possible to construct Astract Syntax Tree (AST) or,
-more generally, Abstract Semantic Graph(ASG) using semantic actions.
-ASG is constructed using two-pass bottom-up walking of the parse tree.
-ASG, generally has a graph structure, but it can be any specialization of it 
-(a tree or just a single node - see calc.py for the example of ASG constructed as 
-a single node/value).
-
-Semantic actions are executed after parsing is complete so that multiple different semantic
-analysis can be performed on the same parse tree.
-
-Python module arpeggio.peg is a good demonstration of how semantic action can be used
-to build PEG parser itself. See also peg_peg.py example where PEG parser is bootstraped
-using description given in PEG language itself.
-
+.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
 
 Questions, discussion etc.
 --------------------------

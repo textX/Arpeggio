@@ -1266,8 +1266,8 @@ class CrossRef(object):
     '''
     Used for rule reference resolving.
     '''
-    def __init__(self, rule_name, position=-1):
-        self.rule_name = rule_name
+    def __init__(self, target_rule_name, position=-1):
+        self.target_rule_name = target_rule_name
         self.position = position
 
 
@@ -1322,7 +1322,7 @@ class ParserPython(Parser):
                         self.__cross_refs += 1
                         if self.debug:
                             print("CrossRef usage: {}"
-                                  .format(c_rule.rule_name))
+                                  .format(c_rule.target_rule_name))
                     return c_rule
 
                 # Semantic action for the rule
@@ -1398,7 +1398,7 @@ class ParserPython(Parser):
                 for i, node in enumerate(e.nodes):
                     if isinstance(node, CrossRef):
                         self.__cross_refs -= 1
-                        e.nodes[i] = __rule_cache[node.rule_name]
+                        e.nodes[i] = __rule_cache[node.target_rule_name]
 
         parser_model = inner_from_python(expression)
         resolve()

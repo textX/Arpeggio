@@ -36,42 +36,42 @@ be used.
 Quick start
 -----------
 
-1. First write a grammar. There are several ways to do that:
+1. Write a grammar. There are several ways to do that:
 
-  a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as::
+a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as::
 
-    from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF
-    from arpeggio import RegExMatch as _
+  from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF
+  from arpeggio import RegExMatch as _
 
-    def number():     return _(r'\d*\.\d*|\d+')
-    def factor():     return Optional(["+","-"]),
-                            [number, ("(", expression, ")")]
-    def term():       return factor, ZeroOrMore(["*","/"], factor)
-    def expression(): return term, ZeroOrMore(["+", "-"], term)
-    def calc():       return OneOrMore(expression), EOF
+  def number():     return _(r'\d*\.\d*|\d+')
+  def factor():     return Optional(["+","-"]),
+                          [number, ("(", expression, ")")]
+  def term():       return factor, ZeroOrMore(["*","/"], factor)
+  def expression(): return term, ZeroOrMore(["+", "-"], term)
+  def calc():       return OneOrMore(expression), EOF
 
-    The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
-    For terminal matches use plain strings or regular expressions.
+  The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
+  For terminal matches use plain strings or regular expressions.
 
-  b) The same grammar could also be written using traditional textual PEG syntax like this::
+b) The same grammar could also be written using traditional textual PEG syntax like this::
 
-    number <- r'\d*\.\d*|\d+';  // this is a comment
-    factor <- ("+" / "-")?
-              (number / "(" expression ")");
-    term <- factor (( "*" / "/") factor)*;
-    expression <- term (("+" / "-") term)*;
-    calc <- expression+ EOF;
+  number <- r'\d*\.\d*|\d+';  // this is a comment
+  factor <- ("+" / "-")?
+            (number / "(" expression ")");
+  term <- factor (( "*" / "/") factor)*;
+  expression <- term (("+" / "-") term)*;
+  calc <- expression+ EOF;
 
-  c) Or similar syntax but a little bit more readable like this::
+c) Or similar syntax but a little bit more readable like this::
 
-    number = r'\d*\.\d*|\d+'    # this is a comment
-    factor = ("+" / "-")?
-              (number / "(" expression ")")
-    term = factor (( "*" / "/") factor)*
-    expression = term (("+" / "-") term)*
-    calc = expression+ EOF
+  number = r'\d*\.\d*|\d+'    # this is a comment
+  factor = ("+" / "-")?
+            (number / "(" expression ")")
+  term = factor (( "*" / "/") factor)*
+  expression = term (("+" / "-") term)*
+  calc = expression+ EOF
 
-  The second and third options are implemented using canonical first form. Feel free to implement your own grammar syntax if you don't like these (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
+The second and third options are implemented using canonical first form. Feel free to implement your own grammar syntax if you don't like these (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
 
 2. Instantiate a parser. Parser works as grammar interpreter. There is no code generation::
 

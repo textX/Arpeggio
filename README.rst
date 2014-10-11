@@ -14,7 +14,7 @@ For more information on PEG and packrat parsers see:
  * http://en.wikipedia.org/wiki/Parsing_expression_grammar
 
 
-INSTALLATION
+Installation
 ------------
 
 Arpeggio is written in Python programming language and distributed with setuptools support.
@@ -33,6 +33,72 @@ after installation you should be able to import arpeggio python module with::
 There is no documentation at the moment. See examples for some ideas of how it can
 be used.
 
+Quick start
+-----------
+
+#. First write a grammar. There are several ways to do that:
+
+  #. The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as:
+
+    from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF
+    from arpeggio import RegExMatch as _
+
+    def number():     return _(r'\d*\.\d*|\d+')
+    def factor():     return Optional(["+","-"]),
+                            [number, ("(", expression, ")")]
+    def term():       return factor, ZeroOrMore(["*","/"], factor)
+    def expression(): return term, ZeroOrMore(["+", "-"], term)
+    def calc():       return OneOrMore(expression), EOF
+
+    The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
+    For terminal matches use plain strings or regular expressions.
+
+  #. The same grammar could also be written using traditional textual PEG syntax like this:
+      number <- r'\d*\.\d*|\d+';  // this is a comment
+      factor <- ("+" / "-")?
+                (number / "(" expression ")");
+      term <- factor (( "*" / "/") factor)*;
+      expression <- term (("+" / "-") term)*;
+      calc <- expression+ EOF;
+
+  #. Or similar syntax but a little bit more readable like this:
+
+      number = r'\d*\.\d*|\d+'    # this is a comment
+      factor = ("+" / "-")?
+                (number / "(" expression ")")
+      term = factor (( "*" / "/") factor)*
+      expression = term (("+" / "-") term)*
+      calc = expression+ EOF
+
+  The second and third options are implemented using canonical first form. Feel free to implement your own grammar syntax if you don't like these (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
+
+#. Instantiate a parser. Parser works as grammar interpreter. There is no code generation:
+
+    from arpeggio import ParserPython
+    parser = ParserPython(calc)   # calc is the root rule of your grammar
+                                  # Use param debug=True for verbose debugging messages and
+                                  # grammar and parse tree visualization using graphviz and dot
+
+#. Parse your inputs:
+
+    parse_tree = parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
+
+#. Analyze parse tree directly or write semantic actions to transform it to a more usable form. See examples how it is done.
+
+#. For textual PEG syntaxes instead of :code:`ParserPyton` instantiate :code:`ParserPEG` from :code:`arpeggio.peg` or :code:`arpeggio.cleanpeg` modules. See examples how it is done.
+
+To debug your grammar set :code:`debug` parameter to :code:`True`. A verbose debug messages will be printed and a dot files will be generated for parser model (grammar) and parse tree visualization.
+
+Here is an image rendered using graphviz of parser model for 'calc' grammar.
+
+|calc_parser_model.dot|
+
+And here is an image rendered for parse tree for the above parsed calc expression.
+
+|calc_parse_tree.dot|
+
+.. |calc_parser_model.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/
+.. |calc_parse_tree.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/
 
 OVERVIEW
 --------
@@ -112,4 +178,9 @@ Note: For code contributions please try to adhere to the `PEP-8 guidelines`_. Al
 .. _PEP-8 guidelines: http://legacy.python.org/dev/peps/pep-0008/
 .. _issue tracker: https://github.com/igordejanovic/Arpeggio/issues/
 
+Why is it called arpeggio?
+--------------------------
 
+In music, arpeggio is playing the chord notes one by one in sequence. I came up with the name by thinking that parsing is very similar to arpeggios in music. You take tokens one by one from an input and make sense out of it – make a chord!
+
+Well, if you don't buy this maybe it is time to tell you the truth. I searched the dictionary for the words that contains PEG acronym and the word arpeggio was at the top of the list ;)

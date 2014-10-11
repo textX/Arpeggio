@@ -113,7 +113,7 @@ Questions, discussion etc.
 --------------------------
 Please use `discussion forum`_ for general discussions, suggestions etc.
 
-If you have some specific question on textX usage please use `stackoverflow`_.
+If you have some specific question on Arpeggio usage please use `stackoverflow`_.
 Just make sure to tag your question with :code:`arpeggio`.
 
 Contributions

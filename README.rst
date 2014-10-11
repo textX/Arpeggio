@@ -80,3 +80,36 @@ to build PEG parser itself. See also peg_peg.py example where PEG parser is boot
 using description given in PEG language itself.
 
 
+Questions, discussion etc.
+--------------------------
+Please use `discussion forum`_ for general discussions, suggestions etc.
+
+If you have some specific question on textX usage please use `stackoverflow`_.
+Just make sure to tag your question with :code:`arpeggio`.
+
+Contributions
+-------------
+Arpeggio is open for contributions. You can contribute code, documentation, tests, bug reports.
+If you plan to make a contribution it would be great if you first announce that on the discussion forum.
+
+For bug reports please use github `issue tracker`_.
+
+For code/doc/test contributions do the following:
+
+#. Fork the `project on github`_.
+#. Clone your fork.
+#. Make a branch for the new feature and switch to it.
+#. Make one or more commits.
+#. Push your branch to github.
+#. Make a pull request. I will look at the changes and if everything is ok I will pull it in.
+
+Note: For code contributions please try to adhere to the `PEP-8 guidelines`_. Although I am not strict in that regard it is useful to have a common ground for coding style. To make things easier use tools for code checking (PyLint, PyFlakes, pep8 etc.).
+
+
+.. _discussion forum: https://groups.google.com/forum/?hl=en#!forum/arpeggio-talk
+.. _stackoverflow: http://stackoverflow.com/
+.. _project on github: https://github.com/igordejanovic/Arpeggio/
+.. _PEP-8 guidelines: http://legacy.python.org/dev/peps/pep-0008/
+.. _issue tracker: https://github.com/igordejanovic/Arpeggio/issues/
+
+

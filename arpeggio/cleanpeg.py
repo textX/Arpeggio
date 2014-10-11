@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 #######################################################################
-# Name: peg.py
-# Purpose: Implementing PEG language
+# Name: cleanpeg.py
+# Purpose: This module is a variation of the original peg.py.
+#   The syntax is slightly changed to be more readable and familiar to
+#   python users. It is based on the Yash's suggestion - issue #11
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
 

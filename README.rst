@@ -36,7 +36,7 @@ be used.
 Quick start
 -----------
 
-#. First write a grammar. There are several ways to do that:
+1. First write a grammar. There are several ways to do that:
 
   a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as::
 
@@ -73,20 +73,20 @@ Quick start
 
   The second and third options are implemented using canonical first form. Feel free to implement your own grammar syntax if you don't like these (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
 
-#. Instantiate a parser. Parser works as grammar interpreter. There is no code generation::
+2. Instantiate a parser. Parser works as grammar interpreter. There is no code generation::
 
     from arpeggio import ParserPython
     parser = ParserPython(calc)   # calc is the root rule of your grammar
                                   # Use param debug=True for verbose debugging messages and
                                   # grammar and parse tree visualization using graphviz and dot
 
-#. Parse your inputs::
+3. Parse your inputs::
 
     parse_tree = parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
 
-#. Analyze parse tree directly or write semantic actions to transform it to a more usable form. See examples how it is done.
+4. Analyze parse tree directly or write semantic actions to transform it to a more usable form. See examples how it is done.
 
-#. For textual PEG syntaxes instead of :code:`ParserPyton` instantiate :code:`ParserPEG` from :code:`arpeggio.peg` or :code:`arpeggio.cleanpeg` modules. See examples how it is done.
+5. For textual PEG syntaxes instead of :code:`ParserPyton` instantiate :code:`ParserPEG` from :code:`arpeggio.peg` or :code:`arpeggio.cleanpeg` modules. See examples how it is done.
 
 To debug your grammar set :code:`debug` parameter to :code:`True`. A verbose debug messages will be printed and a dot files will be generated for parser model (grammar) and parse tree visualization.
 
@@ -99,6 +99,7 @@ And here is an image rendered for parse tree for the above parsed calc expressio
 |calc_parse_tree.dot|
 
 .. |calc_parser_model.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parser_model.dot.png
+  :scale: 50 %
 .. |calc_parse_tree.dot| image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
 
 OVERVIEW

@@ -103,7 +103,7 @@ To debug your grammar set :code:`debug` parameter to :code:`True`. A verbose deb
 Here is an image rendered using graphviz of parser model for 'calc' grammar.
 
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parser_model.dot.png
-  :height: 100px
+  :scale: 50%
 
 And here is an image rendered for parse tree for the above parsed calc expression.
 

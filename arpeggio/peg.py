@@ -56,7 +56,6 @@ class SemGrammar(SemanticAction):
     def first_pass(self, parser, node, children):
         # Find root rule
         for rule in children:
-            print("RULE", rule.rule_name)
             if rule.rule_name == parser.root_rule_name:
                 self.resolved = set()
                 resolved_rule = self._resolve(parser, rule)

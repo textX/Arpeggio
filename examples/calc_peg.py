@@ -52,12 +52,11 @@ def main(debug=False):
 
     result = parser.getASG(sem_actions)
 
-    if debug:
-        # getASG will start semantic analysis.
-        # In this case semantic analysis will evaluate expression and
-        # returned value will be evaluated result of the input_expr expression.
-        # Semantic actions are supplied to the getASG function.
-        print("{} = {}".format(input_expr, result))
+    # getASG will start semantic analysis.
+    # In this case semantic analysis will evaluate expression and
+    # returned value will be evaluated result of the input_expr expression.
+    # Semantic actions are supplied to the getASG function.
+    print("{} = {}".format(input_expr, result))
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

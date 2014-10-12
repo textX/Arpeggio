@@ -23,53 +23,19 @@ from __future__ import print_function, unicode_literals
 from arpeggio import *
 
 # Grammar rules
-def robot():      return Kwd('begin'), ZeroOrMore(command), Kwd('end'), EOF
-def command():      return [up, down, left, right]
-def up():           return 'up'
-def down():         return 'down'
-def left():         return 'left'
-def right():        return 'right'
+def robot():      return 'begin', ZeroOrMore(command), 'end', EOF
+def command():      return [UP, DOWN, LEFT, RIGHT]
+def UP():           return 'up'
+def DOWN():         return 'down'
+def LEFT():         return 'left'
+def RIGHT():        return 'right'
 
 
-# Semantic actions
-class Up(SemanticAction):
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Going up")
-        return (0, 1)
+# Semantic actions visitor
+class RobotVisitor(PTNodeVisitor):
 
-
-class Down(SemanticAction):
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Going down")
-        return (0, -1)
-
-
-class Left(SemanticAction):
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Going left")
-        return (-1, 0)
-
-
-class Right(SemanticAction):
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Going right")
-        return (1, 0)
-
-
-class Command(SemanticAction):
-    def first_pass(self, parser, node, children):
-        if parser.debug:
-            print("Command")
-        return children[0]
-
-
-class Robot(SemanticAction):
-    def first_pass(self, parser, node, children):
-        if parser.debug:
+    def visit_robot(self, node, children):
+        if self.debug:
             print("Evaluating position")
         position = [0, 0]
         for move in children:
@@ -77,13 +43,31 @@ class Robot(SemanticAction):
             position[1] += move[1]
         return position
 
-# Connecting rules with semantic actions
-robot.sem = Robot()
-command.sem = Command()
-up.sem = Up()
-down.sem = Down()
-left.sem = Left()
-right.sem = Right()
+    def visit_command(self, node, children):
+        if self.debug:
+            print("Command")
+        return children[0]
+
+    def visit_UP(self, node, children):
+        if self.debug:
+            print("Going up")
+        return (0, 1)
+
+    def visit_DOWN(self, node, children):
+        if self.debug:
+            print("Going down")
+        return (0, -1)
+
+    def visit_LEFT(self, node, children):
+        if self.debug:
+            print("Going left")
+        return (-1, 0)
+
+    def visit_RIGHT(self, node, children):
+        if self.debug:
+            print("Going right")
+        return (1, 0)
+
 
 def main(debug=False):
     # Program code
@@ -105,10 +89,10 @@ def main(debug=False):
     # We create a parse tree out of textual input
     parse_tree = parser.parse(input_program)
 
-    # getASG will start semantic analysis.
+    # visit_parse_tree will start semantic analysis.
     # In this case semantic analysis will evaluate expression and
     # returned value will be the final position of the robot.
-    result = parser.getASG()
+    result = visit_parse_tree(parse_tree, RobotVisitor(debug=debug))
 
     if debug:
         print("position = ", result)

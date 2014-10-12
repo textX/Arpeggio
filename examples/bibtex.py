@@ -11,7 +11,8 @@
 from __future__ import print_function, unicode_literals
 
 import pprint
-import sys, os
+import os
+import sys
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
@@ -38,26 +39,25 @@ def fieldvalue_part():          return _(r'((\\")|[^{}])+')
 def fieldvalue_inner():         return "{", fieldvalue_braced_content, "}"
 
 
-# Semantic actions
-class BibFileSem(SemanticAction):
-    """
-    Just returns list of child nodes (bibentries).
-    """
-    def first_pass(self, parser, node, children):
-        if parser.debug:
+# Semantic actions visitor
+class BibtexVisitor(PTNodeVisitor):
+
+    def visit_bibfile(self, node, children):
+        """
+        Just returns list of child nodes (bibentries).
+        """
+        if self.debug:
             print("Processing Bibfile")
 
         # Return only dict nodes
         return [x for x in children if type(x) is dict]
 
-
-class BibEntrySem(SemanticAction):
-    """
-    Constructs a map where key is bibentry field name.
-    Key is returned under 'bibkey' key. Type is returned under 'bibtype'.
-    """
-    def first_pass(self, parser, node, children):
-        if parser.debug:
+    def visit_bibentry(self, node, children):
+        """
+        Constructs a map where key is bibentry field name.
+        Key is returned under 'bibkey' key. Type is returned under 'bibtype'.
+        """
+        if self.debug:
             print("  Processing bibentry %s" % children[1])
         bib_entry_map = {
             'bibtype': children[0],
@@ -67,42 +67,32 @@ class BibEntrySem(SemanticAction):
             bib_entry_map[field[0]] = field[1]
         return bib_entry_map
 
-
-class FieldSem(SemanticAction):
-    """
-    Constructs a tuple (fieldname, fieldvalue).
-    """
-    def first_pass(self, parser, node, children):
-        if parser.debug:
+    def visit_field(self, node, children):
+        """
+        Constructs a tuple (fieldname, fieldvalue).
+        """
+        if self.debug:
             print("    Processing field %s" % children[0])
         field = (children[0], children[1])
         return field
 
-
-class FieldValueSem(SemanticAction):
-    """
-    Serbian Serbian letters form latex encoding to Unicode.
-    Remove braces. Remove newlines.
-    """
-    def first_pass(self, parser, node, children):
+    def visit_fieldvalue(self, node, children):
+        """
+        Serbian Serbian letters form latex encoding to Unicode.
+        Remove braces. Remove newlines.
+        """
         value = children[0]
         value = value.replace(r"\'{c}", u"ć")\
-                    .replace(r"\'{C}", u"Ć")\
-                    .replace(r"\v{c}", u"č")\
-                    .replace(r"\v{C}", u"Č")\
-                    .replace(r"\v{z}", u"ž")\
-                    .replace(r"\v{Z}", u"Ž")\
-                    .replace(r"\v{s}", u"š")\
-                    .replace(r"\v{S}", u"Š")
+                     .replace(r"\'{C}", u"Ć")\
+                     .replace(r"\v{c}", u"č")\
+                     .replace(r"\v{C}", u"Č")\
+                     .replace(r"\v{z}", u"ž")\
+                     .replace(r"\v{Z}", u"Ž")\
+                     .replace(r"\v{s}", u"š")\
+                     .replace(r"\v{S}", u"Š")
         value = re.sub("[\n{}]", '', value)
         return value
 
-# Connecting rules with semantic actions
-bibfile.sem = BibFileSem()
-bibentry.sem = BibEntrySem()
-field.sem = FieldSem()
-fieldvalue_braces.sem = FieldValueSem()
-fieldvalue_quotes.sem = FieldValueSem()
 
 def main(debug=False, file_name=None):
     # First we will make a parser - an instance of the bib parser model.
@@ -111,7 +101,8 @@ def main(debug=False, file_name=None):
     parser = ParserPython(bibfile, reduce_tree=True, debug=debug)
 
     if not file_name:
-        file_name = os.path.join(os.path.dirname(__file__), 'bibtex_example.bib')
+        file_name = os.path.join(os.path.dirname(__file__),
+                                 'bibtex_example.bib')
 
     with codecs.open(file_name, "r", encoding="utf-8") as bibtexfile:
         bibtexfile_content = bibtexfile.read()
@@ -120,9 +111,9 @@ def main(debug=False, file_name=None):
     # textual input
     parse_tree = parser.parse(bibtexfile_content)
 
-    # getASG will start semantic analysis.
-    # In this case semantic analysis will list of bibentry maps.
-    ast = parser.getASG()
+    # visit_parse_tree will start semantic analysis.
+    # In this case semantic analysis will return list of bibentry maps.
+    ast = visit_parse_tree(parse_tree, BibtexVisitor(debug=debug))
 
     return ast
 

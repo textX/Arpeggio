@@ -33,16 +33,8 @@ LEFT <- 'left';
 RIGHT <- 'right';
 '''
 
-# Semantic actions
-from robot import Up, Down, Left, Right, Command, Robot
-semantic_actions = {
-    'robot': Robot(),
-    'command': Command(),
-    'UP': Up(),
-    'DOWN': Down(),
-    'LEFT': Left(),
-    'RIGHT': Right()
-}
+# Semantic actions visitor
+from robot import RobotVisitor
 
 
 def main(debug=False):
@@ -57,7 +49,6 @@ def main(debug=False):
         end
     '''
 
-
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of PEG specification therefore we
     # are using ParserPEG class.
@@ -66,10 +57,10 @@ def main(debug=False):
     # We create a parse tree out of textual input
     parse_tree = parser.parse(input)
 
-    # getASG will start semantic analysis.
+    # visit_parse_tree will start semantic analysis.
     # In this case semantic analysis will evaluate expression and
     # returned value will be the final position of the robot.
-    return parser.getASG(sem_actions=semantic_actions)
+    return visit_parse_tree(parse_tree, RobotVisitor(debug=debug))
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

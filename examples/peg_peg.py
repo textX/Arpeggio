@@ -15,24 +15,7 @@ from __future__ import unicode_literals
 
 from arpeggio import *
 from arpeggio.export import PMDOTExporter
-from arpeggio.peg import ParserPEG
-
-# Semantic actions
-from arpeggio.peg import SemGrammar, sem_rule, sem_sequence, sem_ordered_choice,\
-    sem_sufix, sem_prefix, sem_strmatch, sem_regex, sem_rule_crossref
-
-sem_actions = {
-    "peggrammar":      SemGrammar(),
-    "rule":            sem_rule,
-    "ordered_choice":  sem_ordered_choice,
-    "sequence":        sem_sequence,
-    "prefix":          sem_prefix,
-    "sufix":           sem_sufix,
-    "expression":      SemanticActionSingleChild(),
-    "regex":           sem_regex,
-    "str_match":       sem_strmatch,
-    "rule_crossref":   sem_rule_crossref
-}
+from arpeggio.peg import ParserPEG, PEGVisitor
 
 
 # PEG defined using PEG itself.
@@ -76,11 +59,13 @@ def main(debug=False):
     # Now we will use created parser to parse the same peg_grammar used for
     # parser initialization. We can parse peg_grammar because it is specified
     # using PEG itself.
-    parser.parse(peg_grammar)
+    parse_tree = parser.parse(peg_grammar)
 
     # ASG should be the same as parser.parser_model because semantic
     # actions will create PEG parser (tree of ParsingExpressions).
-    asg = parser.getASG(sem_actions)
+    asg = visit_parse_tree(parse_tree, PEGVisitor(root_rule_name='peggrammar',
+                                                  ignore_case=False,
+                                                  debug=debug))
 
     if debug:
         # This graph should be the same as peg_peg_parser_model.dot because

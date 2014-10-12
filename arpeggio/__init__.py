@@ -763,7 +763,7 @@ class ParseTreeNode(object):
                 child = node.visit(visitor)
                 # If visit returns None suppress that child node
                 if child is not None:
-                    children.append(child)
+                    children.append_result(node.rule_name, child)
 
         visit_name = "visit_%s" % self.rule_name
         if hasattr(visitor, visit_name):

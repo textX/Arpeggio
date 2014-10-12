@@ -109,6 +109,8 @@ And here is an image rendered for parse tree for the above parsed calc expressio
 
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
 
+If you are building a domain-specific language then I suggest you to take a look at `textX`_.
+
 Discuss, ask questions
 ----------------------
 Please use `discussion forum`_ for general discussions, suggestions etc.
@@ -135,6 +137,7 @@ For code/doc/test contributions do the following:
 Note: For code contributions please try to adhere to the `PEP-8 guidelines`_. Although I am not strict in that regard it is useful to have a common ground for coding style. To make things easier use tools for code checking (PyLint, PyFlakes, pep8 etc.).
 
 
+.. _textX: https://github.com/igordejanovic/textX
 .. _discussion forum: https://groups.google.com/forum/?hl=en#!forum/arpeggio-talk
 .. _stackoverflow: http://stackoverflow.com/
 .. _project on github: https://github.com/igordejanovic/Arpeggio/

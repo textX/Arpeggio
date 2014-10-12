@@ -13,7 +13,7 @@ from __future__ import print_function, unicode_literals
 
 from arpeggio import *
 from arpeggio import RegExMatch as _
-from .peg import sem_actions
+from .peg import PEGVisitor
 from .peg import ParserPEG as ParserPEGOrig
 
 __all__ = ['ParserPEG']
@@ -49,13 +49,14 @@ def comment():          return _("#.*\n")
 
 
 class ParserPEG(ParserPEGOrig):
+
     def _from_peg(self, language_def):
         parser = ParserPython(peggrammar, comment, reduce_tree=False,
                               debug=self.debug)
         parser.root_rule_name = self.root_rule_name
-        parser.parse(language_def)
+        parse_tree = parser.parse(language_def)
 
-        # Initialise cross-ref counter
-        parser._crossref_cnt = 0
-
-        return parser.getASG(sem_actions=sem_actions)
+        # return parser.getASG(sem_actions=sem_actions)
+        return visit_parse_tree(parse_tree, PEGVisitor(self.root_rule_name,
+                                                       self.ignore_case,
+                                                       debug=self.debug))

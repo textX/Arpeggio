@@ -974,6 +974,7 @@ def visit_parse_tree(parse_tree, visitor):
 
     if visitor.debug:
         print("ASG: First pass")
+
     # Visit tree.
     result = parse_tree.visit(visitor)
 

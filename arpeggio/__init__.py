@@ -746,6 +746,41 @@ class ParseTreeNode(object):
     def name(self):
         return "%s [%s]" % (self.rule_name, self.position)
 
+    def visit(self, visitor):
+        """
+        Visitor pattern implementation.
+
+        Args:
+            visitor(PTNodeVisitor): The visitor object.
+        """
+        if visitor.debug:
+            print("Visiting ", self.name, "  type:",
+                  type(self).__name__, "str:", text(self))
+
+        children = SemanticActionResults()
+        if isinstance(self, NonTerminal):
+            for node in self:
+                child = node.visit(visitor)
+                # If visit returns None suppress that child node
+                if child is not None:
+                    children.append(child)
+
+        visit_name = "visit_%s" % self.rule_name
+        if hasattr(visitor, visit_name):
+            # Call visit method.
+            result = getattr(visitor, visit_name)(self, children)
+
+            # If there is a method with 'second' prefix save
+            # the result of visit for post-processing
+            if hasattr(visitor, "second_%s" % self.rule_name):
+                visitor.for_second_pass.append((self.rule_name, result))
+
+            return result
+
+        elif visitor.defaults:
+            # If default actions are enabled
+            return visitor.visit__default__(self, children)
+
 
 class Terminal(ParseTreeNode):
     """
@@ -869,6 +904,87 @@ class NonTerminal(ParseTreeNode, list):
 # ----------------------------------------------------
 # Semantic Actions
 #
+class PTNodeVisitor(object):
+    """
+    Base class for all parse tree visitors.
+    """
+    def __init__(self, defaults=True, debug=False):
+        """
+        Args:
+            defaults(bool): If the default visit method should be applied in
+                case no method is defined.
+            debug(bool): Print debug messages?
+        """
+        self.for_second_pass = []
+        self.debug = debug
+        self.defaults = defaults
+
+    def visit__default__(self, node, children):
+        """
+        Called if no visit method is defined for the node.
+
+        Args:
+            node(ParseTreeNode):
+            children(processed children ParseTreeNode-s):
+        """
+        if isinstance(node, Terminal):
+            # Default for Terminal is to convert to string unless suppress flag
+            # is set in which case it is suppressed by setting to None.
+            retval = text(node) if not node.suppress else None
+        else:
+            retval = node
+            # Special case. If only one child exist return it.
+            if len(children) == 1:
+                retval = children[0]
+            else:
+                # If there is only one non-string child return
+                # that by default. This will support e.g. bracket
+                # removals.
+                last_non_str = None
+                for c in children:
+                    if not isstr(c):
+                        if last_non_str is None:
+                            last_non_str = c
+                        else:
+                            # If there is multiple non-string objects
+                            # by default convert non-terminal to string
+                            if self.debug:
+                                print("*** Warning: Multiple non-string objects found in default visit. Converting non-terminal to a string.")
+                            retval = text(node)
+                            break
+                else:
+                    # Return the only non-string child
+                    retval = last_non_str
+
+        return retval
+
+
+def visit_parse_tree(parse_tree, visitor):
+    """
+    Applies visitor to parse_tree and runs the second pass
+    afterwards.
+
+    Args:
+        parse_tree(ParseTreeNode):
+        visitor(PTNodeVisitor):
+    """
+    if not parse_tree:
+        raise Exception(
+            "Parse tree is empty. You did call parse(), didn't you?")
+
+    if visitor.debug:
+        print("ASG: First pass")
+    # Visit tree.
+    result = parse_tree.visit(visitor)
+
+    # Second pass
+    if visitor.debug:
+        print("ASG: Second pass")
+    for sa_name, asg_node in visitor.for_second_pass:
+        getattr(visitor, "second_%s" % sa_name)(asg_node)
+
+    return result
+
 
 class SemanticAction(object):
     """

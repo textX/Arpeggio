@@ -97,7 +97,7 @@ Quick start
 
     parse_tree = parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
 
-4. Analyze parse tree directly or write semantic actions to transform it to a more usable form. See examples how it is done.
+4. Analyze parse tree directly or write a visitor class to transform it to a more usable form. See examples how it is done.
 
 5. For textual PEG syntaxes instead of :code:`ParserPyton` instantiate :code:`ParserPEG` from :code:`arpeggio.peg` or :code:`arpeggio.cleanpeg` modules. See examples how it is done.
 

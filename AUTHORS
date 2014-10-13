@@ -2,3 +2,10 @@ Arpeggio - Parser interpreter based on PEG grammars
 
 Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 
+
+Contributors
+------------
+
+ Daniel Fath (Ygg01@github) - Travis CI integration
+ yashpal bhardwaj (codeyash@github) - bug reports, doc contribution, improvement ideas
+

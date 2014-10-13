@@ -2,6 +2,8 @@ Changelog for Arpeggio
 ======================
 
 * Development
+  - Visitor pattern support for semantic analysis.
+  - Alternative PEG syntax (arpeggio.cleanpeg module)
   - Support for unicode in grammars.
   - Python 2/3 compatibility for unicodes.
 

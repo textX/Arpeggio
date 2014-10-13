@@ -106,9 +106,7 @@ class PEGVisitor(PTNodeVisitor):
 
         # Find root rule
         for rule in children:
-            print("RULENODE", rule.rule_name, self.root_rule_name)
             if rule.rule_name == self.root_rule_name:
-                print("ROOT", rule.rule_name)
                 self.resolved = set()
                 resolved_rule = _resolve(rule)
 

@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/igordejanovic/Arpeggio.svg
+    :target: https://travis-ci.org/igordejanovic/Arpeggio
+
 Arpeggio - Packrat parser interpreter
 =====================================
 

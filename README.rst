@@ -39,50 +39,55 @@ be used.
 Quick start
 -----------
 
-1. Write a grammar. There are several ways to do that:
+Write a grammar. There are several ways to do that:
 
-  a) The canonical grammar format uses Python statements and expressions. Each rule is specified as Python function which should return a data structure that defines the rule. For example a grammar for simple calculator can be written as:
+  - The canonical grammar format uses Python statements and expressions.
+    Each rule is specified as Python function which should return a data
+    structure that defines the rule. For example a grammar for simple 
+    calculator can be written as:
 
-  .. code:: python
+    .. code:: python
 
-    from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF
-    from arpeggio import RegExMatch as _
+      from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF
+      from arpeggio import RegExMatch as _
 
-    def number():     return _(r'\d*\.\d*|\d+')
-    def factor():     return Optional(["+","-"]),
-                            [number, ("(", expression, ")")]
-    def term():       return factor, ZeroOrMore(["*","/"], factor)
-    def expression(): return term, ZeroOrMore(["+", "-"], term)
-    def calc():       return OneOrMore(expression), EOF
+      def number():     return _(r'\d*\.\d*|\d+')
+      def factor():     return Optional(["+","-"]),
+                              [number, ("(", expression, ")")]
+      def term():       return factor, ZeroOrMore(["*","/"], factor)
+      def expression(): return term, ZeroOrMore(["+", "-"], term)
+      def calc():       return OneOrMore(expression), EOF
 
-  The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
-  For terminal matches use plain strings or regular expressions.
+    The python lists in the data structure represent ordered choices while the tuples represent sequences from the PEG.
+    For terminal matches use plain strings or regular expressions.
 
-  b) The same grammar could also be written using traditional textual PEG syntax like this:
+  - The same grammar could also be written using traditional textual PEG syntax like this:
 
-  ::
+    ::
 
-    number <- r'\d*\.\d*|\d+';  // this is a comment
-    factor <- ("+" / "-")?
-              (number / "(" expression ")");
-    term <- factor (( "*" / "/") factor)*;
-    expression <- term (("+" / "-") term)*;
-    calc <- expression+ EOF;
+      number <- r'\d*\.\d*|\d+';  // this is a comment
+      factor <- ("+" / "-")?
+                (number / "(" expression ")");
+      term <- factor (( "*" / "/") factor)*;
+      expression <- term (("+" / "-") term)*;
+      calc <- expression+ EOF;
 
-  c) Or similar syntax but a little bit more readable like this:
+  - Or similar syntax but a little bit more readable like this:
 
-  ::
+    ::
 
-    number = r'\d*\.\d*|\d+'    # this is a comment
-    factor = ("+" / "-")?
-              (number / "(" expression ")")
-    term = factor (( "*" / "/") factor)*
-    expression = term (("+" / "-") term)*
-    calc = expression+ EOF
+      number = r'\d*\.\d*|\d+'    # this is a comment
+      factor = ("+" / "-")?
+                (number / "(" expression ")")
+      term = factor (( "*" / "/") factor)*
+      expression = term (("+" / "-") term)*
+      calc = expression+ EOF
 
-  The second and third options are implemented using canonical first form. Feel free to implement your own grammar syntax if you don't like these (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
+    The second and third options are implemented using canonical first form.
+    Feel free to implement your own grammar syntax if you don't like these
+    (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
 
-2. Instantiate a parser. Parser works as grammar interpreter. There is no code generation.
+Instantiate a parser. Parser works as grammar interpreter. There is no code generation.
 
 .. code:: python
 
@@ -91,17 +96,21 @@ Quick start
                                   # Use param debug=True for verbose debugging messages and
                                   # grammar and parse tree visualization using graphviz and dot
 
-3. Parse your inputs.
+Parse your inputs.
 
 .. code:: python
 
     parse_tree = parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
 
-4. Analyze parse tree directly or write a visitor class to transform it to a more usable form. See examples how it is done.
+ Analyze parse tree directly or write a visitor class to transform it to a more
+ usable form. See examples how it is done.
 
-5. For textual PEG syntaxes instead of :code:`ParserPyton` instantiate :code:`ParserPEG` from :code:`arpeggio.peg` or :code:`arpeggio.cleanpeg` modules. See examples how it is done.
+For textual PEG syntaxes instead of :code:`ParserPyton` instantiate :code:`ParserPEG`
+from :code:`arpeggio.peg` or :code:`arpeggio.cleanpeg` modules. See examples how it is done.
 
-To debug your grammar set :code:`debug` parameter to :code:`True`. A verbose debug messages will be printed and a dot files will be generated for parser model (grammar) and parse tree visualization.
+To debug your grammar set :code:`debug` parameter to :code:`True`. A verbose debug
+messages will be printed and a dot files will be generated for parser model (grammar)
+and parse tree visualization.
 
 Here is an image rendered using graphviz of parser model for 'calc' grammar.
 
@@ -118,8 +127,9 @@ Discuss, ask questions
 ----------------------
 Please use `discussion forum`_ for general discussions, suggestions etc.
 
-If you have some specific question on Arpeggio usage please use `stackoverflow`_.
-Just make sure to tag your question with :code:`arpeggio`.
+If you are on `stackoverflow`_ you can ask questions there.
+Just make sure to tag your question with :code:`arpeggio` so that your question
+reach me.
 
 Contribute
 ----------

@@ -15,9 +15,8 @@
 from __future__ import absolute_import, unicode_literals, print_function
 
 from arpeggio.cleanpeg import ParserPEG
-
-# Semantic actions
-from calc import to_floatSA, factorSA, termSA, exprSA
+from arpeggio import visit_parse_tree
+from calc import CalcVisitor
 
 # Grammar is defined using textual specification based on PEG language.
 calc_grammar = """
@@ -29,13 +28,6 @@ calc_grammar = """
         calc = expression+ EOF
 """
 
-# Rules are mapped to semantic actions
-sem_actions = {
-    "number" : to_floatSA,
-    "factor" : factorSA,
-    "term"   : termSA,
-    "expression" : exprSA,
-}
 
 def main(debug=False):
 
@@ -50,12 +42,11 @@ def main(debug=False):
     # Then parse tree is created out of the input_expr expression.
     parse_tree = parser.parse(input_expr)
 
-    result = parser.getASG(sem_actions)
+    result = visit_parse_tree(parse_tree, CalcVisitor(debug=debug))
 
-    # getASG will start semantic analysis.
+    # visit_parse_tree will start semantic analysis.
     # In this case semantic analysis will evaluate expression and
     # returned value will be evaluated result of the input_expr expression.
-    # Semantic actions are supplied to the getASG function.
     print("{} = {}".format(input_expr, result))
 
 if __name__ == "__main__":

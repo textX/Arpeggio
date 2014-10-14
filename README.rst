@@ -85,7 +85,7 @@ Write a grammar. There are several ways to do that:
 
   The second and third options are implemented using canonical first form.
   Feel free to implement your own grammar syntax if you don't like these
-  (see modules :code:`arpeggio.peg` and :code:`arpeggio.cleanpeg`).
+  (see modules ``arpeggio.peg`` and ``arpeggio.cleanpeg``).
 
 Instantiate a parser. Parser works as grammar interpreter. There is no code generation.
 
@@ -106,10 +106,10 @@ Parse your inputs.
 Analyze parse tree directly or write a visitor class to transform it to a more
 usable form. See examples how it is done.
 
-For textual PEG syntaxes instead of :code:`ParserPyton` instantiate :code:`ParserPEG`
-from :code:`arpeggio.peg` or :code:`arpeggio.cleanpeg` modules. See examples how it is done.
+For textual PEG syntaxes instead of ``ParserPyton`` instantiate ``ParserPEG``
+from ``arpeggio.peg`` or ``arpeggio.cleanpeg`` modules. See examples how it is done.
 
-To debug your grammar set :code:`debug` parameter to :code:`True`. A verbose debug
+To debug your grammar set ``debug`` parameter to ``True``. A verbose debug
 messages will be printed and a dot files will be generated for parser model (grammar)
 and parse tree visualization.
 
@@ -128,8 +128,8 @@ Discuss, ask questions
 ----------------------
 Please use `discussion forum`_ for general discussions, suggestions etc.
 
-If you are on `stackoverflow`_ you can ask questions there.
-Just make sure to tag your question with :code:`arpeggio` so that your question
+If you are on stackoverflow_ you can ask questions there.
+Just make sure to tag your question with ``arpeggio`` so that your question
 reach me.
 
 Contribute

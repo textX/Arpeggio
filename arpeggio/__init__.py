@@ -181,38 +181,7 @@ class ParsingExpression(object):
                 processed.add(node)
                 node.clear_cache(processed)
 
-    def _parse_intro(self, parser):
-        if parser.debug:
-            print(">> Entering rule {} in {} at position {} => {}".format(
-                self.name, parser.in_rule, parser.position, parser.context()))
-
-        parser._in_parse_intro = True
-
-        # Skip whitespaces and parse comments if we are not
-        # in the lexical rule
-        if not parser._in_lex_rule:
-            parser._skip_ws()
-            if parser.comments_model and not parser._in_parse_comment:
-                parser._in_parse_comment = True
-                try:
-                    while True:
-                        parser.comments.append(
-                            parser.comments_model.parse(parser))
-                        parser._skip_ws()
-                except NoMatch:
-                    # NoMatch in comment matching is perfectly
-                    # legal and no action should be taken.
-                    pass
-
-                finally:
-                    parser._in_parse_comment = False
-
-        parser._in_parse_intro = False
-
     def parse(self, parser):
-
-        if not parser._in_parse_intro:
-            self._parse_intro(parser)
 
         # Current position could change in recursive calls
         # so save it.
@@ -285,7 +254,7 @@ class ParsingExpression(object):
             # If the result is not parse tree node it must be a plain list
             # so create a new NonTerminal.
             if not isinstance(result, ParseTreeNode):
-                result = NonTerminal(self, c_pos, result)
+                result = NonTerminal(self, result)
 
         # Result caching for use by memoization.
         self.result_cache[c_pos] = (result, parser.position)
@@ -566,8 +535,37 @@ class Match(ParsingExpression):
         else:
             return "%s(%s)" % (self.__class__.__name__, self.to_match)
 
+    def _parse_intro(self, parser):
+        if parser.debug:
+            print(">> Entering rule {} in {} at position {} => {}".format(
+                self.name, parser.in_rule, parser.position, parser.context()))
+
+        parser._in_parse_intro = True
+
+        # Skip whitespaces and parse comments if we are not
+        # in the lexical rule
+        if not parser._in_lex_rule:
+            parser._skip_ws()
+            if parser.comments_model and not parser._in_parse_comment:
+                parser._in_parse_comment = True
+                try:
+                    while True:
+                        parser.comments.append(
+                            parser.comments_model.parse(parser))
+                        parser._skip_ws()
+                except NoMatch:
+                    # NoMatch in comment matching is perfectly
+                    # legal and no action should be taken.
+                    pass
+
+                finally:
+                    parser._in_parse_comment = False
+
+        parser._in_parse_intro = False
+
     def parse(self, parser):
-        self._parse_intro(parser)
+        if not parser._in_parse_intro:
+            self._parse_intro(parser)
 
         try:
             match = self._parse(parser)
@@ -832,8 +830,13 @@ class NonTerminal(ParseTreeNode, list):
             This is used internally.
 
     """
-    def __init__(self, rule, position, nodes, error=False, _filtered=False):
+    def __init__(self, rule, nodes, error=False, _filtered=False):
+
+        # Inherit position from the first child node
+        position = nodes[0].position
+
         super(NonTerminal, self).__init__(rule, position, error)
+
         self.extend(flatten([nodes]))
         self._filtered = _filtered
 
@@ -893,10 +896,7 @@ class NonTerminal(ParseTreeNode, list):
                     nodes.append(n)
                     rule = n.rule
 
-        # For expression NonTerminals instances position does not have
-        # any sense.
-        result = NonTerminal(rule=rule, position=None, nodes=nodes,
-                             _filtered=True)
+        result = NonTerminal(rule=rule, nodes=nodes, _filtered=True)
         self._expr_cache[rule_name] = result
         return result
 

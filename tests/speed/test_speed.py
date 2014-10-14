@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_speed
-# Purpose: Performance test of arpeggio parser
+# Purpose: Basic performance test of arpeggio parser to check for 
+#   performance differences of various approaches.
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
 
-import timeit, sys
+from __future__ import unicode_literals
+import timeit
 
 if __name__ == "__main__":
 
+# Setup code works for python 3 only. Haven't figured out yet how to
+# from __future__ import unicode_literals  in the setup code
     setup = '''
+import codecs
 from arpeggio import OneOrMore, ZeroOrMore, EOF, ParserPython, Optional
 from arpeggio import RegExMatch as _
 
@@ -22,7 +27,7 @@ def expression():       return term, ZeroOrMore(["+", "-"], term)
 def calcfile():         return OneOrMore(expression), EOF
 
 parser = ParserPython(calcfile, reduce_tree=True)
-with open("input.txt", "r") as f:
+with codecs.open("input.txt", encoding="utf-8") as f:
     input = f.read()
     '''
 

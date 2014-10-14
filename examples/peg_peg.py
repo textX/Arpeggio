@@ -63,19 +63,21 @@ def main(debug=False):
 
     # ASG should be the same as parser.parser_model because semantic
     # actions will create PEG parser (tree of ParsingExpressions).
-    asg = visit_parse_tree(parse_tree, PEGVisitor(root_rule_name='peggrammar',
-                                                  ignore_case=False,
-                                                  debug=debug))
+    parser_model, comment_model = visit_parse_tree(
+        parse_tree, PEGVisitor(root_rule_name='peggrammar',
+                               comment_rule_name='comment',
+                               ignore_case=False,
+                               debug=debug))
 
     if debug:
         # This graph should be the same as peg_peg_parser_model.dot because
         # they define the same parser.
-        PMDOTExporter().exportFile(asg,
-                                   "peg_peg_asg.dot")
+        PMDOTExporter().exportFile(parser_model,
+                                   "peg_peg_new_parser_model.dot")
 
     # If we replace parser_mode with ASG constructed parser it will still
     # parse PEG grammars
-    parser.parser_model = asg
+    parser.parser_model = parser_model
     parser.parse(peg_grammar)
 
 if __name__ == '__main__':

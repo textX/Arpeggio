@@ -51,10 +51,15 @@ def comment():          return "//", _(".*\n")
 
 
 class PEGVisitor(PTNodeVisitor):
+    """
+    Visitor that transforms parse tree to a PEG parser for the given language.
+    """
 
-    def __init__(self, root_rule_name, ignore_case, *args, **kwargs):
+    def __init__(self, root_rule_name, comment_rule_name, ignore_case,
+                 *args, **kwargs):
         super(PEGVisitor, self).__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
+        self.comment_rule_name = comment_rule_name
         self.ignore_case = ignore_case
         # Used for linking phase
         self.peg_rules = {
@@ -104,15 +109,17 @@ class PEGVisitor(PTNodeVisitor):
                 self.resolved.add(node)
                 return node
 
-        # Find root rule
+        # Find root and comment rules
+        self.resolved = set()
+        comment_rule = None
         for rule in children:
             if rule.rule_name == self.root_rule_name:
-                self.resolved = set()
-                resolved_rule = _resolve(rule)
+                root_rule = _resolve(rule)
+            if rule.rule_name == self.comment_rule_name:
+                comment_rule = _resolve(rule)
 
-                return resolved_rule
-
-        assert False, "Root rule not found!"
+        assert root_rule, "Root rule not found!"
+        return root_rule, comment_rule
 
     def visit_rule(self, node, children):
         rule_name = children[0]
@@ -194,13 +201,28 @@ class PEGVisitor(PTNodeVisitor):
 
 
 class ParserPEG(Parser):
+
     def __init__(self, language_def, root_rule_name, comment_rule_name=None,
                  *args, **kwargs):
+        """
+        Constructs parser from textual PEG definition.
+
+        Args:
+            language_def (str): A string describing language grammar using
+                PEG notation.
+            root_rule_name(str): The name of the root rule.
+            comment_rule_name(str): The name of the rule for comments.
+        """
         super(ParserPEG, self).__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
+        self.comment_rule_name = comment_rule_name
 
         # PEG Abstract Syntax Graph
-        self.parser_model = self._from_peg(language_def)
+        self.parser_model, self.comments_model = self._from_peg(language_def)
+        # Comments should be optional and there can be more of them
+        if self.comments_model:
+            self.comments_model.root = True
+            self.comments_model.rule_name = comment_rule_name
 
         # In debug mode export parser model to dot for
         # visualization
@@ -209,11 +231,6 @@ class ParserPEG(Parser):
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(
                 self.parser_model, "{}_peg_parser_model.dot".format(root_rule))
-
-        # Comments should be optional and there can be more of them
-        if self.comments_model:
-            self.comments_model.root = True
-            self.comments_model.rule_name = comment_rule_name
 
     def _parse(self):
         return self.parser_model.parse(self)
@@ -224,7 +241,7 @@ class ParserPEG(Parser):
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)
 
-        # return parser.getASG(sem_actions=sem_actions)
         return visit_parse_tree(parse_tree, PEGVisitor(self.root_rule_name,
+                                                       self.comment_rule_name,
                                                        self.ignore_case,
                                                        debug=self.debug))

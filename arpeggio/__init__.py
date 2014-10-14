@@ -1381,13 +1381,27 @@ class CrossRef(object):
 
 
 class ParserPython(Parser):
+
     def __init__(self, language_def, comment_def=None, *args, **kwargs):
+        """
+        Constructs parser from python statements and expressions.
+
+        Args:
+            language_def (python function): A python function that defines
+                the root rule of the grammar.
+            comment_def (python function): A python function that defines
+                the root rule of the comments grammar.
+        """
         super(ParserPython, self).__init__(*args, **kwargs)
 
         # PEG Abstract Syntax Graph
         self.parser_model = self._from_python(language_def)
-        self.comments_model = self._from_python(comment_def) \
-            if comment_def else None
+
+        self.comments_model = None
+        if comment_def:
+            self.comments_model = self._from_python(comment_def)
+            self.comments_model.root = True
+            self.comments_model.rule_name = comment_def.__name__
 
         # In debug mode export parser model to dot for
         # visualization
@@ -1396,11 +1410,6 @@ class ParserPython(Parser):
             root_rule = language_def.__name__
             PMDOTExporter().exportFile(self.parser_model,
                                        "{}_parser_model.dot".format(root_rule))
-
-        # Comments should be optional and there can be more of them
-        if self.comments_model:
-            self.comments_model.root = True
-            self.comments_model.rule_name = comment_def.__name__
 
     def _parse(self):
         return self.parser_model.parse(self)

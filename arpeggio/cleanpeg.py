@@ -56,7 +56,7 @@ class ParserPEG(ParserPEGOrig):
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)
 
-        # return parser.getASG(sem_actions=sem_actions)
         return visit_parse_tree(parse_tree, PEGVisitor(self.root_rule_name,
+                                                       self.comment_rule_name,
                                                        self.ignore_case,
                                                        debug=self.debug))

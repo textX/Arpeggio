@@ -1,8 +1,11 @@
+.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/art/arpeggio-logo.png
+  :height: 100
+
+Arpeggio - PEG parser
+=====================
+
 .. image:: https://travis-ci.org/igordejanovic/Arpeggio.svg
     :target: https://travis-ci.org/igordejanovic/Arpeggio
-
-Arpeggio - Packrat parser interpreter
-=====================================
 
 Arpeggio is PEG grammar interpreter implemented as recursive descent
 parser with memoization (aka Packrat parser).

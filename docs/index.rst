@@ -13,6 +13,25 @@ Arpeggio grammars are based on `PEG formalism <http://en.wikipedia.org/wiki/Pars
 PEG grammars
 ------------
 
+PEG is a type of formal grammar that is given as a set of rules for recognizing strings of the language.
+In a way it is similar to context-free grammars with a very important distinction that PEG are always
+unambiguous. This is achieved by making choice opearator ordered. In PEGs a first choice from
+left to right that matches will be used.
+
+In Arpeggio each PEG rule consists of atomic parsing expression which can be:
+
+  - **terminal match rules**:
+
+    - **String match** - a simple string that is matched literaly from the input string.
+    - **RegEx match** - regular expression match (based on python ``re`` module).
+
+  - **non-terminal match rules**:
+
+    - **Sequence**
+
+TODO: Finis this section.
+
+
 
 Grammar given in Python
 -----------------------
@@ -153,23 +172,151 @@ can parse the same language.
 Parse tree
 ----------
 
+Parse tree or concrete syntax tree is a tree structure built from the input string during parsing.
+It represent the structure of the input string. Each node in the parse tree is either a ``terminal``
+or ``non-terminal``. Terminals are the leafs of the tree while the inner nodes are non-terminals.
+
+Here is an example parse tree for the ``calc`` grammar:
+
+
 Terminals
 ~~~~~~~~~
+Terminals in Arpeggio are created by the specializations of the ``Match`` class: ``StrMatch`` if
+the literal string is matched from the input or ``RegExMatch`` if a regular expression is used to
+match input.
 
 NonTerminals
 ~~~~~~~~~~~~
+Non-terminal nodes are non-leaf nodes of the parse tree. Children of non-terminals can be other non-terminals
+or terminals.
+
+For example, nodes .... from the above parse tree are non-terminal nodes.
 
 Parse tree navigation
 ~~~~~~~~~~~~~~~~~~~~~
+Usually we want to transform parse tree to some more usable form or to extract some data from it.
+Parse tree can be navigated using following approaches:
 
-Errors in grammar
+Grammar debugging
 -----------------
+During grammar design you can make syntax and semantic errors. Arpeggio will report any syntax error
+with all the necessary informations whether you are building parser from python expressions or from
+a textual PEG notation.
 
-Errors in input
----------------
+For semantic error you have a debugging mode of operation which is entered by setting ``debug`` param
+to ``True`` in the parser construction call. When Arpeggio runs in debug mode it will print a detailed
+information of what it is doing. Furthermore a ``dot`` files will be generated that visually represents
+your grammar (this is known in Arpeggio as ``the parser model``). In debug mode also a parse tree will
+also be rendered to ``dot`` file when you parse your input with properly constructed parser.
+
+You can visualize ``dot`` files using some of available dot viewer or you can convert dot file to image
+using ``dot`` tool from ``graphviz`` package.
+
+An example to convert ``calc_parser_model.dot`` to ``png`` file use:
+
+.. code:: bash
+
+  $ dot -Tpng -O calc_parser_model.dot
+
+Errors in the input
+-------------------
+If your grammar is correct but you get input string with syntax error parser will raise ``NoMatch`` exception
+with the information where in the input stream error has occurred and what the parser expect to see at that
+location.
+
+The input location is given as the offset from the beginning of the input string. To convert it to row and column
+use ``position_to_row_col`` method on the parser.
+
+Example:
+
+.. code:: python
+
+
+Currently Arpeggio will report the first rule it tried at that location.
+Arpeggio is backtracking parser, which means that it will go back and try another alternatives when the match
+does not succeeds but it will nevertheless report the furthest place in the input where it failed.
+
 
 Semantic analysis - Visitors
 ----------------------------
+
+You will surely always want to extract some information from the parse tree or to transform it in some
+more usable form.
+The process of parse tree transformation to other forms is referred to as *semantic analysis*.
+You could do that using plain tree navigation etc. but it is better to use some
+standard mechanism.
+
+In Arpeggio a visitor pattern is used for semantic analysis. You write a python class that has a methods named
+``visit_<rule name>`` where rule name is a rule name from the grammar.
+During a semantic analysis a parse tree is walked in the depth-first manner and for each node a proper visitor
+method is called to transform it to some other form. The results are than fed to the parent node visitor method.
+This is repeated until the final, top level parse tree node is processed (its visitor is called).
+The result of the top level node is the final output of the semantic analysis.
+
+
+To apply your visitor class on the parse tree use ``visit_parse_tree`` function.
+
+Example:
+
+.. code:: python
+
+  result = visit_parse_tree(parse_tree, CalcVisitor(debug=True))
+
+The first parameter is a parse tree you get from the ``parser.parse`` call while the second parameter is an
+instance of the your visitor class. Semantic analysis can be run in debug mode if you set ``debug`` parameter
+to ``True`` during visitor construction.
+
+During semantic analysis, each ``visitor_xxx`` method gets current parse tree node as the first parameter and
+the evaluated children nodes as the second parameter.
+
+For example, if you have ``expression`` rule in your grammar than the transformation of the non-terminal
+matched by this rule can be done as:
+
+.. code:: python
+  def visitor_expression(self, node, children):
+    ...
+    return transformed node
+
+
+``node`` is the current ``NonTerminal`` or ``Terminal`` from the parse tree while the ``children`` is
+instance of ``SemanticResults`` class.
+This class is a list like structure that holds the results of semantic evaluation from the children parse
+tree nodes (analysis is done bottom-up).
+
+In the ``calc.py`` example a semantic analysis will evaluate the expression. The parse tree is thus transformed
+to a single numeric value that represent the result of the expression.
+
+In the ``robot.py`` example a semantic analysis will evaluate robot program (transform its parse tree) to the
+final robot location.
+
+Semantic analysis can do a complex stuff. For example, see ``peg_peg.py`` example where the PEG parser for
+the given language is built using semantic analysis.
+
+
+SemanticResults
+~~~~~~~~~~~~~~~
+Class of object returned from the parse tree nodes evaluation. Used for filtering and navigation over evaluation
+results on children nodes.
+
+TODO: Describe class in more details.
+
+Default actions
+~~~~~~~~~~~~~~~
+For each parse tree node that does not have an appropriate ``visitor_xxx`` call a default action is performed.
+If the node is created by a plain string match action will return ``None`` and thus suppress this node.
+This is handy for all those syntax noise (bracket, braces, keywords etc.).
+
+For example, if your grammar is:
+
+.. code::
+
+  number_in_brackets = "(" number ")"
+  number = r'\d+'
+
+Than the default action for ``number`` will return number converted to string and the default action for
+``(`` and ``)`` will return ``None`` and thus suppress this nodes so the visitor method for ``number_in_brackets``
+rule will only see ``number`` child.
+
 
 
 Indices and tables

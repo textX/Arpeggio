@@ -29,12 +29,12 @@ Example grammar in PEG notation:
 
 .. code::
 
-  first = 'first' second+ EOF
-  second = 'a' / 'b'
+  first = 'foo' second+ EOF
+  second = 'bar' / 'baz'
 
-In this example ``first`` is the root rule. This rule will match a literal string ``first`` followed
+In this example ``first`` is the root rule. This rule will match a literal string ``foo`` followed
 by one or more ``second`` rule (this is a rule reference) followed by end of input (``EOF``).
-``second`` rule is ordered choice and will match either ``a`` or ``b`` in that order.
+``second`` rule is ordered choice and will match either ``bar`` or ``baz`` in that order.
 
 During parsing each successfully matched rule will create a parse tree node (see `Parse tree`_).
 
@@ -178,6 +178,23 @@ An example of the ``calc`` grammar given in PEG syntax (``arpeggio.cleanpeg``):
     expression = term (("+" / "-") term)*
     calc = expression+ EOF
 
+
+Each grammar rule is given as an assignment where the lhs is the rule name (e.g. ``number``) and the
+rhs is a PEG expression. Literal string matches are given as strings (e.g. ``"+"``) while regex matches
+are given as strings with prefix ``r`` (e.g. ``r'\d*\.\d*|\d+'``).
+Sequence is a space separated list of expressions. Ordered choice is a list of expression separated with
+``/`` (e.g. ``"+" / "-"``). Zero or more expression is specified by ``*`` operator
+(e.g. ``(( "*" / "/" ) factor)*``). One of more is specified by ``+`` operator (e.g. ``expression+``).
+
+``And`` and ``Not`` predicates are also supported. ``And`` predicate is specified by ``&`` operator 
+(e.g. ``&expression`` - not used in the above grammar). ``Not`` predicate is specified by ``!`` operator
+(e.g. ``!expression`` - not used in the above grammar).
+
+In the rhs a rule reference is a name of another rule. Parser will try to match another rule at that
+location.
+
+Special rule ``EOF`` will match end of input string.
+
 Creating a parser using PEG syntax is done by the class ``ParserPEG`` from the ``arpeggio.peg`` or
 ``arpeggio.cleanpeg`` modules.
 
@@ -226,12 +243,22 @@ The leaf nodes are terminals and they are matched by the string match or regex m
 
 In the square brackets is the location in the input stream where the terminal/non-terminal is recognized.
 
+Each parse tree node has the following attributes:
+
+- **rule** - the parsing expression that created this node.
+- **rule_name** - the name of the rule if it was the root rule or empty string otherwise.
+- **position** - the position in the input stream where this node was recognized.
+
 Terminal nodes
 ~~~~~~~~~~~~~~
-Terminals in Arpeggio are created by the specializations of the ``Match`` class:
+Terminals in Arpeggio are created by the specializations of the parsing expression ``Match`` class.
+There are two specialization of ``Match`` class:
 
 - ``StrMatch`` if the literal string is matched from the input or
 - ``RegExMatch`` if a regular expression is used to match input.
+
+To get the matched string from the terminal object just convert it to string
+(e.g. ``str(t)`` where ``t`` is of ``Terminal`` type)
 
 Non-terminal nodes
 ~~~~~~~~~~~~~~~~~~
@@ -241,12 +268,55 @@ Children of non-terminals can be other non-terminals or terminals.
 For example, nodes with the labels ``expression``, ``factor`` and ``term`` from the above parse
 tree are non-terminal nodes created by the rules with the same names.
 
-Parse tree navigation
-~~~~~~~~~~~~~~~~~~~~~
-Usually we want to transform parse tree to some more usable form or to extract some data from it.
-Parse tree can be navigated using following approaches:
+``NonTerminal`` inherits from ``list``. The elements of ``NonTerminal`` are its children nodes.
+So, you can use index access:
 
-TODO: Finish this section
+.. code:: python
+
+  child = pt_node[2]
+
+Or iteration:
+
+.. code:: python
+
+  for child in pt_node:
+    ...
+
+Additionally, you can access children by the child rule name:
+
+For example:
+
+.. code:: python
+
+  # Grammar
+  def foo(): return "a", bar, "b", baz, "c", ZeroOrMore(bar)
+  def bar(): return "bar"
+  def baz(): return "baz"
+
+  # Parsing
+  parser = ParserPython(foo)
+  result = parser.parse("a bar b baz c bar bar bar")
+
+  # Accessing parse tree nodes. All asserts will pass.
+  # Index access
+  assert result[1].rule_name  == 'bar'
+  # Access by rule name
+  assert result.bar.rule_name == 'bar'
+
+  print(len(result))
+  assert len(result) == 8
+
+  # There is 4 bar matched from result (at the beginning and from ZeroOrMore)
+  # Dot access collect all NTs from the given path
+  assert len(result.bar) == 4
+  # You could call dot access recursively, e.g. result.bar.baz if the 
+  # rule bar called baz. In that case all bars would be collected from
+  # the root and for each bar all baz will be collected.
+
+  # Verify position
+  # First bar is at position 2 and second is at position 14
+  assert result.bar[0].position == 2
+  assert result.bar[1].position == 14
 
 
 Grammar debugging

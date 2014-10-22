@@ -242,7 +242,7 @@ Parse tree navigation
 Usually we want to transform parse tree to some more usable form or to extract some data from it.
 Parse tree can be navigated using following approaches:
 
-TODO
+TODO: Finish this section
 
 
 Grammar debugging
@@ -266,13 +266,17 @@ An example to convert ``calc_parser_model.dot`` to ``png`` file use:
 
   $ dot -Tpng -O calc_parser_model.dot
 
+.. note::
+
+  All tree images in this docs are rendered using debug mode and `dot` tool from graphviz package.
+
 Errors in the input
 -------------------
 If your grammar is correct but you get input string with syntax error parser will raise ``NoMatch`` exception
 with the information where in the input stream error has occurred and what the parser expect to see at that
 location.
 
-By default, if NoMatch is not caught you will get detailed explanation of the error on the console.
+By default, if ``NoMatch`` is not caught you will get detailed explanation of the error on the console.
 The exact location will be reported, the context (part of the input where the error occurred) and the first
 rule that was tried at that location.
 
@@ -294,8 +298,7 @@ Example:
 
 The place in the input stream is marked by ``*`` and the position in row, col is given ``(1, 6)``.
 
-If you wish more control on error reporting (e.g. you are using Arpeggio in GUI application and want to
-report error to the user) you can catch ``NoMatch`` in your code and inspect its attributes.
+If you wish to handle syntax errors gracefully you can catch ``NoMatch`` in your code and inspect its attributes.
 
 .. code:: python
 
@@ -312,11 +315,11 @@ report error to the user) you can catch ``NoMatch`` in your code and inspect its
 - rule: A ``ParsingExpression`` rule that is the source of the exception.
 - position: A position in the input stream where exception occurred.
 - parser (Parser): A ``Parser`` instance.
-- exp_str: What is expected? If not given it is deduced from the rule.
-  Used for nicer error reporting.
+- exp_str: What is expected? If not given it is deduced from the rule. Currently this is used
+  by `textX <https://github.com/igordejanovic/textX>`_ for nicer error reporting.
 
 The ``position`` is given as the offset from the beginning of the input string. To convert it to row and column
-use ``pos_to_linecol`` method on the parser.
+use ``pos_to_linecol`` method of the parser.
 
 .. code:: python
 
@@ -328,12 +331,19 @@ use ``pos_to_linecol`` method on the parser.
       line, col = e.parser.pos_to_linecol(e.position)
       ...
 
-Currently Arpeggio will report the first rule it tried at that location.
 Arpeggio is backtracking parser, which means that it will go back and try another alternatives when the match
 does not succeeds but it will nevertheless report the furthest place in the input where it failed.
+Currently Arpeggio will report the first rule it tried at that location. Future versions will probably kept the
+list of all rules that was tried at reported location.
 
 Parser configuration
 --------------------
+
+There are some aspect of parsing that is not controlled by the grammar.
+Arpeggio has some sane default behaviour but gives the user possibility to alter it.
+
+This section describes various parser parameters.
+
 
 Case insensitive parsing
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -347,7 +357,7 @@ By default Arpeggio is case sensitive. If you wish to do case insensitive parsin
 
 White-space handling
 ~~~~~~~~~~~~~~~~~~~~
-Arpeggio by default skips whitespaces. You can change this behaviour with the parameter ``skipws`` given to
+Arpeggio by default skips white-spaces. You can change this behaviour with the parameter ``skipws`` given to
 parser constructor.
 
 .. code:: python
@@ -367,7 +377,7 @@ For example, to prevent a newline to be treated as whitespace you could write:
 Comment handling
 ~~~~~~~~~~~~~~~~
 Support for comments in your language can be specified as another set of grammar rules.
-See ``simple.py`` example.
+See ``simple.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/simple.py>`` example.
 
 Parser is constructed using two parameters.
 
@@ -379,12 +389,6 @@ First parameter is the root rule while the second is a rule for comments.
 
 During parsing comment parse trees are kept in the separate list thus comments will not show in the main parse
 tree.
-
-.. warning::
-
-  Be aware that `semantic analysis <#Semantic analysis - Visitors>`_ operates on nodes of finished parse tree
-  and therefore on reduced tree some ``visit_xxx`` actions will not get called.
-
 
 Parse tree reduction
 ~~~~~~~~~~~~~~~~~~~~
@@ -403,6 +407,12 @@ For example, ``calc`` parse tree above will look like this:
    :height: 400
 
 Notice the removal of each non-terminal with single child.
+
+.. warning::
+
+  Be aware that `semantic analysis <#Semantic analysis - Visitors>`_ operates on nodes of finished parse tree
+  and therefore on reduced tree some ``visit_xxx`` actions will not get called.
+
 
 Semantic analysis - Visitors
 ----------------------------
@@ -439,7 +449,7 @@ This is repeated until the final, top level parse tree node is processed (its vi
 The result of the top level node is the final output of the semantic analysis.
 
 
-To apply your visitor class on the parse tree use ``visit_parse_tree`` function.
+To run semantic analysis apply your visitor class to the parse tree using ``visit_parse_tree`` function.
 
 .. code:: python
 
@@ -458,8 +468,8 @@ visitor methods.
       if self.debug:
         print("Visiting some rule!")
 
-During semantic analysis, each ``visitor_xxx`` method gets current parse tree node as the first parameter and
-the evaluated children nodes as the second parameter.
+During semantic analysis, each ``visitor_xxx`` method gets current parse tree node as the ``node`` parameter and
+the evaluated children nodes as the ``children`` parameter.
 
 For example, if you have ``expression`` rule in your grammar than the transformation of the non-terminal
 matched by this rule can be done as:
@@ -467,8 +477,8 @@ matched by this rule can be done as:
 .. code:: python
 
   def visitor_expression(self, node, children):
-    ...
-    return transformed node
+    ... # transform node using 'node' and 'children' parameter
+    return transformed_node
 
 
 ``node`` is the current ``NonTerminal`` or ``Terminal`` from the parse tree while the ``children`` is

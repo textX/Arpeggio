@@ -5,7 +5,7 @@
 
 
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/art/arpeggio-logo.png
-   :height:70
+   :height: 70
 
 Welcome to Arpeggio's documentation!
 ====================================

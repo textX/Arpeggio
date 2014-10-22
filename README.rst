@@ -126,6 +126,11 @@ And here is an image rendered for parse tree for the above parsed calc expressio
 
 If you are building a domain-specific language then I suggest you to take a look at `textX`_.
 
+Documentation
+-------------
+
+Arpeggio documentation is available `here <http://arpeggio.readthedocs.org/en/latest/>`_.
+
 Discuss, ask questions
 ----------------------
 Please use `discussion forum`_ for general discussions, suggestions etc.

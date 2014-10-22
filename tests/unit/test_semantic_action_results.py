@@ -12,7 +12,7 @@ import pytest
 
 # Grammar
 from arpeggio import ZeroOrMore, OneOrMore, ParserPython, Terminal, NonTerminal,\
-    SemanticAction, SemanticActionResults
+    SemanticActionResults, PTNodeVisitor, visit_parse_tree
 from arpeggio.export import PTDOTExporter
 from arpeggio import RegExMatch as _
 
@@ -27,22 +27,17 @@ def fourth():       return _(r'\d+')
 first_sar = None
 third_sar = None
 
-class FirstSA(SemanticAction):
-    def first_pass(self, parser, node, children):
+class TestVisitor(PTNodeVisitor):
+    def visit_first(self, node, children):
         global first_sar
         first_sar = children
 
-
-class ThirdSA(SemanticAction):
-    def first_pass(self, parser, node, children):
+    def visit_third(self, node, children):
         global third_sar
         third_sar = children
 
         return 1
 
-
-first.sem = FirstSA()
-third.sem = ThirdSA()
 
 def test_semantic_action_results():
 
@@ -55,7 +50,7 @@ def test_semantic_action_results():
 
     PTDOTExporter().exportFile(result, 'test_semantic_action_results_pt.dot')
 
-    parser.getASG()
+    visit_parse_tree(result, TestVisitor())
 
     assert isinstance(first_sar, SemanticActionResults)
     assert len(first_sar.third) == 3

@@ -15,22 +15,53 @@ PEG grammars
 
 PEG is a type of formal grammar that is given as a set of rules for recognizing strings of the language.
 In a way it is similar to context-free grammars with a very important distinction that PEG are always
-unambiguous. This is achieved by making choice opearator ordered. In PEGs a first choice from
+unambiguous. This is achieved by making choice operator ordered. In PEGs a first choice from
 left to right that matches will be used.
+
+PEG grammar is a set of PEG rules. PEG rules consists of parsing expressions and can reference (call)
+each other.
+
+Example grammar in PEG notation:
+
+.. code::
+
+  first = 'first' second+ EOF
+  second = 'a' / 'b'
+
+In this example ``first`` is the root rule. This rule will match a literal string ``first`` followed
+by one or more ``second`` rule (this is a rule reference) followed by end of input (``EOF``).
+``second`` rule is ordered choice and will match either ``a`` or ``b`` in that order.
+
+During parsing each successfully matched rule will create a parse tree node (see `Parse tree`_).
 
 In Arpeggio each PEG rule consists of atomic parsing expression which can be:
 
-  - **terminal match rules**:
+- **terminal match rules** - create a `Terminal nodes`_:
 
-    - **String match** - a simple string that is matched literaly from the input string.
-    - **RegEx match** - regular expression match (based on python ``re`` module).
+  - **String match** - a simple string that is matched literally from the input string.
+  - **RegEx match** - regular expression match (based on python ``re`` module).
 
-  - **non-terminal match rules**:
+- **non-terminal match rules** - create a `Non-terminal nodes`_:
 
-    - **Sequence**
+  - **Sequence** - succeeds if all parsing expressions matches at current location in the defined order.
+    Matched input is consumed.
+  - **Ordered choice** - succeeds if any of the given expressions matches at the current location. The
+    match is tried in the order defined. Matched input is consumed.
+  - **Zero or more** - given expression is matched until match is successful. Always succeeds. Matched input
+    is consumed.
+  - **One or more** - given expressions is matched until match is successful. Succeeds if at least one
+    match is done. Matched input is consumed.
+  - **Optional** - matches given expression but will not fail if match can't be done. Matched input is
+    consumed.
+  - **And predicate** - succeeds if given expression matches at current location but does not
+    consume any input.
+  - **Not predicate** - succeeds if given expression **does not** matches at current location but
+    does not consume any input.
 
-TODO: Finis this section.
+PEG grammars in Arpeggio may be written twofold:
 
+- Using Python statements and expressions.
+- Using textual PEG syntax (currently there are two variants, see below).
 
 
 Grammar given in Python
@@ -70,7 +101,9 @@ For example, the ``calc`` language consists of one or more ``expression`` and en
 
 ``factor`` rule consists of optional ``+`` or ``-`` char
 matched in that order (they are given in Python list thus ordered choice) followed by the ordered choice
-of ``number`` rule and sequence of ``expression`` rule in brackets.
+of ``number`` rule and a sequence of ``expression`` rule in brackets.
+This rule will match an optional sign (``+`` or ``-`` checked in that order) after which follows a ``number``
+or an ``expression`` in brackets (checked in that order).
 
 From this description Arpeggio builds **the parser model**. Parser model is a graph of recursive parser expressions.
 This is done during parser instantiation. For example, to instantiate ``calc`` parser you do the following:
@@ -92,7 +125,7 @@ After parser construction your can call ``parser.parse`` to parse your input tex
     parse_tree = parser.parse(input_expr)
 
 You can navigate and analyze parse tree or transform it using visitor patter to some more
-usable form.
+usable form (see `Semantic analysis - Visitors`_)
 
 If you want to debug parser construction set ``debug`` parameter to ``True`` in the ``ParserPython`` call.
 
@@ -112,7 +145,8 @@ rendered as image using one of available dot viewer software or transformed to a
 After this command you will get ``calc_parser_model.dot.png`` file which can be opened in any ``png`` image
 viewer. This image shows the graph representing the parser model which looks like this:
 
-|calc_parser_model|
+.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parser_model.dot.png
+   :height: 600
 
 
 PEG notations
@@ -176,17 +210,27 @@ Parse tree or concrete syntax tree is a tree structure built from the input stri
 It represent the structure of the input string. Each node in the parse tree is either a ``terminal``
 or ``non-terminal``. Terminals are the leafs of the tree while the inner nodes are non-terminals.
 
-Here is an example parse tree for the ``calc`` grammar:
+Here is an example parse tree for the ``calc`` grammar and the expression "-(4-1)*5+(2+4.67)+5.89/(.2+7)":
 
+.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
+   :height: 500
 
-Terminals
-~~~~~~~~~
-Terminals in Arpeggio are created by the specializations of the ``Match`` class: ``StrMatch`` if
-the literal string is matched from the input or ``RegExMatch`` if a regular expression is used to
-match input.
+Each non-leaf node is non-terminal. The name in in this nodes are the names of the grammar PEG rules that
+created them.
 
-NonTerminals
-~~~~~~~~~~~~
+The leaf nodes are terminals and they are matched by the string match or regex match rules.
+
+In the square brackets is the location in the input stream where the terminal/non-terminal is recognized.
+
+Terminal nodes
+~~~~~~~~~~~~~~
+Terminals in Arpeggio are created by the specializations of the ``Match`` class:
+
+- ``StrMatch`` if the literal string is matched from the input or
+- ``RegExMatch`` if a regular expression is used to match input.
+
+Non-terminal nodes
+~~~~~~~~~~~~~~~~~~
 Non-terminal nodes are non-leaf nodes of the parse tree. Children of non-terminals can be other non-terminals
 or terminals.
 
@@ -224,18 +268,72 @@ If your grammar is correct but you get input string with syntax error parser wil
 with the information where in the input stream error has occurred and what the parser expect to see at that
 location.
 
-The input location is given as the offset from the beginning of the input string. To convert it to row and column
-use ``position_to_row_col`` method on the parser.
+By default, if NoMatch is not caught you will get detailed explanation of the error on the console.
+The exact location will be reported, the context (part of the input where the error occurred) and the first
+rule that was tried at that location.
 
 Example:
 
 .. code:: python
 
+    parser = ParserPython(calc)
+    # 'r' in the following expression can't be recognized by
+    # calc grammar
+    input_expr = "23+4/r-89"
+    parse_tree = parser.parse(input_expr)
+
+.. code::
+
+  Traceback (most recent call last):
+    ...
+  arpeggio.NoMatch: Expected '+' at position (1, 6) => '23+4/*r-89'.
+
+The place in the input stream is marked by ``*`` and the position in row, col is given ``(1, 6)``.
+
+If you wish more control on error reporting (e.g. you are using Arpeggio in GUI application and want to
+report error to the user) you can catch ``NoMatch`` in your code and inspect its attributes.
+
+.. code:: python
+
+    try:
+      parser = ParserPython(calc)
+      input_expr = "23+4/r-89"
+      parse_tree = parser.parse(input_expr)
+    except NoMatch as e:
+      # Do something with e
+
+
+``NoMatch`` class has following attributes:
+
+- rule: A ``ParsingExpression`` rule that is the source of the exception.
+- position: A position in the input stream where exception occurred.
+- parser (Parser): A ``Parser`` instance.
+- exp_str: What is expected? If not given it is deduced from the rule.
+  Used for nicer error reporting.
+
+The ``position`` is given as the offset from the beginning of the input string. To convert it to row and column
+use ``pos_to_linecol`` method on the parser.
+
+.. code:: python
+
+    try:
+      parser = ParserPython(calc)
+      input_expr = "23+4/r-89"
+      parse_tree = parser.parse(input_expr)
+    except NoMatch as e:
+      line, col = e.parser.pos_to_linecol(e.position)
+      ...
 
 Currently Arpeggio will report the first rule it tried at that location.
 Arpeggio is backtracking parser, which means that it will go back and try another alternatives when the match
 does not succeeds but it will nevertheless report the furthest place in the input where it failed.
 
+
+White-space handling
+--------------------
+
+Comment handling
+----------------
 
 Semantic analysis - Visitors
 ----------------------------
@@ -273,6 +371,7 @@ For example, if you have ``expression`` rule in your grammar than the transforma
 matched by this rule can be done as:
 
 .. code:: python
+
   def visitor_expression(self, node, children):
     ...
     return transformed node

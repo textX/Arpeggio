@@ -64,8 +64,8 @@ PEG grammars in Arpeggio may be written twofold:
 - Using textual PEG syntax (currently there are two variants, see below).
 
 
-Grammar given in Python
------------------------
+Grammars written in Python
+--------------------------
 
 Canonical form of grammar specification uses Python statements and expressions.
 
@@ -124,7 +124,7 @@ After parser construction your can call ``parser.parse`` to parse your input tex
     input_expr = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
     parse_tree = parser.parse(input_expr)
 
-You can navigate and analyze parse tree or transform it using visitor patter to some more
+You can navigate and analyze parse tree or transform it using visitor pattern to some more
 usable form (see `Semantic analysis - Visitors`_)
 
 If you want to debug parser construction set ``debug`` parameter to ``True`` in the ``ParserPython`` call.
@@ -149,8 +149,8 @@ viewer. This image shows the graph representing the parser model which looks lik
    :height: 600
 
 
-PEG notations
--------------
+Grammars written in PEG notations
+---------------------------------
 
 Grammars can also be specified using PEG notation. There are actually two of them at the moment and
 both notations are implemented using canonical Python based grammars (see modules ``arpeggio.peg`` and
@@ -159,8 +159,8 @@ both notations are implemented using canonical Python based grammars (see module
 There are no significant differences between those two syntax. The first one use more traditional approach
 using ``<-`` for rule assignment, ``//`` for line comments and ``;`` for the rule terminator.
 The second syntax (from ``arpeggio.cleanpeg``) uses ``=`` for assignment, does not use rule terminator
-and use ``#`` for line comments. Which one your choose is totally up to you. If your don't like any
-of these syntaxes you can make your own (just start with ``arpeggio.peg`` and ``arpeggio.cleanpeg`` modules
+and use ``#`` for line comments. Which one you choose is totally up to you. If your don't like any
+of these syntaxes you can make your own (look at ``arpeggio.peg`` and ``arpeggio.cleanpeg`` modules
 as an examples).
 
 An example of the ``calc`` grammar given in PEG syntax (``arpeggio.cleanpeg``):
@@ -231,15 +231,19 @@ Terminals in Arpeggio are created by the specializations of the ``Match`` class:
 
 Non-terminal nodes
 ~~~~~~~~~~~~~~~~~~
-Non-terminal nodes are non-leaf nodes of the parse tree. Children of non-terminals can be other non-terminals
-or terminals.
+Non-terminal nodes are non-leaf nodes of the parse tree. They are created by PEG grammar rules.
+Children of non-terminals can be other non-terminals or terminals.
 
-For example, nodes .... from the above parse tree are non-terminal nodes.
+For example, nodes with the labels ``expression``, ``factor`` and ``term`` from the above parse
+tree are non-terminal nodes created by the rules with the same names.
 
 Parse tree navigation
 ~~~~~~~~~~~~~~~~~~~~~
 Usually we want to transform parse tree to some more usable form or to extract some data from it.
 Parse tree can be navigated using following approaches:
+
+TODO
+
 
 Grammar debugging
 -----------------
@@ -328,12 +332,75 @@ Currently Arpeggio will report the first rule it tried at that location.
 Arpeggio is backtracking parser, which means that it will go back and try another alternatives when the match
 does not succeeds but it will nevertheless report the furthest place in the input where it failed.
 
-
-White-space handling
+Parser configuration
 --------------------
 
+Case insensitive parsing
+~~~~~~~~~~~~~~~~~~~~~~~~
+By default Arpeggio is case sensitive. If you wish to do case insensitive parsing set parser parameter
+``ignore_case`` to ``True``.
+
+.. code:: python
+
+  parser = ParserPython(calc, ignore_case=True)
+
+
+White-space handling
+~~~~~~~~~~~~~~~~~~~~
+Arpeggio by default skips whitespaces. You can change this behaviour with the parameter ``skipws`` given to
+parser constructor.
+
+.. code:: python
+
+  parser = ParserPython(calc, skipws=False)
+
+You can also change what is considered a whitespace by Arpeggio using the ``ws`` parameter. It is a plain string
+that consists of white-space characters. By default it is set to "\t\n\r ".
+
+For example, to prevent a newline to be treated as whitespace one can write:
+
+.. code:: python
+
+  parser = ParserPython(calc, ws='\t\r ')
+
+
 Comment handling
-----------------
+~~~~~~~~~~~~~~~~
+Support for comments in your language can be specified as another set of grammar rules.
+See ``simple.py`` example.
+
+Parser is constructed using two parameters.
+
+.. code:: python
+
+  parser = ParserPython(simpleLanguage, comment, debug=debug)
+
+First parameter is the root rule while the second is a rule for comments.
+
+During parsing comments parse trees are kept in separate list thus comments will not show in the main parse
+tree.
+
+.. warning::
+
+  Be aware that `semanti analysis <Semantic analysis - Visitors>`_ operates on nodes of finished parse tree
+  and therefore on reduced tree some ``visit_xxx`` actions will not get called.
+
+
+Parse tree reduction
+~~~~~~~~~~~~~~~~~~~~
+Non-terminals are by default created for each rule. Sometimes it can result in trees of great depth.
+You can alter this behaviour setting ``reduce_tree`` parameter to ``True``.
+
+.. code:: python
+
+  parser = ParserPython(calc, reduce_tree=True)
+
+In this configuration non-terminals with single child will be removed from the parse tree.
+
+For example, ``calc`` parse tree above will look like this:
+
+.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree_reduced.dot.png
+   :height: 400
 
 Semantic analysis - Visitors
 ----------------------------
@@ -341,7 +408,7 @@ Semantic analysis - Visitors
 You will surely always want to extract some information from the parse tree or to transform it in some
 more usable form.
 The process of parse tree transformation to other forms is referred to as *semantic analysis*.
-You could do that using plain tree navigation etc. but it is better to use some
+You could do that using parse tree navigation etc. but it is better to use some
 standard mechanism.
 
 In Arpeggio a visitor pattern is used for semantic analysis. You write a python class that has a methods named
@@ -382,14 +449,17 @@ instance of ``SemanticResults`` class.
 This class is a list like structure that holds the results of semantic evaluation from the children parse
 tree nodes (analysis is done bottom-up).
 
-In the ``calc.py`` example a semantic analysis will evaluate the expression. The parse tree is thus transformed
+In the `calc.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc.py>`_ example a
+semantic analysis (``CalcVisitor`` class) will evaluate the expression. The parse tree is thus transformed
 to a single numeric value that represent the result of the expression.
 
-In the ``robot.py`` example a semantic analysis will evaluate robot program (transform its parse tree) to the
+In the `robot.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc.py>`_ example a
+semantic analysis (``RobotVisitor`` class) will evaluate robot program (transform its parse tree) to the
 final robot location.
 
-Semantic analysis can do a complex stuff. For example, see ``peg_peg.py`` example where the PEG parser for
-the given language is built using semantic analysis.
+Semantic analysis can do a complex stuff. For example,
+see `peg_peg.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg.py>`_ example where
+the PEG parser for the given language is built using semantic analysis.
 
 
 SemanticResults

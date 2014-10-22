@@ -1,11 +1,10 @@
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/art/arpeggio-logo.png
-  :height: 100
+   :height: 100
 
 Arpeggio - PEG parser
 =====================
 
-.. image:: https://travis-ci.org/igordejanovic/Arpeggio.svg
-    :target: https://travis-ci.org/igordejanovic/Arpeggio
+|build-status| |docs|
 
 Arpeggio is PEG grammar interpreter implemented as recursive descent
 parser with memoization (aka Packrat parser).
@@ -167,3 +166,12 @@ Why is it called arpeggio?
 In music, arpeggio is playing the chord notes one by one in sequence. I came up with the name by thinking that parsing is very similar to arpeggios in music. You take tokens one by one from an input and make sense out of it – make a chord!
 
 Well, if you don't buy this maybe it is time to tell you the truth. I searched the dictionary for the words that contain PEG acronym and the word arpeggio was at the top of the list ;)
+
+
+.. |build-status| image:: https://readthedocs.org/projects/arpeggio/badge/?version=latest
+   :target: https://readthedocs.org/projects/arpeggio/?badge=latest
+   :alt: Documentation Status
+
+.. |docs| image:: https://travis-ci.org/igordejanovic/Arpeggio.svg
+   :target: https://travis-ci.org/igordejanovic/Arpeggio
+

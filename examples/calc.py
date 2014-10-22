@@ -40,7 +40,7 @@ class CalcVisitor(PTNodeVisitor):
 
     def visit_factor(self, node, children):
         """
-        Removes parenthesis if exists and returns what was contained inside.
+        Applies a sign to the expression or number.
         """
         if self.debug:
             print("Factor {}".format(children))

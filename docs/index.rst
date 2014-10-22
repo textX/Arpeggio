@@ -447,7 +447,16 @@ To apply your visitor class on the parse tree use ``visit_parse_tree`` function.
 
 The first parameter is a parse tree you get from the ``parser.parse`` call while the second parameter is an
 instance of your visitor class. Semantic analysis can be run in debug mode if you set ``debug`` parameter
-to ``True`` during visitor construction.
+to ``True`` during visitor construction. You can use this flag to print your own debug information from 
+visitor methods.
+
+.. code:: python
+
+  class MyLanguageVisitor(PTNodeVisitor):
+
+    def visit_somerule(self, node, children):
+      if self.debug:
+        print("Visiting some rule!")
 
 During semantic analysis, each ``visitor_xxx`` method gets current parse tree node as the first parameter and
 the evaluated children nodes as the second parameter.

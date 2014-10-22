@@ -1039,7 +1039,7 @@ class SemanticAction(object):
 
 class SemanticActionResults(list):
     """
-    Used in first_pass call to supply results of semantic analysis
+    Used in visitor methods call to supply results of semantic analysis
     of children parse tree nodes.
     Enables dot access by the name of the rule similar to NonTerminal
     tree navigation.

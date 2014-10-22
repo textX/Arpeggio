@@ -357,7 +357,7 @@ parser constructor.
 You can also change what is considered a whitespace by Arpeggio using the ``ws`` parameter. It is a plain string
 that consists of white-space characters. By default it is set to "\t\n\r ".
 
-For example, to prevent a newline to be treated as whitespace one can write:
+For example, to prevent a newline to be treated as whitespace you could write:
 
 .. code:: python
 
@@ -373,16 +373,16 @@ Parser is constructed using two parameters.
 
 .. code:: python
 
-  parser = ParserPython(simpleLanguage, comment, debug=debug)
+  parser = ParserPython(simpleLanguage, comment)
 
 First parameter is the root rule while the second is a rule for comments.
 
-During parsing comments parse trees are kept in separate list thus comments will not show in the main parse
+During parsing comment parse trees are kept in the separate list thus comments will not show in the main parse
 tree.
 
 .. warning::
 
-  Be aware that `semanti analysis <Semantic analysis - Visitors>`_ operates on nodes of finished parse tree
+  Be aware that `semantic analysis <#Semantic analysis - Visitors>`_ operates on nodes of finished parse tree
   and therefore on reduced tree some ``visit_xxx`` actions will not get called.
 
 
@@ -402,6 +402,8 @@ For example, ``calc`` parse tree above will look like this:
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree_reduced.dot.png
    :height: 400
 
+Notice the removal of each non-terminal with single child.
+
 Semantic analysis - Visitors
 ----------------------------
 
@@ -411,8 +413,26 @@ The process of parse tree transformation to other forms is referred to as *seman
 You could do that using parse tree navigation etc. but it is better to use some
 standard mechanism.
 
-In Arpeggio a visitor pattern is used for semantic analysis. You write a python class that has a methods named
-``visit_<rule name>`` where rule name is a rule name from the grammar.
+In Arpeggio a visitor pattern is used for semantic analysis. You write a python class that inherits
+``PTNodeVisitor`` and has a methods of the form ``visit_<rule name>(self, node, children)`` where
+rule name is a rule name from the grammar.
+
+.. code:: python
+
+  class CalcVisitor(PTNodeVisitor):
+
+      def visit_number(self, node, children):
+          return float(node.value)
+
+      def visit_factor(self, node, children):
+          if len(children) == 1:
+              return children[0]
+          sign = -1 if children[0] == '-' else 1
+          return sign * children[-1]
+
+      ...
+
+
 During a semantic analysis a parse tree is walked in the depth-first manner and for each node a proper visitor
 method is called to transform it to some other form. The results are than fed to the parent node visitor method.
 This is repeated until the final, top level parse tree node is processed (its visitor is called).
@@ -421,14 +441,12 @@ The result of the top level node is the final output of the semantic analysis.
 
 To apply your visitor class on the parse tree use ``visit_parse_tree`` function.
 
-Example:
-
 .. code:: python
 
   result = visit_parse_tree(parse_tree, CalcVisitor(debug=True))
 
 The first parameter is a parse tree you get from the ``parser.parse`` call while the second parameter is an
-instance of the your visitor class. Semantic analysis can be run in debug mode if you set ``debug`` parameter
+instance of your visitor class. Semantic analysis can be run in debug mode if you set ``debug`` parameter
 to ``True`` during visitor construction.
 
 During semantic analysis, each ``visitor_xxx`` method gets current parse tree node as the first parameter and
@@ -446,8 +464,11 @@ matched by this rule can be done as:
 
 ``node`` is the current ``NonTerminal`` or ``Terminal`` from the parse tree while the ``children`` is
 instance of ``SemanticResults`` class.
-This class is a list like structure that holds the results of semantic evaluation from the children parse
+This class is a list-like structure that holds the results of semantic evaluation from the children parse
 tree nodes (analysis is done bottom-up).
+
+To suppress node completely return ``None`` from visitor method. In this case the parent visitor method will
+not get this node in its ``children`` parameter.
 
 In the `calc.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc.py>`_ example a
 semantic analysis (``CalcVisitor`` class) will evaluate the expression. The parse tree is thus transformed
@@ -458,8 +479,9 @@ semantic analysis (``RobotVisitor`` class) will evaluate robot program (transfor
 final robot location.
 
 Semantic analysis can do a complex stuff. For example,
-see `peg_peg.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg.py>`_ example where
-the PEG parser for the given language is built using semantic analysis.
+see `peg_peg.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg.py>`_ example and 
+`PEGVisitor <https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py>`_ class where the
+PEG parser for the given language is built using semantic analysis.
 
 
 SemanticResults
@@ -485,6 +507,8 @@ For example, if your grammar is:
 Than the default action for ``number`` will return number converted to string and the default action for
 ``(`` and ``)`` will return ``None`` and thus suppress this nodes so the visitor method for ``number_in_brackets``
 rule will only see ``number`` child.
+
+This behaviour can be disabled setting parameter ``defaults`` to ``False`` on visitor construction.
 
 
 

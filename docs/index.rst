@@ -577,16 +577,34 @@ see `peg_peg.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/
 PEG parser for the given language is built using semantic analysis.
 
 
-SemanticResults
-~~~~~~~~~~~~~~~
+SemanticActionResults
+~~~~~~~~~~~~~~~~~~~~~
 Class of object returned from the parse tree nodes evaluation. Used for filtering and navigation over evaluation
 results on children nodes.
 
-TODO: Describe class in more details.
+Instance of this class is given as ``children`` parameter of ``visitor_xxx`` methods.
+This class inherits ``list`` so index access as well as iteration is available.
+
+Furthermore, child nodes can be filtered by rule name using name lookup.
+
+.. code:: python
+
+  def visit_bar(self, node, children):
+    # Index access
+    child = children[2]
+
+    # Iteration
+    for child in children:
+      ...
+
+    # Rule name lookup
+    # Returns a list of all rules created by PEG rule 'baz'
+    baz_created = children['baz']
+
 
 Default actions
 ~~~~~~~~~~~~~~~
-For each parse tree node that does not have an appropriate ``visitor_xxx`` call a default action is performed.
+For each parse tree node that does not have an appropriate ``visitor_xxx`` method a default action is performed.
 If the node is created by a plain string match action will return ``None`` and thus suppress this node.
 This is handy for all those syntax noise (bracket, braces, keywords etc.).
 
@@ -603,7 +621,8 @@ rule will only see ``number`` child.
 
 This behaviour can be disabled setting parameter ``defaults`` to ``False`` on visitor construction.
 
-
+If you want to call this default behaviour from your visitor method call ``visit__default__(node, children)`` on
+superclass (``PTNodeVisitor``).
 
 Indices and tables
 ==================

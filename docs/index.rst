@@ -631,7 +631,7 @@ rule will only see one child (from the ``number`` rule reference).
 If the node is a non-terminal and there is only one child the default action will return that child effectively
 passing it to the parent node visitor.
 
-Default actions can be disabled setting parameter ``defaults`` to ``False`` on visitor construction.
+Default actions can be disabled by setting parameter ``defaults`` to ``False`` on visitor construction.
 
 .. code:: python
 

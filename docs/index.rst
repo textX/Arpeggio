@@ -151,10 +151,20 @@ rendered as image using one of available dot viewer software or transformed to a
   $ dot -Tpng -O calc_parser_model.dot
 
 After this command you will get ``calc_parser_model.dot.png`` file which can be opened in any ``png`` image
-viewer. This image shows the graph representing the parser model which looks like this:
+viewer. This is how it looks like:
 
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parser_model.dot.png
    :height: 600
+
+Each node in this graph is a parsing expression.
+Nodes are labeled by the type name of the parsing expression.
+If node represents the rule from the grammar the label is of the form ``<rule_name>=<PEG type>`` where
+``rule_name`` it the name of the grammar rule.
+The edges connect children expressions. The labels on the edges represent the order in which the graph will be
+traversed during parsing.
+
+Arpeggio will start from the root node and traverse the parser model graph consuming all matched input.
+When all root node branches are traversed the parsing is done.
 
 
 Grammars written in PEG notations

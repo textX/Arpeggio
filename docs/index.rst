@@ -99,18 +99,22 @@ that maps to PEG expressions.
 - **Not predicate** is represented as an instance of ``Not`` class.
 - **Literal string match** is represented as string or regular expression given as an instance of
   ``RegExMatch`` class.
-- **End of string/file** is recoginzed by the ``EOF`` special rule.
+- **End of string/file** is recognized by the ``EOF`` special rule.
 
 For example, the ``calc`` language consists of one or more ``expression`` and end of file.
 
 ``factor`` rule consists of optional ``+`` or ``-`` char
 matched in that order (they are given in Python list thus ordered choice) followed by the ordered choice
 of ``number`` rule and a sequence of ``expression`` rule in brackets.
-This rule will match an optional sign (``+`` or ``-`` checked in that order) after which follows a ``number``
-or an ``expression`` in brackets (checked in that order).
+This rule will match an optional sign (``+`` or ``-`` tried in that order) after which follows a ``number``
+or an ``expression`` in brackets (tried in that order).
 
-From this description Arpeggio builds **the parser model**. Parser model is a graph of recursive parser expressions.
-This is done during parser instantiation. For example, to instantiate ``calc`` parser you do the following:
+From this description Arpeggio builds **the parser model**. Parser model is a graph of parser
+expressions (see bellow this how to visualize this graph).
+Each node of the graph is an instance of some of the classes described above which inherits ``ParserExpression``.
+
+Parser model construction is done during parser instantiation.
+For example, to instantiate ``calc`` parser you do the following:
 
 .. code:: python
 
@@ -119,7 +123,7 @@ This is done during parser instantiation. For example, to instantiate ``calc`` p
 Where ``calc`` is the function defining the root rule of your grammar.
 There is no code generation. Parser works as an interpreter for your grammar.
 The grammar is used to configure Arpeggio parser to recognize your language
-(in this case the ``calc`` language).
+(in this case the ``calc`` language). In other words, Arpeggio interprets the parser model (your grammar).
 
 After parser construction your can call ``parser.parse`` to parse your input text.
 
@@ -180,15 +184,19 @@ An example of the ``calc`` grammar given in PEG syntax (``arpeggio.cleanpeg``):
 
 
 Each grammar rule is given as an assignment where the lhs is the rule name (e.g. ``number``) and the
-rhs is a PEG expression. Literal string matches are given as strings (e.g. ``"+"``) while regex matches
-are given as strings with prefix ``r`` (e.g. ``r'\d*\.\d*|\d+'``).
-Sequence is a space separated list of expressions. Ordered choice is a list of expression separated with
-``/`` (e.g. ``"+" / "-"``). Zero or more expression is specified by ``*`` operator
-(e.g. ``(( "*" / "/" ) factor)*``). One of more is specified by ``+`` operator (e.g. ``expression+``).
+rhs is a PEG expression.
 
-``And`` and ``Not`` predicates are also supported. ``And`` predicate is specified by ``&`` operator 
-(e.g. ``&expression`` - not used in the above grammar). ``Not`` predicate is specified by ``!`` operator
-(e.g. ``!expression`` - not used in the above grammar).
+- **Literal string matches** are given as strings (e.g. ``"+"``).
+- **Regex matches** are given as strings with prefix ``r`` (e.g. ``r'\d*\.\d*|\d+'``).
+- **Sequence** is a space separated list of expressions (e.g. ``expression+ EOF`` is a sequence of two expressions).
+- **Ordered choice** is a list of expression separated with ``/`` (e.g. ``"+" / "-"``).
+- **Zero or more** expression is specified by ``*`` operator (e.g. ``(( "*" / "/" ) factor)*``).
+- **One of more** is specified by ``+`` operator (e.g. ``expression+``).
+
+``And`` and ``Not`` predicates are also supported.
+
+- **And predicate** is specified by ``&`` operator (e.g. ``&expression`` - not used in the grammar above).
+- **Not predicate** is specified by ``!`` operator (e.g. ``!expression`` - not used in the grammar above).
 
 In the rhs a rule reference is a name of another rule. Parser will try to match another rule at that
 location.
@@ -303,7 +311,8 @@ For example:
   # Access by rule name
   assert result.bar.rule_name == 'bar'
 
-  print(len(result))
+  # There are 8 children nodes of the root 'result' node.
+  # Each child is a terminal in this case.
   assert len(result) == 8
 
   # There is 4 bar matched from result (at the beginning and from ZeroOrMore)
@@ -314,7 +323,7 @@ For example:
   # the root and for each bar all baz will be collected.
 
   # Verify position
-  # First bar is at position 2 and second is at position 14
+  # First 'bar' is at position 2 and second is at position 14
   assert result.bar[0].position == 2
   assert result.bar[1].position == 14
 
@@ -344,8 +353,8 @@ An example to convert ``calc_parser_model.dot`` to ``png`` file use:
 
   All tree images in this docs are rendered using debug mode and `dot` tool from graphviz package.
 
-Errors in the input
--------------------
+Handling syntax errors in the input
+-----------------------------------
 If your grammar is correct but you get input string with syntax error parser will raise ``NoMatch`` exception
 with the information where in the input stream error has occurred and what the parser expect to see at that
 location.
@@ -451,7 +460,7 @@ For example, to prevent a newline to be treated as whitespace you could write:
 Comment handling
 ~~~~~~~~~~~~~~~~
 Support for comments in your language can be specified as another set of grammar rules.
-See ``simple.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/simple.py>`` example.
+See `simple.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/simple.py>`_ example.
 
 Parser is constructed using two parameters.
 
@@ -615,14 +624,29 @@ For example, if your grammar is:
   number_in_brackets = "(" number ")"
   number = r'\d+'
 
-Than the default action for ``number`` will return number converted to string and the default action for
+Than the default action for ``number`` will return number converted to a string and the default action for
 ``(`` and ``)`` will return ``None`` and thus suppress this nodes so the visitor method for ``number_in_brackets``
-rule will only see ``number`` child.
+rule will only see one child (from the ``number`` rule reference).
 
-This behaviour can be disabled setting parameter ``defaults`` to ``False`` on visitor construction.
+If the node is a non-terminal and there is only one child the default action will return that child effectively
+passing it to the parent node visitor.
+
+Default actions can be disabled setting parameter ``defaults`` to ``False`` on visitor construction.
+
+.. code:: python
+
+  result = visit_parse_tree(parse_tree, CalcVisitor(defaults=False))
 
 If you want to call this default behaviour from your visitor method call ``visit__default__(node, children)`` on
 superclass (``PTNodeVisitor``).
+
+.. code:: python
+
+  def visitor_myrule(self, node, children):
+    if some_condition:
+      ...
+    else:
+      return super(MyVisitor, self).visit__default__(node, children)
 
 Indices and tables
 ==================

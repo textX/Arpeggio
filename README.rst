@@ -35,9 +35,6 @@ after installation you should be able to import arpeggio python module with::
 
     import arpeggio
 
-There is no documentation at the moment. See examples for some ideas of how it can
-be used.
-
 Quick start
 -----------
 

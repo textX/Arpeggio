@@ -21,9 +21,9 @@ from arpeggio import OneOrMore, ZeroOrMore, EOF, ParserPython, Optional
 from arpeggio import RegExMatch as _
 
 def number():           return _(r'\d*\.\d*|\d+')
-def factor():           return [(Optional(["+","-"]), number), ("(", expression, ")")]
-def term():             return factor, ZeroOrMore(["*","/"], factor)
-def expression():       return term, ZeroOrMore(["+", "-"], term)
+def factor():           return [(Optional([u"+",u"-"]), number), (u"(", expression, u")")]
+def term():             return factor, ZeroOrMore([u"*",u"/"], factor)
+def expression():       return term, ZeroOrMore([u"+", u"-"], term)
 def calcfile():         return OneOrMore(expression), EOF
 
 parser = ParserPython(calcfile, reduce_tree=True)

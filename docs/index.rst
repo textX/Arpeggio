@@ -233,7 +233,7 @@ can parse the same language.
     parse_tree = parser.parse(input_expr)
 
 
-.. warning::
+.. note::
   Just remember that using textual PEG syntax imposes a slight overhead since the grammar must be parsed and
   the parser for your language must be built by semantic analysis of grammar parse tree.
   If you plan to instantiate your parser once and than use it many times this will not have that much of
@@ -432,7 +432,8 @@ list of all rules that was tried at reported location.
 Parser configuration
 --------------------
 
-There are some aspect of parsing that is not controlled by the grammar.
+There are some aspect of parsing that can be configured using parser and/or
+``ParsingExpression`` parameters.
 Arpeggio has some sane default behaviour but gives the user possibility to alter it.
 
 This section describes various parser parameters.
@@ -465,6 +466,34 @@ For example, to prevent a newline to be treated as whitespace you could write:
 .. code:: python
 
   parser = ParserPython(calc, ws='\t\r ')
+
+.. note::
+
+  These parameters can be used on the ``Sequence`` level so one could write
+  grammar like this:
+
+  .. code:: python
+
+    def grammar():     return Sequence("one", "two", "three",
+                                       skipws=False), "four"
+    parser = ParserPython(grammar)
+
+
+Keyword handling
+~~~~~~~~~~~~~~~~
+``autokwd`` parameter will do a word boundary match for keyword-like matches. This
+parameter is disabled by default.
+
+.. code:: python
+
+    def grammar():     return "one", "two", "three"
+
+    parser = ParserPython(grammar, autokwd=True)
+
+    # If autokwd is enabled this should parse without error.
+    parser.parse("one two three")
+    # But this will not parse
+    parser.parse("onetwothree")
 
 
 Comment handling
@@ -504,7 +533,29 @@ Notice the removal of each non-terminal with single child.
 .. warning::
 
   Be aware that `semantic analysis <#Semantic analysis - Visitors>`_ operates on nodes of finished parse tree
-  and therefore on reduced tree some ``visit_xxx`` actions will not get called.
+  and therefore on reduced tree some ``visit_<rule_name>`` actions will not get called.
+
+Newline termination for Repetitions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+By default ``Repetition`` parsing expressions (i.e. ``ZeroOrMore`` and ``OneOrMore``)
+will obey ``skipws`` and ``ws`` settings but there are situations where repetitions
+should not pass the end of the current line. For this feature ``eolterm`` parameter is
+introduced which can be set on a repetition and will ensure that it terminates
+before entering a new line.
+
+.. code:: python
+
+  def grammar():      return first, second
+  def first():        return ZeroOrMore(["a", "b"], eolterm=True)
+  def second():       return "a"
+
+  # first rule should match only first line
+  # so that second rule will match "a" on the new line
+  input = """a a b a b b
+  a"""
+
+  parser = ParserPython(grammar)
+  result = parser.parse(input)
 
 
 Semantic analysis - Visitors
@@ -619,6 +670,16 @@ Furthermore, child nodes can be filtered by rule name using name lookup.
     # Rule name lookup
     # Returns a list of all rules created by PEG rule 'baz'
     baz_created = children['baz']
+
+
+Post-processing in second calls
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Visitor may define method with the ``second_<rule_name>`` name form. If this
+method exists it will be called after all parse tree node are processed and it
+will be given the results of the ``visitor_<rule_name>`` call.
+
+This is usually used when some additional post-processing is needed (e.g.
+reference resolving).
 
 
 Default actions

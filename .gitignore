@@ -44,3 +44,11 @@ nosetests.xml
 # Graphviz
 *.dot
 *.svg
+*.dot.png
+
+# Other
+.~lock*
+*.log
+docs/_build
+
+

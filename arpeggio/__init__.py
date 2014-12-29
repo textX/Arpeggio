@@ -1120,7 +1120,7 @@ class Parser(object):
         comments(list): A list of ParseTreeNode for matched comments.
 
     """
-    def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False,
+    def __init__(self, skipws=True, ws=None, reduce_tree=False,
                  autokwd=False, ignore_case=False, debug=False):
 
         # Used to indicate state in which parser should not
@@ -1128,7 +1128,10 @@ class Parser(object):
         self._eolterm = False
 
         self.skipws = skipws
-        self.ws = ws
+        if ws is not None:
+            self.ws = ws
+        else:
+            self.ws = DEFAULT_WS
         self.reduce_tree = reduce_tree
         self.autokwd = autokwd
         self.ignore_case = ignore_case

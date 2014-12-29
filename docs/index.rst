@@ -719,10 +719,4 @@ superclass (``PTNodeVisitor``).
     else:
       return super(MyVisitor, self).visit__default__(node, children)
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

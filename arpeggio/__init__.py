@@ -1090,15 +1090,17 @@ class Parser(object):
         skipws (bool): Should the whitespace skipping be done. Default is True.
         ws (str): A string consisting of whitespace characters.
         reduce_tree (bool): If true non-terminals with single child will be
-            eliminated from the parse tree. Default is True.
+            eliminated from the parse tree. Default is False.
         ignore_case(bool): If case is ignored (default=False)
+        autokwd(bool): If keyword-like StrMatches are matched on word
+            boundaries. Default is False.
         debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
         comments(list): A list of ParseTreeNode for matched comments.
 
     """
     def __init__(self, skipws=True, ws=DEFAULT_WS, reduce_tree=False,
-                 debug=False, ignore_case=False):
+                 autokwd=False, ignore_case=False, debug=False):
 
         # Used to indicate state in which parser should not
         # treat newlines as whitespaces.
@@ -1107,6 +1109,7 @@ class Parser(object):
         self.skipws = skipws
         self.ws = ws
         self.reduce_tree = reduce_tree
+        self.autokwd = autokwd
         self.ignore_case = ignore_case
         self.debug = debug
         self.comments_model = None
@@ -1114,6 +1117,12 @@ class Parser(object):
         self.sem_actions = {}
 
         self.parse_tree = None
+
+        # Create regex used for autokwd matching
+        flags = 0
+        if ignore_case:
+            flags = re.IGNORECASE
+        self.keyword_regex = re.compile(r'[^\d\W]\w*', flags)
 
         # Keep track of root rule we are currently in.
         # Used for debugging purposes
@@ -1465,10 +1474,22 @@ class ParserPython(Parser):
                     print("New rule: {} -> {}"
                           .format(rule_name, retval.__class__.__name__))
 
-            elif isinstance(expression, StrMatch):
-                if expression.ignore_case is None:
-                    expression.ignore_case = self.ignore_case
-                retval = expression
+            elif type(expression) is text or isinstance(expression, StrMatch):
+                if type(expression) is text:
+                    retval = StrMatch(expression, ignore_case=self.ignore_case)
+                else:
+                    retval = expression
+                    if expression.ignore_case is None:
+                        expression.ignore_case = self.ignore_case
+
+                if self.autokwd:
+                    to_match = retval.to_match
+                    match = self.keyword_regex.match(to_match)
+                    if match and match.span() == (0, len(to_match)):
+                        retval = RegExMatch(r'{}\b'.format(to_match),
+                                            ignore_case=self.ignore_case,
+                                            str_repr=to_match)
+                        retval.compile()
 
             elif isinstance(expression, RegExMatch):
                 # Regular expression are not compiled yet
@@ -1500,9 +1521,6 @@ class ParserPython(Parser):
                 retval.nodes = [inner_from_python(e) for e in expression]
                 if any((isinstance(x, CrossRef) for x in retval.nodes)):
                     __for_resolving.append(retval)
-
-            elif type(expression) is text:
-                retval = StrMatch(expression, ignore_case=self.ignore_case)
 
             else:
                 raise GrammarError("Unrecognized grammar element '%s'." %

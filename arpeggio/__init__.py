@@ -280,10 +280,25 @@ class Sequence(ParsingExpression):
     """
     Will match sequence of parser expressions in exact order they are defined.
     """
+
+    def __init__(self, *elements, **kwargs):
+        super(Sequence, self).__init__(*elements, **kwargs)
+        self.ws = kwargs.pop('ws', None)
+        self.skipws = kwargs.pop('skipws', None)
+
     def _parse(self, parser):
         results = []
         c_pos = parser.position
         seq_len = len(self.nodes)
+
+        if self.ws is not None:
+            old_ws = parser.ws
+            parser.ws = self.ws
+
+        if self.skipws is not None:
+            old_skipws = parser.skipws
+            parser.skipws = self.skipws
+
         try:
             for e in self.nodes:
                 result = None
@@ -306,6 +321,12 @@ class Sequence(ParsingExpression):
             parser.position = c_pos     # Backtracking
             self._nm_change_rule(m, parser)
             raise
+
+        finally:
+            if self.ws is not None:
+                parser.ws = old_ws
+            if self.skipws is not None:
+                parser.skipws = old_skipws
 
         return results
 
@@ -1504,7 +1525,8 @@ class ParserPython(Parser):
             elif isinstance(expression, Match):
                 retval = expression
 
-            elif isinstance(expression, Repetition) or \
+            elif isinstance(expression, Sequence) or \
+                    isinstance(expression, Repetition) or \
                     isinstance(expression, SyntaxPredicate) or \
                     isinstance(expression, Decorator):
                 retval = expression

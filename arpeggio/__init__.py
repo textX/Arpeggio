@@ -63,7 +63,7 @@ class NoMatch(Exception):
             occurred.
         parser (Parser): An instance of a parser.
         exp_str(str): What is expected? If not given it is deduced from
-            the rule.
+            the rule. Used in error messages.
         soft(bool): Used to indicate soft no match exception.
     """
     def __init__(self, rule, position, parser, exp_str=None, soft=False):
@@ -89,10 +89,17 @@ class NoMatch(Exception):
         self._up = True
 
     def __str__(self):
-        return "Expected '{}' at position {} => '{}'."\
-            .format(self.exp_str,
-                    text(self.parser.pos_to_linecol(self.position)),
-                    self.parser.context(position=self.position))
+        if self.parser.file_name:
+            return "Expected '{}' at {}{} => '{}'."\
+                .format(self.exp_str,
+                        self.parser.file_name,
+                        text(self.parser.pos_to_linecol(self.position)),
+                        self.parser.context(position=self.position))
+        else:
+            return "Expected '{}' at position {} => '{}'."\
+                .format(self.exp_str,
+                        text(self.parser.pos_to_linecol(self.position)),
+                        self.parser.context(position=self.position))
 
     def __unicode__(self):
         return self.__str__()
@@ -1188,11 +1195,20 @@ class Parser(object):
         else:
             self._ws = self._real_ws
 
-    def parse(self, _input):
+    def parse(self, _input, file_name=None):
+        """
+        Parses input and produces parse tree.
+
+        Args:
+            _input(str): An input string to parse.
+            file_name(str): If input is loaded from file this can be
+                set to file name. It is used in error messages.
+        """
         self.position = 0  # Input position
         self.nm = None  # Last NoMatch exception
         self.line_ends = []
         self.input = _input
+        self.file_name = file_name
         self.parser_model.clear_cache()
         if self.comments_model:
             self.comments_model.clear_cache()
@@ -1216,7 +1232,7 @@ class Parser(object):
         with codecs.open(file_name, 'r', 'utf-8') as f:
             content = f.read()
 
-        return self.parse(content)
+        return self.parse(content, file_name=file_name)
 
     def getASG(self, sem_actions=None, defaults=True):
         """

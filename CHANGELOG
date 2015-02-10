@@ -1,8 +1,12 @@
 Changelog for Arpeggio
 ======================
 
-* Development
-  - 
+* 2015-02-10 Release 0.10
+  - Documentation - http://arpeggio.readthedocs.org/en/latest/
+  - autokwd parser parameter. Match on word boundaries for keyword-like
+    string matches.
+  - skipws and ws parameters for Sequence.
+  - Improvements in error reporting.
 
 * 2014-10-16 Release 0.9
   - Visitor pattern support for semantic analysis - issue 15

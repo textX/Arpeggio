@@ -1,6 +1,10 @@
 Changelog for Arpeggio
 ======================
 
+* 2015-04-14 Release 1.0
+  - Functionally identical to v0.10. It is just the time to go
+    production-stable ;)
+
 * 2015-02-10 Release 0.10
   - Documentation - http://arpeggio.readthedocs.org/en/latest/
   - autokwd parser parameter. Match on word boundaries for keyword-like

@@ -2,7 +2,6 @@ Arpeggio parser - TODO
 ----------------------
 
 Some stuff that should be done in the near future:
-- Documentation
 - Left recursion support 
 - Error recovery.
     This is the essential requirement for the Arpeggio because IDE usage is the main

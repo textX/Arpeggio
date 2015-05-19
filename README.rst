@@ -6,24 +6,25 @@ Arpeggio - PEG parser
 
 |build-status| |docs|
 
-Arpeggio is PEG grammar interpreter implemented as recursive descent
+Arpeggio is a PEG grammar interpreter implemented as a recursive descent
 parser with memoization (aka Packrat parser).
 
-Arpeggio is a part of the research project whose main goal is building environment for DSL development.
-The main domain of application is IDE for DSL development but it can be used for all
-sort of general purpose parsing.
+Arpeggio's main use is a foundation for a tool-chain for DSL development but it
+can be used for all sort of general purpose parsing.
 
 For more information on PEG and packrat parsers see:
  * http://pdos.csail.mit.edu/~baford/packrat/
  * http://pdos.csail.mit.edu/~baford/packrat/thesis/
  * http://en.wikipedia.org/wiki/Parsing_expression_grammar
 
+For a higher level library for building DSLs take a look at `textX`_. It builds
+on top of Arpeggio and makes language parser implementation a lot easier.
 
 Installation
 ------------
 
-Arpeggio is written in Python programming language and distributed with setuptools support.
-Install it with from pypi with the following command::
+Arpeggio is written in Python programming language and distributed with
+setuptools support. Install it with from pypi with the following command::
 
     pip install Arpeggio
 
@@ -42,7 +43,7 @@ Write a grammar. There are several ways to do that:
 
 - The canonical grammar format uses Python statements and expressions.
   Each rule is specified as Python function which should return a data
-  structure that defines the rule. For example a grammar for simple 
+  structure that defines the rule. For example a grammar for simple
   calculator can be written as:
 
   .. code:: python
@@ -121,7 +122,6 @@ And here is an image rendered for parse tree for the above parsed calc expressio
 
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
 
-If you are building a domain-specific language then I suggest you to take a look at `textX`_.
 
 Learn more
 ----------

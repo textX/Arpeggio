@@ -69,3 +69,21 @@ def test_ws():
     # But ws will be default outside of sequence
     parser.parse("""one two  three
         four""")
+
+
+    # Test for ws with more than one char.
+    def grammar():     return Sequence("one", "two", "three",
+                                       ws=' \t'), "four"
+
+    parser = ParserPython(grammar)
+
+    # If we change ws per sequence and set it to spaces and tabs
+    # given input will raise exception
+    with pytest.raises(NoMatch):
+        parser.parse("one two   \nthree \t four")
+
+    # But ws will be default outside of sequence
+    parser.parse("one two  three \n\t four")
+
+    # Inside sequence a spaces and tabs will be skipped
+    parser.parse("one \t two\t three \nfour")

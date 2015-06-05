@@ -64,10 +64,8 @@ class NoMatch(Exception):
         parser (Parser): An instance of a parser.
         exp_str(str): What is expected? If not given it is deduced from
             the rule. Used in error messages.
-        soft(bool): Used to indicate soft no match exception.
     """
-    def __init__(self, rule, position, parser, exp_str=None, soft=False):
-        self.soft = soft
+    def __init__(self, rule, position, parser, exp_str=None):
         self.rule = rule
         self.position = position
         self.parser = parser
@@ -316,10 +314,8 @@ class ParsingExpression(object):
         Used to report most generic language element expected at the
         place of the NoMatch exception.
         """
-        # We do not take into account soft NoMatch exceptions.
-        if not nm.soft:
-            if self.root and parser.position == nm.position and nm._up:
-                nm.rule_name = self.rule_name
+        if self.root and parser.position == nm.position and nm._up:
+            nm.rule_name = self.rule_name
 
 
 class Sequence(ParsingExpression):
@@ -406,8 +402,8 @@ class Repetition(ParsingExpression):
 
 class Optional(Repetition):
     """
-    Optional will try to match parser expression specified and will
-    fail softly in case match is not successful.
+    Optional will try to match parser expression specified and will not fail
+    in case match is not successful.
     """
     def _parse(self, parser):
         result = None

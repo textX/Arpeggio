@@ -10,7 +10,7 @@
 from __future__ import unicode_literals
 import pytest
 
-from arpeggio import ZeroOrMore, Optional, ParserPython, NoMatch
+from arpeggio import ZeroOrMore, Optional, ParserPython, NoMatch, EOF
 
 
 def test_optional_inside_zeroormore():
@@ -18,9 +18,9 @@ def test_optional_inside_zeroormore():
     Test optional match inside a zero or more.
     Optional should always succeed thus inducing ZeroOrMore
     to try the match again.
-    Arpeggio handle this using soft failures.
+    Arpeggio handle this case.
     """
-    def grammar():  return ZeroOrMore(Optional('a'))
+    def grammar():  return ZeroOrMore(Optional('a')), EOF
 
     parser = ParserPython(grammar)
 

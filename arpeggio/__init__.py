@@ -595,12 +595,7 @@ class Match(ParsingExpression):
         if not parser._in_parse_intro:
             self._parse_intro(parser)
 
-        try:
-            match = self._parse(parser)
-        except NoMatch as nm:
-            parser._nm_raise(nm)
-
-        return match
+        return self._parse(parser)
 
 
 class RegExMatch(Match):

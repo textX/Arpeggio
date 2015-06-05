@@ -50,5 +50,5 @@ nosetests.xml
 .~lock*
 *.log
 docs/_build
-
+*.report
 

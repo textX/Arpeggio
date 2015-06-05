@@ -130,8 +130,6 @@ class DebugPrinter(object):
         self.debug = kwargs.pop("debug", False)
         self.current_ident = 0
 
-        print(kwargs)
-
         super(DebugPrinter, self).__init__(**kwargs)
 
     def dprint(self, message, ident_change=0):
@@ -243,7 +241,6 @@ class ParsingExpression(object):
             if parser.debug:
                 parser.dprint("** Cache hit for [{}, {}] = '{}' : new_pos={}"
                       .format(self.name, c_pos, text(result), text(new_pos)))
-                # print("<< Leaving rule {}".format(self.name))
 
             # If NoMatch is recorded at this position raise.
             if isinstance(result, NoMatch):

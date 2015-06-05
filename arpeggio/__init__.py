@@ -116,6 +116,38 @@ def flatten(_iterable):
     return result
 
 
+class DebugPrinter(object):
+    """
+    Mixin class for adding debug print support.
+
+    Attributes:
+        debug (bool): If true debugging messages will be printed.
+        current_ident(int): Current identation level for prints.
+    """
+
+    def __init__(self, **kwargs):
+
+        self.debug = kwargs.pop("debug", False)
+        self.current_ident = 0
+
+        print(kwargs)
+
+        super(DebugPrinter, self).__init__(**kwargs)
+
+    def dprint(self, message, ident_change=0):
+        """
+        Handle debug message. Current implementation will print to stdout using
+        the current identation level.
+        """
+        if ident_change < 0:
+            self.current_ident += ident_change
+
+        print("%s%s" % ("  " * self.current_ident, message))
+
+        if ident_change > 0:
+            self.current_ident += ident_change
+
+
 # ---------------------------------------------------------
 # Parser Model (PEG Abstract Semantic Graph) elements
 
@@ -190,6 +222,14 @@ class ParsingExpression(object):
 
     def parse(self, parser):
 
+        if parser.debug:
+            parser.dprint(">> Entering rule {}{} at position {} => {}"
+                .format(self.name,
+                        " in {}".format(parser.in_rule) if parser.in_rule
+                            else "",
+                        parser.position,
+                        parser.context()), 1)
+
         # Current position could change in recursive calls
         # so save it.
         c_pos = parser.position
@@ -201,7 +241,7 @@ class ParsingExpression(object):
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             if parser.debug:
-                print("** Cache hit for [{}, {}] = '{}' : new_pos={}"
+                parser.dprint("** Cache hit for [{}, {}] = '{}' : new_pos={}"
                       .format(self.name, c_pos, text(result), text(new_pos)))
                 # print("<< Leaving rule {}".format(self.name))
 
@@ -218,8 +258,8 @@ class ParsingExpression(object):
 
         # Remember last parsing expression and set this as
         # the new last.
-        _last_pexpression = parser._last_pexpression
-        parser._last_pexpression = self
+        last_pexpression = parser.last_pexpression
+        parser.last_pexpression = self
 
         if self.rule_name:
             # If we are entering root rule
@@ -240,10 +280,10 @@ class ParsingExpression(object):
 
         finally:
             # Recover last parsing expression.
-            parser._last_pexpression = _last_pexpression
+            parser.last_pexpression = last_pexpression
 
             if parser.debug:
-                print("<< Leaving rule {}".format(self.name))
+                parser.dprint("<< Leaving rule {}".format(self.name), -1)
 
             # If leaving root rule restore previous root rule name.
             if self.rule_name:
@@ -529,8 +569,8 @@ class Combine(Decorator):
     def _parse(self, parser):
         results = []
 
-        old_in_lex_rule = parser._in_lex_rule
-        parser._in_lex_rule = True
+        oldin_lex_rule = parser.in_lex_rule
+        parser.in_lex_rule = True
         c_pos = parser.position
         try:
             for parser_model_node in self.nodes:
@@ -545,7 +585,7 @@ class Combine(Decorator):
             parser.position = c_pos  # Backtracking
             raise
         finally:
-            parser._in_lex_rule = old_in_lex_rule
+            parser.in_lex_rule = oldin_lex_rule
 
 
 class Match(ParsingExpression):
@@ -564,18 +604,15 @@ class Match(ParsingExpression):
             return "%s(%s)" % (self.__class__.__name__, self.to_match)
 
     def _parse_intro(self, parser):
-        if parser.debug:
-            print(">> Entering rule {} in {} at position {} => {}".format(
-                self.name, parser.in_rule, parser.position, parser.context()))
 
-        parser._in_parse_intro = True
+        parser.in_parse_intro = True
 
         # Skip whitespaces and parse comments if we are not
         # in the lexical rule
-        if not parser._in_lex_rule:
+        if not parser.in_lex_rule:
             parser._skip_ws()
-            if parser.comments_model and not parser._in_parse_comment:
-                parser._in_parse_comment = True
+            if parser.comments_model and not parser.in_parse_comment:
+                parser.in_parse_comment = True
                 try:
                     while True:
                         parser.comments.append(
@@ -587,12 +624,20 @@ class Match(ParsingExpression):
                     pass
 
                 finally:
-                    parser._in_parse_comment = False
+                    parser.in_parse_comment = False
 
-        parser._in_parse_intro = False
+        parser.in_parse_intro = False
 
     def parse(self, parser):
-        if not parser._in_parse_intro:
+        if parser.debug:
+            parser.dprint(">> Match rule {}{} at position {} => {}"
+                .format(self.name,
+                        " in {}".format(parser.in_rule) if parser.in_rule
+                            else "",
+                        parser.position,
+                        parser.context()))
+
+        if not parser.in_parse_intro:
             self._parse_intro(parser)
 
         return self._parse(parser)
@@ -635,13 +680,13 @@ class RegExMatch(Match):
         m = self.regex.match(parser.input[c_pos:])
         if m:
             if parser.debug:
-                print("++ Match '%s' at %d => '%s'" % (m.group(),
+                parser.dprint("++ Match '%s' at %d => '%s'" % (m.group(),
                       c_pos, parser.context(len(m.group()))))
             parser.position += len(m.group())
             return Terminal(self, c_pos, m.group())
         else:
             if parser.debug:
-                print("-- NoMatch at {}".format(c_pos))
+                parser.dprint("-- NoMatch at {}".format(c_pos))
             parser._nm_raise(self, c_pos, parser)
 
 
@@ -663,24 +708,25 @@ class StrMatch(Match):
         c_pos = parser.position
         input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
         if parser.debug:
-            print("Input = ", input_frag)
+            parser.dprint("Input = {}".format(input_frag))
         if self.ignore_case:
             match = input_frag.lower() == self.to_match.lower()
         else:
             match = input_frag == self.to_match
         if match:
             if parser.debug:
-                print("++ Match '{}' at {} => '{}'".format(self.to_match,
-                      c_pos, parser.context(len(self.to_match))))
+                parser.dprint("++ Match '{}' at {} => '{}'"
+                    .format(self.to_match, c_pos,
+                            parser.context(len(self.to_match))))
             parser.position += len(self.to_match)
 
             # If this match is inside sequence than mark for suppression
-            suppress = type(parser._last_pexpression) is Sequence
+            suppress = type(parser.last_pexpression) is Sequence
 
             return Terminal(self, c_pos, self.to_match, suppress=suppress)
         else:
             if parser.debug:
-                print("-- NoMatch at {}".format(c_pos))
+                parser.dprint("-- NoMatch at {}".format(c_pos))
             parser._nm_raise(self, c_pos, parser)
 
     def __str__(self):
@@ -726,7 +772,7 @@ class EndOfFile(Match):
             return Terminal(EOF(), c_pos, '', suppress=True)
         else:
             if parser.debug:
-                print("!! EOF not matched.")
+                parser.dprint("!! EOF not matched.")
             parser._nm_raise(self, c_pos, parser)
 
 
@@ -775,8 +821,8 @@ class ParseTreeNode(object):
             visitor(PTNodeVisitor): The visitor object.
         """
         if visitor.debug:
-            print("Visiting ", self.name, "  type:",
-                  type(self).__name__, "str:", text(self))
+            visitor.dprint("Visiting {}  type:{} str:{}"
+                           .format(self.name, type(self).__name__, text(self)))
 
         children = SemanticActionResults()
         if isinstance(self, NonTerminal):
@@ -927,20 +973,20 @@ class NonTerminal(ParseTreeNode, list):
 # ----------------------------------------------------
 # Semantic Actions
 #
-class PTNodeVisitor(object):
+class PTNodeVisitor(DebugPrinter):
     """
     Base class for all parse tree visitors.
     """
-    def __init__(self, defaults=True, debug=False):
+    def __init__(self, defaults=True, **kwargs):
         """
         Args:
             defaults(bool): If the default visit method should be applied in
                 case no method is defined.
-            debug(bool): Print debug messages?
         """
         self.for_second_pass = []
-        self.debug = debug
         self.defaults = defaults
+
+        super(PTNodeVisitor, self).__init__(**kwargs)
 
     def visit__default__(self, node, children):
         """
@@ -972,7 +1018,10 @@ class PTNodeVisitor(object):
                             # If there is multiple non-string objects
                             # by default convert non-terminal to string
                             if self.debug:
-                                print("*** Warning: Multiple non-string objects found in default visit. Converting non-terminal to a string.")
+                                self.dprint("*** Warning: Multiple "
+                                            "non-string objects found in "
+                                            "default visit. Converting non-"
+                                            "terminal to a string.")
                             retval = text(node)
                             break
                 else:
@@ -996,14 +1045,14 @@ def visit_parse_tree(parse_tree, visitor):
             "Parse tree is empty. You did call parse(), didn't you?")
 
     if visitor.debug:
-        print("ASG: First pass")
+        visitor.dprint("ASG: First pass")
 
     # Visit tree.
     result = parse_tree.visit(visitor)
 
     # Second pass
     if visitor.debug:
-        print("ASG: Second pass")
+        visitor.dprint("ASG: Second pass")
     for sa_name, asg_node in visitor.for_second_pass:
         getattr(visitor, "second_%s" % sa_name)(asg_node)
 
@@ -1050,7 +1099,10 @@ class SemanticAction(object):
                             # If there is multiple non-string objects
                             # by default convert non-terminal to string
                             if parser.debug:
-                                print("*** Warning: Multiple non-string objects found in applying default semantic action. Converting non-terminal to string.")
+                                parser.dprint("*** Warning: Multiple non-"
+                                        "string objects found in applying "
+                                        "default semantic action. Converting "
+                                        "non-terminal to string.")
                             retval = text(node)
                             break
                 else:
@@ -1105,25 +1157,42 @@ class SemanticActionToString(SemanticAction):
 # Parsers
 
 
-class Parser(object):
+class Parser(DebugPrinter):
     """
     Abstract base class for all parsers.
 
     Attributes:
-        skipws (bool): Should the whitespace skipping be done. Default is True.
-        ws (str): A string consisting of whitespace characters.
-        reduce_tree (bool): If true non-terminals with single child will be
-            eliminated from the parse tree. Default is False.
-        ignore_case(bool): If case is ignored (default=False)
-        autokwd(bool): If keyword-like StrMatches are matched on word
-            boundaries. Default is False.
-        debug (bool): If true debugging messages will be printed.
         comments_model: parser model for comments.
         comments(list): A list of ParseTreeNode for matched comments.
-
+        sem_actions(dict): A dictionary of semantic actions keyed by the
+            rule name.
+        parse_tree(NonTerminal): The parse tree consisting of NonTerminal and
+            Terminal instances.
+        in_rule (str): Current rule name.
+        in_parse_comment (bool): True if parsing comments.
+        in_parse_intro (bool): True if parsing intro (whitespaces and
+            comments). Used to prevent infinite recursion.
+        in_optional (bool): True if parsing optionals (Optional, ZeroOrMore or
+            OneOrMore after first).
+        in_lex_rule (bool): True if in lexical rule. Currently used in Combine
+            decorator to convert match to a single Terminal.
+        last_pexpression (bool): Last parsing expression traversed.
     """
     def __init__(self, skipws=True, ws=None, reduce_tree=False,
-                 autokwd=False, ignore_case=False, debug=False):
+                 autokwd=False, ignore_case=False, **kwargs):
+        """
+        Args:
+            skipws (bool): Should the whitespace skipping be done.  Default is
+                True.
+            ws (str): A string consisting of whitespace characters.
+            reduce_tree (bool): If true non-terminals with single child will be
+                eliminated from the parse tree. Default is False.
+            autokwd(bool): If keyword-like StrMatches are matched on word
+                boundaries. Default is False.
+            ignore_case(bool): If case is ignored (default=False)
+        """
+
+        super(Parser, self).__init__(**kwargs)
 
         # Used to indicate state in which parser should not
         # treat newlines as whitespaces.
@@ -1137,7 +1206,6 @@ class Parser(object):
         self.reduce_tree = reduce_tree
         self.autokwd = autokwd
         self.ignore_case = ignore_case
-        self.debug = debug
         self.comments_model = None
         self.comments = []
         self.sem_actions = {}
@@ -1154,15 +1222,19 @@ class Parser(object):
         # Used for debugging purposes
         self.in_rule = ''
 
-        self._in_parse_comment = False
-        self._in_parse_intro = False
+        self.in_parse_comment = False
+        self.in_parse_intro = False
+
+        # If under optional PE (Optional or ZeroOrMore or OneOrMore after
+        # first occurence) we do not store NoMatch for error reporting.
+        self.in_optional = False
 
         # Are we in lexical rule. If so do not
         # skip whitespaces.
-        self._in_lex_rule = False
+        self.in_lex_rule = False
 
         # Last parsing expression traversed
-        self._last_pexpression = None
+        self.last_pexpression = None
 
     @property
     def ws(self):
@@ -1263,8 +1335,8 @@ class Parser(object):
             """
 
             if self.debug:
-                print("Walking down ", node.name, "  type:",
-                      type(node).__name__, "str:", text(node))
+                self.dprint("Walking down %s   type: %s  str: %s" %
+                    (node.name, type(node).__name__, text(node)))
 
             children = SemanticActionResults()
             if isinstance(node, NonTerminal):
@@ -1274,11 +1346,12 @@ class Parser(object):
                         children.append_result(n.rule_name, child)
 
             if self.debug:
-                print("Processing ", node.name, "= '", text(node),
-                      "'  type:", type(node).__name__,
-                      "len:", len(node) if isinstance(node, list) else "")
+                self.dprint("Processing %s = '%s'  type:%s len:%d" %
+                            (node.name, text(node), type(node).__name__,
+                             len(node) if isinstance(node, list) else ""))
                 for i, a in enumerate(children):
-                    print("\t%d:" % (i + 1), text(a), "type:", type(a).__name__)
+                    self.dprint("  %d:%s type:%s" %
+                                (i+1, text(a), type(a).__name__))
 
             if node.rule_name in sem_actions:
                 sem_action = sem_actions[node.rule_name]
@@ -1294,13 +1367,13 @@ class Parser(object):
                     action_name = sem_action.__name__ \
                         if hasattr(sem_action, '__name__') \
                         else sem_action.__class__.__name__
-                    print("\tApplying semantic action ", action_name)
+                    self.dprint("  Applying semantic action %s" % action_name)
 
             else:
                 if defaults:
                     # If no rule is present use some sane defaults
                     if self.debug:
-                        print("\tApplying default semantic action.")
+                        self.dprint("  Applying default semantic action.")
 
                     retval = SemanticAction().first_pass(self, node, children)
 
@@ -1309,19 +1382,19 @@ class Parser(object):
 
             if self.debug:
                 if retval is None:
-                    print("\tSuppressed.")
+                    self.dprint("  Suppressed.")
                 else:
-                    print("\tResolved to = ", text(retval),
-                          "  type:", type(retval).__name__)
+                    self.dprint("  Resolved to = %s  type:" %
+                                (text(retval), type(retval).__name__))
             return retval
 
         if self.debug:
-            print("ASG: First pass")
+            self.dprint("ASG: First pass")
         asg = tree_walk(self.parse_tree)
 
         # Second pass
         if self.debug:
-            print("ASG: Second pass")
+            self.dprint("ASG: Second pass")
         for sa_name, asg_node in for_second_pass:
             sem_actions[sa_name].second_pass(self, asg_node)
 
@@ -1394,24 +1467,22 @@ class Parser(object):
         """
         # Do not report NoMatch for comments matching.
         # Use last exception instead.
-        if not self._in_parse_comment or self.nm is None:
+        if not self.in_parse_comment or self.nm is None:
             # Non-comment nm will override comment nm
             if self.nm is not None:
-                override = self.nm._in_comment and not self._in_parse_comment
+                override = self.nm._in_comment and not self.in_parse_comment
             else:
                 override = True
 
             if len(args) == 1 and isinstance(args[0], NoMatch):
-                # Do not report soft failures
-                if not args[0].soft:
-                    if override or args[0].position > self.nm.position:
-                        self.nm = args[0]
-                        self.nm._in_comment = self._in_parse_comment
+                if override or args[0].position > self.nm.position:
+                    self.nm = args[0]
+                    self.nm._in_comment = self.in_parse_comment
             else:
                 rule, position, parser = args
                 if override or position > self.nm.position:
                     self.nm = NoMatch(rule, position, parser)
-                    self.nm._in_comment = self._in_parse_comment
+                    self.nm._in_comment = self.in_parse_comment
         raise self.nm
 
 

@@ -268,6 +268,8 @@ class ParsingExpression(object):
 
         try:
             result = self._parse(parser)
+            if type(result) is list and result and result[0] is None:
+                result = None
 
         except NoMatch as e:
             parser.position = c_pos  # Backtracking
@@ -314,7 +316,7 @@ class ParsingExpression(object):
         Used to report most generic language element expected at the
         place of the NoMatch exception.
         """
-        # We do not take into accout soft no match exceptions.
+        # We do not take into account soft NoMatch exceptions.
         if not nm.soft:
             if self.root and parser.position == nm.position and nm._up:
                 nm.rule_name = self.rule_name
@@ -345,21 +347,9 @@ class Sequence(ParsingExpression):
 
         try:
             for e in self.nodes:
-                result = None
-                try:
-                    result = e.parse(parser)
-                    if result:
-                        results.append(result)
-                except NoMatch as e:
-                    # Soft NoMatches are OK in sequences
-                    # but if all elements of sequence return soft
-                    # no match than this sequence must raise a
-                    # soft NoMatch also.
-                    if not e.soft:
-                        raise
-                    seq_len -= 1
-                    if seq_len == 0:
-                        raise
+                result = e.parse(parser)
+                if result:
+                    results.append(result)
 
         except NoMatch as m:
             parser.position = c_pos     # Backtracking
@@ -388,13 +378,12 @@ class OrderedChoice(Sequence):
             try:
                 result = [e.parse(parser)]
                 match = True
+                break
             except NoMatch as m:
                 parser.position = c_pos  # Backtracking
                 self._nm_change_rule(m, parser)
-            else:
-                break
 
-        if not match:
+        if not match and parser.nm:
             raise parser.nm
 
         return result
@@ -423,12 +412,18 @@ class Optional(Repetition):
     def _parse(self, parser):
         result = None
         c_pos = parser.position
+
+        # Set parser for optional mode
+        oldin_optional = parser.in_optional
+        parser.in_optional = True
+
         try:
             result = [self.nodes[0].parse(parser)]
         except NoMatch as e:
             parser.position = c_pos  # Backtracking
-            raise NoMatch(e.rule, e.position, e.parser,
-                          exp_str=e.exp_str, soft=True)
+
+        # Restore in_optional state
+        parser.in_optional = oldin_optional
 
         return result
 
@@ -447,21 +442,27 @@ class ZeroOrMore(Repetition):
             old_eolterm = parser.eolterm
             parser.eolterm = self.eolterm
 
+        # Set parser for optional mode
+        oldin_optional = parser.in_optional
+        parser.in_optional = True
+
         while True:
             try:
                 c_pos = parser.position
-                results.append(self.nodes[0].parse(parser))
+                result = self.nodes[0].parse(parser)
+                if not result:
+                    break
+                results.append(result)
             except NoMatch as e:
                 parser.position = c_pos  # Backtracking
+                break
 
-                if self.eolterm:
-                    # Restore previous eolterm
-                    parser.eolterm = old_eolterm
+        if self.eolterm:
+            # Restore previous eolterm
+            parser.eolterm = old_eolterm
 
-                if results:
-                    break
-                raise NoMatch(e.rule, e.position, e.parser,
-                              exp_str=e.exp_str, soft=True)
+        # Restore in_optional state
+        parser.in_optional = oldin_optional
 
         return results
 
@@ -472,7 +473,7 @@ class OneOrMore(Repetition):
     """
     def _parse(self, parser):
         results = []
-        first = False
+        first = True
 
         if self.eolterm:
             # Remember current eolterm and set eolterm of
@@ -480,21 +481,33 @@ class OneOrMore(Repetition):
             old_eolterm = parser.eolterm
             parser.eolterm = self.eolterm
 
+        # Set parser for optional mode
+        oldin_optional = parser.in_optional
+
         while True:
             try:
                 c_pos = parser.position
-                results.append(self.nodes[0].parse(parser))
-                first = True
+                result = self.nodes[0].parse(parser)
+                if not result:
+                    break
+                results.append(result)
+                first = False
+                parser.in_optional = True
             except NoMatch:
                 parser.position = c_pos  # Backtracking
 
+                if first:
+                    raise
+
+                break
+
+            finally:
                 if self.eolterm:
                     # Restore previous eolterm
                     parser.eolterm = old_eolterm
 
-                if not first:
-                    raise
-                break
+                # Restore in_optional state
+                parser.in_optional = oldin_optional
 
         return results
 
@@ -1462,24 +1475,30 @@ class Parser(DebugPrinter):
         Args:
             args: A NoMatch instance or (value, position, parser)
         """
+
+        override = True
         # Do not report NoMatch for comments matching.
         # Use last exception instead.
         if not self.in_parse_comment or self.nm is None:
             # Non-comment nm will override comment nm
             if self.nm is not None:
                 override = self.nm._in_comment and not self.in_parse_comment
-            else:
-                override = True
 
-            if len(args) == 1 and isinstance(args[0], NoMatch):
-                if override or args[0].position > self.nm.position:
-                    self.nm = args[0]
-                    self.nm._in_comment = self.in_parse_comment
-            else:
-                rule, position, parser = args
-                if override or position > self.nm.position:
-                    self.nm = NoMatch(rule, position, parser)
-                    self.nm._in_comment = self.in_parse_comment
+        if len(args) == 1:
+            exception = args[0]
+        else:
+            rule, position, parser = args
+            exception = NoMatch(rule, position, parser)
+        exception._in_comment = self.in_parse_comment
+
+        # We will not cache NoMatch if the parser is in optional matching.
+        if self.in_optional:
+            raise exception
+
+        if override or exception.position > self.nm.position:
+            exception._in_comment = self.in_parse_comment
+            self.nm = exception
+
         raise self.nm
 
 
@@ -1648,3 +1667,5 @@ class ParserPython(Parser):
 
     def errors(self):
         pass
+
+

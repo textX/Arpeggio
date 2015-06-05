@@ -704,8 +704,6 @@ class StrMatch(Match):
     def _parse(self, parser):
         c_pos = parser.position
         input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
-        if parser.debug:
-            parser.dprint("Input = {}".format(input_frag))
         if self.ignore_case:
             match = input_frag.lower() == self.to_match.lower()
         else:
@@ -723,7 +721,9 @@ class StrMatch(Match):
             return Terminal(self, c_pos, self.to_match, suppress=suppress)
         else:
             if parser.debug:
-                parser.dprint("-- NoMatch at {}".format(c_pos))
+                parser.dprint("-- No match '{}' at {} => '{}'"
+                    .format(self.to_match, c_pos,
+                            parser.context(len(self.to_match))))
             parser._nm_raise(self, c_pos, parser)
 
     def __str__(self):
@@ -1547,12 +1547,13 @@ class ParserPython(Parser):
                 if rule_name in __rule_cache:
                     c_rule = __rule_cache.get(rule_name)
                     if self.debug:
-                        print("Rule {} founded in cache.".format(rule_name))
+                        self.dprint("Rule {} founded in cache."
+                                    .format(rule_name))
                     if isinstance(c_rule, CrossRef):
                         self.__cross_refs += 1
                         if self.debug:
-                            print("CrossRef usage: {}"
-                                  .format(c_rule.target_rule_name))
+                            self.dprint("CrossRef usage: {}"
+                                        .format(c_rule.target_rule_name))
                     return c_rule
 
                 # Semantic action for the rule
@@ -1574,8 +1575,8 @@ class ParserPython(Parser):
                 # Update cache
                 __rule_cache[rule_name] = retval
                 if self.debug:
-                    print("New rule: {} -> {}"
-                          .format(rule_name, retval.__class__.__name__))
+                    self.dprint("New rule: {} -> {}"
+                                .format(rule_name, retval.__class__.__name__))
 
             elif type(expression) is text or isinstance(expression, StrMatch):
                 if type(expression) is text:

@@ -34,7 +34,7 @@ Features
 * `Keyword handling <http://arpeggio.readthedocs.org/en/stable/#keyword-handling>`_
 * `Support for comments <http://arpeggio.readthedocs.org/en/stable/#comment-handling>`_
 * `Newline termination for Repetition <http://arpeggio.readthedocs.org/en/stable/#newline-termination-for-repetitions>`_ (available only in Python syntax)
-* Nice `parse tree navigation <http://arpeggio.readthedocs.org/en/stable/#non-terminal-nodes>`_
+* `Parse tree navigation <http://arpeggio.readthedocs.org/en/stable/#non-terminal-nodes>`_
 * `Visitors for semantic analysis <http://arpeggio.readthedocs.org/en/stable/#semantic-analysis-visitors>`_
 * `Extensive error reporting <http://arpeggio.readthedocs.org/en/stable/#handling-syntax-errors-in-the-input>`_
 * `Good support for debugging <http://arpeggio.readthedocs.org/en/stable/#grammar-debugging>`_

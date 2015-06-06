@@ -1479,7 +1479,7 @@ class Parser(DebugPrinter):
         if not self.in_parse_comment or self.nm is None:
             # Non-comment nm will override comment nm
             if self.nm is not None:
-                override = self.nm._in_comment and not self.in_parse_comment
+                override = self.nm._in_comment
 
         if len(args) == 1:
             exception = args[0]
@@ -1493,7 +1493,6 @@ class Parser(DebugPrinter):
             raise exception
 
         if override or exception.position > self.nm.position:
-            exception._in_comment = self.in_parse_comment
             self.nm = exception
 
         raise self.nm

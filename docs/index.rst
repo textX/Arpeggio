@@ -45,11 +45,13 @@ During parsing each successfully matched rule will create a parse tree node (see
 In Arpeggio each PEG rule consists of atomic parsing expression which can be:
 
 - **terminal match rules** - create a `Terminal nodes`_:
+
   - **String match** - a simple string that is matched literally from the input
     string.
   - **RegEx match** - regular expression match (based on python ``re`` module).
 
 - **non-terminal match rules** - create a `Non-terminal nodes`_:
+
   - **Sequence** - succeeds if all parsing expressions matches at current
     location in the defined order.  Matched input is consumed.
   - **Ordered choice** - succeeds if any of the given expressions matches at the

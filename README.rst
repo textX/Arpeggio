@@ -23,23 +23,23 @@ on top of Arpeggio and makes language parser implementation a lot easier.
 Features
 --------
 
- * Using `PEG <http://en.wikipedia.org/wiki/Parsing_expression_grammar>`_
-   - unambiguous grammars.
- * Works as grammar interpreter - no code is generated.
- * Multiple syntaxes for grammar definition (`Python <http://arpeggio.readthedocs.org/en/stable/#grammars-written-in-python>`_,
-   `peg <http://arpeggio.readthedocs.org/en/stable/#grammars-written-in-peg-notations>`, cleanpeg, make your
-   own)
- * `Case sensitive/insensitive parsing <http://arpeggio.readthedocs.org/en/stable/#case-insensitive-parsing>`_
- * `Whitespace handling control <http://arpeggio.readthedocs.org/en/stable/#white-space-handling>`_
- * `Keyword handling <http://arpeggio.readthedocs.org/en/stable/#keyword-handling>`_
- * `Support for comments <http://arpeggio.readthedocs.org/en/stable/#comment-handling>`_
- * `Newline termination for Repetition <http://arpeggio.readthedocs.org/en/stable/#newline-termination-for-repetitions>`_ (available only in Python syntax)
- * Nice `parse tree navigation <http://arpeggio.readthedocs.org/en/stable/#non-terminal-nodes>`_
- * `Visitors for semantic analysis <http://arpeggio.readthedocs.org/en/stable/#semantic-analysis-visitors>`_
- * `Extensive error reporting <http://arpeggio.readthedocs.org/en/stable/#handling-syntax-errors-in-the-input>`_
- * `Good support for debugging <http://arpeggio.readthedocs.org/en/stable/#grammar-debugging>`_
- * `Good test coverage <https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit>`_
- * `Sphinx documentation <http://arpeggio.readthedocs.org/en/stable/`_
+* Using `PEG <http://en.wikipedia.org/wiki/Parsing_expression_grammar>`_
+  - unambiguous grammars.
+* Works as grammar interpreter - no code is generated.
+* Multiple syntaxes for grammar definition (`Python <http://arpeggio.readthedocs.org/en/stable/#grammars-written-in-python>`_,
+  `peg <http://arpeggio.readthedocs.org/en/stable/#grammars-written-in-peg-notations>`_, cleanpeg, make your
+  own)
+* `Case sensitive/insensitive parsing <http://arpeggio.readthedocs.org/en/stable/#case-insensitive-parsing>`_
+* `Whitespace handling control <http://arpeggio.readthedocs.org/en/stable/#white-space-handling>`_
+* `Keyword handling <http://arpeggio.readthedocs.org/en/stable/#keyword-handling>`_
+* `Support for comments <http://arpeggio.readthedocs.org/en/stable/#comment-handling>`_
+* `Newline termination for Repetition <http://arpeggio.readthedocs.org/en/stable/#newline-termination-for-repetitions>`_ (available only in Python syntax)
+* Nice `parse tree navigation <http://arpeggio.readthedocs.org/en/stable/#non-terminal-nodes>`_
+* `Visitors for semantic analysis <http://arpeggio.readthedocs.org/en/stable/#semantic-analysis-visitors>`_
+* `Extensive error reporting <http://arpeggio.readthedocs.org/en/stable/#handling-syntax-errors-in-the-input>`_
+* `Good support for debugging <http://arpeggio.readthedocs.org/en/stable/#grammar-debugging>`_
+* `Good test coverage <https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit>`_
+* `Sphinx documentation <http://arpeggio.readthedocs.org/en/stable/>`_
 
 Installation
 ------------

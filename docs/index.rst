@@ -141,9 +141,9 @@ If you want to debug parser construction set ``debug`` parameter to ``True`` in 
 
     parser = ParserPython(calc, debug=True)
 
-In this case a verbose messages will be printed during parser construction and the 
+In this case a verbose messages will be printed during parser construction and the
 ``dot`` file (from `graphviz software package <http://www.graphviz.org/content/dot-language>`_)
-will be created if the parser model is constructed without errors. This dot file can be 
+will be created if the parser model is constructed without errors. This dot file can be
 rendered as image using one of available dot viewer software or transformed to an image using ``dot`` tool.
 
 .. code:: bash
@@ -328,7 +328,7 @@ For example:
   # There is 4 bar matched from result (at the beginning and from ZeroOrMore)
   # Dot access collect all NTs from the given path
   assert len(result.bar) == 4
-  # You could call dot access recursively, e.g. result.bar.baz if the 
+  # You could call dot access recursively, e.g. result.bar.baz if the
   # rule bar called baz. In that case all bars would be collected from
   # the root and for each bar all baz will be collected.
 
@@ -340,18 +340,39 @@ For example:
 
 Grammar debugging
 -----------------
-During grammar design you can make syntax and semantic errors. Arpeggio will report any syntax error
-with all the necessary informations whether you are building parser from python expressions or from
-a textual PEG notation.
 
-For semantic error you have a debugging mode of operation which is entered by setting ``debug`` param
-to ``True`` in the parser construction call. When Arpeggio runs in debug mode it will print a detailed
-information of what it is doing. Furthermore a ``dot`` files will be generated that visually represents
-your grammar (this is known in Arpeggio as ``the parser model``). In debug mode also a parse tree will
-also be rendered to ``dot`` file when you parse your input with properly constructed parser.
+During grammar design you can make syntax and semantic errors. Arpeggio will
+report any syntax error with all the necessary informations whether you are
+building parser from python expressions or from a textual PEG notation.
 
-You can visualize ``dot`` files using some of available dot viewer or you can convert dot file to image
-using ``dot`` tool from ``graphviz`` package.
+For semantic error you have a debugging mode of operation which is entered by
+setting ``debug`` param to ``True`` in the parser construction call. When
+Arpeggio runs in debug mode it will print a detailed information of what it is
+doing::
+
+  >> Entering rule calc=Sequence at position 0 => *-(4-1)*5+(
+    >> Entering rule OneOrMore in calc at position 0 => *-(4-1)*5+(
+        >> Entering rule expression=Sequence in calc at position 0 => *-(4-1)*5+(
+          >> Entering rule term=Sequence in expression at position 0 => *-(4-1)*5+(
+              >> Entering rule factor=Sequence in term at position 0 => *-(4-1)*5+(
+                >> Entering rule Optional in factor at position 0 => *-(4-1)*5+(
+                    >> Entering rule OrderedChoice in factor at position 0 => *-(4-1)*5+(
+                      >> Match rule StrMatch(+) in factor at position 0 => *-(4-1)*5+(
+                          -- No match '+' at 0 => '*-*(4-1)*5+('
+                      >> Match rule StrMatch(-) in factor at position 0 => *-(4-1)*5+(
+                          ++ Match '-' at 0 => '*-*(4-1)*5+('
+                    << Leaving rule OrderedChoice
+                << Leaving rule Optional
+                >> Entering rule OrderedChoice in factor at position 1 => -*(4-1)*5+(2
+
+
+Furthermore, a ``dot`` files will be generated that visually represents your
+grammar (this is known in Arpeggio as ``the parser model``). In debug mode also
+a parse tree will also be rendered to ``dot`` file when you parse your input
+with properly constructed parser.
+
+You can visualize ``dot`` files using some of available dot viewer or you can
+convert dot file to image using ``dot`` tool from ``graphviz`` package.
 
 An example to convert ``calc_parser_model.dot`` to ``png`` file use:
 
@@ -601,7 +622,7 @@ To run semantic analysis apply your visitor class to the parse tree using ``visi
 
 The first parameter is a parse tree you get from the ``parser.parse`` call while the second parameter is an
 instance of your visitor class. Semantic analysis can be run in debug mode if you set ``debug`` parameter
-to ``True`` during visitor construction. You can use this flag to print your own debug information from 
+to ``True`` during visitor construction. You can use this flag to print your own debug information from
 visitor methods.
 
 .. code:: python
@@ -642,7 +663,7 @@ semantic analysis (``RobotVisitor`` class) will evaluate robot program (transfor
 final robot location.
 
 Semantic analysis can do a complex stuff. For example,
-see `peg_peg.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg.py>`_ example and 
+see `peg_peg.py <https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg.py>`_ example and
 `PEGVisitor <https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py>`_ class where the
 PEG parser for the given language is built using semantic analysis.
 

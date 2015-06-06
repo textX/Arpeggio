@@ -1473,13 +1473,12 @@ class Parser(DebugPrinter):
             args: A NoMatch instance or (value, position, parser)
         """
 
-        override = True
+        override = False
         # Do not report NoMatch for comments matching.
         # Use last exception instead.
         if not self.in_parse_comment or self.nm is None:
             # Non-comment nm will override comment nm
-            if self.nm is not None:
-                override = self.nm._in_comment
+            override = self.nm is None or self.nm._in_comment
 
         if len(args) == 1:
             exception = args[0]

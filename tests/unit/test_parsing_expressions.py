@@ -65,21 +65,22 @@ def test_zero_or_more():
 
 def test_one_or_more():
 
-    def grammar():      return OneOrMore("a")
+    def grammar():      return OneOrMore("a"), "b"
 
     parser = ParserPython(grammar)
 
-    parsed = parser.parse("aaaaaaa")
+    parsed = parser.parse("aaaaaa a  b")
 
-    assert str(parsed) == "a | a | a | a | a | a | a"
-    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],  'a' [3],  'a' [4],  'a' [5],  'a' [6] ]"
+    assert str(parsed) == "a | a | a | a | a | a | a | b"
+    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],  'a' [3],  'a' [4],  'a' [5],  'a' [7],  'b' [10] ]"
 
+    parser.parse("ab")
 
     with pytest.raises(NoMatch):
         parser.parse("")
 
     with pytest.raises(NoMatch):
-        parser.parse("bbb")
+        parser.parse("b")
 
 def test_optional():
 

@@ -282,8 +282,8 @@ Here is an example parse tree for the ``calc`` grammar and the expression
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
    :height: 500
 
-Each non-leaf node is non-terminal. The name in in this nodes are the names of
-the grammar PEG rules that created them.
+Each non-leaf node is non-terminal. The name in this nodes are the names of the
+grammar PEG rules that created them.
 
 The leaf nodes are terminals and they are matched by the string match or regex
 match rules.

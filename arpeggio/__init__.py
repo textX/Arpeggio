@@ -380,8 +380,8 @@ class OrderedChoice(Sequence):
                 parser.position = c_pos  # Backtracking
                 self._nm_change_rule(m, parser)
 
-        if not match and parser.nm:
-            raise parser.nm
+        if not match:
+            parser._nm_raise(self, c_pos, parser)
 
         return result
 

@@ -138,7 +138,7 @@ class DebugPrinter(object):
         if ident_change < 0:
             self.current_ident += ident_change
 
-        print("%s%s" % ("  " * self.current_ident, message))
+        print("%s%s" % ("   " * self.current_ident, message))
 
         if ident_change > 0:
             self.current_ident += ident_change
@@ -239,6 +239,7 @@ class ParsingExpression(object):
             if parser.debug:
                 parser.dprint("** Cache hit for [{}, {}] = '{}' : new_pos={}"
                       .format(self.name, c_pos, text(result), text(new_pos)))
+                parser.dprint("<< Leaving rule {}".format(self.name), -1)
 
             # If NoMatch is recorded at this position raise.
             if isinstance(result, NoMatch):
@@ -719,7 +720,7 @@ class StrMatch(Match):
             match = input_frag == self.to_match
         if match:
             if parser.debug:
-                parser.dprint("++ Match '{}' at {} => '{}'"
+                parser.dprint("   ++ Match '{}' at {} => '{}'"
                     .format(self.to_match, c_pos,
                             parser.context(len(self.to_match))))
             parser.position += len(self.to_match)
@@ -730,7 +731,7 @@ class StrMatch(Match):
             return Terminal(self, c_pos, self.to_match, suppress=suppress)
         else:
             if parser.debug:
-                parser.dprint("-- No match '{}' at {} => '{}'"
+                parser.dprint("   -- No match '{}' at {} => '{}'"
                     .format(self.to_match, c_pos,
                             parser.context(len(self.to_match))))
             parser._nm_raise(self, c_pos, parser)

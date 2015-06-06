@@ -39,7 +39,7 @@ Features
 * `Extensive error reporting <http://arpeggio.readthedocs.org/en/stable/#handling-syntax-errors-in-the-input>`_
 * `Good support for debugging <http://arpeggio.readthedocs.org/en/stable/#grammar-debugging>`_
 * `Good test coverage <https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit>`_
-* `Sphinx documentation <http://arpeggio.readthedocs.org/en/stable/>`_
+* `Sphinx documentation <http://arpeggio.readthedocs.org/en/latest/>`_
 
 Installation
 ------------

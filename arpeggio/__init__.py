@@ -481,30 +481,30 @@ class OneOrMore(Repetition):
         # Set parser for optional mode
         oldin_optional = parser.in_optional
 
-        while True:
-            try:
-                c_pos = parser.position
-                result = self.nodes[0].parse(parser)
-                if not result:
+        try:
+            while True:
+                try:
+                    c_pos = parser.position
+                    result = self.nodes[0].parse(parser)
+                    if not result:
+                        break
+                    results.append(result)
+                    first = False
+                    parser.in_optional = True
+                except NoMatch:
+                    parser.position = c_pos  # Backtracking
+
+                    if first:
+                        raise
+
                     break
-                results.append(result)
-                first = False
-                parser.in_optional = True
-            except NoMatch:
-                parser.position = c_pos  # Backtracking
+        finally:
+            if self.eolterm:
+                # Restore previous eolterm
+                parser.eolterm = old_eolterm
 
-                if first:
-                    raise
-
-                break
-
-            finally:
-                if self.eolterm:
-                    # Restore previous eolterm
-                    parser.eolterm = old_eolterm
-
-                # Restore in_optional state
-                parser.in_optional = oldin_optional
+            # Restore in_optional state
+            parser.in_optional = oldin_optional
 
         return results
 

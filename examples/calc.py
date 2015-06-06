@@ -106,6 +106,9 @@ def main(debug=False):
 
     result = visit_parse_tree(parse_tree, CalcVisitor(debug=debug))
 
+    # Check that result is valid
+    assert (result - -7.51194444444) < 0.0001
+
     # visit_parse_tree will start semantic analysis.
     # In this case semantic analysis will evaluate expression and
     # returned value will be evaluated result of the input_expr expression.

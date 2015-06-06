@@ -1355,7 +1355,7 @@ class Parser(DebugPrinter):
             if self.debug:
                 self.dprint("Processing %s = '%s'  type:%s len:%d" %
                             (node.name, text(node), type(node).__name__,
-                             len(node) if isinstance(node, list) else ""))
+                             len(node) if isinstance(node, list) else 0))
                 for i, a in enumerate(children):
                     self.dprint("  %d:%s type:%s" %
                                 (i+1, text(a), type(a).__name__))
@@ -1391,7 +1391,7 @@ class Parser(DebugPrinter):
                 if retval is None:
                     self.dprint("  Suppressed.")
                 else:
-                    self.dprint("  Resolved to = %s  type:" %
+                    self.dprint("  Resolved to = %s  type:%s" %
                                 (text(retval), type(retval).__name__))
             return retval
 

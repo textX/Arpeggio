@@ -37,7 +37,7 @@ Features
 * `Parse tree navigation <http://arpeggio.readthedocs.org/en/stable/#non-terminal-nodes>`_
 * `Visitors for semantic analysis <http://arpeggio.readthedocs.org/en/stable/#semantic-analysis-visitors>`_
 * `Extensive error reporting <http://arpeggio.readthedocs.org/en/stable/#handling-syntax-errors-in-the-input>`_
-* `Good support for debugging <http://arpeggio.readthedocs.org/en/stable/#grammar-debugging>`_
+* `Good support for debugging and visualization <http://arpeggio.readthedocs.org/en/stable/#grammar-debugging>`_
 * `Good test coverage <https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit>`_
 * `Sphinx documentation <http://arpeggio.readthedocs.org/en/latest/>`_
 

@@ -24,7 +24,7 @@ Features
 --------
 
 * Using `PEG <http://en.wikipedia.org/wiki/Parsing_expression_grammar>`_
-  - unambiguous grammars.
+  and packrat parsing - unambiguous grammars, unlimited lookahead, linear time.
 * Works as grammar interpreter - no code is generated.
 * Multiple syntaxes for grammar definition (`Python <http://arpeggio.readthedocs.org/en/stable/#grammars-written-in-python>`_,
   `peg <http://arpeggio.readthedocs.org/en/stable/#grammars-written-in-peg-notations>`_, cleanpeg, make your

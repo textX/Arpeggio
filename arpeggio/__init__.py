@@ -373,9 +373,11 @@ class OrderedChoice(Sequence):
         c_pos = parser.position
         for e in self.nodes:
             try:
-                result = [e.parse(parser)]
-                match = True
-                break
+                result = e.parse(parser)
+                if result is not None:
+                    match = True
+                    result = [result]
+                    break
             except NoMatch as m:
                 parser.position = c_pos  # Backtracking
                 self._nm_change_rule(m, parser)

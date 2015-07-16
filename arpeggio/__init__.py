@@ -637,7 +637,7 @@ class Match(ParsingExpression):
 
     def parse(self, parser):
         if parser.debug:
-            parser.dprint(">> Match rule {}{} at position {} => {}"
+            parser.dprint("?? Try match rule {}{} at position {} => {}"
                 .format(self.name,
                         " in {}".format(parser.in_rule) if parser.in_rule
                             else "",
@@ -720,7 +720,7 @@ class StrMatch(Match):
             match = input_frag == self.to_match
         if match:
             if parser.debug:
-                parser.dprint("   ++ Match '{}' at {} => '{}'"
+                parser.dprint("++ Match '{}' at {} => '{}'"
                     .format(self.to_match, c_pos,
                             parser.context(len(self.to_match))))
             parser.position += len(self.to_match)
@@ -731,7 +731,7 @@ class StrMatch(Match):
             return Terminal(self, c_pos, self.to_match, suppress=suppress)
         else:
             if parser.debug:
-                parser.dprint("   -- No match '{}' at {} => '{}'"
+                parser.dprint("-- No match '{}' at {} => '{}'"
                     .format(self.to_match, c_pos,
                             parser.context(len(self.to_match))))
             parser._nm_raise(self, c_pos, parser)

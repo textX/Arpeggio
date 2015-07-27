@@ -359,7 +359,8 @@ class Sequence(ParsingExpression):
             if self.skipws is not None:
                 parser.skipws = old_skipws
 
-        return results
+        if results:
+            return results
 
 
 class OrderedChoice(Sequence):
@@ -445,10 +446,15 @@ class ZeroOrMore(Repetition):
         oldin_optional = parser.in_optional
         parser.in_optional = True
 
+        counter = 0
         while True:
             try:
+                counter += 1
                 c_pos = parser.position
                 result = self.nodes[0].parse(parser)
+                if counter > 10000:
+                    print("Overflow!!!:", result)
+                    print(type(self.nodes[0]))
                 if not result:
                     break
                 results.append(result)

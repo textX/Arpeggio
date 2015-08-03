@@ -624,24 +624,25 @@ class Match(ParsingExpression):
 
         # Skip whitespaces and parse comments if we are not
         # in the lexical rule
-        if not parser.in_lex_rule:
-            parser._skip_ws()
-            if parser.comments_model and not parser.in_parse_comment:
-                parser.in_parse_comment = True
-                try:
-                    while True:
-                        parser.comments.append(
-                            parser.comments_model.parse(parser))
-                        parser._skip_ws()
-                except NoMatch:
-                    # NoMatch in comment matching is perfectly
-                    # legal and no action should be taken.
-                    pass
+        try:
+            if not parser.in_lex_rule:
+                parser._skip_ws()
+                if parser.comments_model and not parser.in_parse_comment:
+                    parser.in_parse_comment = True
+                    try:
+                        while True:
+                            parser.comments.append(
+                                parser.comments_model.parse(parser))
+                            parser._skip_ws()
+                    except NoMatch:
+                        # NoMatch in comment matching is perfectly
+                        # legal and no action should be taken.
+                        pass
 
-                finally:
-                    parser.in_parse_comment = False
-
-        parser.in_parse_intro = False
+                    finally:
+                        parser.in_parse_comment = False
+        finally:
+            parser.in_parse_intro = False
 
     def parse(self, parser):
         if parser.debug:

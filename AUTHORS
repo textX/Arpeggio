@@ -8,4 +8,5 @@ Contributors
 
  Daniel Fath (Ygg01@github) - Travis CI integration
  yashpal bhardwaj (codeyash@github) - bug reports, doc contribution, improvement ideas
+ Santi Villalba (sdvillal@github) - fix for arpeggio recovery after giving non-string input.
 

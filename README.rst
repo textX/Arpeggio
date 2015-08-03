@@ -144,6 +144,17 @@ And here is an image rendered for parse tree for the above parsed calc expressio
 .. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/calc_parse_tree.dot.png
 
 
+Open-source projects using Arpeggio
+-----------------------------------
+
+- `textX`_ - Meta-language for building Domain-Specific Languages in Python
+- `whatami`_ - Unobtrusive object self-identification for Python (`parsers`_ module)
+
+.. _textX: https://github.com/igordejanovic/textX
+.. _whatami: https://github.com/sdvillal/whatami
+.. _parsers: https://github.com/sdvillal/whatami/blob/master/whatami/parsers.py
+
+
 Learn more
 ----------
 

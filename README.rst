@@ -147,7 +147,8 @@ And here is an image rendered for parse tree for the above parsed calc expressio
 Open-source projects using Arpeggio
 -----------------------------------
 
-- `textX`_ - Meta-language for building Domain-Specific Languages in Python
+- `textX`_ - Meta-language for building Domain-Specific Languages in Python (and
+  all projects using textX)
 - `whatami`_ - Unobtrusive object self-identification for Python (`parsers`_ module)
 
 .. _textX: https://github.com/igordejanovic/textX

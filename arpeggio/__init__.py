@@ -219,12 +219,15 @@ class ParsingExpression(object):
     def parse(self, parser):
 
         if parser.debug:
+            name = self.name
+            if name.startswith('__asgn'):
+                name = "{}[{}]".format(self.name, self._attr_name)
             parser.dprint(">> Entering rule {}{} at position {} => {}"
-                .format(self.name,
-                        " in {}".format(parser.in_rule) if parser.in_rule
-                            else "",
-                        parser.position,
-                        parser.context()), 1)
+                          .format(name,
+                                  " in {}".format(parser.in_rule)
+                                  if parser.in_rule else "",
+                                  parser.position,
+                                  parser.context()), 1)
 
         # Current position could change in recursive calls
         # so save it.

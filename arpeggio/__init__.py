@@ -933,7 +933,7 @@ class NonTerminal(ParseTreeNode, list):
         return self.name
 
     def __str__(self):
-        return " | ".join([str(x) for x in self])
+        return " | ".join([text(x) for x in self])
 
     def __unicode__(self):
         return self.__str__()

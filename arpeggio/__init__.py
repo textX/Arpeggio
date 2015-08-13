@@ -446,10 +446,8 @@ class ZeroOrMore(Repetition):
         oldin_optional = parser.in_optional
         parser.in_optional = True
 
-        counter = 0
         while True:
             try:
-                counter += 1
                 c_pos = parser.position
                 result = self.nodes[0].parse(parser)
                 if not result:

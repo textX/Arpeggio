@@ -452,9 +452,6 @@ class ZeroOrMore(Repetition):
                 counter += 1
                 c_pos = parser.position
                 result = self.nodes[0].parse(parser)
-                if counter > 10000:
-                    print("Overflow!!!:", result)
-                    print(type(self.nodes[0]))
                 if not result:
                     break
                 results.append(result)

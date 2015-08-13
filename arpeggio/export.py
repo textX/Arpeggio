@@ -7,6 +7,7 @@
 # License: MIT License
 #######################################################################
 
+from __future__ import unicode_literals
 import io
 from arpeggio import Terminal
 
@@ -34,13 +35,15 @@ class Exporter(object):
         """
         self._outf = io.StringIO()
         self._export(obj)
-        return self._outf.getvalue()
+        content = self._outf.getvalue()
+        self._outf.close()
+        return content
 
     def exportFile(self, obj, file_name):
         """
         Export of obj to a file.
         """
-        self._outf = open(file_name, "w")
+        self._outf = io.open(file_name, "w", encoding="utf-8")
         self._export(obj)
         self._outf.close()
 

@@ -78,7 +78,7 @@ class PEGVisitor(PTNodeVisitor):
 
             def resolve_rule_by_name(rule_name):
                     if self.debug:
-                        print("Resolving crossref {}".format(rule_name))
+                        self.dprint("Resolving crossref {}".format(rule_name))
                     resolved_rule = get_rule_by_name(rule_name)
                     while type(resolved_rule) is CrossRef:
                         target_rule = resolved_rule.target_rule_name
@@ -90,9 +90,9 @@ class PEGVisitor(PTNodeVisitor):
                         resolved_rule.rule_name = rule_name
                         self.peg_rules[rule_name] = resolved_rule
                         if self.debug:
-                            print("Resolving: cloned to {} = > {}"
-                                  .format(resolved_rule.rule_name,
-                                          resolved_rule.name))
+                            self.dprint("Resolving: cloned to {} = > {}"
+                                        .format(resolved_rule.rule_name,
+                                                resolved_rule.name))
                     return resolved_rule
 
             if isinstance(node, CrossRef):

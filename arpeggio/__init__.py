@@ -138,7 +138,7 @@ class DebugPrinter(object):
         if ident_change < 0:
             self.current_ident += ident_change
 
-        print("%s%s" % ("   " * self.current_ident, message))
+        print(("%s%s" % ("   " * self.current_ident, message)).encode('utf-8'))
 
         if ident_change > 0:
             self.current_ident += ident_change

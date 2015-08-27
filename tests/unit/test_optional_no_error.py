@@ -14,6 +14,7 @@ from arpeggio import ZeroOrMore, Optional, ParserPython, NoMatch
 
 def test_optional_no_error():
     """
+    Test that optional match failure does not show up in the NoMatch errors.
     """
     def grammar():  return Optional('a'), 'b'
 

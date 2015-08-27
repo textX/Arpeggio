@@ -1,6 +1,16 @@
 Changelog for Arpeggio
 ======================
 
+* 2015-08-27 Release 1.1
+  - Reworking NoMatch exception handling code.
+  - Some optimization tweaks. Removed unnecessary exception handling.
+  - Improved debug printings.
+  - Fix in ordered choice with optional matches (issue #20)
+  - Fixing parser invalid state after handling non-string inputs
+    (thanks Santi Villalba - sdvillal@github)
+  - Some fixes in conversion to utf-8 encoding.
+  - Various improvements and additions to the tests.
+
 * 2015-04-14 Release 1.0
   - Functionally identical to v0.10. It is just the time to go
     production-stable ;)

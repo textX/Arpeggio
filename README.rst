@@ -4,7 +4,7 @@
 Arpeggio - PEG parser
 =====================
 
-|build-status| |docs|
+|pypi-badge| |build-status| |docs|
 
 Arpeggio is a PEG grammar interpreter implemented as a recursive descent
 parser with memoization (aka Packrat parser).
@@ -203,6 +203,10 @@ Why is it called arpeggio?
 In music, arpeggio is playing the chord notes one by one in sequence. I came up with the name by thinking that parsing is very similar to arpeggios in music. You take tokens one by one from an input and make sense out of it – make a chord!
 
 Well, if you don't buy this maybe it is time to tell you the truth. I searched the dictionary for the words that contain PEG acronym and the word arpeggio was at the top of the list ;)
+
+.. |pypi-badge| image:: https://img.shields.io/pypi/v/Arpeggio.svg
+   :target: https://pypi.python.org/pypi/Arpeggio
+   :alt: PyPI Version
 
 
 .. |build-status| image:: https://readthedocs.org/projects/arpeggio/badge/?version=latest

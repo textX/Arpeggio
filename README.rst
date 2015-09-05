@@ -4,7 +4,7 @@
 Arpeggio - PEG parser
 =====================
 
-|pypi-badge| |build-status| |docs|
+|pypi-badge| |license| |build-status| |docs|
 
 Arpeggio is a PEG grammar interpreter implemented as a recursive descent
 parser with memoization (aka Packrat parser).
@@ -208,6 +208,7 @@ Well, if you don't buy this maybe it is time to tell you the truth. I searched t
    :target: https://pypi.python.org/pypi/Arpeggio
    :alt: PyPI Version
 
+.. |license| image:: https://img.shields.io/pypi/l/Arpeggio.svg
 
 .. |build-status| image:: https://readthedocs.org/projects/arpeggio/badge/?version=latest
    :target: https://readthedocs.org/projects/arpeggio/?badge=latest

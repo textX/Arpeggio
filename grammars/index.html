@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="Igor Dejanović">
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+
+	<title>Grammars - Arpeggio</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="..">Arpeggio</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../getting_started/">Getting started</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Grammars</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../parse_trees/">Parse tree</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../handling_errors/">Handling errors</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../debugging/">Debugging</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../configuration/">Parser configuration</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../semantics/">Semantic analysis</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../tutorials/calc/">Calc</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../tutorials/csv/">CSV</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../about/discuss/">Discuss</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../about/contributing/">Contributing</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../about/license/">License</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                </ul>
+            
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                    <li >
+                        <a rel="next" href="../getting_started/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../parse_trees/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/igordejanovic/Arpeggio">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#grammars">Grammars</a></li>
+        
+            <li><a href="#grammars-written-in-python">Grammars written in Python</a></li>
+        
+            <li><a href="#grammars-written-in-peg-notations">Grammars written in PEG notations</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="grammars">Grammars</h1>
+<p>Arpeggio is based on <a href="https://en.wikipedia.org/wiki/Parsing_expression_grammar">PEG grammars</a>.
+PEG is a type of formal grammar that is given as a set of rules for recognizing
+strings of the language.  In a way it is similar to context-free grammars with a
+very important distinction that PEG are always unambiguous. This is achieved by
+making choice operator ordered. In PEGs a first choice from left to right that
+matches will be used.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>More information on PEGs can be found on <a href="http://bford.info/packrat/">this page</a>.</p>
+</div>
+<p>PEG grammar is a set of PEG rules. PEG rules consists of parsing expressions and
+can reference (call) each other.</p>
+<p>Example grammar in PEG notation:</p>
+<pre><code>first = 'foo' second+ EOF
+second = 'bar' / 'baz'
+</code></pre>
+<p>In this example <code>first</code> is the root rule. This rule will match a literal
+string <code>foo</code> followed by one or more <code>second</code> rule (this is a rule
+reference) followed by end of input (<code>EOF</code>).  <code>second</code> rule is ordered
+choice and will match either <code>bar</code> or <code>baz</code> in that order.</p>
+<p>During parsing each successfully matched rule will create a parse tree node.  At
+the end of parsing a complete <a href="../parse_trees/">parse tree</a> of the input will be
+returned.  .</p>
+<p>In Arpeggio each PEG rule consists of atomic parsing expression which can be:</p>
+<ul>
+<li>
+<p><strong>terminal match rules</strong> - create a <a href="../parse_trees/#terminal-nodes">Terminal nodes</a>:</p>
+<ul>
+<li><strong>String match</strong> - a simple string that is matched literally from the input
+  string.</li>
+<li><strong>RegEx match</strong> - regular expression match (based on python <code>re</code> module).</li>
+</ul>
+</li>
+<li>
+<p><strong>non-terminal match rules</strong> - create a <a href="../parse_trees/#non-terminal-nodes">Non-terminal nodes</a>:</p>
+<ul>
+<li><strong>Sequence</strong> - succeeds if all parsing expressions matches at current
+  location in the defined order.  Matched input is consumed.</li>
+<li><strong>Ordered choice</strong> - succeeds if any of the given expressions matches at the
+  current location. The match is tried in the order defined. Matched input is
+  consumed.</li>
+<li><strong>Zero or more</strong> - given expression is matched until match is successful.
+  Always succeeds. Matched input is consumed.</li>
+<li><strong>One or more</strong> - given expressions is matched until match is successful.
+  Succeeds if at least one match is done. Matched input is consumed.</li>
+<li><strong>Optional</strong> - matches given expression but will not fail if match can't be
+  done. Matched input is consumed.</li>
+<li><strong>And predicate</strong> - succeeds if given expression matches at current location
+  but does not consume any input.</li>
+<li><strong>Not predicate</strong> - succeeds if given expression <strong>does not</strong> matches at
+  current location but does not consume any input.</li>
+</ul>
+</li>
+</ul>
+<p>PEG grammars in Arpeggio may be written twofold:</p>
+<ul>
+<li>Using Python statements and expressions.</li>
+<li>Using textual PEG syntax (currently there are two variants, see below).</li>
+</ul>
+<h2 id="grammars-written-in-python">Grammars written in Python</h2>
+<p>Canonical form of grammar specification uses Python statements and expressions.</p>
+<p>Here is an example of arpeggio grammar for simple calculator:</p>
+<pre><code>def number():     return _(r'\d*\.\d*|\d+')
+def factor():     return Optional(["+","-"]), [number,
+                          ("(", expression, ")")]
+def term():       return factor, ZeroOrMore(["*","/"], factor)
+def expression(): return term, ZeroOrMore(["+", "-"], term)
+def calc():       return OneOrMore(expression), EOF
+</code></pre>
+<p>Each rule is given in the form of Python function. Python function returns data
+structure that maps to PEG expressions.</p>
+<ul>
+<li><strong>Sequence</strong> is represented as Python tuple.</li>
+<li><strong>Ordered choice</strong> is represented as Python list where each element is one
+  alternative.</li>
+<li><strong>One or more</strong> is represented as an instance of <code>OneOrMore</code> class.
+  The parameters are treated as a containing sequence.</li>
+<li><strong>Zero or more</strong> is represented as an instance of <code>ZeroOrMore</code> class.
+  The parameters are treated as a containing sequence.</li>
+<li><strong>Optional</strong> is represented as an instance of <code>Optional</code> class.</li>
+<li><strong>And predicate</strong> is represented as an instance of <code>And</code> class.</li>
+<li><strong>Not predicate</strong> is represented as an instance of <code>Not</code> class.</li>
+<li><strong>Literal string match</strong> is represented as string or regular expression given
+  as an instance of <code>RegExMatch</code> class.</li>
+<li><strong>End of string/file</strong> is recognized by the <code>EOF</code> special rule.</li>
+</ul>
+<p>For example, the <code>calc</code> language consists of one or more <code>expression</code> and
+end of file.</p>
+<p><code>factor</code> rule consists of optional <code>+</code> or <code>-</code> char matched in that order
+(they are given in Python list thus ordered choice) followed by the ordered
+choice of <code>number</code> rule and a sequence of <code>expression</code> rule in brackets.
+This rule will match an optional sign (<code>+</code> or <code>-</code> tried in that order) after
+which follows a <code>number</code> or an <code>expression</code> in brackets (tried in that
+order).</p>
+<p>From this description Arpeggio builds <strong>the parser model</strong>. Parser model is a
+graph of parser expressions (see <a href="../debugging/#grammar-visualization">Grammar
+visualization</a>).  Each node of the graph is
+an instance of some of the classes described above which inherits
+<code>ParserExpression</code>.</p>
+<p>Parser model construction is done during parser instantiation.  For example, to
+instantiate <code>calc</code> parser you do the following:</p>
+<pre><code class="python">parser = ParserPython(calc)
+</code></pre>
+
+<p>Where <code>calc</code> is the function defining the root rule of your grammar. There is no
+code generation. Parser works as an interpreter for your grammar. The grammar is
+used to configure Arpeggio parser to recognize your language (in this case the
+<code>calc</code> language). In other words, Arpeggio interprets the parser model (your
+grammar).</p>
+<p>After parser construction your can call <code>parser.parse</code> to parse your input
+text.</p>
+<pre><code class="python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
+parse_tree = parser.parse(input_expr)
+</code></pre>
+
+<p>Arpeggio will start from the root node and traverse <em>the parser model graph</em>
+consuming all matched input.  When all root node branches are traversed the
+parsing is done and <em>the parse tree</em> is returned.</p>
+<p>You can navigate and analyze parse tree or transform it using visitor pattern to
+some more usable form (see <a href="../semantics/#visitors">Semantic analysis - Visitors</a>)</p>
+<h2 id="grammars-written-in-peg-notations">Grammars written in PEG notations</h2>
+<p>Grammars can also be specified using PEG notation. There are actually two of
+them at the moment and both notations are implemented using canonical Python
+based grammars (see modules
+<a href="https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py">arpeggio.peg</a>
+and
+<a href="https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/cleanpeg.py">arpeggio.cleanpeg</a>).</p>
+<p>There are no significant differences between those two syntax. The first one use
+more traditional approach using <code>&lt;-</code> for rule assignment, <code>//</code> for line comments
+and <code>;</code> for the rule terminator.  The second syntax (from <code>arpeggio.cleanpeg</code>)
+uses <code>=</code> for assignment, does not use rule terminator and use <code>#</code> for line
+comments. Which one you choose is totally up to you. If your don't like any of
+these syntaxes you can make your own (look at <code>arpeggio.peg</code> and
+<code>arpeggio.cleanpeg</code> modules as an examples).</p>
+<p>An example of the <code>calc</code> grammar given in PEG syntax (<code>arpeggio.cleanpeg</code>):</p>
+<pre><code class="python">number = r'\d*\.\d*|\d+'
+factor = (&quot;+&quot; / &quot;-&quot;)? (number / &quot;(&quot; expression &quot;)&quot;)
+term = factor (( &quot;*&quot; / &quot;/&quot;) factor)*
+expression = term ((&quot;+&quot; / &quot;-&quot;) term)*
+calc = expression+ EOF
+</code></pre>
+
+<p>Each grammar rule is given as an assignment where the lhs is the rule name (e.g.
+<code>number</code>) and the rhs is a PEG expression.</p>
+<ul>
+<li><strong>Literal string matches</strong> are given as strings (e.g. <code>"+"</code>).</li>
+<li><strong>Regex matches</strong> are given as strings with prefix <code>r</code> (e.g.
+  <code>r'\d*\.\d*|\d+'</code>).</li>
+<li><strong>Sequence</strong> is a space separated list of expressions (e.g. <code>expression+
+  EOF</code> is a sequence of two expressions).</li>
+<li><strong>Ordered choice</strong> is a list of expression separated with <code>/</code> (e.g. <code>"+" /
+  "-"</code>).</li>
+<li><strong>Zero or more</strong> expression is specified by <code>*</code> operator (e.g. <code>(( "*" /
+  "/" ) factor)*</code>).</li>
+<li><strong>One of more</strong> is specified by <code>+</code> operator (e.g. <code>expression+</code>).</li>
+</ul>
+<p><code>And</code> and <code>Not</code> predicates are also supported.</p>
+<ul>
+<li><strong>And predicate</strong> is specified by <code>&amp;</code> operator (e.g. <code>&amp;expression</code> - not
+  used in the grammar above).</li>
+<li><strong>Not predicate</strong> is specified by <code>!</code> operator (e.g. <code>!expression</code> - not
+  used in the grammar above).</li>
+</ul>
+<p>In the rhs a rule reference is a name of another rule. Parser will try to match
+another rule at that location.</p>
+<p>Special rule <code>EOF</code> will match end of input string.</p>
+<p>Creating a parser using PEG syntax is done by the class <code>ParserPEG</code> from the
+<code>arpeggio.peg</code> or <code>arpeggio.cleanpeg</code> modules.</p>
+<pre><code class="python">from arpeggio.cleanpeg import ParserPEG
+parser = ParserPEG(calc_grammar, &quot;calc&quot;)
+</code></pre>
+
+<p>Where <code>calc_grammar</code> is a string with the grammar given above and the
+<code>"calc"</code> is the name of the root rule of the grammar.</p>
+<p>After this you get the same parser as with the <code>ParserPython</code>. There is no
+difference at all so you can parse the same language.</p>
+<pre><code class="python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
+parse_tree = parser.parse(input_expr)
+</code></pre>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Just remember that using textual PEG syntax imposes a slight overhead since
+the grammar must be parsed and the parser for your language must be built by
+semantic analysis of grammar parse tree.  If you plan to instantiate your
+parser once and than use it many times this shall not have that much of
+performance hit but if your workflow introduce instantiating parser each time
+your parse some input than consider defining your grammar using Python as it
+will start faster.  Nevertheless, the parsing performance will be the same in
+both approach since the same code for parsing is used.</p>
+</div></div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="Igor Dejanović">
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+
+	<title>Parse tree - Arpeggio</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="..">Arpeggio</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../getting_started/">Getting started</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../grammars/">Grammars</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Parse tree</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../handling_errors/">Handling errors</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../debugging/">Debugging</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../configuration/">Parser configuration</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../semantics/">Semantic analysis</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../tutorials/calc/">Calc</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../tutorials/csv/">CSV</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../about/discuss/">Discuss</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../about/contributing/">Contributing</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../about/license/">License</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                </ul>
+            
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                    <li >
+                        <a rel="next" href="../grammars/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../handling_errors/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/igordejanovic/Arpeggio">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#parse-trees">Parse trees</a></li>
+        
+            <li><a href="#terminal-nodes">Terminal nodes</a></li>
+        
+            <li><a href="#non-terminal-nodes">Non-terminal nodes</a></li>
+        
+            <li><a href="#parse-tree-reduction">Parse tree reduction</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="parse-trees">Parse trees</h1>
+<p>Parse tree or concrete syntax tree is a tree structure built from the input
+string during parsing.  It represent the structure of the input string. Each
+node in the parse tree is either a <a href="#terminal-nodes">terminal</a> or
+<a href="#non-terminal-nodes">non-terminal</a>. Terminals are the leafs of the tree while
+the inner nodes are non-terminals.</p>
+<p>Here is an example parse tree for the <code>calc</code> grammar and the expression
+<code>-(4-1)*5+(2+4.67)+5.89/(.2+7)</code>:</p>
+<p><img alt="Calc parse tree" src="../images/calc_parse_tree.dot.png" /></p>
+<p>Each non-leaf node is non-terminal. The name in this nodes are the names of the
+grammar PEG rules that created them.</p>
+<p>The leaf nodes are terminals and they are matched by the <em>string match</em> or <em>regex
+match</em> rules.</p>
+<p>In the square brackets is the location in the input stream where the
+terminal/non-terminal is recognized.</p>
+<p>Each parse tree node has the following attributes:</p>
+<ul>
+<li><strong>rule</strong> - the parsing expression that created this node.</li>
+<li><strong>rule_name</strong> - the name of the rule if it was the root rule or empty string
+  otherwise.</li>
+<li><strong>position</strong> - the position in the input stream where this node was
+  recognized.</li>
+</ul>
+<h2 id="terminal-nodes">Terminal nodes</h2>
+<p>Terminals in Arpeggio are created by the specializations of the parsing
+expression <code>Match</code> class.  There are two specialization of <code>Match</code> class:</p>
+<ul>
+<li><code>StrMatch</code> if the literal string is matched from the input or</li>
+<li><code>RegExMatch</code> if a regular expression is used to match input.</li>
+</ul>
+<p>To get the matched string from the terminal object just convert it to string
+(e.g. <code>str(t)</code> where <code>t</code> is of <code>Terminal</code> type).</p>
+<h2 id="non-terminal-nodes">Non-terminal nodes</h2>
+<p>Non-terminal nodes are non-leaf nodes of the parse tree. They are created by PEG
+grammar rules.  Children of non-terminals can be other non-terminals or
+terminals.</p>
+<p>For example, nodes with the labels <code>expression</code>, <code>factor</code> and <code>term</code> from
+the above parse tree are non-terminal nodes created by the rules with the same
+names.</p>
+<p><code>NonTerminal</code> inherits from <code>list</code>. The elements of <code>NonTerminal</code> are its
+children nodes.  So, you can use index access:</p>
+<pre><code class="python">child = pt_node[2]
+</code></pre>
+
+<p>Or iteration:</p>
+<pre><code class="python">for child in pt_node:
+  ...
+</code></pre>
+
+<p>Additionally, you can access children by the child rule name:</p>
+<p>For example:</p>
+<pre><code class="python"># Grammar
+def foo(): return &quot;a&quot;, bar, &quot;b&quot;, baz, &quot;c&quot;, ZeroOrMore(bar)
+def bar(): return &quot;bar&quot;
+def baz(): return &quot;baz&quot;
+
+# Parsing
+parser = ParserPython(foo)
+result = parser.parse(&quot;a bar b baz c bar bar bar&quot;)
+
+# Accessing parse tree nodes. All asserts will pass.
+# Index access
+assert result[1].rule_name  == 'bar'
+# Access by rule name
+assert result.bar.rule_name == 'bar'
+
+# There are 8 children nodes of the root 'result' node.
+# Each child is a terminal in this case.
+assert len(result) == 8
+
+# There is 4 bar matched from result (at the beginning and from ZeroOrMore)
+# Dot access collect all NTs from the given path
+assert len(result.bar) == 4
+# You could call dot access recursively, e.g. result.bar.baz if the
+# rule bar called baz. In that case all bars would be collected from
+# the root and for each bar all baz will be collected.
+
+# Verify position
+# First 'bar' is at position 2 and second is at position 14
+assert result.bar[0].position == 2
+assert result.bar[1].position == 14
+
+</code></pre>
+
+<h2 id="parse-tree-reduction">Parse tree reduction</h2>
+<p>Non-terminals are by default created for each rule. Sometimes it can result in
+trees of great depth.  You can alter this behaviour setting <code>reduce_tree</code>
+parameter to <code>True</code>.</p>
+<pre><code class="python">parser = ParserPython(calc, reduce_tree=True)
+</code></pre>
+
+<p>In this configuration non-terminals with single child will be removed from the
+parse tree.</p>
+<p>For example, <code>calc</code> parse tree above will look like this:</p>
+<p><img alt="Calc parse tree reduced" src="../images/calc_parse_tree_reduced.dot.png" /></p>
+<p>Notice the removal of each non-terminal with single child.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Be aware that <a href="../semantics/">semantic analysis</a> operates on nodes of
+finished parse tree and therefore on reduced tree some <code>visit_&lt;rule_name&gt;</code>
+actions will not get called.</p>
+</div></div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

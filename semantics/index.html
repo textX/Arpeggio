@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="Igor Dejanović">
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+
+	<title>Semantic analysis - Arpeggio</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="..">Arpeggio</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../getting_started/">Getting started</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../grammars/">Grammars</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../parse_trees/">Parse tree</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../handling_errors/">Handling errors</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../debugging/">Debugging</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../configuration/">Parser configuration</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Semantic analysis</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorials <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../tutorials/calc/">Calc</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../tutorials/csv/">CSV</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../about/discuss/">Discuss</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../about/contributing/">Contributing</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../about/license/">License</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                </ul>
+            
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                    <li >
+                        <a rel="next" href="../configuration/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../tutorials/calc/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/igordejanovic/Arpeggio">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#semantic-analysis-visitors">Semantic analysis - Visitors</a></li>
+        
+            <li><a href="#semanticactionresults">SemanticActionResults</a></li>
+        
+            <li><a href="#post-processing-in-second-calls">Post-processing in second calls</a></li>
+        
+            <li><a href="#default-actions">Default actions</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="semantic-analysis-visitors">Semantic analysis - Visitors</h1>
+<p>You will surely always want to extract some information from the parse tree or
+to transform it in some more usable form.  The process of parse tree
+transformation to other forms is referred to as <em>semantic analysis</em>.  You could
+do that using parse tree navigation etc. but it is better to use some standard
+mechanism.</p>
+<p>In Arpeggio a visitor pattern is used for semantic analysis. You write a python
+class that inherits <code>PTNodeVisitor</code> and has a methods of the form
+<code>visit_&lt;rule name&gt;(self, node, children)</code> where rule name is a rule name from
+the grammar.</p>
+<pre><code>class CalcVisitor(PTNodeVisitor):
+
+    def visit_number(self, node, children):
+        return float(node.value)
+
+    def visit_factor(self, node, children):
+        if len(children) == 1:
+            return children[0]
+        sign = -1 if children[0] == '-' else 1
+        return sign * children[-1]
+
+    ...
+</code></pre>
+<p>During a semantic analysis a parse tree is walked in the depth-first manner and
+for each node a proper visitor method is called to transform it to some other
+form. The results are than fed to the parent node visitor method.  This is
+repeated until the final, top level parse tree node is processed (its visitor is
+called). The result of the top level node is the final output of the semantic
+analysis.</p>
+<p>To run semantic analysis apply your visitor class to the parse tree using
+<code>visit_parse_tree</code> function.</p>
+<pre><code class="python">result = visit_parse_tree(parse_tree, CalcVisitor(debug=True))
+</code></pre>
+
+<p>The first parameter is a parse tree you get from the <code>parser.parse</code> call while
+the second parameter is an instance of your visitor class. Semantic analysis can
+be run in debug mode if you set <code>debug</code> parameter to <code>True</code> during visitor
+construction. You can use this flag to print your own debug information from
+visitor methods.</p>
+<pre><code>class MyLanguageVisitor(PTNodeVisitor):
+
+  def visit_somerule(self, node, children):
+    if self.debug:
+      print("Visiting some rule!")
+</code></pre>
+<p>During semantic analysis, each <code>visitor_xxx</code> method gets current parse tree node
+as the <code>node</code> parameter and the evaluated children nodes as the <code>children</code>
+parameter.</p>
+<p>For example, if you have <code>expression</code> rule in your grammar than the
+transformation of the non-terminal matched by this rule can be done as:</p>
+<pre><code>def visitor_expression(self, node, children):
+  ... # transform node using 'node' and 'children' parameter
+  return transformed_node
+</code></pre>
+<p><code>node</code> is the current <code>NonTerminal</code> or <code>Terminal</code> from the parse tree
+while the <code>children</code> is instance of <code>SemanticResults</code> class.  This class is
+a list-like structure that holds the results of semantic evaluation from the
+children parse tree nodes (analysis is done bottom-up).</p>
+<p>To suppress node completely return <code>None</code> from visitor method. In this case
+the parent visitor method will not get this node in its <code>children</code> parameter.</p>
+<p>In the <a href="https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc.py">calc.py
+example</a>
+a semantic analysis (<code>CalcVisitor</code> class) will evaluate the result of arithmetic
+expression. The parse tree is thus transformed to a single numeric value that
+represent the result of the expression.</p>
+<p>In the <a href="https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc.py">robot.py
+example</a>
+a semantic analysis (<code>RobotVisitor</code> class) will evaluate robot program
+(transform its parse tree) to the final robot location.</p>
+<p>Semantic analysis can do a complex stuff. For example, see
+<a href="https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg.py">peg_peg.py</a>
+and
+<a href="https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py">PEGVisitor</a>
+class where the PEG parser for the given language is built using semantic
+analysis.</p>
+<h2 id="semanticactionresults">SemanticActionResults</h2>
+<p>Class of object returned from the parse tree nodes evaluation. Used for
+filtering and navigation over evaluation results on children nodes.</p>
+<p>Instance of this class is given as <code>children`` parameter of</code>visitor_xxx<code>methods.  This class inherits</code>list` so index access as well as iteration is
+available.</p>
+<p>Furthermore, child nodes can be filtered by rule name using name lookup.</p>
+<pre><code class="python">def visit_bar(self, node, children):
+  # Index access
+  child = children[2]
+
+  # Iteration
+  for child in children:
+    ...
+
+  # Rule name lookup
+  # Returns a list of all rules created by PEG rule 'baz'
+  baz_created = children['baz']
+</code></pre>
+
+<h2 id="post-processing-in-second-calls">Post-processing in second calls</h2>
+<p>Visitor may define method with the <code>second_&lt;rule_name&gt;</code> name form. If this
+method exists it will be called after all parse tree node are processed and it
+will be given the results of the <code>visitor_&lt;rule_name&gt;</code> call.</p>
+<p>This is usually used when some additional post-processing is needed (e.g.
+reference resolving).</p>
+<h2 id="default-actions">Default actions</h2>
+<p>For each parse tree node that does not have an appropriate <code>visitor_xxx</code>
+method a default action is performed.  If the node is created by a plain string
+match action will return <code>None</code> and thus suppress this node. This is handy
+for all those syntax noise (bracket, braces, keywords etc.).</p>
+<p>For example, if your grammar is:</p>
+<pre><code class="python">number_in_brackets = &quot;(&quot; number &quot;)&quot;
+number = r'\d+'
+</code></pre>
+
+<p>Than the default action for <code>number</code> will return number converted to a string
+and the default action for <code>(</code> and <code>)</code> will return <code>None</code> and thus suppress this
+nodes so the visitor method for <code>number_in_brackets</code> rule will only see one
+child (from the <code>number</code> rule reference).</p>
+<p>If the node is a non-terminal and there is only one child the default action
+will return that child effectively passing it to the parent node visitor.</p>
+<p>Default actions can be disabled by setting parameter <code>defaults</code> to <code>False</code> on
+visitor construction.</p>
+<pre><code class="python">result = visit_parse_tree(parse_tree, CalcVisitor(defaults=False))
+</code></pre>
+
+<p>If you want to call this default behaviour from your visitor method call
+<code>visit__default__(node, children)</code> on superclass (<code>PTNodeVisitor</code>).</p>
+<pre><code class="python">def visitor_myrule(self, node, children):
+  if some_condition:
+    ...
+  else:
+    return super(MyVisitor, self).visit__default__(node, children)
+</code></pre></div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

@@ -19,9 +19,8 @@ Documentation with tutorials is available `here
 
 .. |license| image:: https://img.shields.io/pypi/l/Arpeggio.svg
 
-.. |build-status| image:: https://readthedocs.org/projects/arpeggio/badge/?version=latest
-   :target: https://readthedocs.org/projects/arpeggio/?badge=latest
-   :alt: Documentation Status
+.. |build-status| image:: https://travis-ci.org/igordejanovic/Arpeggio.svg?branch=master
+   :target: https://travis-ci.org/igordejanovic/Arpeggio
 
 .. |docs| image:: https://img.shields.io/badge/docs-latest-green.svg
    :target: http://igordejanovic.net/Arpeggio/

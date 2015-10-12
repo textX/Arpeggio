@@ -51,4 +51,4 @@ nosetests.xml
 *.log
 docs/_build
 *.report
-
+site

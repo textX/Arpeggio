@@ -23,6 +23,6 @@ Documentation with tutorials is available `here
    :target: https://readthedocs.org/projects/arpeggio/?badge=latest
    :alt: Documentation Status
 
-.. |docs| image:: https://travis-ci.org/igordejanovic/Arpeggio.svg
-   :target: https://travis-ci.org/igordejanovic/Arpeggio
-
+.. |docs| image:: https://img.shields.io/badge/docs-latest-green.svg
+   :target: http://igordejanovic.net/Arpeggio/
+   :alt: Documentation Status

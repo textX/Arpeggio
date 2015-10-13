@@ -14,7 +14,7 @@ For a higher level library for building DSLs take a look at
 [textX](https://github.com/igordejanovic/textX). It builds on top of Arpeggio
 and makes language parser implementation a lot easier.
 
-See `Getting started` in the `User Guide` menu to get you going or read some of the
+See [Getting started](getting_started.md) in the `User Guide` menu to get you going or read some of the
 tutorials.
 
 

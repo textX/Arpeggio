@@ -17,12 +17,29 @@ def field_content():            return _(r'([^,\n])+')
 def field_content_quoted():     return _(r'(("")|([^"]))+')
 def csvfile():                  return OneOrMore([record, '\n']), EOF
 
-test_data = '''
-Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
 
-Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343456.45"
-Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
-'''
+class CSVVisitor(PTNodeVisitor):
+    def visit_field(self, node, children):
+        value = children[0]
+        try:
+            return float(value)
+        except:
+            pass
+        try:
+            return int(value)
+        except:
+            return value
+
+    def visit_record(self, node, children):
+        # record is a list of fields. The children nodes are fields so just
+        # transform it to list.
+        return list(children)
+
+    def visit_csvfile(self, node, children):
+        # We are not interested in newlines so we will filter them.
+        return [x for x in children if x!='\n']
+
+
 
 def main(debug=False):
     # First we will make a parser - an instance of the CVS parser model.
@@ -30,10 +47,15 @@ def main(debug=False):
     # are using ParserPython class.
     # Skipping of whitespace will be done only for tabs and spaces. Newlines
     # have semantics in csv files. They are used to separate records.
-    parser = ParserPython(csvfile, ws='\t ', reduce_tree=True, debug=debug)
+    parser = ParserPython(csvfile, ws='\t ', debug=debug)
 
     # Creating parse tree out of textual input
+    test_data = open('test_data.csv', 'r').read()
     parse_tree = parser.parse(test_data)
+
+    # Create list of lists using visitor
+    csv_content = visit_parse_tree(parse_tree, CSVVisitor())
+    print(csv_content)
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

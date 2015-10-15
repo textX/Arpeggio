@@ -1,0 +1,4 @@
+Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
+
+Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "34312.7"
+Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343486.12"

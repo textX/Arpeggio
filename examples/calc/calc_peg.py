@@ -18,18 +18,12 @@ from arpeggio.cleanpeg import ParserPEG
 from arpeggio import visit_parse_tree
 from calc import CalcVisitor
 
-# Grammar is defined using textual specification based on PEG language.
-calc_grammar = """
-        number = r'\d*\.\d*|\d+'
-        factor = ("+" / "-")?
-                  (number / "(" expression ")")
-        term = factor (( "*" / "/") factor)*
-        expression = term (("+" / "-") term)*
-        calc = expression+ EOF
-"""
-
 
 def main(debug=False):
+
+    # Grammar is defined using textual specification based on PEG language.
+    # Load grammar form file.
+    calc_grammar = open('calc.peg', 'r').read()
 
     # First we will make a parser - an instance of the calc parser model.
     # Parser model is given in the form of PEG notation therefore we
@@ -56,5 +50,5 @@ if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
-    main(debug=False)
+    main(debug=True)
 

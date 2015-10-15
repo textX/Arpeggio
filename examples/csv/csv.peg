@@ -1,0 +1,6 @@
+csvfile = (record / r'\n')+ EOF
+record = field ("," field)*
+field = quoted_field / field_content
+field_content = r'([^,\n])+'
+quoted_field = '"' field_content_quoted '"'
+field_content_quoted = r'(("")|([^"]))+'

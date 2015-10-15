@@ -1,5 +1,10 @@
 # Grammars
 
+With grammar you teach Arpeggio how to parse your inputs.
+
+
+---
+
 Arpeggio is based on [PEG grammars](https://en.wikipedia.org/wiki/Parsing_expression_grammar).
 PEG is a type of formal grammar that is given as a set of rules for recognizing
 strings of the language.  In a way it is similar to context-free grammars with a

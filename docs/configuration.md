@@ -1,5 +1,9 @@
 # Parser configuration
 
+This section describes how to alter parser default behaviour.
+
+---
+
 There are some aspect of parsing that can be configured using parser and/or
 `ParsingExpression` parameters.  Arpeggio has some sane default behaviour but
 gives the user possibility to alter it.

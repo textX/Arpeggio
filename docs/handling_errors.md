@@ -1,5 +1,9 @@
 # Handling syntax errors in the input
 
+This section explains how to handle parsing errors.
+
+---
+
 If your grammar is correct but you get input string with syntax error parser
 will raise `NoMatch` exception with the information where in the input stream
 error has occurred and what the parser expect to see at that location.

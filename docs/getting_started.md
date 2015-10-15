@@ -1,5 +1,9 @@
 # Getting started
 
+Installation and your first steps with Arpeggio.
+
+---
+
 ## Installation
 
 Arpeggio is written in Python programming language and distributed with

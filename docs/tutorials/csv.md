@@ -1,5 +1,9 @@
 # Comma-Separated Values (CSV) parser tutorial
 
+A tutorial for building parser for well known CSV format.
+
+---
+
 In this tutorial we will see how to make a parser for a simple data interchange
 format - [CSV]() (Comma-Separated Values).
 CSV is a textual format for tabular data interchange. It is described by

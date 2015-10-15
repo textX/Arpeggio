@@ -1,5 +1,9 @@
 # Contributions
 
+If you want to contribute to the Arpeggio project.
+
+---
+
 Arpeggio is open for contributions. You can contribute code, documentation,
 tests, bug reports.  If you plan to make a contribution it would be great if you
 first announce that on the discussion forum.

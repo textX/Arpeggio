@@ -1,5 +1,9 @@
 # Parse trees
 
+Parse tree is a first structure you get from a successful parse.
+
+---
+
 Parse tree or concrete syntax tree is a tree structure built from the input
 string during parsing.  It represent the structure of the input string. Each
 node in the parse tree is either a [terminal](#terminal-nodes) or

@@ -1,5 +1,12 @@
 # Calculator tutorial
 
+A tutorial for parsing of arithmetic expressions.
+
+---
+
+!!! note "TODO"
+    This tutorial will be based on [Calc example](https://github.com/igordejanovic/Arpeggio/tree/master/examples/calc).
+
 In this tutorial we will make a parser and evaluator for simple arithmetic expression
 (numbers and operations - addition, substraction, multiplication and division).
 The parser will be able to recognize following expressions:

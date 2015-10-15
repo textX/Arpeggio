@@ -1,5 +1,9 @@
 # Discuss, ask questions
 
+If you want to get help or involve in the community.
+
+---
+
 Please use [discussion
 forum](https://groups.google.com/forum/?hl=en#!forum/arpeggio-talk) for general
 discussions, suggestions etc.

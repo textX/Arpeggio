@@ -1,5 +1,9 @@
 # Debugging
 
+When the stuff goes wrong you will want to debug your parser.
+
+---
+
 ## Parser debug mode
 
 During grammar design you can make syntax and semantic errors. Arpeggio will

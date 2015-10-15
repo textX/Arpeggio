@@ -1,5 +1,9 @@
 # Semantic analysis - Visitors
 
+This section explains how to transform parse tree to a more usable structure.
+
+---
+
 You will surely always want to extract some information from the parse tree or
 to transform it in some more usable form.  The process of parse tree
 transformation to other forms is referred to as *semantic analysis*.  You could

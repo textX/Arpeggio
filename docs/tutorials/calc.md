@@ -16,7 +16,7 @@ The parser will be able to recognize following expressions:
     4*12+5-4*(2-8)
     ...
 
-Evaluation will be done using [support for semantic analysis](semantics.md)
+Evaluation will be done using [support for semantic analysis](../semantics.md)
 
 
 Let's start with grammar definition first. Expression parsing has additional

@@ -16,8 +16,9 @@ pages:
     - Parser configuration: configuration.md
     - Semantic analysis: semantics.md
 - Tutorials:
-    - Calc: tutorials/calc.md
     - CSV: tutorials/csv.md
+    - BibTex: tutorials/bibtex.md
+    - Calc: tutorials/calc.md
 - About:
     - Discuss: about/discuss.md
     - Contributing: about/contributing.md

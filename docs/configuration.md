@@ -102,11 +102,11 @@ For example, `calc` parse tree above will look like this:
 
 Notice the removal of each non-terminal with single child.
 
-.. warning::
-
-  Be aware that `semantic analysis <#Semantic analysis - Visitors>`_ operates on
-  nodes of finished parse tree and therefore on reduced tree some
-  ``visit_<rule_name>`` actions will not get called.
+!!! warning
+    Be aware that [semantic analysis](semantics.md) operates on nodes of
+    finished parse tree. Therefore, it you use [tree
+    reduction](configuration.md#parse-tree-reduction) visitor methods will not
+    get called for the removed nodes.
 
 
 ## Newline termination for Repetitions

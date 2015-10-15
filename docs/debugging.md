@@ -78,15 +78,32 @@ Which produces `png` image given bellow.
 
 You can also explicitly render your parser model or parse tree to `dot` file
 even if the parser is not in the debug mode.
-This is achieved with the following Python code:
+
+For parser model this is achieved with the following Python code:
 
 ```python
-TODO
+from arpeggio.export import PMDOTExporter
+PMDOTExporter().exportFile(parser.parser_model,
+                            "my_parser_model.dot")
+```
+
+For parse tree it is achieved with:
+
+```python
+from arpeggio.export import PTDOTExporter
+PTDOTExporter().exportFile(parse_tree,
+                           "my_parse_tree.dot")
+```
+
+To get e.g. `png` images from `dot` files do as usuall:
+
+```bash
+$ dot -Tpng -O *dot
 
 ```
 
 
 !!! note
-    All tree images in this docs are rendered using debug mode and `dot` tool from
-    the [GraphViz](http://graphviz.org/) software.
+    All tree images in this docs are rendered using Arpeggio's visualization and
+    `dot` tool from the [GraphViz](http://graphviz.org/) software.
 

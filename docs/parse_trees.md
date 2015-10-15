@@ -106,25 +106,6 @@ assert result.bar[1].position == 14
 
 ## Parse tree reduction
 
-Non-terminals are by default created for each rule. Sometimes it can result in
-trees of great depth.  You can alter this behaviour setting `reduce_tree`
-parameter to `True`.
+Parser can be configured to create a reduced parse tree. More information can be
+found [here](configuration.md#parse-tree-reduction).
 
-```python
-parser = ParserPython(calc, reduce_tree=True)
-```
-
-In this configuration non-terminals with single child will be removed from the
-parse tree.
-
-For example, `calc` parse tree above will look like this:
-
-![Calc parse tree reduced](images/calc_parse_tree_reduced.dot.png)
-
-
-Notice the removal of each non-terminal with single child.
-
-!!! warning
-    Be aware that [semantic analysis](semantics.md) operates on nodes of
-    finished parse tree and therefore on reduced tree some `visit_<rule_name>`
-    actions will not get called.

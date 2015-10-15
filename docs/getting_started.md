@@ -10,15 +10,24 @@ form [PyPI](https://pypi.python.org/pypi/Arpeggio/) with the following command:
     $ pip install Arpeggio
 ```
 
-You can also install Arpeggio from source. In this case you have two options.
-Either download source distribution, unpack and install:
+You can also install Arpeggio from source. In this case you have two options:
+- download source code and install
+- clone git repository and install
 
-```bash
-$ wget https://github.com/igordejanovic/Arpeggio/archive/v1.1.tar.gz
-$ tar xzf v1.1.tar.gz
-$ cd Arpeggio-1.1
-$ python setup.py install
-```
+To download source distribution do:
+
+- download
+
+        $ wget https://github.com/igordejanovic/Arpeggio/archive/v1.1.tar.gz
+
+- unpack
+
+        $ tar xzf v1.1.tar.gz
+
+- install
+
+        $ cd Arpeggio-1.1
+        $ python setup.py install
 
 !!! note
     We strive to keep `master` branch always stable so it is fairly safe to use.
@@ -26,7 +35,7 @@ $ python setup.py install
     use `https://github.com/igordejanovic/Arpeggio/archive/master.tar.gz` URL in the
     above download command.
 
-Or clone source repository with git:
+To clone source repository with git:
 
 ```bash
 $ git clone git@github.com:igordejanovic/Arpeggio.git

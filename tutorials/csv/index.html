@@ -15,6 +15,7 @@
         <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../style.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -115,14 +116,20 @@
                         <ul class="dropdown-menu">
                         
                             
-<li >
-    <a href="../calc/">Calc</a>
+<li class="active">
+    <a href="./">CSV</a>
 </li>
 
                         
                             
-<li class="active">
-    <a href="./">CSV</a>
+<li >
+    <a href="../bibtex/">BibTex</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../calc/">Calc</a>
 </li>
 
                         
@@ -168,12 +175,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../calc/">
+                        <a rel="next" href="../../semantics/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../../about/discuss/">
+                        <a rel="prev" href="../bibtex/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -198,11 +205,227 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
+        <li class="main active"><a href="#comma-separated-values-csv-parser-tutorial">Comma-Separated Values (CSV) parser tutorial</a></li>
+        
+            <li><a href="#the-grammar">The grammar</a></li>
+        
+            <li><a href="#the-parser">The parser</a></li>
+        
+            <li><a href="#parsing">Parsing</a></li>
+        
+            <li><a href="#defining-grammar-using-peg-notation">Defining grammar using PEG notation</a></li>
+        
+            <li><a href="#extract-data">Extract data</a></li>
+        
+    
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-</div>
+<h1 id="comma-separated-values-csv-parser-tutorial">Comma-Separated Values (CSV) parser tutorial</h1>
+<p>In this tutorial we will see how to make a parser for a simple data interchange
+format - <a href="">CSV</a> (Comma-Separated Values).
+CSV is a textual format for tabular data interchange. It is described by
+<a href="https://tools.ietf.org/html/rfc4180">RFC 4180</a>.</p>
+<p><a href="https://en.wikipedia.org/wiki/Comma-separated_values">Here</a> is an example of
+CSV file:</p>
+<pre><code class="csv">Year,Make,Model,Length
+1997,Ford,E350,2.34
+2000,Mercury,Cougar,2.38
+</code></pre>
+
+<p>Although, there is <a href="https://docs.python.org/3/library/csv.html">csv module</a> in
+the standard Python library this example has been made as the CSV is ubiquitous
+and easy to understand so it it a good starter for learning Arpeggio.</p>
+<h2 id="the-grammar">The grammar</h2>
+<p>Let's define CSV grammar.</p>
+<ul>
+<li>
+<p>CSV file consists of one or more records separated by a newline.</p>
+<pre><code>def csvfile():    return OneOrMore([record, '\n']), EOF
+</code></pre>
+</li>
+<li>
+<p>Each record consists of fields separated with commas.</p>
+<pre><code>def record():     return field, ZeroOrMore(",", field)
+</code></pre>
+</li>
+<li>
+<p>Each field may be quoted or not.</p>
+<pre><code>def field():      return [quoted_field, field_content]
+</code></pre>
+</li>
+<li>
+<p>Field content is everything until newline or comma.</p>
+<pre><code>def field_content():            return _(r'([^,\n])+')
+</code></pre>
+<p>We use regular expression to match everything that is not comma or
+  newline.</p>
+</li>
+<li>
+<p>Quoted field starts and ends with double quotes.</p>
+<pre><code>def quoted_field():             return '"', field_content_quoted, '"'
+</code></pre>
+</li>
+<li>
+<p>Quoted field content is defined as </p>
+<pre><code>def field_content_quoted():     return _(r'(("")|([^"]))+')
+</code></pre>
+<p>Quoted field content is defined with regular expression that will match
+  everything until the closing double-quote. Double quote inside data must
+  be escaped by doubling it (<code>""</code>).</p>
+</li>
+</ul>
+<p>The whole grammar is</p>
+<pre><code>def record():                   return field, ZeroOrMore(",", field)
+def field():                    return [quoted_field, field_content]
+def quoted_field():             return '"', field_content_quoted, '"'
+def field_content():            return _(r'([^,\n])+')
+def field_content_quoted():     return _(r'(("")|([^"]))+')
+def csvfile():                  return OneOrMore([record, '\n']), EOF
+</code></pre>
+<h2 id="the-parser">The parser</h2>
+<p>Let's instantiate parser. In order to catch newlines in <code>csvfile</code> rule we must
+disable newlines as whitespace so that Arpeggio does not skip over them. Thus,
+we will be able to handle them explicitly as we do in csvfile rule. To do so we
+will use <code>ws</code> parameter in parser construction to redefine what is considered as
+whitespace.  You can find more information
+<a href="../../configuration/#white-space-handling">here</a>.</p>
+<pre><code>parser = ParserPython(csvfile, ws='\t ')
+</code></pre>
+<p>So, whitespace will be a tab char or space. Newline will be treated as regular
+character.  We give grammar root rule to the <code>ParserPython</code>. In this example it
+is <code>csvfile</code> function.</p>
+<p><code>parser</code> now refers to the parser object capable of parsing CSV inputs.</p>
+<h2 id="parsing">Parsing</h2>
+<p>Let's parse some CSV example string:</p>
+<pre><code class="python">test_data = '''
+Unquoted test, &quot;Quoted test&quot;, 23234, One Two Three, &quot;343456.45&quot;
+
+Unquoted test 2, &quot;Quoted test with &quot;&quot;inner&quot;&quot; quotes&quot;, 23234, One Two Three, &quot;343456.45&quot;
+Unquoted test 3, &quot;Quoted test 3&quot;, 23234, One Two Three, &quot;343456.45&quot;
+'''
+
+parse_tree = parser.parse(test_data)
+
+</code></pre>
+
+<p><code>parse_tree</code> is a reference to <a href="../../parse_trees/">parse tree</a> of the <code>test_data</code>
+example string.</p>
+<p>This parse tree is <a href="../../debugging/#grammar-visualization">visualized</a> below:</p>
+<p><img alt="CSV parse tree" src="../img/csvfile_parse_tree.dot.png" /></p>
+<h2 id="defining-grammar-using-peg-notation">Defining grammar using PEG notation</h2>
+<p>Let's now define the same grammar but using <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
+notation</a>.</p>
+<p>We shall repeat the process above but we shall encode rules in PEG.
+We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module)</p>
+<ul>
+<li>
+<p>CSV file consists of one or more records separated by a newline.</p>
+<pre><code>csvfile = (record / '\n')+ EOF
+</code></pre>
+</li>
+<li>
+<p>Each record consists of fields separated with commas.</p>
+<pre><code>record = field ("," field)*
+</code></pre>
+</li>
+<li>
+<p>Each field may be quoted or not.</p>
+<pre><code>field = quoted_field / field_content
+</code></pre>
+</li>
+<li>
+<p>Field content is everything until newline or comma.</p>
+<pre><code>field_content = r'([^,\n])+'
+</code></pre>
+<p>We use regular expression to match everything that is not comma or
+  newline.</p>
+</li>
+<li>
+<p>Quoted field starts and ends with double quotes.</p>
+<pre><code>quoted_field = '"' field_content_quoted '"'
+</code></pre>
+</li>
+<li>
+<p>Quoted field content is defined as </p>
+<pre><code>field_content_quoted = r'(("")|([^"]))+'
+</code></pre>
+<p>Quoted field content is defined with regular expression that will match
+  everything until the closing double-quote. Double quote inside data must
+  be escaped by doubling it (<code>""</code>).</p>
+</li>
+</ul>
+<p>The whole grammar is:</p>
+<pre><code>  csvfile = (record / r'\n')+ EOF
+  record = field ("," field)*
+  field = quoted_field / field_content
+  field_content = r'([^,\n])+'
+  quoted_field = '"' field_content_quoted '"'
+  field_content_quoted = r'(("")|([^"]))+'
+</code></pre>
+<p>If we put the parser in debug mode and generate parse tree image we can 
+verify that we are getting the same parse tree regardless of the grammar
+specification approach we use.</p>
+<h2 id="extract-data">Extract data</h2>
+<p>Our aim is to extract data from the <code>csv</code> file.</p>
+<p>First lets define our target data structure we want to get.</p>
+<p>Since <code>csv</code> consists of list of records where each record consists of fields
+we shall construct python list of lists:</p>
+<pre><code>  [
+    [field1, field2, field3, ...],  # First row
+    [field1, field2, field3,...],   # Second row
+    [...],  # ...
+    ...
+  ]
+</code></pre>
+<p>To construct this list of list we may process parse tree by navigating its
+nodes and building the required target data structure.
+But, it is easier to use Arpeggio's support for <a href="../../semantics/">semantic analysis - Visitor
+Pattern</a>.</p>
+<p>Let's make a Visitor for CSV that will build our list of lists.</p>
+<pre><code class="python">class CSVVisitor(PTNodeVisitor):
+    def visit_record(self, node, children):
+        # record is a list of fields. The children nodes are fields so just
+        # transform it to python list.
+        return list(children)
+
+    def visit_csvfile(self, node, children):
+        # We are not interested in empty lines so we will filter them.
+        return [x for x in children if x!='\n']
+</code></pre>
+
+<p>and apply this visitor to the parse tree:</p>
+<pre><code class="python">csv_content = visit_parse_tree(parse_tree, CSVVisitor())
+</code></pre>
+
+<p>Now if we print <code>csv_content</code> we can see that it is exactly what we wanted:</p>
+<pre><code class="python">[[u'Unquoted test', u'Quoted test', u'23234', u'One Two Three', u'343456.45'], [u'Unquoted test 2', u'Quoted test with &quot;&quot;inner&quot;&quot; quotes', u'23234', u'One Two Three', u'34312.7'], [u'Unquoted test 3', u'Quoted test 3', u'23234', u'One Two Three', u'343486.12']]
+</code></pre>
+
+<p>But, there is more we can do. If we look at our data we can see that some fields
+are of numeric type but they end up as strings in our target structure. Let's
+convert them to Python floats or ints.  To do this conversion we will introduce
+<code>visit_field</code> method in our <code>CSVVisitor</code> class.</p>
+<pre><code class="python">class CSVVisitor(PTNodeVisitor):
+  ...
+  def visit_field(self, node, children):
+      value = children[0]
+      try:
+          return float(value)
+      except:
+          pass
+      try:
+          return int(value)
+      except:
+          return value
+  ...
+</code></pre>
+
+<p>If we print <code>csv_content</code> now we can see that numeric values are not strings
+anymore but a proper Python types.</p>
+<pre><code class="python">[[u'Unquoted test', u'Quoted test', 23234.0, u'One Two Three', 343456.45], [u'Unquoted test 2', u'Quoted test with &quot;&quot;inner&quot;&quot; quotes', 23234.0, u'One Two Three', 34312.7], [u'Unquoted test 3', u'Quoted test 3', 23234.0, u'One Two Three', 343486.12]]
+</code></pre></div>
             
         </div>
 

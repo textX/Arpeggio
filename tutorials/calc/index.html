@@ -15,6 +15,7 @@
         <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../style.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -115,14 +116,20 @@
                         <ul class="dropdown-menu">
                         
                             
-<li class="active">
-    <a href="./">Calc</a>
+<li >
+    <a href="../csv/">CSV</a>
 </li>
 
                         
                             
 <li >
-    <a href="../csv/">CSV</a>
+    <a href="../bibtex/">BibTex</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Calc</a>
 </li>
 
                         
@@ -168,12 +175,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../../semantics/">
+                        <a rel="next" href="../bibtex/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../csv/">
+                        <a rel="prev" href="../../about/discuss/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -198,11 +205,24 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
+        <li class="main active"><a href="#calculator-tutorial">Calculator tutorial</a></li>
+        
+    
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-</div>
+<h1 id="calculator-tutorial">Calculator tutorial</h1>
+<p>In this tutorial we will make a parser and evaluator for simple arithmetic expression
+(numbers and operations - addition, substraction, multiplication and division).
+The parser will be able to recognize following expressions:</p>
+<pre><code>2+7-3.6
+3/(3-1)+45*2.17+8
+4*12+5-4*(2-8)
+...
+</code></pre>
+<p>Evaluation will be done using <a href="semantics.md">support for semantic analysis</a></p>
+<p>Let's start with grammar definition first. Expression parsing has additional</p></div>
             
         </div>
 

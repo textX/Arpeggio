@@ -15,6 +15,7 @@
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../style.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -116,13 +117,19 @@
                         
                             
 <li >
-    <a href="../tutorials/calc/">Calc</a>
+    <a href="../tutorials/csv/">CSV</a>
 </li>
 
                         
                             
 <li >
-    <a href="../tutorials/csv/">CSV</a>
+    <a href="../tutorials/bibtex/">BibTex</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../tutorials/calc/">Calc</a>
 </li>
 
                         
@@ -288,10 +295,13 @@ parse tree.</p>
 <p>For example, <code>calc</code> parse tree above will look like this:</p>
 <p><img alt="Calc parse tree reduced" src="../images/calc_parse_tree_reduced.dot.png" /></p>
 <p>Notice the removal of each non-terminal with single child.</p>
-<p>.. warning::</p>
-<p>Be aware that <code>semantic analysis &lt;#Semantic analysis - Visitors&gt;</code>_ operates on
-  nodes of finished parse tree and therefore on reduced tree some
-  <code>visit_&lt;rule_name&gt;</code> actions will not get called.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Be aware that <a href="../semantics/">semantic analysis</a> operates on nodes of
+finished parse tree. Therefore, it you use <a href="./#parse-tree-reduction">tree
+reduction</a> visitor methods will not
+get called for the removed nodes.</p>
+</div>
 <h2 id="newline-termination-for-repetitions">Newline termination for Repetitions</h2>
 <p>By default <code>Repetition</code> parsing expressions (i.e. <code>ZeroOrMore</code> and
 <code>OneOrMore</code>) will obey <code>skipws</code> and <code>ws</code> settings but there are situations

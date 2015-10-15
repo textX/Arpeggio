@@ -15,6 +15,7 @@
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../style.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -116,13 +117,19 @@
                         
                             
 <li >
-    <a href="../tutorials/calc/">Calc</a>
+    <a href="../tutorials/csv/">CSV</a>
 </li>
 
                         
                             
 <li >
-    <a href="../tutorials/csv/">CSV</a>
+    <a href="../tutorials/bibtex/">BibTex</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../tutorials/calc/">Calc</a>
 </li>
 
                         
@@ -268,16 +275,28 @@ parse tree <code>dot</code> file will be generated also.</p>
 <p>Which produces <code>png</code> image given bellow.</p>
 <p><img src="../images/calc_parse_tree.dot.png"/></p>
 <p>You can also explicitly render your parser model or parse tree to <code>dot</code> file
-even if the parser is not in the debug mode.
-This is achieved with the following Python code:</p>
-<pre><code class="python">TODO
+even if the parser is not in the debug mode.</p>
+<p>For parser model this is achieved with the following Python code:</p>
+<pre><code class="python">from arpeggio.export import PMDOTExporter
+PMDOTExporter().exportFile(parser.parser_model,
+                            &quot;my_parser_model.dot&quot;)
+</code></pre>
+
+<p>For parse tree it is achieved with:</p>
+<pre><code class="python">from arpeggio.export import PTDOTExporter
+PTDOTExporter().exportFile(parse_tree,
+                           &quot;my_parse_tree.dot&quot;)
+</code></pre>
+
+<p>To get e.g. <code>png</code> images from <code>dot</code> files do as usuall:</p>
+<pre><code class="bash">$ dot -Tpng -O *dot
 
 </code></pre>
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>All tree images in this docs are rendered using debug mode and <code>dot</code> tool from
-the <a href="http://graphviz.org/">GraphViz</a> software.</p>
+<p>All tree images in this docs are rendered using Arpeggio's visualization and
+<code>dot</code> tool from the <a href="http://graphviz.org/">GraphViz</a> software.</p>
 </div></div>
             
         </div>

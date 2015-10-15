@@ -15,6 +15,7 @@
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../style.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -116,13 +117,19 @@
                         
                             
 <li >
-    <a href="../tutorials/calc/">Calc</a>
+    <a href="../tutorials/csv/">CSV</a>
 </li>
 
                         
                             
 <li >
-    <a href="../tutorials/csv/">CSV</a>
+    <a href="../tutorials/bibtex/">BibTex</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../tutorials/calc/">Calc</a>
 </li>
 
                         
@@ -217,14 +224,28 @@ form <a href="https://pypi.python.org/pypi/Arpeggio/">PyPI</a> with the followin
 <pre><code class="bash">    $ pip install Arpeggio
 </code></pre>
 
-<p>You can also install Arpeggio from source. In this case you have two options.
-Either download source distribution, unpack and install:</p>
-<pre><code class="bash">$ wget https://github.com/igordejanovic/Arpeggio/archive/v1.1.tar.gz
-$ tar xzf v1.1.tar.gz
-$ cd Arpeggio-1.1
+<p>You can also install Arpeggio from source. In this case you have two options:
+- download source code and install
+- clone git repository and install</p>
+<p>To download source distribution do:</p>
+<ul>
+<li>
+<p>download</p>
+<pre><code>$ wget https://github.com/igordejanovic/Arpeggio/archive/v1.1.tar.gz
+</code></pre>
+</li>
+<li>
+<p>unpack</p>
+<pre><code>$ tar xzf v1.1.tar.gz
+</code></pre>
+</li>
+<li>
+<p>install</p>
+<pre><code>$ cd Arpeggio-1.1
 $ python setup.py install
 </code></pre>
-
+</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>We strive to keep <code>master</code> branch always stable so it is fairly safe to use.
@@ -232,7 +253,7 @@ To install current development branch of Arpeggio instead of the stable release
 use <code>https://github.com/igordejanovic/Arpeggio/archive/master.tar.gz</code> URL in the
 above download command.</p>
 </div>
-<p>Or clone source repository with git:</p>
+<p>To clone source repository with git:</p>
 <pre><code class="bash">$ git clone git@github.com:igordejanovic/Arpeggio.git
 $ cd Arpeggio
 $ python setup.py install

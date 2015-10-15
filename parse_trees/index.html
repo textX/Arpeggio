@@ -15,6 +15,7 @@
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../style.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -116,13 +117,19 @@
                         
                             
 <li >
-    <a href="../tutorials/calc/">Calc</a>
+    <a href="../tutorials/csv/">CSV</a>
 </li>
 
                         
                             
 <li >
-    <a href="../tutorials/csv/">CSV</a>
+    <a href="../tutorials/bibtex/">BibTex</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../tutorials/calc/">Calc</a>
 </li>
 
                         
@@ -296,23 +303,8 @@ assert result.bar[1].position == 14
 </code></pre>
 
 <h2 id="parse-tree-reduction">Parse tree reduction</h2>
-<p>Non-terminals are by default created for each rule. Sometimes it can result in
-trees of great depth.  You can alter this behaviour setting <code>reduce_tree</code>
-parameter to <code>True</code>.</p>
-<pre><code class="python">parser = ParserPython(calc, reduce_tree=True)
-</code></pre>
-
-<p>In this configuration non-terminals with single child will be removed from the
-parse tree.</p>
-<p>For example, <code>calc</code> parse tree above will look like this:</p>
-<p><img alt="Calc parse tree reduced" src="../images/calc_parse_tree_reduced.dot.png" /></p>
-<p>Notice the removal of each non-terminal with single child.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Be aware that <a href="../semantics/">semantic analysis</a> operates on nodes of
-finished parse tree and therefore on reduced tree some <code>visit_&lt;rule_name&gt;</code>
-actions will not get called.</p>
-</div></div>
+<p>Parser can be configured to create a reduced parse tree. More information can be
+found <a href="../configuration/#parse-tree-reduction">here</a>.</p></div>
             
         </div>
 

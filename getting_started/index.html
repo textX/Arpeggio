@@ -211,6 +211,8 @@
         
             <li><a href="#quick-start">Quick start</a></li>
         
+            <li><a href="#read-tutorials">Read Tutorials</a></li>
+        
     
     </ul>
 </div></div>
@@ -221,14 +223,21 @@
 <hr />
 <h2 id="installation">Installation</h2>
 <p>Arpeggio is written in Python programming language and distributed with
-setuptools support. If you have <code>pip</code> tool installed Arpeggio can be installed
-form <a href="https://pypi.python.org/pypi/Arpeggio/">PyPI</a> with the following command:</p>
+setuptools support. If you have <code>pip</code> tool installed the most recent stable
+version of Arpeggio can be installed form
+<a href="https://pypi.python.org/pypi/Arpeggio/">PyPI</a> with the following command:</p>
 <pre><code class="bash">    $ pip install Arpeggio
 </code></pre>
 
-<p>You can also install Arpeggio from source. In this case you have two options:
-- download source code and install
-- clone git repository and install</p>
+<p>To verify that you have installed Arpeggio correctly run the following command:</p>
+<pre><code class="bash">$ python -c 'import arpeggio'
+</code></pre>
+
+<p>If you get no error, Arpeggio is correctly installed.</p>
+<p>To install Arpeggio for contribution see <a href="../about/contributing/">here</a>.</p>
+<h3 id="installing-from-source">Installing from source</h3>
+<p>If for some weird reason you don't have or don't want to use <code>pip</code> you can still
+install Arpeggio from source.</p>
 <p>To download source distribution do:</p>
 <ul>
 <li>
@@ -248,35 +257,8 @@ $ python setup.py install
 </code></pre>
 </li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>We strive to keep <code>master</code> branch always stable so it is fairly safe to use.
-To install current development branch of Arpeggio instead of the stable release
-use <code>https://github.com/igordejanovic/Arpeggio/archive/master.tar.gz</code> URL in the
-above download command.</p>
-</div>
-<p>To clone source repository with git:</p>
-<pre><code class="bash">$ git clone git@github.com:igordejanovic/Arpeggio.git
-$ cd Arpeggio
-$ python setup.py install
-</code></pre>
-
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>By default, after cloning you code will be on the <code>master</code> branch. It is current
-development branch. If you want to install some stable release you
-must first switch to appropriate <code>tag</code> before issuing command <code>python
-setup.py install</code>.</p>
-<pre><code>$ git checkout v1.1
-$ python setup.py install
-</code></pre>
-</div>
-<p>To verify that you have installed Arpeggio correctly run the following command:</p>
-<pre><code class="bash">$ python -c 'import arpeggio'
-</code></pre>
-
-<p>If you get no error, Arpeggio is correctly installed.</p>
 <h2 id="quick-start">Quick start</h2>
+<p>Basic workflow in using Arpeggio goes like this:</p>
 <p><strong>Write <a href="../grammars/">a grammar</a></strong>. There are several ways to do that:</p>
 <ul>
 <li>
@@ -345,7 +327,10 @@ model (grammar) and parse tree visualization.</p>
 <p>Here is an image rendered using graphviz of parser model for <code>calc</code> grammar.</p>
 <p><img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/></p>
 <p>And here is an image rendered for parse tree for the above parsed <code>calc</code> expression.</p>
-<p><img src="../images/calc_parse_tree.dot.png"/></p></div>
+<p><img src="../images/calc_parse_tree.dot.png"/></p>
+<h2 id="read-tutorials">Read Tutorials</h2>
+<p>Read some of the tutorials (<a href="../tutorials/csv">CSV</a>, <a href="../tutorials/bibtex">BibTex</a>,
+<a href="../tutorials/calc">Calc</a>).</p></div>
             
         </div>
 

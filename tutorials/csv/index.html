@@ -240,7 +240,8 @@ CSV file:</p>
 the standard Python library this example has been made as the CSV is ubiquitous
 and easy to understand so it it a good starter for learning Arpeggio.</p>
 <h2 id="the-grammar">The grammar</h2>
-<p>Let's define CSV grammar.</p>
+<p>Let's start first by creating a python module called <code>csv.py</code>.</p>
+<p>Now, let's define CSV grammar. </p>
 <ul>
 <li>
 <p>CSV file consists of one or more records separated by a newline.</p>
@@ -278,8 +279,12 @@ and easy to understand so it it a good starter for learning Arpeggio.</p>
   be escaped by doubling it (<code>""</code>).</p>
 </li>
 </ul>
-<p>The whole grammar is</p>
-<pre><code>def record():                   return field, ZeroOrMore(",", field)
+<p>The whole content of the <code>csv.py</code> file until now should be:</p>
+<pre><code>from arpeggio import *
+from arpeggio import RegExMatch as _
+
+# This is the CSV grammar
+def record():                   return field, ZeroOrMore(",", field)
 def field():                    return [quoted_field, field_content]
 def quoted_field():             return '"', field_content_quoted, '"'
 def field_content():            return _(r'([^,\n])+')
@@ -288,39 +293,61 @@ def csvfile():                  return OneOrMore([record, '\n']), EOF
 </code></pre>
 <h2 id="the-parser">The parser</h2>
 <p>Let's instantiate parser. In order to catch newlines in <code>csvfile</code> rule we must
-disable newlines as whitespace so that Arpeggio does not skip over them. Thus,
-we will be able to handle them explicitly as we do in csvfile rule. To do so we
-will use <code>ws</code> parameter in parser construction to redefine what is considered as
-whitespace.  You can find more information
+tell Arpeggio not to treat newlines as whitespace, i.e. not to skip over them.
+Thus, we will be able to handle them explicitly as we do in csvfile rule. To do
+so we will use <code>ws</code> parameter in parser construction to redefine what is
+considered as whitespace.  You can find more information
 <a href="../../configuration/#white-space-handling">here</a>.</p>
+<p>After the grammar in <code>csv.py</code> instantiate the parser:</p>
 <pre><code>parser = ParserPython(csvfile, ws='\t ')
 </code></pre>
-<p>So, whitespace will be a tab char or space. Newline will be treated as regular
+<p>So, whitespace will be a tab char or a space. Newline will be treated as regular
 character.  We give grammar root rule to the <code>ParserPython</code>. In this example it
 is <code>csvfile</code> function.</p>
 <p><code>parser</code> now refers to the parser object capable of parsing CSV inputs.</p>
 <h2 id="parsing">Parsing</h2>
-<p>Let's parse some CSV example string:</p>
-<pre><code class="python">test_data = '''
-Unquoted test, &quot;Quoted test&quot;, 23234, One Two Three, &quot;343456.45&quot;
+<p>Let's parse some CSV example string.</p>
+<p>Create file <code>test_data.csv</code> with the following content:</p>
+<pre><code>Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
 
-Unquoted test 2, &quot;Quoted test with &quot;&quot;inner&quot;&quot; quotes&quot;, 23234, One Two Three, &quot;343456.45&quot;
-Unquoted test 3, &quot;Quoted test 3&quot;, 23234, One Two Three, &quot;343456.45&quot;
-'''
-
+Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343456.45"
+Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
+</code></pre>
+<p>In <code>csv.py</code> file write:</p>
+<pre><code class="python">test_data = open('test_data.csv', 'r').read()
 parse_tree = parser.parse(test_data)
 
 </code></pre>
 
-<p><code>parse_tree</code> is a reference to <a href="../../parse_trees/">parse tree</a> of the <code>test_data</code>
-example string.</p>
-<p>This parse tree is <a href="../../debugging/#grammar-visualization">visualized</a> below:</p>
+<p><code>test_data</code> is Python string containing test CSV data from the file. Calling
+<code>parser.parse</code> on the data will produce the <a href="../../parse_trees/">parse tree</a>.</p>
+<p>If you run <code>csv.py</code> module, and there are no syntax errors in the <code>test_data.csv</code>
+file, <code>parse_tree</code> will be a reference to <a href="../../parse_trees/">parse tree</a> of
+the test CSV data.</p>
+<pre><code class="bash">$ python csv.py
+</code></pre>
+
+<p><strong>Congratulations!! You have successfuly parsed CSV file.</strong></p>
+<p>This parse tree is <a href="../../debugging/#grammar-visualization">visualized</a> below
+(Tip: The image is large. Right click on it and choose <code>View image</code> to see it in
+a separate tab and to be able to use zooming):</p>
 <p><img alt="CSV parse tree" src="../img/csvfile_parse_tree.dot.png" /></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To visualize grammar (aka parser model) and parse tree instantiate the
+parser in debug mode.</p>
+<pre><code>parser = ParserPython(csvfile, ws='\t ', debug=True)
+</code></pre>
+<p>Transform generated <code>dot</code> files to images.
+See more <a href="../../debugging/#grammar-visualization">here</a></p>
+</div>
 <h2 id="defining-grammar-using-peg-notation">Defining grammar using PEG notation</h2>
-<p>Let's now define the same grammar but using <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
-notation</a>.</p>
+<p>Now, let's try the same but using <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
+notation</a> for the grammar
+definition.</p>
 <p>We shall repeat the process above but we shall encode rules in PEG.
-We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module)</p>
+We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module).</p>
+<p>First, create textual file <code>csv.peg</code> to store the grammar.</p>
 <ul>
 <li>
 <p>CSV file consists of one or more records separated by a newline.</p>
@@ -358,7 +385,7 @@ We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module)</p>
   be escaped by doubling it (<code>""</code>).</p>
 </li>
 </ul>
-<p>The whole grammar is:</p>
+<p>The whole grammar (i.e. the contents of <code>csv.peg</code> file) is:</p>
 <pre><code>  csvfile = (record / r'\n')+ EOF
   record = field ("," field)*
   field = quoted_field / field_content
@@ -366,11 +393,34 @@ We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module)</p>
   quoted_field = '"' field_content_quoted '"'
   field_content_quoted = r'(("")|([^"]))+'
 </code></pre>
+<p>Now, we shall create <code>csv_peg.py</code> file in order to instantiate our parser and
+parse inputs.  This time we shall instantiate different parser class
+(<code>ParserPEG</code>). The whole content of <code>csv_peg.py</code> should be:</p>
+<pre><code class="python">from arpeggio.cleanpeg import ParserPEG
+
+csv_grammar = open('csv.peg', 'r').read()
+parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ')
+</code></pre>
+
+<p>Here we load the grammar from <code>csv.peg</code> file and construct the parser using
+<code>ParserPEG</code> class.</p>
+<p>The rest of the code is the same as in <code>csv.py</code>. We load <code>test_data.csv</code> and
+call <code>parser.parse</code> on it to produce parse tree.</p>
+<p>To verify that everything works without errors execute <code>csv_peg.py</code> module.</p>
+<pre><code class="bash">$ python csv_peg.py
+</code></pre>
+
 <p>If we put the parser in debug mode and generate parse tree image we can 
 verify that we are getting the same parse tree regardless of the grammar
 specification approach we use.</p>
+<p>To put parser in debug mode add <code>debug=True</code> to the parser parameters list.</p>
+<pre><code class="python">parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=True)
+</code></pre>
+
 <h2 id="extract-data">Extract data</h2>
-<p>Our aim is to extract data from the <code>csv</code> file.</p>
+<p>Our main goal is to extract data from the <code>csv</code> file.</p>
+<p>The parse tree we get as a result of parsing is not very useful on its own.
+We need to transform it to some other data structure that we can use.</p>
 <p>First lets define our target data structure we want to get.</p>
 <p>Since <code>csv</code> consists of list of records where each record consists of fields
 we shall construct python list of lists:</p>
@@ -427,7 +477,9 @@ convert them to Python floats or ints.  To do this conversion we will introduce
 <p>If we print <code>csv_content</code> now we can see that numeric values are not strings
 anymore but a proper Python types.</p>
 <pre><code class="python">[[u'Unquoted test', u'Quoted test', 23234.0, u'One Two Three', 343456.45], [u'Unquoted test 2', u'Quoted test with &quot;&quot;inner&quot;&quot; quotes', 23234.0, u'One Two Three', 34312.7], [u'Unquoted test 3', u'Quoted test 3', 23234.0, u'One Two Three', 343486.12]]
-</code></pre></div>
+</code></pre>
+
+<p>This example code can be found <a href="https://github.com/igordejanovic/Arpeggio/tree/master/examples/csv">here</a>.</p></div>
             
         </div>
 

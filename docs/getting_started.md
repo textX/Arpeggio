@@ -132,7 +132,9 @@ And here is an image rendered for parse tree for the above parsed `calc` express
 
 <img src="../images/calc_parse_tree.dot.png"/>
 
-## Read Tutorials
 
-Read some of the tutorials ([CSV](tutorials/csv), [BibTex](tutorials/bibtex),
+## Read the tutorials
+
+Next, you can read some of the step-by-step tutorials ([CSV](tutorials/csv), [BibTex](tutorials/bibtex),
 [Calc](tutorials/calc)).
+

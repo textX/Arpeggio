@@ -7,16 +7,29 @@ Installation and your first steps with Arpeggio.
 ## Installation
 
 Arpeggio is written in Python programming language and distributed with
-setuptools support. If you have `pip` tool installed Arpeggio can be installed
-form [PyPI](https://pypi.python.org/pypi/Arpeggio/) with the following command:
+setuptools support. If you have `pip` tool installed the most recent stable
+version of Arpeggio can be installed form
+[PyPI](https://pypi.python.org/pypi/Arpeggio/) with the following command:
 
 ```bash
     $ pip install Arpeggio
 ```
 
-You can also install Arpeggio from source. In this case you have two options:
-- download source code and install
-- clone git repository and install
+To verify that you have installed Arpeggio correctly run the following command:
+
+```bash
+$ python -c 'import arpeggio'
+```
+
+If you get no error, Arpeggio is correctly installed.
+
+To install Arpeggio for contribution see [here](about/contributing.md).
+
+
+### Installing from source
+
+If for some weird reason you don't have or don't want to use `pip` you can still
+install Arpeggio from source.
 
 To download source distribution do:
 
@@ -33,39 +46,10 @@ To download source distribution do:
         $ cd Arpeggio-1.1
         $ python setup.py install
 
-!!! note
-    We strive to keep `master` branch always stable so it is fairly safe to use.
-    To install current development branch of Arpeggio instead of the stable release
-    use `https://github.com/igordejanovic/Arpeggio/archive/master.tar.gz` URL in the
-    above download command.
-
-To clone source repository with git:
-
-```bash
-$ git clone git@github.com:igordejanovic/Arpeggio.git
-$ cd Arpeggio
-$ python setup.py install
-```
-
-!!! note
-    By default, after cloning you code will be on the `master` branch. It is current
-    development branch. If you want to install some stable release you
-    must first switch to appropriate `tag` before issuing command `python
-    setup.py install`.
-
-        $ git checkout v1.1
-        $ python setup.py install
-
-To verify that you have installed Arpeggio correctly run the following command:
-
-```bash
-$ python -c 'import arpeggio'
-```
-
-If you get no error, Arpeggio is correctly installed.
-
 
 ## Quick start
+
+Basic workflow in using Arpeggio goes like this:
 
 
 **Write [a grammar](grammars.md)**. There are several ways to do that:
@@ -148,4 +132,7 @@ And here is an image rendered for parse tree for the above parsed `calc` express
 
 <img src="../images/calc_parse_tree.dot.png"/>
 
+## Read Tutorials
 
+Read some of the tutorials ([CSV](tutorials/csv), [BibTex](tutorials/bibtex),
+[Calc](tutorials/calc)).

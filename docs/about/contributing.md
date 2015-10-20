@@ -14,6 +14,13 @@ For code/doc/test contributions do the following:
 
 1. Fork the [project on github](https://github.com/igordejanovic/Arpeggio/).
 1. Clone your fork.
+
+    To clone source repository with git and install for development do:
+
+        $ git clone git@github.com:your_user_name/Arpeggio.git
+        $ cd Arpeggio
+        $ python setup.py develop
+
 1. Make a branch for the new feature and switch to it.
 1. Make one or more commits.
 1. Push your branch to github.

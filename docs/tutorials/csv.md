@@ -25,7 +25,9 @@ and easy to understand so it it a good starter for learning Arpeggio.
 
 ## The grammar
 
-Let's define CSV grammar.
+Let's start first by creating a python module called `csv.py`.
+
+Now, let's define CSV grammar. 
 
 - CSV file consists of one or more records separated by a newline.
 
@@ -59,8 +61,12 @@ Let's define CSV grammar.
       be escaped by doubling it (`""`).
 
 
-The whole grammar is
+The whole content of the `csv.py` file until now should be:
 
+    from arpeggio import *
+    from arpeggio import RegExMatch as _
+
+    # This is the CSV grammar
     def record():                   return field, ZeroOrMore(",", field)
     def field():                    return [quoted_field, field_content]
     def quoted_field():             return '"', field_content_quoted, '"'
@@ -72,15 +78,17 @@ The whole grammar is
 ## The parser
 
 Let's instantiate parser. In order to catch newlines in `csvfile` rule we must
-disable newlines as whitespace so that Arpeggio does not skip over them. Thus,
-we will be able to handle them explicitly as we do in csvfile rule. To do so we
-will use `ws` parameter in parser construction to redefine what is considered as
-whitespace.  You can find more information
+tell Arpeggio not to treat newlines as whitespace, i.e. not to skip over them.
+Thus, we will be able to handle them explicitly as we do in csvfile rule. To do
+so we will use `ws` parameter in parser construction to redefine what is
+considered as whitespace.  You can find more information
 [here](../configuration.md#white-space-handling).
+
+After the grammar in `csv.py` instantiate the parser:
 
     parser = ParserPython(csvfile, ws='\t ')
 
-So, whitespace will be a tab char or space. Newline will be treated as regular
+So, whitespace will be a tab char or a space. Newline will be treated as regular
 character.  We give grammar root rule to the `ParserPython`. In this example it
 is `csvfile` function.
 
@@ -89,36 +97,64 @@ is `csvfile` function.
 
 ## Parsing
 
-Let's parse some CSV example string:
+Let's parse some CSV example string.
+
+Create file `test_data.csv` with the following content:
+
+    Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
+
+    Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343456.45"
+    Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
+
+In `csv.py` file write:
 
 ```python
-test_data = '''
-Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
-
-Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343456.45"
-Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
-'''
-
+test_data = open('test_data.csv', 'r').read()
 parse_tree = parser.parse(test_data)
 
 ```
 
-`parse_tree` is a reference to [parse tree](../parse_trees.md) of the `test_data`
-example string.
+`test_data` is Python string containing test CSV data from the file. Calling
+`parser.parse` on the data will produce the [parse tree](../parse_trees.md).
 
-This parse tree is [visualized](../debugging.md#grammar-visualization) below:
+If you run `csv.py` module, and there are no syntax errors in the `test_data.csv`
+file, `parse_tree` will be a reference to [parse tree](../parse_trees.md) of
+the test CSV data.
+
+```bash
+$ python csv.py
+```
+
+**Congratulations!! You have successfuly parsed CSV file.**
+
+This parse tree is [visualized](../debugging.md#grammar-visualization) below
+(Tip: The image is large. Right click on it and choose `View image` to see it in
+a separate tab and to be able to use zooming):
 
 
 ![CSV parse tree](img/csvfile_parse_tree.dot.png)
 
 
+!!! note
+    To visualize grammar (aka parser model) and parse tree instantiate the
+    parser in debug mode.
+
+        parser = ParserPython(csvfile, ws='\t ', debug=True)
+
+    Transform generated `dot` files to images.
+    See more [here](../debugging.md#grammar-visualization)
+
+
 ## Defining grammar using PEG notation
 
-Let's now define the same grammar but using [textual PEG
-notation](../grammars.md#grammars-written-in-peg-notations).
+Now, let's try the same but using [textual PEG
+notation](../grammars.md#grammars-written-in-peg-notations) for the grammar
+definition.
 
 We shall repeat the process above but we shall encode rules in PEG.
-We shall use clean PEG variant (`arpeggio.cleanpeg` module)
+We shall use clean PEG variant (`arpeggio.cleanpeg` module).
+
+First, create textual file `csv.peg` to store the grammar.
 
 - CSV file consists of one or more records separated by a newline.
 
@@ -152,7 +188,7 @@ We shall use clean PEG variant (`arpeggio.cleanpeg` module)
       be escaped by doubling it (`""`).
 
 
-The whole grammar is:
+The whole grammar (i.e. the contents of `csv.peg` file) is:
 
       csvfile = (record / r'\n')+ EOF
       record = field ("," field)*
@@ -161,13 +197,47 @@ The whole grammar is:
       quoted_field = '"' field_content_quoted '"'
       field_content_quoted = r'(("")|([^"]))+'
 
+
+Now, we shall create `csv_peg.py` file in order to instantiate our parser and
+parse inputs.  This time we shall instantiate different parser class
+(`ParserPEG`). The whole content of `csv_peg.py` should be:
+
+```python
+from arpeggio.cleanpeg import ParserPEG
+
+csv_grammar = open('csv.peg', 'r').read()
+parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ')
+```
+
+Here we load the grammar from `csv.peg` file and construct the parser using
+`ParserPEG` class.
+
+The rest of the code is the same as in `csv.py`. We load `test_data.csv` and
+call `parser.parse` on it to produce parse tree.
+
+To verify that everything works without errors execute `csv_peg.py` module.
+
+```bash
+$ python csv_peg.py
+```
+
 If we put the parser in debug mode and generate parse tree image we can 
 verify that we are getting the same parse tree regardless of the grammar
 specification approach we use.
 
+To put parser in debug mode add `debug=True` to the parser parameters list.
+
+```python
+parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=True)
+```
+
+
 ## Extract data
 
-Our aim is to extract data from the `csv` file.
+Our main goal is to extract data from the `csv` file.
+
+The parse tree we get as a result of parsing is not very useful on its own.
+We need to transform it to some other data structure that we can use.
 
 First lets define our target data structure we want to get.
 
@@ -241,4 +311,4 @@ anymore but a proper Python types.
 ```
 
 
-
+This example code can be found [here](https://github.com/igordejanovic/Arpeggio/tree/master/examples/csv).

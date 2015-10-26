@@ -8,7 +8,7 @@
 
 from arpeggio.cleanpeg import ParserPEG
 
-def main(debug=Falseand ):
+def main(debug=False):
     # First we will make a parser - an instance of the CVS parser model.
     # Parser model is given in the form of clean PEG description therefore we
     # are using ParserPEG class from arpeggio.clenapeg.  Grammar is loaded from

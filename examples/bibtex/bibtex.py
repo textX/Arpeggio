@@ -78,7 +78,8 @@ class BibtexVisitor(PTNodeVisitor):
 
     def visit_fieldvalue(self, node, children):
         """
-        Serbian Serbian letters form latex encoding to Unicode.
+        This example is used in practice at the University of Novi Sad.
+        Thus, handle accented chars found in writtings in Serbian language.
         Remove braces. Remove newlines.
         """
         value = children[0]

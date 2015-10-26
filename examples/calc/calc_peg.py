@@ -38,14 +38,15 @@ def main(debug=False):
     # Then parse tree is created out of the input_expr expression.
     parse_tree = parser.parse(input_expr)
 
+    # The result is obtained by semantic evaluation using visitor class.
+    # visit_parse_tree will start semantic analysis.
+    # In this case semantic analysis will evaluate expression and
+    # returned value will be evaluated result of the input_expr expression.
     result = visit_parse_tree(parse_tree, CalcVisitor(debug=debug))
 
     # Check that result is valid
     assert (result - -7.51194444444) < 0.0001
 
-    # visit_parse_tree will start semantic analysis.
-    # In this case semantic analysis will evaluate expression and
-    # returned value will be evaluated result of the input_expr expression.
     print("{} = {}".format(input_expr, result))
 
 if __name__ == "__main__":

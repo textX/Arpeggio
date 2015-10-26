@@ -4,9 +4,11 @@ This is an example of a parser for a simple data interchange format - CSV
 (Comma-Separated Values). CSV is a textual format for tabular data interchange.
 It is described by RFC 4180.
 
-`csv.py` file is an implementation using Python grammar specification.
-`csv_peg.py` file is the same parser implemented using PEG grammar syntax where
-the grammar is specified in the `csv.peg` file.
+`csv.py` file is an implementation using [Python grammar
+specification](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-python).
+`csv_peg.py` file is the same parser implemented using [PEG grammar
+syntax](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations)
+where the grammar is specified in the `csv.peg` file.
 
 Run this examples:
 ```

@@ -3,10 +3,8 @@
 # Name: bibtex.py
 # Purpose: Parser for bibtex files
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2013-2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2013-2015 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
-#
-# This example demonstrates grammar and parser for bibtex files.
 #######################################################################
 from __future__ import print_function, unicode_literals
 
@@ -83,14 +81,14 @@ class BibtexVisitor(PTNodeVisitor):
         Remove braces. Remove newlines.
         """
         value = children[0]
-        value = value.replace(r"\'{c}", u"ć")\
-                     .replace(r"\'{C}", u"Ć")\
-                     .replace(r"\v{c}", u"č")\
-                     .replace(r"\v{C}", u"Č")\
-                     .replace(r"\v{z}", u"ž")\
-                     .replace(r"\v{Z}", u"Ž")\
-                     .replace(r"\v{s}", u"š")\
-                     .replace(r"\v{S}", u"Š")
+        value = value.replace(r"\'{c}", "ć")\
+                     .replace(r"\'{C}", "Ć")\
+                     .replace(r"\v{c}", "č")\
+                     .replace(r"\v{C}", "Č")\
+                     .replace(r"\v{z}", "ž")\
+                     .replace(r"\v{Z}", "Ž")\
+                     .replace(r"\v{s}", "š")\
+                     .replace(r"\v{S}", "Š")
         value = re.sub("[\n{}]", '', value)
         return value
 

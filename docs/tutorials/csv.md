@@ -127,7 +127,7 @@ $ python csv.py
 
 **Congratulations!! You have successfuly parsed CSV file.**
 
-This parse tree is [visualized](../debugging.md#grammar-visualization) below
+This parse tree is [visualized](../debugging.md#visualization) below
 (Tip: The image is large. Right click on it and choose `View image` to see it in
 a separate tab and to be able to use zooming):
 
@@ -142,7 +142,7 @@ a separate tab and to be able to use zooming):
         parser = ParserPython(csvfile, ws='\t ', debug=True)
 
     Transform generated `dot` files to images.
-    See more [here](../debugging.md#grammar-visualization)
+    See more [here](../debugging.md#visualization)
 
 
 ## Defining grammar using PEG notation

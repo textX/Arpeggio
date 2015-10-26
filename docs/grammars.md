@@ -104,7 +104,7 @@ order).
 
 From this description Arpeggio builds **the parser model**. Parser model is a
 graph of parser expressions (see [Grammar
-visualization](debugging.md#grammar-visualization)).  Each node of the graph is
+visualization](debugging.md#visualization)).  Each node of the graph is
 an instance of some of the classes described above which inherits
 `ParserExpression`.
 

@@ -36,7 +36,7 @@ is doing.
                   >> Entering rule OrderedChoice in factor at position 1 => -*(4-1)*5+(2
 
 
-## Grammar visualization
+## Visualization
 
 Furthermore, while running in debug mode, a `dot` file (a graph description file
 format from [GraphViz software

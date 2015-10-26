@@ -30,7 +30,9 @@ You can visualize `dot` files with some dot file viewers (e.g.
 [ZGRViewer](http://zvtm.sourceforge.net/zgrviewer.html)) or produce graphics
 with `dot` tool (you need to install [GraphViz](http://www.graphviz.org/) for that)
 
-    dot -Tpng -O *dot
+```bash
+$ dot -Tpng -O *dot
+```
 
 The full tutorial based on this example can be found
 [here](http://igordejanovic.net/Arpeggio/tutorials/calc/).

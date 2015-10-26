@@ -11,29 +11,7 @@
 
 from __future__ import unicode_literals
 
-json_bnf = """
-object
-    { members }
-    {}
-members
-    string : value
-    members , string : value
-array
-    [ elements ]
-    []
-elements
-    value
-    elements , value
-value
-    string
-    number
-    object
-    array
-    true
-    false
-    null
-"""
-
+import os
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
@@ -51,42 +29,19 @@ def jsonObject():       return "{", Optional(jsonMembers), "}"
 def jsonFile():         return jsonObject, EOF
 
 
-testdata = """
-{
-    "glossary": {
-        "title": "example glossary",
-        "GlossDiv": {
-            "title": "S",
-            "GlossList":
-                {
-                "ID": "SGML",
-                "SortAs": "SGML",
-                "GlossTerm": "Standard Generalized Markup Language",
-                "TrueValue": true,
-                "FalseValue": false,
-                "Gravity": -9.8,
-                "LargestPrimeLessThan100": 97,
-                "AvogadroNumber": 6.02E23,
-                "EvenPrimesGreaterThan2": null,
-                "PrimesLessThan10" : [2,3,5,7],
-                "Acronym": "SGML",
-                "Abbrev": "ISO 8879:1986",
-                "GlossDef": "A meta-markup language, used to create markup languages such as DocBook.",
-                "GlossSeeAlso": ["GML", "XML", "markup"],
-                "EmptyDict":  {},
-                "EmptyList" : []
-                }
-        }
-    }
-}
-"""
-
 def main(debug=False):
     # Creating parser from parser model.
     parser = ParserPython(jsonFile, debug=debug)
 
+    # Load test JSON file
+    current_dir = os.path.dirname(__file__)
+    testdata = open(os.path.join(current_dir, 'test.json')).read()
+
     # Parse json string
     parse_tree = parser.parse(testdata)
+
+    # parse_tree can now be analysed and transformed to some other form
+    # using e.g. visitor support. See http://igordejanovic.net/Arpeggio/semantics/
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

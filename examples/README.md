@@ -11,4 +11,18 @@ separate `*.peg` file.
 Each folder has its own README file with the description of the example.
 
 
+To try out this examples clone this [git
+repository](https://help.github.com/articles/cloning-a-repository/) or [download
+source](https://github.com/igordejanovic/Arpeggio/archive/master.zip), unpack,
+and run with python:
+
+```bash
+$ cd Arpeggio/examples
+$ python <example_name>.py
+```
+
+Install Arpeggio before trying examples. To install Arpeggio read the [Getting
+started guide](http://igordejanovic.net/Arpeggio/getting_started/).
+
+
 

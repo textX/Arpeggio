@@ -2,7 +2,7 @@
 # Name: simple.py
 # Purpose: Simple language based on example from pyPEG
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2015 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example demonstrates grammar definition using python constructs.
@@ -10,6 +10,8 @@
 #######################################################################
 
 from __future__ import unicode_literals
+
+import os
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
@@ -30,24 +32,18 @@ def functioncall():     return symbol, "(", expressionlist, ")"
 def function():         return Kwd("function"), symbol, parameterlist, block
 def simpleLanguage():   return function
 
-input = """
-    function fak(n) {
-        if (n==0) {
-            // For 0! result is 0
-            return 0;
-        } else { /* And for n>0 result is calculated recursively */
-            return n * fak(n - 1);
-        };
-    }
-"""
 
 def main(debug=False):
+
+    # Load test program from file
+    current_dir = os.path.dirname(__file__)
+    test_program = open(os.path.join(current_dir, 'program.simple')).read()
 
     # Parser instantiation. simpleLanguage is the definition of the root rule
     # and comment is a grammar rule for comments.
     parser = ParserPython(simpleLanguage, comment, debug=debug)
 
-    parse_tree = parser.parse(input)
+    parse_tree = parser.parse(test_program)
 
 
 if __name__ == "__main__":

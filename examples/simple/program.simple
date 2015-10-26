@@ -1,0 +1,8 @@
+function fak(n) {
+    if (n==0) {
+        // For 0! result is 0
+        return 0;
+    } else { /* And for n>0 result is calculated recursively */
+        return n * fak(n - 1);
+    };
+}

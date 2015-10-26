@@ -195,8 +195,11 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_str_match(self, node, children):
         match_str = node.value[1:-1]
-        match_str = match_str.replace("\\'", "'")
-        match_str = match_str.replace("\\\\", "\\")
+        match_str = match_str.replace("\\'", "'")\
+                             .replace("\\\\", "\\")\
+                             .replace("\\n", "\n")\
+                             .replace("\\t", "\t")
+        match_str
         return StrMatch(match_str, ignore_case=self.ignore_case)
 
 

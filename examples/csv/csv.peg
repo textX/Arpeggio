@@ -1,4 +1,4 @@
-csvfile = (record / r'\n')+ EOF
+csvfile = (record / '\n')+ EOF
 record = field ("," field)*
 field = quoted_field / field_content
 field_content = r'([^,\n])+'

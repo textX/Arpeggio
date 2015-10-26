@@ -7,6 +7,8 @@
 ##############################################################################
 
 from __future__ import unicode_literals
+import pprint
+import os
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
@@ -50,12 +52,15 @@ def main(debug=False):
     parser = ParserPython(csvfile, ws='\t ', debug=debug)
 
     # Creating parse tree out of textual input
-    test_data = open('test_data.csv', 'r').read()
+    current_dir = os.path.dirname(__file__)
+    test_data = open(os.path.join(current_dir, 'test_data.csv'), 'r').read()
     parse_tree = parser.parse(test_data)
 
     # Create list of lists using visitor
     csv_content = visit_parse_tree(parse_tree, CSVVisitor())
-    print(csv_content)
+    print("This is a list of lists with the data from CSV file.")
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(csv_content)
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

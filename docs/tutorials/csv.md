@@ -276,10 +276,24 @@ and apply this visitor to the parse tree:
 csv_content = visit_parse_tree(parse_tree, CSVVisitor())
 ```
 
-Now if we print `csv_content` we can see that it is exactly what we wanted:
+Now if we pretty-print `csv_content` we can see that it is exactly what we wanted:
 
 ```python
-[[u'Unquoted test', u'Quoted test', u'23234', u'One Two Three', u'343456.45'], [u'Unquoted test 2', u'Quoted test with ""inner"" quotes', u'23234', u'One Two Three', u'34312.7'], [u'Unquoted test 3', u'Quoted test 3', u'23234', u'One Two Three', u'343486.12']]
+[   [   u'Unquoted test',
+        u'Quoted test',
+        u'23234',
+        u'One Two Three',
+        u'343456.45'],
+    [   u'Unquoted test 2',
+        u'Quoted test with ""inner"" quotes',
+        u'23234',
+        u'One Two Three',
+        u'34312.7'],
+    [   u'Unquoted test 3',
+        u'Quoted test 3',
+        u'23234',
+        u'One Two Three',
+        u'343486.12']]
 ```
 
 But, there is more we can do. If we look at our data we can see that some fields
@@ -303,11 +317,21 @@ class CSVVisitor(PTNodeVisitor):
   ...
 ```
 
-If we print `csv_content` now we can see that numeric values are not strings
+If we pretty-print `csv_content` now we can see that numeric values are not strings
 anymore but a proper Python types.
 
 ```python
-[[u'Unquoted test', u'Quoted test', 23234.0, u'One Two Three', 343456.45], [u'Unquoted test 2', u'Quoted test with ""inner"" quotes', 23234.0, u'One Two Three', 34312.7], [u'Unquoted test 3', u'Quoted test 3', 23234.0, u'One Two Three', 343486.12]]
+[   [u'Unquoted test', u'Quoted test', 23234.0, u'One Two Three', 343456.45],
+    [   u'Unquoted test 2',
+        u'Quoted test with ""inner"" quotes',
+        23234.0,
+        u'One Two Three',
+        34312.7],
+    [   u'Unquoted test 3',
+        u'Quoted test 3',
+        23234.0,
+        u'One Two Three',
+        343486.12]]
 ```
 
 

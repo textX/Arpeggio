@@ -2,7 +2,7 @@
 # Name: calc_peg.py
 # Purpose: Simple expression evaluator example using PEG language
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009-2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2015 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example is functionally equivalent to calc.py. The difference is that

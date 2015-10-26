@@ -97,7 +97,7 @@ def main(debug=False, file_name=None):
     # First we will make a parser - an instance of the bib parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
-    parser = ParserPython(bibfile, reduce_tree=True, debug=debug)
+    parser = ParserPython(bibfile, debug=debug)
 
     if not file_name:
         file_name = os.path.join(os.path.dirname(__file__),

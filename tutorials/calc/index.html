@@ -208,27 +208,212 @@
         <li class="main active"><a href="#calculator-tutorial">Calculator tutorial</a></li>
         
     
+        <li class="main "><a href="#the-grammar">The grammar</a></li>
+        
+    
+        <li class="main "><a href="#the-parser">The parser</a></li>
+        
+    
+        <li class="main "><a href="#evaluating-parse-tree">Evaluating parse tree</a></li>
+        
+    
+        <li class="main "><a href="#the-grammar-in-peg">The grammar in PEG</a></li>
+        
+    
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
 <h1 id="calculator-tutorial">Calculator tutorial</h1>
-<p>A tutorial for parsing of arithmetic expressions.</p>
+<p>A tutorial for parsing and evaluation of arithmetic expressions.</p>
 <hr />
-<div class="admonition note">
-<p class="admonition-title">TODO</p>
-<p>This tutorial will be based on <a href="https://github.com/igordejanovic/Arpeggio/tree/master/examples/calc">Calc example</a>.</p>
-</div>
-<p>In this tutorial we will make a parser and evaluator for simple arithmetic expression
-(numbers and operations - addition, substraction, multiplication and division).
-The parser will be able to recognize following expressions:</p>
+<p>In this tutorial we will make a parser and evaluator for simple arithmetic
+expression (numbers and operations - addition, subtraction, multiplication and
+division).  The parser will be able to recognize and evaluate following
+expressions:</p>
 <pre><code>2+7-3.6
 3/(3-1)+45*2.17+8
 4*12+5-4*(2-8)
 ...
 </code></pre>
-<p>Evaluation will be done using <a href="../../semantics/">support for semantic analysis</a></p>
-<p>Let's start with grammar definition first. Expression parsing has additional</p></div>
+<p>Evaluation will be done using <a href="../../semantics/">support for semantic analysis</a>.</p>
+<p>Parsing infix expression has additional constraints related to operator
+precedence. Arpeggio is recursive-descent parser, parsing the input from left to
+right and doing a leftmost derivation. 
+There is a simple technique that will enable proper evaluation in the context
+of a different operator precedence.</p>
+<p>Let's start with grammar definition.</p>
+<h1 id="the-grammar">The grammar</h1>
+<ul>
+<li>Each <code>calc</code> file consists of one or more expressions.</li>
+</ul>
+<pre><code class="python">def calc():       return OneOrMore(expression), EOF
+</code></pre>
+
+<ul>
+<li>Each expression is a sum or subtraction of terms.</li>
+</ul>
+<pre><code class="python">def expression(): return term, ZeroOrMore([&quot;+&quot;, &quot;-&quot;], term)
+</code></pre>
+
+<ul>
+<li>Each term is a multiplication or division of factors.</li>
+</ul>
+<pre><code class="python">def term():       return factor, ZeroOrMore([&quot;*&quot;,&quot;/&quot;], factor)
+</code></pre>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice that the order of precendence is from lower to upper.
+The deeper is the grammar rule, the tighter is the bonding.</p>
+</div>
+<ul>
+<li>Each factor is either a number or an expression inside brackets. The prefix
+  sign is optional. This is a support for unary minus.</li>
+</ul>
+<pre><code class="python">def factor():     return Optional([&quot;+&quot;,&quot;-&quot;]), [number, (&quot;(&quot;, expression, &quot;)&quot;)]
+</code></pre>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice indirect recursion here to <code>expression</code>. It is not left since the
+opening bracket must be found.</p>
+</div>
+<ul>
+<li>And finally we define <code>number</code> using regular expression as</li>
+</ul>
+<pre><code class="python">def number():     return _(r'\d*\.\d*|\d+')
+</code></pre>
+
+<h1 id="the-parser">The parser</h1>
+<p>Using above grammar specified in <a href="../../grammars/#grammars-written-in-python">Python
+notation</a> we instantiate the parser
+using <code>ParserPython</code> class.</p>
+<pre><code class="python">  parser = ParserPython(calc)
+</code></pre>
+
+<p>This parser is able to parse arithmetic expression like this</p>
+<pre><code>-(4-1)*5+(2+4.67)+5.89/(.2+7)
+</code></pre>
+
+<p>and produce parse tree like this</p>
+<p><img alt="calc parse tree" src="../../images/calc_parse_tree.dot.png" /></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All tree images in this documentation are produced by running the parser
+in <a href="../../debugging/">debug mode</a> and using <a href="../../debugging/#visualization">visualization
+support</a>.</p>
+</div>
+<p>The parsing is done like this:</p>
+<pre><code class="python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
+parse_tree = parser.parse(input_expr)
+</code></pre>
+
+<p>By ordering operation in the grammar form lower to upper precendence we have
+got the parse tree where the priority is retained. This will help us to easier
+make an expression evaluation.</p>
+<h1 id="evaluating-parse-tree">Evaluating parse tree</h1>
+<p>To implement evaluation we shall use Arpeggio's support for <a href="../../semantics/">semantic
+analysis</a> using visitor patter.</p>
+<p>Visitor is an object with methods named <code>visit_&lt;rule&gt;</code> which gets called for 
+each node of parse tree produced with the given rule. The processing of the 
+tree nodes is done bottom-up.</p>
+<pre><code class="python">class CalcVisitor(PTNodeVisitor):
+
+    def visit_number(self, node, children):
+        &quot;&quot;&quot;
+        Converts node value to float.
+        &quot;&quot;&quot;
+        return float(node.value)
+
+    ...
+
+</code></pre>
+
+<p>Visit method for the <code>number</code> rule will do the conversion of the matched text
+to <code>float</code> type. This nodes will always be the terminal nodes and will be
+evaluated first.</p>
+<pre><code class="python">
+    def visit_factor(self, node, children):
+        &quot;&quot;&quot;
+        Applies a sign to the expression or number.
+        &quot;&quot;&quot;
+        if len(children) == 1:
+            return children[0]
+        sign = -1 if children[0] == '-' else 1
+        return sign * children[-1]
+
+</code></pre>
+
+<p>Factor will have an optional sign as the first child and whatever matches first
+from the ordered choice of number and expression.
+We take the last element. It must be the result of <code>number</code> or <code>expression</code>
+evaluation and apply an optional sing on it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that the constant string matches will be removed by the Arpeggio, thus
+you will never get a constant string match in the children list.</p>
+</div>
+<pre><code class="python">
+    def visit_term(self, node, children):
+        &quot;&quot;&quot;
+        Divides or multiplies factors.
+        Factor nodes will be already evaluated.
+        &quot;&quot;&quot;
+        term = children[0]
+        for i in range(2, len(children), 2):
+            if children[i-1] == &quot;*&quot;:
+                term *= children[i]
+            else:
+                term /= children[i]
+        return term
+</code></pre>
+
+<p><code>term</code> consist of multiplication or divisions. Both operations are left
+associative so we shall run from left to right. Each even element will be
+evaluated <code>factor</code> while each odd element will be an operation to perform.
+At the end we return the evaluated <code>term</code>.</p>
+<pre><code class="python">    def visit_expression(self, node, children):
+        &quot;&quot;&quot;
+        Adds or substracts terms.
+        Term nodes will be already evaluated.
+        &quot;&quot;&quot;
+        expr = 0
+        start = 0
+        # Check for unary + or - operator
+        if text(children[0]) in &quot;+-&quot;:
+            start = 1
+
+        for i in range(start, len(children), 2):
+            if i and children[i - 1] == &quot;-&quot;:
+                expr -= children[i]
+            else:
+                expr += children[i]
+
+        return expr
+</code></pre>
+
+<p>And finally the whole expression consists of additions and subtractions of
+terms. A minor glitch here is a support for unary minus and plus sign.</p>
+<p>Let's apply this visitor to our parse tree.</p>
+<pre><code class="python">result = visit_parse_tree(parse_tree, CalcVisitor(debug=debug))
+</code></pre>
+
+<p>The result will be a <code>float</code> which represent the value of the given expression.</p>
+<h1 id="the-grammar-in-peg">The grammar in PEG</h1>
+<p>As a final note, the same grammar can be specified in <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
+syntax</a>.</p>
+<pre><code>number = r'\d*\.\d*|\d+'
+factor = (&quot;+&quot; / &quot;-&quot;)?
+          (number / &quot;(&quot; expression &quot;)&quot;)
+term = factor (( &quot;*&quot; / &quot;/&quot;) factor)*
+expression = term ((&quot;+&quot; / &quot;-&quot;) term)*
+calc = expression+ EOF
+
+</code></pre>
+
+<p>The code for both parser can be found in the <a href="https://github.com/igordejanovic/Arpeggio/tree/master/examples/calc">Calc
+example</a>.</p></div>
             
         </div>
 

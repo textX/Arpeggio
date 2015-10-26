@@ -1,4 +1,4 @@
-# BibTex example
+# BibTeX example
 
 This example demonstrates building parser for a [BibTeX](http://www.bibtex.org/)
 format, a format for used to describe bibliographic references.

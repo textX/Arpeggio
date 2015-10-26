@@ -1,16 +1,16 @@
-# BibTex tutorial
+# BibTeX tutorial
 
 A tutorial for parsing well known format for bibliographic references.
 
 ---
 
-The word [BibTeX](http://www.bibtex.org/) stands for a tool and a file format
+The word [BibTeX](http://www.BibTeX.org/) stands for a tool and a file format
 which are used to describe and process lists of references, mostly in
 conjunction with LaTeX documents.
 
-An example of BibTex entry is given below.
+An example of BibTeX entry is given below.
 
-```bibtex
+```BibTeX
 @article{DejanovicADomain-SpecificLanguageforDefiningStaticStructureofDatabaseApplications2010,
     author = "Igor Dejanovi\'{c} and Gordana Milosavljevi\'{c} and Branko Peri\v{s}i\'{c} and Maja Tumbas",
     title = "A {D}omain-Specific Language for Defining Static Structure of Database Applications",
@@ -27,7 +27,7 @@ An example of BibTex entry is given below.
 }
 ```
 
-Each BibTex entry starts with `@` and a keyword denoting entry type (`article`)
+Each BibTeX entry starts with `@` and a keyword denoting entry type (`article`)
 in this example. After the entry type is the body of the reference inside curly
 braces. The body of the reference consists of elements separated by a comma.
 The first element is the key of the entry. It should be unique.
@@ -47,11 +47,11 @@ from arpeggio import RegExMatch as _
 
 Then create grammar rules:
 
-- BibTex file consists of zero or more BibTex entries.
+- BibTeX file consists of zero or more BibTeX entries.
 ```python
 def bibfile():    return ZeroOrMore(bibentry), EOF
 ```
-- Now we define the structure of BibTex entry.
+- Now we define the structure of BibTeX entry.
 ```python
 def bibentry():  return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
 ```
@@ -65,7 +65,7 @@ def fieldvalue():               return [fieldvalue_braces, fieldvalue_quotes]
 def fieldvalue_braces():        return "{", fieldvalue_braced_content, "}"
 def fieldvalue_quotes():        return '"', fieldvalue_quoted_content, '"'
 ```
-- Now, let's define field name, BibTex type and the key. We use regular
+- Now, let's define field name, BibTeX type and the key. We use regular
   expression match for this (`RegExMatch` class).
 ```python
 def fieldname():                return _(r'[-\w]+')
@@ -73,8 +73,8 @@ def bibtype():                  return _(r'@\w+')
 def bibkey():                   return _(r'[^\s,]+')
 ```
   Field name is defined as hyphen or alphanumeric one or more times.
-  BibTex entry type is `@` char after which must be one or more alphanumeric.
-  BibTex key is everything until the first space or comma.
+  BibTeX entry type is `@` char after which must be one or more alphanumeric.
+  BibTeX key is everything until the first space or comma.
 
 - Field value can be quoted and braced. Let's match the content.
 ```python
@@ -100,7 +100,7 @@ parser = ParserPython(bibfile)
 
 Now, we have our parser. Let's parse some input:
 
-- First load some BibTex data from a file.
+- First load some BibTeX data from a file.
 ```python
 file_name = os.path.join(os.path.dirname(__file__), 'bibtex_example.bib')
 with codecs.open(file_name, "r", encoding="utf-8") as bibtexfile:
@@ -119,9 +119,9 @@ The parse tree is produced.
 
 # Extracting data from the parse tree
 
-Let's suppose that we want our BibTex file to be transformed to a list of
+Let's suppose that we want our BibTeX file to be transformed to a list of
 Python dictionaries where each field is keyed by its name and the value is 
-the field value cleaned up from the BibTex cruft.
+the field value cleaned up from the BibTeX cruft.
 
 Like this:
 
@@ -151,11 +151,11 @@ and stored in [the parse tree](../parse_trees.md). We could navigate the tree
 to extract the data and build the python list of dictionaries but a lot easier
 is to use [Arpeggio's visitor support](../semantics.md).
 
-In this case we shall create `BibtexVisitor` class with `visit_*` methods for
+In this case we shall create `BibTeXVisitor` class with `visit_*` methods for
 each grammar rule whose parse tree node we want to process.
 
 ```python
-class BibtexVisitor(PTNodeVisitor):
+class BibTeXVisitor(PTNodeVisitor):
 
     def visit_bibfile(self, node, children):
         """
@@ -188,7 +188,7 @@ class BibtexVisitor(PTNodeVisitor):
 Now, apply the visitor to the parse tree.
 
 ```python
-ast = visit_parse_tree(parse_tree, BibtexVisitor())
+ast = visit_parse_tree(parse_tree, BibTeXVisitor())
 ```
 
 `ast` is now a Python list of dictionaries in the desired format from above.
@@ -198,5 +198,5 @@ repository](https://github.com/igordejanovic/Arpeggio/tree/master/examples/bibte
 
 !!! note
     Example in the repository is actually a fully working parser with the
-    support for Bibtex comments and comment entries. This is out of scope
+    support for BibTeX comments and comment entries. This is out of scope
     for this tutorial. You can find the details in the source code.

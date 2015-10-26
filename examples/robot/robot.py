@@ -20,6 +20,7 @@
 #######################################################################
 from __future__ import print_function, unicode_literals
 
+import os
 from arpeggio import *
 
 # Grammar rules
@@ -70,16 +71,10 @@ class RobotVisitor(PTNodeVisitor):
 
 
 def main(debug=False):
-    # Program code
-    input_program = '''
-        begin
-            up
-            up
-            left
-            down
-            right
-        end
-    '''
+
+    # Load program
+    current_dir = os.path.dirname(__file__)
+    input_program = open(os.path.join(current_dir, 'program.rbt'), 'r').read()
 
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of python constructs therefore we

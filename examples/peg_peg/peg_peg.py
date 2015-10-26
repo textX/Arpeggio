@@ -3,7 +3,7 @@
 # Name: peg_peg.py
 # Purpose: PEG parser definition using PEG itself.
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2015 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # PEG can be used to describe PEG.
@@ -13,41 +13,16 @@
 
 from __future__ import unicode_literals
 
+import os
 from arpeggio import *
 from arpeggio.export import PMDOTExporter
-from arpeggio.peg import ParserPEG, PEGVisitor
-
-
-# PEG defined using PEG itself.
-peg_grammar = r"""
- peggrammar <- rule+ EOF;
- rule <- rule_name LEFT_ARROW ordered_choice ';';
- ordered_choice <- sequence (SLASH sequence)*;
- sequence <- prefix+;
- prefix <- (AND/NOT)? sufix;
- sufix <- expression (QUESTION/STAR/PLUS)?;
- expression <- regex / rule_crossref
-                / (OPEN ordered_choice CLOSE) / str_match;
-
- rule_name <- r'[a-zA-Z_]([a-zA-Z_]|[0-9])*';
- rule_crossref <- rule_name;
- regex <- 'r\'' r'(\\\'|[^\'])*' '\'';
- str_match <- r'\'(\\\'|[^\'])*\'|"[^"]*"';
- LEFT_ARROW <- '<-';
- SLASH <- '/';
- AND <- '&';
- NOT <- '!';
- QUESTION <- '?';
- STAR <- '*';
- PLUS <- '+';
- OPEN <- '(';
- CLOSE <- ')';
- DOT <- '.';
- comment <- '//' r'.*\n';
-"""
+from arpeggio.peg import PEGVisitor, ParserPEG
 
 
 def main(debug=False):
+
+    current_dir = os.path.dirname(__file__)
+    peg_grammar = open(os.path.join(current_dir, 'peg.peg')).read()
 
     # ParserPEG will use ParserPython to parse peg_grammar definition and
     # create parser_model for parsing PEG based grammars
@@ -59,6 +34,7 @@ def main(debug=False):
     # Now we will use created parser to parse the same peg_grammar used for
     # parser initialization. We can parse peg_grammar because it is specified
     # using PEG itself.
+    print("PARSING")
     parse_tree = parser.parse(peg_grammar)
 
     # ASG should be the same as parser.parser_model because semantic

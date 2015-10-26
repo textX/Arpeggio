@@ -1,0 +1,24 @@
+ peggrammar <- rule+ EOF;
+ rule <- rule_name LEFT_ARROW ordered_choice ';';
+ ordered_choice <- sequence (SLASH sequence)*;
+ sequence <- prefix+;
+ prefix <- (AND/NOT)? sufix;
+ sufix <- expression (QUESTION/STAR/PLUS)?;
+ expression <- regex / rule_crossref
+                / (OPEN ordered_choice CLOSE) / str_match;
+
+ rule_name <- r'[a-zA-Z_]([a-zA-Z_]|[0-9])*';
+ rule_crossref <- rule_name;
+ regex <- 'r\'' r'(\\\'|[^\'])*' '\'';
+ str_match <- r'\'(\\\'|[^\'])*\'|"[^"]*"';
+ LEFT_ARROW <- '<-';
+ SLASH <- '/';
+ AND <- '&';
+ NOT <- '!';
+ QUESTION <- '?';
+ STAR <- '*';
+ PLUS <- '+';
+ OPEN <- '(';
+ CLOSE <- ')';
+ DOT <- '.';
+ comment <- '//' r'.*\n';

@@ -20,7 +20,7 @@ def test_examples():
     examples = [f for f in glob.glob(examples_pat) if f != '__init__.py']
     for e in examples:
         example_dir = os.path.dirname(e)
-        sys.path.append(example_dir)
+        sys.path.insert(0, example_dir)
         (module_name, _) = os.path.splitext(os.path.basename(e))
         (module_file, module_path, desc) = \
             imp.find_module(module_name, [example_dir])

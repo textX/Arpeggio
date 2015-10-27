@@ -15,6 +15,7 @@ pages:
     - Debugging: debugging.md
     - Parser configuration: configuration.md
     - Semantic analysis: semantics.md
+    - Troubleshooting: troubleshooting.md
 - Tutorials:
     - CSV: tutorials/csv.md
     - BibTex: tutorials/bibtex.md

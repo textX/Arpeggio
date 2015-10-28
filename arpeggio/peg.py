@@ -67,22 +67,33 @@ class PEGVisitor(PTNodeVisitor):
         }
 
     def visit_peggrammar(self, node, children):
+
         def _resolve(node):
+            """
+            Resolves CrossRefs from the parser model.
+            """
+
+            if node in self.resolved:
+                return node
+            self.resolved.add(node)
 
             def get_rule_by_name(rule_name):
-                if rule_name in self.peg_rules:
+                try:
                     return self.peg_rules[rule_name]
-                else:
+                except KeyError:
                     raise SemanticError("Rule \"{}\" does not exists."
                                         .format(rule_name))
 
             def resolve_rule_by_name(rule_name):
+
                     if self.debug:
                         self.dprint("Resolving crossref {}".format(rule_name))
+
                     resolved_rule = get_rule_by_name(rule_name)
                     while type(resolved_rule) is CrossRef:
                         target_rule = resolved_rule.target_rule_name
                         resolved_rule = get_rule_by_name(target_rule)
+
                     # If resolved rule hasn't got the same name it
                     # should be cloned and preserved in the peg_rules cache
                     if resolved_rule.rule_name != rule_name:
@@ -98,10 +109,7 @@ class PEGVisitor(PTNodeVisitor):
             if isinstance(node, CrossRef):
                 # The root rule is a cross-ref
                 resolved_rule = resolve_rule_by_name(node.target_rule_name)
-                if resolved_rule not in self.resolved:
-                    self.resolved.add(resolved_rule)
-                    _resolve(resolved_rule)
-                return resolved_rule
+                return _resolve(resolved_rule)
             else:
                 # Resolve children nodes
                 for i, n in enumerate(node.nodes):

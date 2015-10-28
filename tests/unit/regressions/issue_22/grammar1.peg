@@ -1,0 +1,17 @@
+number_token     = r'(\d+|\d+\.\d*|\d*\.\d+)'
+identifier_token = r'[a-zA-Z_][a-zA-Z0-9_]*'
+
+unqualified_identifier_expression = identifier_token
+qualified_identifier_expression   = identifier_token ( "." identifier_token )*
+
+unary_expression              = number_token / qualified_identifier_expression
+
+method_call_expression        = qualified_identifier_expression "(" ( rvalue_expression ( "," rvalue_expression )* )? ")"
+collection_index_expression   = qualified_identifier_expression "["   rvalue_expression ( "," rvalue_expression )*    "]"
+
+lvalue_expression             = qualified_identifier_expression
+rvalue_expression             = collection_index_expression / method_call_expression / unary_expression
+
+expression                    = collection_index_expression / method_call_expression / unary_expression
+
+belang = expression* EOF

@@ -7,10 +7,16 @@ division).
 `calc.py` defines grammar using [python
 language](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-python).
 
-`calc_peg.py` shows the same example where grammar is specified using textual
-[PEG
-notation](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations)
-(cleanpeg variant). The grammar is in `calc.peg` file.
+`calc_peg.py` shows the same example where grammar is specified using a
+traditional textual [PEG
+notation](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations).
+The grammar is in `calc.peg` file.
+
+`calc_cleanpeg.py` shows the same example where grammar is specified using a
+"clean" variant of textual [PEG
+notation](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations).
+The grammar is in `calc_clean.peg` file.
+
 
 Examples can be run with:
 

@@ -409,6 +409,7 @@ terms. A minor glitch here is a support for unary minus and plus sign.</p>
 <h1 id="the-grammar-in-peg">The grammar in PEG</h1>
 <p>As a final note, the same grammar can be specified in <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
 syntax</a>.</p>
+<p>Either a clean PEG variant:</p>
 <pre><code>number = r'\d*\.\d*|\d+'
 factor = (&quot;+&quot; / &quot;-&quot;)?
           (number / &quot;(&quot; expression &quot;)&quot;)
@@ -418,6 +419,17 @@ calc = expression+ EOF
 
 </code></pre>
 
+<p>or traditional PEG variant:</p>
+<pre><code>number &lt;- r'\d*\.\d*|\d+';
+factor &lt;- (&quot;+&quot; / &quot;-&quot;)?
+          (number / &quot;(&quot; expression &quot;)&quot;);
+term &lt;- factor (( &quot;*&quot; / &quot;/&quot;) factor)*;
+expression &lt;- term ((&quot;+&quot; / &quot;-&quot;) term)*;
+calc &lt;- expression+ EOF;
+</code></pre>
+
+<p>The grammar for textual PEG is parsed using Arpeggio itself and this shows the
+flexibility of the Arpeggio parser.</p>
 <p>The code for both parser can be found in the <a href="https://github.com/igordejanovic/Arpeggio/tree/master/examples/calc">Calc
 example</a>.</p></div>
             

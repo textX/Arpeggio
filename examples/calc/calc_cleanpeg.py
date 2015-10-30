@@ -15,7 +15,7 @@
 from __future__ import absolute_import, unicode_literals, print_function
 
 import os
-from arpeggio.peg import ParserPEG
+from arpeggio.cleanpeg import ParserPEG
 from arpeggio import visit_parse_tree
 from calc import CalcVisitor
 
@@ -24,8 +24,8 @@ def main(debug=False):
 
     # Grammar is defined using textual specification based on PEG language.
     # Load grammar form file.
-    calc_grammar = open(os.path.join(os.path.dirname(__file__), 'calc.peg'),
-                        'r').read()
+    calc_grammar = open(os.path.join(os.path.dirname(__file__),
+                                     'calc_clean.peg'), 'r').read()
 
     # First we will make a parser - an instance of the calc parser model.
     # Parser model is given in the form of PEG notation therefore we

@@ -1,0 +1,8 @@
+# Calc grammar in clean PEG language
+
+number = r'\d*\.\d*|\d+'
+factor = ("+" / "-")?
+          (number / "(" expression ")")
+term = factor (( "*" / "/") factor)*
+expression = term (("+" / "-") term)*
+calc = expression+ EOF

@@ -138,3 +138,10 @@ And here is an image rendered for parse tree for the above parsed `calc` express
 Next, you can read some of the step-by-step tutorials ([CSV](tutorials/csv), [BibTex](tutorials/bibtex),
 [Calc](tutorials/calc)).
 
+## Try the examples
+
+Arpeggio comes with [a lot of
+examples](https://github.com/igordejanovic/Arpeggio/tree/master/examples). To
+install and play around with the examples follow the instructions from the [README
+file](https://github.com/igordejanovic/Arpeggio/tree/master/examples).
+

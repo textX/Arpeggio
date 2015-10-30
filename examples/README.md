@@ -18,6 +18,7 @@ and run with python:
 
 ```bash
 $ cd Arpeggio/examples
+$ cd <example_name>
 $ python <example_name>.py
 ```
 

@@ -23,9 +23,10 @@ Examples can be run with:
 ```bash
 $ python calc.py
 $ python calc_peg.py
+$ python calc_cleanpeg.py
 ```
 
-Both grammar definition result in the same parser and the parsing end evaluation 
+All three grammar definition result in the same parser and the parsing end evaluation 
 should produce the same result.
 
 If run in debug mode (setting `debug` to `True` in `ParserPython` or `ParserPEG`

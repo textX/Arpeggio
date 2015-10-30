@@ -212,6 +212,8 @@ The result will be a `float` which represent the value of the given expression.
 As a final note, the same grammar can be specified in [textual PEG
 syntax](../grammars.md#grammars-written-in-peg-notations).
 
+Either a clean PEG variant:
+
 ```
 number = r'\d*\.\d*|\d+'
 factor = ("+" / "-")?
@@ -221,6 +223,20 @@ expression = term (("+" / "-") term)*
 calc = expression+ EOF
 
 ```
+
+or traditional PEG variant:
+
+```
+number <- r'\d*\.\d*|\d+';
+factor <- ("+" / "-")?
+          (number / "(" expression ")");
+term <- factor (( "*" / "/") factor)*;
+expression <- term (("+" / "-") term)*;
+calc <- expression+ EOF;
+```
+
+The grammar for textual PEG is parsed using Arpeggio itself and this shows the
+flexibility of the Arpeggio parser.
 
 The code for both parser can be found in the [Calc
 example](https://github.com/igordejanovic/Arpeggio/tree/master/examples/calc).

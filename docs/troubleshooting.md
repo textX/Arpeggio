@@ -88,3 +88,32 @@ from __future__ import unicode_literals
 
 This will enable unicode literals in the python < 3.
 
+
+## Visitor method is not called during semantic analysis
+
+Semantic analysis operates on a parse tree nodes produced by grammar rules.
+If you are using a `reduce_tree=True` option in the construction of the parser
+all non-terminal nodes with only one child will be suppressed in the parse tree.
+Thus, visitor methods for those nodes will not be called.
+
+To resolve issue either disable tree reduction during parser construction (i.e.
+`reduce_tree=False`) or do visitor job in some of the calling rules that produce
+parse tree node with more than one child.
+
+As a side note, there is implicit reduction of nodes whose grammar rule is a 
+sequence with only one child.
+
+```python
+def mean():             return number
+def number():           return _(r'\d*\.\d*|\d+')
+```
+
+Here a node `number` will be suppressed from the parser model and visitor
+`visit_number` will not be called. You have to define `visit_mean` or a visitor
+for some of the rules calling `mean`.
+
+This implicit reduction can not be disabled at the moment. Please see [issue
+24](https://github.com/igordejanovic/Arpeggio/issues/24).
+
+
+

@@ -217,6 +217,8 @@
         
             <li><a href="#unrecognized-grammar-element">Unrecognized grammar element '...'</a></li>
         
+            <li><a href="#visitor-method-is-not-called-during-semantic-analysis">Visitor method is not called during semantic analysis</a></li>
+        
     
     </ul>
 </div></div>
@@ -287,7 +289,26 @@ unicode literals when defining grammars using Python notation.</p>
 <pre><code class="python">from __future__ import unicode_literals
 </code></pre>
 
-<p>This will enable unicode literals in the python &lt; 3.</p></div>
+<p>This will enable unicode literals in the python &lt; 3.</p>
+<h2 id="visitor-method-is-not-called-during-semantic-analysis">Visitor method is not called during semantic analysis</h2>
+<p>Semantic analysis operates on a parse tree nodes produced by grammar rules.
+If you are using a <code>reduce_tree=True</code> option in the construction of the parser
+all non-terminal nodes with only one child will be suppressed in the parse tree.
+Thus, visitor methods for those nodes will not be called.</p>
+<p>To resolve issue either disable tree reduction during parser construction (i.e.
+<code>reduce_tree=False</code>) or do visitor job in some of the calling rules that produce
+parse tree node with more than one child.</p>
+<p>As a side note, there is implicit reduction of nodes whose grammar rule is a 
+sequence with only one child.</p>
+<pre><code class="python">def mean():             return number
+def number():           return _(r'\d*\.\d*|\d+')
+</code></pre>
+
+<p>Here a node <code>number</code> will be suppressed from the parser model and visitor
+<code>visit_number</code> will not be called. You have to define <code>visit_mean</code> or a visitor
+for some of the rules calling <code>mean</code>.</p>
+<p>This implicit reduction can not be disabled at the moment. Please see <a href="https://github.com/igordejanovic/Arpeggio/issues/24">issue
+24</a>.</p></div>
             
         </div>
 

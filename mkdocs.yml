@@ -4,6 +4,7 @@ site_description: Parser interpreter based on PEG grammars for Python
 site_author: Igor Dejanović
 
 repo_url: https://github.com/igordejanovic/Arpeggio
+google_analytics: ['UA-68681917-1', 'igordejanovic.net']
 
 pages:
 - Home: index.md

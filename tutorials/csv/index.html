@@ -260,7 +260,10 @@ and easy to understand so it it a good starter for learning Arpeggio.</p>
 <p>Now, let's define CSV grammar. </p>
 <ul>
 <li>
-<p>CSV file consists of one or more records separated by a newline.</p>
+<p>CSV file consists of one or more records or newlines. List inside <code>OneOrMore</code>
+  will be interpreted as <a href="../../grammars/#grammars-written-in-python">Ordered
+  Choice</a> and the End-Of-File at the
+  end.</p>
 <pre><code>def csvfile():    return OneOrMore([record, '\n']), EOF
 </code></pre>
 </li>
@@ -366,7 +369,8 @@ We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module).</p>
 <p>First, create textual file <code>csv.peg</code> to store the grammar.</p>
 <ul>
 <li>
-<p>CSV file consists of one or more records separated by a newline.</p>
+<p>CSV file consists of one or more records or newlines and the End-Of-File at
+  the end.</p>
 <pre><code>csvfile = (record / '\n')+ EOF
 </code></pre>
 </li>

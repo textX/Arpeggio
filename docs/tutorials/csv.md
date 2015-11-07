@@ -29,10 +29,9 @@ Let's start first by creating a python module called `csv.py`.
 
 Now, let's define CSV grammar. 
 
-- CSV file consists of one or more records or newlines. List inside `OneOrMore`
-  will be interpreted as [Ordered
-  Choice](../grammars.md#grammars-written-in-python) and the End-Of-File at the
-  end.
+- CSV file consists of one or more records or newlines and the End-Of-File at the
+  end. Python list inside `OneOrMore` will be interpreted as [Ordered
+  Choice](../grammars.md#grammars-written-in-python).
 
         def csvfile():    return OneOrMore([record, '\n']), EOF
 

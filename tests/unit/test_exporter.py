@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_python_parser
-# Purpose: Test for parser constructed using Python-based grammars.
+# Purpose: Testing the dot exporter.
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License

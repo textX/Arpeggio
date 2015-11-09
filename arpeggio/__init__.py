@@ -1190,7 +1190,7 @@ class Parser(DebugPrinter):
             OneOrMore after first).
         in_lex_rule (bool): True if in lexical rule. Currently used in Combine
             decorator to convert match to a single Terminal.
-        last_pexpression (bool): Last parsing expression traversed.
+        last_pexpression (ParsingExpression): Last parsing expression traversed.
     """
     def __init__(self, skipws=True, ws=None, reduce_tree=False,
                  autokwd=False, ignore_case=False, **kwargs):

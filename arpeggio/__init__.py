@@ -62,13 +62,16 @@ class NoMatch(Exception):
         position (int): A position in the input stream where exception
             occurred.
         parser (Parser): An instance of a parser.
+        in_optional(bool): If the exception was raised during parsing of
+            optional parsing expressions.
         exp_str(str): What is expected? If not given it is deduced from
             the rule. Used in error messages.
     """
-    def __init__(self, rule, position, parser, exp_str=None):
+    def __init__(self, rule, position, parser, in_optional, exp_str=None):
         self.rule = rule
         self.position = position
         self.parser = parser
+        self.in_optional = in_optional
         self.exp_str = exp_str
 
         if not exp_str:
@@ -1480,26 +1483,22 @@ class Parser(DebugPrinter):
             args: A NoMatch instance or (value, position, parser)
         """
 
-        override = False
-        # Do not report NoMatch for comments matching.
-        # Use last exception instead.
-        if not self.in_parse_comment or self.nm is None:
-            # Non-comment nm will override comment nm
-            override = self.nm is None or self.nm._in_comment
-
+        # Non-comment NoMatch have precedence over comment NoMatch
+        # Non-optional NoMatch have precedence over optional NoMatch
+        # But the precedence is always higher for those that has gone
+        # further in the input stream.
         if len(args) == 1:
-            exception = args[0]
+            exc = args[0]
         else:
             rule, position, parser = args
-            exception = NoMatch(rule, position, parser)
-        exception._in_comment = self.in_parse_comment
+            exc = NoMatch(rule, position, parser, parser.in_optional)
+            exc._in_comment = self.in_parse_comment
 
-        # We will not cache NoMatch if the parser is in optional matching.
-        if self.in_optional:
-            raise exception
-
-        if override or exception.position > self.nm.position:
-            self.nm = exception
+        if self.nm is None or exc.position > self.nm.position or  \
+            (exc.position == self.nm.position and
+                ((self.nm.in_optional and not exc.parser.in_optional) or
+                 (not exc.parser.in_parse_comment and self.nm._in_comment))):
+            self.nm = exc
 
         raise self.nm
 

@@ -225,7 +225,7 @@ class ParsingExpression(object):
             name = self.name
             if name.startswith('__asgn'):
                 name = "{}[{}]".format(self.name, self._attr_name)
-            parser.dprint(">> Entering rule {}{} at position {} => {}"
+            parser.dprint(">> Matching rule {}{} at position {} => {}"
                           .format(name,
                                   " in {}".format(parser.in_rule)
                                   if parser.in_rule else "",
@@ -245,7 +245,8 @@ class ParsingExpression(object):
             if parser.debug:
                 parser.dprint("** Cache hit for [{}, {}] = '{}' : new_pos={}"
                       .format(self.name, c_pos, text(result), text(new_pos)))
-                parser.dprint("<< Leaving rule {}".format(self.name), -1)
+                parser.dprint("<<+ Matched rule {} at position {}"
+                      .format(self.name, new_pos), -1)
 
             # If NoMatch is recorded at this position raise.
             if isinstance(result, NoMatch):
@@ -287,7 +288,14 @@ class ParsingExpression(object):
             parser.last_pexpression = last_pexpression
 
             if parser.debug:
-                parser.dprint("<< Leaving rule {}".format(self.name), -1)
+                parser.dprint("<<{} rule {}{} at position {} => {}"
+                    .format("- Not matched"
+                                if parser.position is c_pos else "+ Matched",
+                            self.name,
+                            " in {}".format(parser.in_rule)
+                            if parser.in_rule else "",
+                            parser.position,
+                            parser.context()), -1)
 
             # If leaving root rule restore previous root rule name.
             if self.rule_name:

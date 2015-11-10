@@ -1,6 +1,11 @@
 Changelog for Arpeggio
 ======================
 
+* 2015-11-10 Release 1.2.1
+  - Fixing error reporting that wasn't taking into account successful matches
+    in optionals.
+  - Slightly imporved debug prints.
+
 * 2015-10-31 Release 1.2
   - Docs has been migrated to MkDocs and restructured. A lot of new additions
     have been made and three full length tutorials.

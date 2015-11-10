@@ -12,7 +12,7 @@
 ###############################################################################
 
 __author__ = "Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>"
-__version__ = "1.2"
+__version__ = "1.2.1"
 
 from setuptools import setup
 

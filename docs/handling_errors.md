@@ -9,8 +9,8 @@ will raise `NoMatch` exception with the information where in the input stream
 error has occurred and what the parser expect to see at that location.
 
 By default, if `NoMatch` is not caught you will get detailed explanation of
-the error on the console.  The exact location will be reported, the context
-(part of the input where the error occurred) and the first rule that was tried
+the error at the console.  The exact location will be reported, the context
+(part of the input where the error occurred) and all the rules that were tried
 at that location.
 
 Example:
@@ -28,7 +28,8 @@ following traceback will be printed:
 
     Traceback (most recent call last):
       ...
-    arpeggio.NoMatch: Expected '+' at position (1, 6) => '23+4/*r-89'.
+    arpeggio.NoMatch: Expected '+' or '-' or 'number' or 
+      '(' at position (1, 6) => '23+4/*r-89'.
 
 The place in the input stream is marked by `*` and the position in (row, col) is
 given (`(1, 6)`).
@@ -48,12 +49,9 @@ except NoMatch as e:
 
 `NoMatch` class has the following attributes:
 
-- `rule` - A `ParsingExpression` rule that is the source of the exception.
+- `rules` - A list of `ParsingExpression` rules that are the sources of the exception.
 - `position` - A position in the input stream where exception occurred.
 - `parser` - A `Parser` instance used for parsing.
-- `exp_str` -  What is expected? If not given it is deduced from the rule. Currently
-  this is used by [textX](https://github.com/igordejanovic/textX) for nicer
-  error reporting.
 
 The `position` is given as the offset from the beginning of the input string.
 To convert it to row and column use `pos_to_linecol` method of the parser.
@@ -69,11 +67,9 @@ except NoMatch as e:
 ```
 
 Arpeggio is a backtracking parser, which means that it will go back and try
-another alternatives when the match does not succeeds but it will nevertheless
-report the furthest place in the input where it failed.  Currently Arpeggio will
-report the first rule it tried at that location. Future versions could keep the
-list of all rules that was tried at reported location.
-
+another alternatives when the match does not succeeds. Nevertheless, it will 
+report the furthest place in the input where it failed. Arpeggio will
+report all `Match` rules that failed at that position.
 
 
 

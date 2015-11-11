@@ -1501,7 +1501,7 @@ class Parser(DebugPrinter):
             if self.nm is None or not parser.in_parse_comment:
                 if not self.nm or position > self.nm.position:
                     self.nm = NoMatch([rule], position, parser)
-                elif position == self.nm.position:
+                elif position == self.nm.position and isinstance(rule, Match):
                     self.nm.rules.append(rule)
 
         raise self.nm

@@ -322,18 +322,6 @@ class ParsingExpression(object):
 
         return result
 
-    # TODO: _nm_change_rule should be called from every parser expression parse
-    #         method that can potentially be the root parser rule.
-    def _nm_change_rule(self, nm, parser):
-        """
-        Change rule for the given NoMatch object to a more generic if
-        we did not consume any input and we are moving up the parser model.
-        Used to report most generic language element expected at the
-        place of the NoMatch exception.
-        """
-        if self.root and parser.position == nm.position and nm._up:
-            nm.rule_name = self.rule_name
-
 
 class Sequence(ParsingExpression):
     """
@@ -366,7 +354,6 @@ class Sequence(ParsingExpression):
 
         except NoMatch as m:
             parser.position = c_pos     # Backtracking
-            self._nm_change_rule(m, parser)
             raise
 
         finally:

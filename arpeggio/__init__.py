@@ -397,7 +397,6 @@ class OrderedChoice(Sequence):
                     break
             except NoMatch as m:
                 parser.position = c_pos  # Backtracking
-                self._nm_change_rule(m, parser)
 
         if not match:
             parser._nm_raise(self, c_pos, parser)

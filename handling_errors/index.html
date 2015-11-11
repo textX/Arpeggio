@@ -235,8 +235,8 @@
 will raise <code>NoMatch</code> exception with the information where in the input stream
 error has occurred and what the parser expect to see at that location.</p>
 <p>By default, if <code>NoMatch</code> is not caught you will get detailed explanation of
-the error on the console.  The exact location will be reported, the context
-(part of the input where the error occurred) and the first rule that was tried
+the error at the console.  The exact location will be reported, the context
+(part of the input where the error occurred) and all the rules that were tried
 at that location.</p>
 <p>Example:</p>
 <pre><code class="python">parser = ParserPython(calc)
@@ -250,7 +250,8 @@ parse_tree = parser.parse(input_expr)
 following traceback will be printed:</p>
 <pre><code>Traceback (most recent call last):
   ...
-arpeggio.NoMatch: Expected '+' at position (1, 6) =&gt; '23+4/*r-89'.
+arpeggio.NoMatch: Expected '+' or '-' or 'number' or 
+  '(' at position (1, 6) =&gt; '23+4/*r-89'.
 </code></pre>
 <p>The place in the input stream is marked by <code>*</code> and the position in (row, col) is
 given (<code>(1, 6)</code>).</p>
@@ -266,12 +267,9 @@ except NoMatch as e:
 
 <p><code>NoMatch</code> class has the following attributes:</p>
 <ul>
-<li><code>rule</code> - A <code>ParsingExpression</code> rule that is the source of the exception.</li>
+<li><code>rules</code> - A list of <code>ParsingExpression</code> rules that are the sources of the exception.</li>
 <li><code>position</code> - A position in the input stream where exception occurred.</li>
 <li><code>parser</code> - A <code>Parser</code> instance used for parsing.</li>
-<li><code>exp_str</code> -  What is expected? If not given it is deduced from the rule. Currently
-  this is used by <a href="https://github.com/igordejanovic/textX">textX</a> for nicer
-  error reporting.</li>
 </ul>
 <p>The <code>position</code> is given as the offset from the beginning of the input string.
 To convert it to row and column use <code>pos_to_linecol</code> method of the parser.</p>
@@ -285,10 +283,9 @@ except NoMatch as e:
 </code></pre>
 
 <p>Arpeggio is a backtracking parser, which means that it will go back and try
-another alternatives when the match does not succeeds but it will nevertheless
-report the furthest place in the input where it failed.  Currently Arpeggio will
-report the first rule it tried at that location. Future versions could keep the
-list of all rules that was tried at reported location.</p></div>
+another alternatives when the match does not succeeds. Nevertheless, it will 
+report the furthest place in the input where it failed. Arpeggio will
+report all <code>Match</code> rules that failed at that position.</p></div>
             
         </div>
 

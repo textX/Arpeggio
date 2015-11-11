@@ -58,47 +58,49 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        rule (ParserExpression): A rule that is the source of exception.
+        rules (list of ParserExpression): Rules that are tried at the position
+            of the exception.
         position (int): A position in the input stream where exception
             occurred.
         parser (Parser): An instance of a parser.
-        in_optional(bool): If the exception was raised during parsing of
-            optional parsing expressions.
-        exp_str(str): What is expected? If not given it is deduced from
-            the rule. Used in error messages.
     """
-    def __init__(self, rule, position, parser, in_optional, exp_str=None):
-        self.rule = rule
+    def __init__(self, rules, position, parser):
+        self.rules = rules
         self.position = position
         self.parser = parser
-        self.in_optional = in_optional
-        self.exp_str = exp_str
-
-        if not exp_str:
-            if hasattr(self.rule, '_exp_str'):
-                # Rule may override error message
-                self.exp_str = self.rule._exp_str
-            elif self.rule.root:
-                self.exp_str = rule.rule_name
-            elif isinstance(self.rule, Match) and \
-                    not isinstance(self.rule, EndOfFile):
-                self.exp_str = rule.to_match
-            else:
-                self.exp_str = self.rule.name
 
         # By default when NoMatch is thrown we will go up the Parser Model.
         self._up = True
 
     def __str__(self):
+        def rule_to_exp_str(rule):
+            if hasattr(rule, '_exp_str'):
+                # Rule may override expected report string
+                return rule._exp_str
+            elif rule.root:
+                return rule.rule_name
+            elif isinstance(rule, Match) and \
+                    not isinstance(rule, EndOfFile):
+                return rule.to_match
+            else:
+                return rule.name
+
+        what_is_expected = ["'{}'".format(rule_to_exp_str(r)) for r in self.rules]
+
+        if len(what_is_expected) == 0:
+            what_str = "'{}'".format(what_is_expected[0])
+        else:
+            what_str = " or ".join(what_is_expected)
+
         if self.parser.file_name:
-            return "Expected '{}' at {}{} => '{}'."\
-                .format(self.exp_str,
+            return "Expected {} at {}:{} => '{}'."\
+                .format(what_str,
                         self.parser.file_name,
                         text(self.parser.pos_to_linecol(self.position)),
                         self.parser.context(position=self.position))
         else:
-            return "Expected '{}' at position {} => '{}'."\
-                .format(self.exp_str,
+            return "Expected {} at position {} => '{}'."\
+                .format(what_str,
                         text(self.parser.pos_to_linecol(self.position)),
                         self.parser.context(position=self.position))
 
@@ -1491,22 +1493,17 @@ class Parser(DebugPrinter):
             args: A NoMatch instance or (value, position, parser)
         """
 
-        # Non-comment NoMatch have precedence over comment NoMatch
-        # Non-optional NoMatch have precedence over optional NoMatch
-        # But the precedence is always higher for those that has gone
-        # further in the input stream.
         if len(args) == 1:
             exc = args[0]
+            if exc.position > self.nm.position:
+                self.nm = exc
         else:
             rule, position, parser = args
-            exc = NoMatch(rule, position, parser, parser.in_optional)
-            exc._in_comment = self.in_parse_comment
-
-        if self.nm is None or exc.position > self.nm.position or  \
-            (exc.position == self.nm.position and
-                ((self.nm.in_optional and not exc.parser.in_optional) or
-                 (not exc.parser.in_parse_comment and self.nm._in_comment))):
-            self.nm = exc
+            if self.nm is None or not parser.in_parse_comment:
+                if not self.nm or position > self.nm.position:
+                    self.nm = NoMatch([rule], position, parser)
+                elif position == self.nm.position:
+                    self.nm.rules.append(rule)
 
         raise self.nm
 

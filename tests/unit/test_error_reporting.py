@@ -10,11 +10,12 @@ from __future__ import unicode_literals
 import pytest
 
 from arpeggio import ZeroOrMore, Optional, ParserPython, NoMatch, EOF
+from arpeggio import RegExMatch as _
 
 
 def test_non_optional_precedence():
     """
-    Test that non-optional match has precedence over optional.
+    Test that all tried match at position are reported.
     """
     def grammar():  return Optional('a'), 'b'
 
@@ -24,7 +25,7 @@ def test_non_optional_precedence():
         parser.parse('c')
 
     except NoMatch as e:
-        assert "Expected 'b'" in str(e)
+        assert "Expected 'a' or 'b'" in str(e)
 
     def grammar():  return ['b', Optional('a')]
 
@@ -53,5 +54,42 @@ def test_optional_with_better_match():
 
     except NoMatch as e:
         assert "Expected 'five'" in str(e)
+
+def test_file_name_reporting():
+    """
+    Test that if parser has file name set it will be reported.
+    """
+
+    def grammar():      return Optional('a'), 'b', EOF
+
+    parser = ParserPython(grammar)
+
+    try:
+        parser.parse("\n\n   a c", file_name="test_file.peg")
+    except NoMatch as e:
+        assert "Expected 'b' at test_file.peg:(3, 6)" in str(e)
+
+def test_comment_matching_not_reported():
+    """
+    Test that matching of comments is not reported.
+    """
+
+    def grammar():      return Optional('a'), 'b', EOF
+    def comments():     return _('\/\/.*$')
+
+    parser = ParserPython(grammar, comments)
+
+    try:
+        parser.parse('\n\n a // This is a comment \n c')
+    except NoMatch as e:
+        assert "Expected 'b' at position (4, 2)" in str(e)
+
+
+
+
+
+
+
+
 
 

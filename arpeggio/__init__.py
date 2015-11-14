@@ -81,11 +81,11 @@ class NoMatch(Exception):
                 return rule.rule_name
             elif isinstance(rule, Match) and \
                     not isinstance(rule, EndOfFile):
-                return rule.to_match
+                return "'{}'".format(rule.to_match)
             else:
                 return rule.name
 
-        what_is_expected = ["'{}'".format(rule_to_exp_str(r)) for r in self.rules]
+        what_is_expected = ["{}".format(rule_to_exp_str(r)) for r in self.rules]
 
         if len(what_is_expected) == 0:
             what_str = "'{}'".format(what_is_expected[0])

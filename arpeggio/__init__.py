@@ -592,7 +592,7 @@ class Combine(Decorator):
 
             # Create terminal from result
             return Terminal(self, c_pos,
-                            "".join([text(result) for result in results]))
+                            "".join([x.flat_str() for x in results]))
         except NoMatch:
             parser.position = c_pos  # Backtracking
             raise
@@ -886,6 +886,9 @@ class Terminal(ParseTreeNode):
         else:
             return "%s [%s]" % (self.rule_name, self.position)
 
+    def flat_str(self):
+        return self.value
+
     def __str__(self):
         return self.value
 
@@ -933,6 +936,12 @@ class NonTerminal(ParseTreeNode, list):
     @property
     def desc(self):
         return self.name
+
+    def flat_str(self):
+        """
+        Return flatten string representation.
+        """
+        return "".join([x.flat_str() for x in self])
 
     def __str__(self):
         return " | ".join([text(x) for x in self])

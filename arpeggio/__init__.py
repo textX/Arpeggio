@@ -252,7 +252,7 @@ class ParsingExpression(object):
 
             # If NoMatch is recorded at this position raise.
             if isinstance(result, NoMatch):
-                parser._nm_raise(result)
+                raise result
 
             # else return cached result
             return result

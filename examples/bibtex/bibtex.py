@@ -30,8 +30,9 @@ def comment():                  return _(r'[^@]+')
 def bibtype():                  return _(r'@\w+')
 def bibkey():                   return _(r'[^\s,]+')
 def fieldvalue_quoted_content():    return _(r'((\\")|[^"])*')
-def fieldvalue_braced_content():    return Combine(ZeroOrMore(Optional(And("{"), fieldvalue_inner),\
-                                                    fieldvalue_part))
+def fieldvalue_braced_content():    return Combine(
+                                            ZeroOrMore([Optional(And("{"), fieldvalue_inner),\
+                                                        fieldvalue_part]))
 
 def fieldvalue_part():          return _(r'((\\")|[^{}])+')
 def fieldvalue_inner():         return "{", fieldvalue_braced_content, "}"

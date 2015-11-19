@@ -692,11 +692,13 @@ class RegExMatch(Match):
         c_pos = parser.position
         m = self.regex.match(parser.input[c_pos:])
         if m:
+            matched = m.group()
             if parser.debug:
-                parser.dprint("++ Match '%s' at %d => '%s'" % (m.group(),
-                      c_pos, parser.context(len(m.group()))))
-            parser.position += len(m.group())
-            return Terminal(self, c_pos, m.group())
+                parser.dprint("++ Match '%s' at %d => '%s'" % (matched,
+                      c_pos, parser.context(len(matched))))
+            parser.position += len(matched)
+            if matched:
+                return Terminal(self, c_pos, matched)
         else:
             if parser.debug:
                 parser.dprint("-- NoMatch at {}".format(c_pos))

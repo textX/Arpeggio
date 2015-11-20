@@ -77,20 +77,24 @@ To suppress node completely return `None` from visitor method. In this case
 the parent visitor method will not get this node in its `children` parameter.
 
 In the [calc.py
-example](https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc.py)
-a semantic analysis (`CalcVisitor` class) will evaluate the result of arithmetic
-expression. The parse tree is thus transformed to a single numeric value that
-represent the result of the expression.
+example](https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc/calc.py)
+a semantic analysis
+([CalcVisitor](https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc/calc.py#L31)
+class) will evaluate the result of arithmetic expression. The parse tree is thus
+transformed to a single numeric value that represent the result of the
+expression.
 
 In the [robot.py
-example](https://github.com/igordejanovic/Arpeggio/blob/master/examples/calc.py)
-a semantic analysis (`RobotVisitor` class) will evaluate robot program
-(transform its parse tree) to the final robot location.
+example](https://github.com/igordejanovic/Arpeggio/tree/master/examples/robot) a
+semantic analysis
+([RobotVisitor](https://github.com/igordejanovic/Arpeggio/blob/master/examples/robot/robot.py#L36)
+class) will evaluate robot program (transform its parse tree) to the final robot
+location.
 
 Semantic analysis can do a complex stuff. For example, see
-[peg_peg.py](https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg.py)
+[peg_peg.py](https://github.com/igordejanovic/Arpeggio/blob/master/examples/peg_peg/peg_peg.py)
 and
-[PEGVisitor](https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py)
+[PEGVisitor](https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py#L53)
 class where the PEG parser for the given language is built using semantic
 analysis.
 

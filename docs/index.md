@@ -32,11 +32,11 @@ tutorials.
 * [Support for comments](configuration.md#comment-handling)
 * [Newline termination for
   Repetition](configuration.md#newline-termination-for-repetitions) (available only in Python syntax)
-* [Parse tree navigation]()
-* [Visitors for semantic analysis]()
-* [Extensive error reporting]()
-* [Good support for debugging and visualization]()
-* [Good test coverage]()
+* [Parse tree navigation](parse_trees.md)
+* [Visitors for semantic analysis](semantics.md)
+* [Extensive error reporting](handling_errors.md)
+* [Good support for debugging and visualization](debugging.md)
+* [Good test coverage](https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit)
 * Beautiful mkdocs documentation - you are reading it
 
 ## Open-source projects using Arpeggio

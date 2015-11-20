@@ -73,23 +73,15 @@ class CalcVisitor(PTNodeVisitor):
         """
         if self.debug:
             print("Expression {}".format(children))
-        expr = 0
-        start = 0
-        # Check for unary + or - operator
-        if text(children[0]) in "+-":
-            start = 1
-
-        for i in range(start, len(children), 2):
+        expr = children[0]
+        for i in range(2, len(children), 2):
             if i and children[i - 1] == "-":
                 expr -= children[i]
             else:
                 expr += children[i]
-
         if self.debug:
             print("Expression = {}".format(expr))
-
         return expr
-
 
 
 def main(debug=False):

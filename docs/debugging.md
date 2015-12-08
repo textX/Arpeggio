@@ -54,7 +54,7 @@ $ dot -Tpng -O calc_parser_model.dot
 After this command you will get ``calc_parser_model.dot.png`` file which can be
 opened in any ``png`` image viewer. This is how it looks like:
 
-<img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/>
+<a href="../images/calc_parser_model.dot.png" target="_blank"><img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/></a>
 
 Each node in this graph is a parsing expression.  Nodes are labeled by the type
 name of the parsing expression.  If node represents the rule from the grammar
@@ -78,7 +78,7 @@ $ dot -Tpng -O calc_parse_tree.dot
 
 Which produces `png` image given bellow.
 
-<img src="../images/calc_parse_tree.dot.png"/>
+<a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a>
 
 You can also explicitly render your parser model or parse tree to `dot` file
 even if the parser is not in the debug mode.

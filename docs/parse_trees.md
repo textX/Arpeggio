@@ -13,7 +13,8 @@ the inner nodes are non-terminals.
 Here is an example parse tree for the `calc` grammar and the expression
 `-(4-1)*5+(2+4.67)+5.89/(.2+7)`:
 
-![Calc parse tree](images/calc_parse_tree.dot.png)
+<a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a>
+
 
 Each non-leaf node is non-terminal. The name in this nodes are the names of the
 grammar PEG rules that created them.

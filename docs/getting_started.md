@@ -125,12 +125,12 @@ model (grammar) and parse tree visualization.
 
 Here is an image rendered using graphviz of parser model for `calc` grammar.
 
-<img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/>
+<a href="../images/calc_parser_model.dot.png" target="_blank"><img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/></a>
 
 
 And here is an image rendered for parse tree for the above parsed `calc` expression.
 
-<img src="../images/calc_parse_tree.dot.png"/>
+<a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a>
 
 
 ## Read the tutorials

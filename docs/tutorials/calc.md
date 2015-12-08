@@ -84,7 +84,7 @@ This parser is able to parse arithmetic expression like this
 
 and produce parse tree like this
 
-![calc parse tree](../images/calc_parse_tree.dot.png)
+<a href="../../images/calc_parse_tree.dot.png" target="_blank"><img src="../../images/calc_parse_tree.dot.png"/></a>
 
 
 !!! note

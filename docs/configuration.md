@@ -101,8 +101,7 @@ parse tree.
 
 For example, `calc` parse tree above will look like this:
 
-![Calc parse tree reduced](images/calc_parse_tree_reduced.dot.png)
-
+<a href="../images/calc_parse_tree_reduced.dot.png" target="_blank"><img src="../images/calc_parse_tree_reduced.dot.png"/></a>
 
 Notice the removal of each non-terminal with single child.
 

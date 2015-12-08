@@ -129,12 +129,12 @@ $ python csv.py
 
 **Congratulations!! You have successfuly parsed CSV file.**
 
-This parse tree is [visualized](../debugging.md#visualization) below
-(Tip: The image is large. Right click on it and choose `View image` to see it in
-a separate tab and to be able to use zooming):
+This parse tree is [visualized](../debugging.md#visualization) below (Tip: The
+image is large. Click on it to see it in a separate tab and to be able to use
+zooming):
 
 
-![CSV parse tree](img/csvfile_parse_tree.dot.png)
+<a href="../img/csvfile_parse_tree.dot.png" target="_blank"><img src="../img/csvfile_parse_tree.dot.png"/></a>
 
 
 !!! note

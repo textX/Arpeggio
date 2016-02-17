@@ -47,6 +47,8 @@ tutorials.
   self-identification for Python
   ([parsers](https://github.com/sdvillal/whatami/blob/master/whatami/parsers.py)
   module)
+- [ithkuil](https://github.com/fizyk20/ithkuil) - A Python package providing
+  tools for analysing texts in the [Ithkuil](http://ithkuil.net/) constructed language.
 
 
 ## Why is it called arpeggio?

@@ -4,7 +4,7 @@
 # Purpose: Basic performance test of arpeggio parser to check for
 #   performance differences of various approaches.
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2016 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
 
@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
 # Setup code works for python 3 only. Haven't figured out yet how to
 # from __future__ import unicode_literals  in the setup code
-    setup = '''
+    setup = r'''
 import codecs
 from arpeggio import OneOrMore, ZeroOrMore, EOF, ParserPython, Optional
 from arpeggio import RegExMatch as _
@@ -25,11 +25,12 @@ def factor():           return [(Optional([u"+",u"-"]), number), (u"(", expressi
 def term():             return factor, ZeroOrMore([u"*",u"/"], factor)
 def expression():       return term, ZeroOrMore([u"+", u"-"], term)
 def calcfile():         return OneOrMore(expression), EOF
+def comment():          return _(r'\/\*(.|\n)*?\*\/')
 
-parser = ParserPython(calcfile, reduce_tree=True)
-with codecs.open("input.txt", encoding="utf-8") as f:
+parser = ParserPython(calcfile, comment, reduce_tree=True)
+with codecs.open("input_comments.txt", encoding="utf-8") as f:
     input = f.read()
     '''
 
     print(timeit.timeit("parser.parse(input)", setup=setup, number=20))
-    # 4 s
+    # 4.7 s

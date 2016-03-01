@@ -615,33 +615,31 @@ class Match(ParsingExpression):
         else:
             return "%s(%s)" % (self.__class__.__name__, self.to_match)
 
-    def _parse_intro(self, parser):
+    def _parse_comments(self, parser):
+        """Parse comments."""
 
-        parser.in_parse_intro = True
-
-        # Skip whitespaces and parse comments if we are not
-        # in the lexical rule
         try:
-            if not parser.in_lex_rule:
-                parser._skip_ws()
-                if parser.comments_model and not parser.in_parse_comment:
-                    parser.in_parse_comment = True
-                    try:
-                        while True:
-                            parser.comments.append(
-                                parser.comments_model.parse(parser))
-                            parser._skip_ws()
-                    except NoMatch:
-                        # NoMatch in comment matching is perfectly
-                        # legal and no action should be taken.
-                        pass
-
-                    finally:
-                        parser.in_parse_comment = False
+            parser.in_parse_comments = True
+            if parser.comments_model:
+                try:
+                    while True:
+                        # TODO: Consumed whitespaces and comments should be
+                        #       attached to the first match ahead.
+                        parser.comments.append(
+                            parser.comments_model.parse(parser))
+                        parser._skip_ws()
+                except NoMatch:
+                    # NoMatch in comment matching is perfectly
+                    # legal and no action should be taken.
+                    pass
         finally:
-            parser.in_parse_intro = False
+            parser.in_parse_comments = False
 
     def parse(self, parser):
+
+        if not parser.in_lex_rule:
+            parser._skip_ws()
+
         if parser.debug:
             parser.dprint("?? Try match rule {}{} at position {} => {}"
                 .format(self.name,
@@ -650,8 +648,14 @@ class Match(ParsingExpression):
                         parser.position,
                         parser.context()))
 
-        if not parser.in_parse_intro:
-            self._parse_intro(parser)
+        if parser.position in parser.comment_positions:
+            # Skip comments if already parsed.
+            parser.position = parser.comment_positions[parser.position]
+        else:
+            if not parser.in_parse_comments and not parser.in_lex_rule:
+                comment_start = parser.position
+                self._parse_comments(parser)
+                parser.comment_positions[comment_start] = parser.position
 
         return self._parse(parser)
 
@@ -1193,9 +1197,7 @@ class Parser(DebugPrinter):
         parse_tree(NonTerminal): The parse tree consisting of NonTerminal and
             Terminal instances.
         in_rule (str): Current rule name.
-        in_parse_comment (bool): True if parsing comments.
-        in_parse_intro (bool): True if parsing intro (whitespaces and
-            comments). Used to prevent infinite recursion.
+        in_parse_comments (bool): True if parsing comments.
         in_optional (bool): True if parsing optionals (Optional, ZeroOrMore or
             OneOrMore after first).
         in_lex_rule (bool): True if in lexical rule. Currently used in Combine
@@ -1232,6 +1234,7 @@ class Parser(DebugPrinter):
         self.ignore_case = ignore_case
         self.comments_model = None
         self.comments = []
+        self.comment_positions = {}
         self.sem_actions = {}
 
         self.parse_tree = None
@@ -1246,8 +1249,7 @@ class Parser(DebugPrinter):
         # Used for debugging purposes
         self.in_rule = ''
 
-        self.in_parse_comment = False
-        self.in_parse_intro = False
+        self.in_parse_comments = False
 
         # If under optional PE (Optional or ZeroOrMore or OneOrMore after
         # first occurence) we do not store NoMatch for error reporting.
@@ -1303,6 +1305,7 @@ class Parser(DebugPrinter):
         self.parser_model.clear_cache()
         if self.comments_model:
             self.comments_model.clear_cache()
+        self.comment_positions = {}
         self.parse_tree = self._parse()
 
         # In debug mode export parse tree to dot file for
@@ -1496,7 +1499,7 @@ class Parser(DebugPrinter):
                 self.nm = exc
         else:
             rule, position, parser = args
-            if self.nm is None or not parser.in_parse_comment:
+            if self.nm is None or not parser.in_parse_comments:
                 if not self.nm or position > self.nm.position:
                     self.nm = NoMatch([rule], position, parser)
                 elif position == self.nm.position and isinstance(rule, Match):

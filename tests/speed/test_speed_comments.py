@@ -33,4 +33,4 @@ with codecs.open("input_comments.txt", encoding="utf-8") as f:
     '''
 
     print(timeit.timeit("parser.parse(input)", setup=setup, number=20))
-    # 4.7 s
+    # 4.4 s

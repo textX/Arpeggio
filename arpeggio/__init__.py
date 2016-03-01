@@ -694,7 +694,7 @@ class RegExMatch(Match):
 
     def _parse(self, parser):
         c_pos = parser.position
-        m = self.regex.match(parser.input[c_pos:])
+        m = self.regex.match(parser.input, c_pos)
         if m:
             matched = m.group()
             if parser.debug:

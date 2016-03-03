@@ -1,6 +1,17 @@
 Changelog for Arpeggio
 ======================
 
+* 2016-03-03 Release 1.3
+  - Improved error reporting (See issue #25). On the point of error all possible
+    matches will be reported now.
+  - Fixed bug with regex that succeeds with empty string in repetitions
+    (see issue #26).
+  - Various fixes in examples and the docs.
+  - Significant performance improvement for parsing of large files. This fix
+    also changes handling of '^' in regex matches. Now '^' will match on the
+    beginning of the input and beginning of new line.
+  - Performance improvements in comment parsing.
+
 * 2015-11-10 Release 1.2.1
   - Fixing error reporting that wasn't taking into account successful matches
     in optionals.

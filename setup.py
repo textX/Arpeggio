@@ -4,15 +4,16 @@
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009-2015 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2016 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
-# Arpeggio is an implementation of packrat parser interpreter based on PEG grammars.
+# Arpeggio is an implementation of packrat parser interpreter based on PEG
+# grammars.
 # Parsers are defined using python language construction or PEG language.
 ###############################################################################
 
 __author__ = "Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>"
-__version__ = "1.2.1"
+__version__ = "1.3"
 
 from setuptools import setup
 

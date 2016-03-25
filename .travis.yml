@@ -12,5 +12,5 @@ install:
 script:
     - py.test --cov=arpeggio --cov-report xml tests/unit
 after_success:
-    - coveralls
+    - coveralls debug
 

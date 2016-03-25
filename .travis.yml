@@ -7,10 +7,10 @@ python:
     - "3.5"
 install:
     - python setup.py install
-    - pip install coveralls
+    - pip install python-coveralls
     - pip install pytest-cov
 script:
-    - py.test --cov=arpeggio --cov-report xml tests/unit
+    - py.test --cov=arpeggio --cov-report term-missing tests/unit
 after_success:
-    - coveralls debug
+    - coveralls
 

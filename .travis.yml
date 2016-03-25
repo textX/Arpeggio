@@ -10,7 +10,7 @@ install:
     - pip install coveralls
     - pip install pytest-cov
 script:
-    - py.test --cov=arpeggio tests/unit
+    - py.test --cov=arpeggio --cov-report xml tests/unit
 after_success:
     - coveralls
 

@@ -125,13 +125,13 @@ class DebugPrinter(object):
 
     Attributes:
         debug (bool): If true debugging messages will be printed.
-        current_ident(int): Current identation level for prints.
+        _current_ident(int): Current identation level for prints.
     """
 
     def __init__(self, **kwargs):
 
         self.debug = kwargs.pop("debug", False)
-        self.current_ident = 0
+        self._current_ident = 0
 
         super(DebugPrinter, self).__init__(**kwargs)
 
@@ -141,12 +141,12 @@ class DebugPrinter(object):
         the current identation level.
         """
         if ident_change < 0:
-            self.current_ident += ident_change
+            self._current_ident += ident_change
 
-        print(("%s%s" % ("   " * self.current_ident, message)).encode('utf-8'))
+        print(("%s%s" % ("   " * self._current_ident, message)).encode('utf-8'))
 
         if ident_change > 0:
-            self.current_ident += ident_change
+            self._current_ident += ident_change
 
 
 # ---------------------------------------------------------

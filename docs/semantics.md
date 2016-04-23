@@ -68,9 +68,9 @@ transformation of the non-terminal matched by this rule can be done as:
       return transformed_node
 
 
-`node` is the current `NonTerminal` or `Terminal` from the parse tree
-while the `children` is instance of `SemanticResults` class.  This class is
-a list-like structure that holds the results of semantic evaluation from the
+`node` is the current `NonTerminal` or `Terminal` from the parse tree while the
+`children` is an instance of `SemanticActionResults` class. This class is a
+list-like structure that holds the results of semantic evaluation from the
 children parse tree nodes (analysis is done bottom-up).
 
 To suppress node completely return `None` from visitor method. In this case

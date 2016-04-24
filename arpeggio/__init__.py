@@ -204,6 +204,12 @@ class ParsingExpression(object):
         else:
             return id(self)
 
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return self.desc
+
     def clear_cache(self, processed=None):
         """
         Clears memoization cache. Should be called on input change.
@@ -365,6 +371,9 @@ class Sequence(ParsingExpression):
         if results:
             return results
 
+    def __unicode__(self):
+        return " ".join([text(x) for x in self.nodes])
+
 
 class OrderedChoice(Sequence):
     """
@@ -389,6 +398,9 @@ class OrderedChoice(Sequence):
             parser._nm_raise(self, c_pos, parser)
 
         return result
+
+    def __unicode__(self):
+        return "|".join([text(x) for x in self.nodes])
 
 
 class Repetition(ParsingExpression):
@@ -429,6 +441,9 @@ class Optional(Repetition):
 
         return result
 
+    def __unicode__(self):
+        return "({})?".format(text(self.nodes[0]))
+
 
 class ZeroOrMore(Repetition):
     """
@@ -467,6 +482,9 @@ class ZeroOrMore(Repetition):
         parser.in_optional = oldin_optional
 
         return results
+
+    def __unicode__(self):
+        return "({})*".format(text(self.nodes[0]))
 
 
 class OneOrMore(Repetition):
@@ -513,6 +531,9 @@ class OneOrMore(Repetition):
 
         return results
 
+    def __unicode__(self):
+        return "({})+".format(text(self.nodes[0]))
+
 
 class SyntaxPredicate(ParsingExpression):
     """
@@ -537,6 +558,9 @@ class And(SyntaxPredicate):
                 raise
         parser.position = c_pos
 
+    def __unicode__(self):
+        return "&({})".format(text(self.nodes[0]))
+
 
 class Not(SyntaxPredicate):
     """
@@ -553,6 +577,9 @@ class Not(SyntaxPredicate):
                 return
         parser.position = c_pos
         parser._nm_raise(self, c_pos, parser)
+
+    def __unicode__(self):
+        return "!({})".format(text(self.nodes[0]))
 
 
 class Empty(SyntaxPredicate):
@@ -686,11 +713,8 @@ class RegExMatch(Match):
             flags |= re.IGNORECASE
         self.regex = re.compile(self.to_match_regex, flags)
 
-    def __str__(self):
-        return self.to_match
-
     def __unicode__(self):
-        return self.__str__()
+        return self.to_match
 
     def _parse(self, parser):
         c_pos = parser.position
@@ -748,11 +772,8 @@ class StrMatch(Match):
                             parser.context(len(self.to_match))))
             parser._nm_raise(self, c_pos, parser)
 
-    def __str__(self):
-        return self.to_match
-
     def __unicode__(self):
-        return self.__str__()
+        return self.to_match
 
     def __eq__(self, other):
         return self.to_match == text(other)

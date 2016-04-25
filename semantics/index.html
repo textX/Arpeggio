@@ -290,9 +290,9 @@ transformation of the non-terminal matched by this rule can be done as:</p>
   ... # transform node using 'node' and 'children' parameter
   return transformed_node
 </code></pre>
-<p><code>node</code> is the current <code>NonTerminal</code> or <code>Terminal</code> from the parse tree
-while the <code>children</code> is instance of <code>SemanticResults</code> class.  This class is
-a list-like structure that holds the results of semantic evaluation from the
+<p><code>node</code> is the current <code>NonTerminal</code> or <code>Terminal</code> from the parse tree while the
+<code>children</code> is an instance of <code>SemanticActionResults</code> class. This class is a
+list-like structure that holds the results of semantic evaluation from the
 children parse tree nodes (analysis is done bottom-up).</p>
 <p>To suppress node completely return <code>None</code> from visitor method. In this case
 the parent visitor method will not get this node in its <code>children</code> parameter.</p>

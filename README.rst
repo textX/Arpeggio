@@ -12,6 +12,9 @@ Arpeggio is a recursive descent parser with memoization based on PEG grammars
 Documentation with tutorials is available `here
 <http://igordejanovic.net/Arpeggio/>`_.
 
+**Note:** for a higher level parsing/language tool (i.e., a nicer interface to
+Arpeggio) see `textX <https://github.com/igordejanovic/textX>`_.
+
 
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/Arpeggio.svg
    :target: https://pypi.python.org/pypi/Arpeggio

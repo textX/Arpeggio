@@ -27,7 +27,9 @@ import types
 DEFAULT_WS = '\t\n\r '
 NOMATCH_MARKER = 0
 
-
+class ShortestChoiceList(list):
+    pass
+    
 class ArpeggioError(Exception):
     """
     Base class for arpeggio errors.
@@ -403,7 +405,37 @@ class OrderedChoice(Sequence):
             parser._nm_raise(self, c_pos, parser)
 
         return result
+        
+class ShortestChoice(Sequence):
+    def _parse(self, parser):
+        match = False
+        c_pos = parser.position
+        shortest_result = None
+        shortest_result_str = None
+        shortest_result_cpos = None
+        for e in self.nodes:
+            try:
+                result = e.parse(parser)
+                if result is not None:
+                    result = [result]
+                    result_str = "".join([x.flat_str() for x in flatten(result)])
+                    if (not shortest_result) or (len(shortest_result_str) > len(result_str)):
+                        shortest_result = result
+                        shortest_result_str = result_str
+                        shortest_result_cpos = parser.position
+                    match = True
+                    parser.position = c_pos
+            except NoMatch as m:
+                parser.position = c_pos  # Backtracking
 
+
+        if not match:
+            parser._nm_raise(self, c_pos, parser)
+
+        parser.position = shortest_result_cpos
+        return shortest_result
+
+    pass
 
 class Repetition(ParsingExpression):
     """
@@ -1701,8 +1733,10 @@ class ParserPython(Parser):
                 if any((isinstance(x, CrossRef) for x in retval.nodes)):
                     __for_resolving.append(retval)
 
-            elif type(expression) in [list, tuple]:
-                if type(expression) is list:
+            elif type(expression) in [list, tuple, ShortestChoiceList]:
+                if type(expression) is ShortestChoiceList:
+                    retval = ShortestChoice(expression)
+                elif type(expression) is list:
                     retval = OrderedChoice(expression)
                 else:
                     retval = Sequence(expression)

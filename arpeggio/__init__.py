@@ -192,7 +192,7 @@ class ParsingExpression(object):
 
     @property
     def desc(self):
-        return self.name
+        return "{}{}".format(self.name, "-" if self.suppress else "")
 
     @property
     def name(self):

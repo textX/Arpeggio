@@ -167,6 +167,8 @@ class ParsingExpression(object):
             root of the parser rule? The root parser rule will create
             non-terminal node of the parse tree during parsing.
         nodes (list of ParsingExpression): A list of child parser expressions.
+        suppress (bool): If this is set to True than no ParseTreeNode will be
+            created for this ParsingExpression. Default False.
     """
     def __init__(self, *elements, **kwargs):
 
@@ -181,6 +183,8 @@ class ParsingExpression(object):
         if not hasattr(nodes, '__iter__'):
             nodes = [nodes]
         self.nodes = nodes
+
+        self.suppress = kwargs.get('suppress', False)
 
         # Memoization. Every node cache the parsing results for the given input
         # positions.
@@ -276,7 +280,8 @@ class ParsingExpression(object):
 
         try:
             result = self._parse(parser)
-            if type(result) is list and result and result[0] is None:
+            if self.suppress or (type(result) is list and
+                                   result and result[0] is None):
                 result = None
 
         except NoMatch as e:
@@ -657,7 +662,9 @@ class Match(ParsingExpression):
                 self._parse_comments(parser)
                 parser.comment_positions[comment_start] = parser.position
 
-        return self._parse(parser)
+        result = self._parse(parser)
+        if not self.suppress:
+            return result
 
 
 class RegExMatch(Match):

@@ -65,7 +65,7 @@ at the top of the list ;)
 
 ## Citing Arpeggio
 
-If you want to cite Arpeggio please cite this paper:
+If you use Arpeggio please cite this paper:
 
 Dejanović I., Milosavljević G., Vaderna R.: Arpeggio: A flexible PEG parser for
 Python, Knowledge-Based Systems, 2016, 95, 71 - 74,

@@ -242,7 +242,7 @@ class ParsingExpression(object):
         # Memoization.
         # If this position is already parsed by this parser expression use
         # the result
-        if c_pos in self.result_cache:
+        if parser.memoization and c_pos in self.result_cache:
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             if parser.debug:
@@ -282,7 +282,8 @@ class ParsingExpression(object):
         except NoMatch as e:
             parser.position = c_pos  # Backtracking
             # Memoize NoMatch at this position for this rule
-            self.result_cache[c_pos] = (e, c_pos)
+            if parser.memoization:
+                self.result_cache[c_pos] = (e, c_pos)
             raise
 
         finally:
@@ -319,7 +320,8 @@ class ParsingExpression(object):
                 result = NonTerminal(self, result)
 
         # Result caching for use by memoization.
-        self.result_cache[c_pos] = (result, parser.position)
+        if parser.memoization:
+            self.result_cache[c_pos] = (result, parser.position)
 
         return result
 
@@ -1212,7 +1214,7 @@ class Parser(DebugPrinter):
         last_pexpression (ParsingExpression): Last parsing expression traversed.
     """
     def __init__(self, skipws=True, ws=None, reduce_tree=False,
-                 autokwd=False, ignore_case=False, **kwargs):
+                 autokwd=False, ignore_case=False, memoization=False, **kwargs):
         """
         Args:
             skipws (bool): Should the whitespace skipping be done.  Default is
@@ -1223,6 +1225,8 @@ class Parser(DebugPrinter):
             autokwd(bool): If keyword-like StrMatches are matched on word
                 boundaries. Default is False.
             ignore_case(bool): If case is ignored (default=False)
+            memoization(bool): If memoization should be used
+                (a.k.a. packrat parsing)
         """
 
         super(Parser, self).__init__(**kwargs)
@@ -1239,6 +1243,7 @@ class Parser(DebugPrinter):
         self.reduce_tree = reduce_tree
         self.autokwd = autokwd
         self.ignore_case = ignore_case
+        self.memoization = memoization
         self.comments_model = None
         self.comments = []
         self.comment_positions = {}

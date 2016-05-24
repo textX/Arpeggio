@@ -69,9 +69,6 @@ class NoMatch(Exception):
         self.position = position
         self.parser = parser
 
-        # By default when NoMatch is thrown we will go up the Parser Model.
-        self._up = True
-
     def __str__(self):
         def rule_to_exp_str(rule):
             if hasattr(rule, '_exp_str'):
@@ -262,10 +259,6 @@ class ParsingExpression(object):
 
             # else return cached result
             return result
-
-        # We are descending down
-        if parser.nm:
-            parser.nm._up = False
 
         # Remember last parsing expression and set this as
         # the new last.

@@ -32,5 +32,5 @@ with codecs.open("input.txt", encoding="utf-8") as f:
     '''
 
     print(timeit.timeit("parser.parse(input)", setup=setup, number=20))
-    # 3.8 s
+    # 3.06 s without memoization
 

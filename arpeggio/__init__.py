@@ -341,7 +341,6 @@ class Sequence(ParsingExpression):
     def _parse(self, parser):
         results = []
         c_pos = parser.position
-        seq_len = len(self.nodes)
 
         if self.ws is not None:
             old_ws = parser.ws
@@ -357,7 +356,7 @@ class Sequence(ParsingExpression):
                 if result:
                     results.append(result)
 
-        except NoMatch as m:
+        except NoMatch:
             parser.position = c_pos     # Backtracking
             raise
 
@@ -387,7 +386,7 @@ class OrderedChoice(Sequence):
                     match = True
                     result = [result]
                     break
-            except NoMatch as m:
+            except NoMatch:
                 parser.position = c_pos  # Backtracking
 
         if not match:
@@ -426,7 +425,7 @@ class Optional(Repetition):
 
         try:
             result = [self.nodes[0].parse(parser)]
-        except NoMatch as e:
+        except NoMatch:
             parser.position = c_pos  # Backtracking
 
         # Restore in_optional state
@@ -460,7 +459,7 @@ class ZeroOrMore(Repetition):
                 if not result:
                     break
                 results.append(result)
-            except NoMatch as e:
+            except NoMatch:
                 parser.position = c_pos  # Backtracking
                 break
 

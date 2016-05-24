@@ -249,9 +249,11 @@ class ParsingExpression(object):
             result, new_pos = self.result_cache[c_pos]
             parser.position = new_pos
             if parser.debug:
-                parser.dprint("** Cache hit for [{}, {}] = '{}' : new_pos={}"
+                parser.dprint(
+                    "** Cache hit for [{}, {}] = '{}' : new_pos={}"
                       .format(self.name, c_pos, text(result), text(new_pos)))
-                parser.dprint("<<+ Matched rule {} at position {}"
+                parser.dprint(
+                    "<<+ Matched rule {} at position {}"
                       .format(self.name, new_pos), -1)
 
             # If NoMatch is recorded at this position raise.
@@ -281,7 +283,7 @@ class ParsingExpression(object):
         try:
             result = self._parse(parser)
             if self.suppress or (type(result) is list and
-                                   result and result[0] is None):
+                                 result and result[0] is None):
                 result = None
 
         except NoMatch as e:
@@ -296,13 +298,14 @@ class ParsingExpression(object):
 
             if parser.debug:
                 parser.dprint("<<{} rule {}{} at position {} => {}"
-                    .format("- Not matched"
-                                if parser.position is c_pos else "+ Matched",
-                            self.name,
-                            " in {}".format(parser.in_rule)
-                            if parser.in_rule else "",
-                            parser.position,
-                            parser.context()), -1)
+                              .format("- Not matched"
+                                      if parser.position is c_pos
+                                      else "+ Matched",
+                                      self.name,
+                                      " in {}".format(parser.in_rule)
+                                      if parser.in_rule else "",
+                                      parser.position,
+                                      parser.context()), -1)
 
             # If leaving root rule restore previous root rule name.
             if self.rule_name:
@@ -645,10 +648,11 @@ class Match(ParsingExpression):
             parser._skip_ws()
 
         if parser.debug:
-            parser.dprint("?? Try match rule {}{} at position {} => {}"
+            parser.dprint(
+                "?? Try match rule {}{} at position {} => {}"
                 .format(self.name,
-                        " in {}".format(parser.in_rule) if parser.in_rule
-                            else "",
+                        " in {}".format(parser.in_rule)
+                        if parser.in_rule else "",
                         parser.position,
                         parser.context()))
 
@@ -704,8 +708,9 @@ class RegExMatch(Match):
         if m:
             matched = m.group()
             if parser.debug:
-                parser.dprint("++ Match '%s' at %d => '%s'" % (matched,
-                      c_pos, parser.context(len(matched))))
+                parser.dprint(
+                    "++ Match '%s' at %d => '%s'" %
+                    (matched, c_pos, parser.context(len(matched))))
             parser.position += len(matched)
             if matched:
                 return Terminal(self, c_pos, matched)
@@ -738,7 +743,8 @@ class StrMatch(Match):
             match = input_frag == self.to_match
         if match:
             if parser.debug:
-                parser.dprint("++ Match '{}' at {} => '{}'"
+                parser.dprint(
+                    "++ Match '{}' at {} => '{}'"
                     .format(self.to_match, c_pos,
                             parser.context(len(self.to_match))))
             parser.position += len(self.to_match)
@@ -749,7 +755,8 @@ class StrMatch(Match):
             return Terminal(self, c_pos, self.to_match, suppress=suppress)
         else:
             if parser.debug:
-                parser.dprint("-- No match '{}' at {} => '{}'"
+                parser.dprint(
+                    "-- No match '{}' at {} => '{}'"
                     .format(self.to_match, c_pos,
                             parser.context(len(self.to_match))))
             parser._nm_raise(self, c_pos, parser)
@@ -1133,10 +1140,11 @@ class SemanticAction(object):
                             # If there is multiple non-string objects
                             # by default convert non-terminal to string
                             if parser.debug:
-                                parser.dprint("*** Warning: Multiple non-"
-                                        "string objects found in applying "
-                                        "default semantic action. Converting "
-                                        "non-terminal to string.")
+                                parser.dprint(
+                                    "*** Warning: Multiple non-"
+                                    "string objects found in applying "
+                                    "default semantic action. Converting "
+                                    "non-terminal to string.")
                             retval = text(node)
                             break
                 else:
@@ -1368,7 +1376,8 @@ class Parser(DebugPrinter):
             """
 
             if self.debug:
-                self.dprint("Walking down %s   type: %s  str: %s" %
+                self.dprint(
+                    "Walking down %s   type: %s  str: %s" %
                     (node.name, type(node).__name__, text(node)))
 
             children = SemanticActionResults()
@@ -1679,5 +1688,3 @@ class ParserPython(Parser):
 
     def errors(self):
         pass
-
-

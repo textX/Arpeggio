@@ -207,7 +207,8 @@ class ParsingExpression(object):
 
     def clear_cache(self, processed=None):
         """
-        Clears memoization cache. Should be called on input change.
+        Clears memoization cache. Should be called on input change and end
+        of parsing.
 
         Args:
             processed (set): Set of processed nodes to prevent infinite loops.
@@ -1314,11 +1315,12 @@ class Parser(DebugPrinter):
         self.line_ends = []
         self.input = _input
         self.file_name = file_name
-        self.parser_model.clear_cache()
-        if self.comments_model:
-            self.comments_model.clear_cache()
         self.comment_positions = {}
         self.parse_tree = self._parse()
+
+        # At end of parsing clear memoization caches to free memory.
+        if self.memoization:
+            self._clear_caches()
 
         # In debug mode export parse tree to dot file for
         # visualization
@@ -1519,6 +1521,14 @@ class Parser(DebugPrinter):
                     self.nm.rules.append(rule)
 
         raise self.nm
+
+    def _clear_caches(self):
+        """
+        Clear memoization caches if packrat parser is used.
+        """
+        self.parser_model.clear_cache()
+        if self.comments_model:
+            self.comments_model.clear_cache()
 
 
 class CrossRef(object):

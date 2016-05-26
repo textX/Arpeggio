@@ -1,0 +1,2 @@
+psutil
+memory_profiler

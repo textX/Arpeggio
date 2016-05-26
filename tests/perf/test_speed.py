@@ -28,11 +28,17 @@ def timeit(parser, file_name, message):
     t_end = time.time()
 
     print('Elapsed time: {:.2f}'.format(t_end - t_start), 'sec')
-    print('Speed = {:.2f}'.format(file_size/1000/(t_end - t_start)), 'KB/sec\n')
+    print('Speed = {:.2f}'.format(file_size/1000/(t_end - t_start)), 'KB/sec')
+
+    if parser.memoization:
+        print('Cache hits = ', parser.cache_hits)
+        print('Cache misses = ', parser.cache_misses)
+        print('Success ratio[%] = ',
+              parser.cache_hits*100/(parser.cache_hits + parser.cache_misses))
+    print()
 
 
 def main():
-
 
     # Small file
     file_name_small = 'LightSwitch.rpy'

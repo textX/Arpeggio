@@ -243,23 +243,29 @@ class ParsingExpression(object):
         # Memoization.
         # If this position is already parsed by this parser expression use
         # the result
-        if parser.memoization and c_pos in self.result_cache:
-            result, new_pos = self.result_cache[c_pos]
-            parser.position = new_pos
-            if parser.debug:
-                parser.dprint(
-                    "** Cache hit for [{}, {}] = '{}' : new_pos={}"
-                      .format(self.name, c_pos, text(result), text(new_pos)))
-                parser.dprint(
-                    "<<+ Matched rule {} at position {}"
-                      .format(self.name, new_pos), -1)
+        if parser.memoization:
+            try:
+                result, new_pos = self.result_cache[c_pos]
+                parser.position = new_pos
+                parser.cache_hits += 1
+                if parser.debug:
+                    parser.dprint(
+                        "** Cache hit for [{}, {}] = '{}' : new_pos={}"
+                        .format(self.name, c_pos, text(result), text(new_pos)))
+                    parser.dprint(
+                        "<<+ Matched rule {} at position {}"
+                        .format(self.name, new_pos), -1)
 
-            # If NoMatch is recorded at this position raise.
-            if isinstance(result, NoMatch):
-                raise result
+                # If NoMatch is recorded at this position raise.
+                if result is 0:
+                    raise parser.nm
 
-            # else return cached result
-            return result
+                # else return cached result
+                return result
+
+            except KeyError:
+                parser.cache_misses += 1
+
 
         # Remember last parsing expression and set this as
         # the new last.
@@ -280,11 +286,11 @@ class ParsingExpression(object):
                                  result and result[0] is None):
                 result = None
 
-        except NoMatch as e:
+        except NoMatch:
             parser.position = c_pos  # Backtracking
             # Memoize NoMatch at this position for this rule
             if parser.memoization:
-                self.result_cache[c_pos] = (e, c_pos)
+                self.result_cache[c_pos] = (0, c_pos)
             raise
 
         finally:
@@ -1316,6 +1322,8 @@ class Parser(DebugPrinter):
         self.input = _input
         self.file_name = file_name
         self.comment_positions = {}
+        self.cache_hits = 0
+        self.cache_misses = 0
         self.parse_tree = self._parse()
 
         # At end of parsing clear memoization caches to free memory.

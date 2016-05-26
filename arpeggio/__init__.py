@@ -25,6 +25,7 @@ from arpeggio.utils import isstr
 import types
 
 DEFAULT_WS = '\t\n\r '
+NOMATCH_MARKER = 0
 
 
 class ArpeggioError(Exception):
@@ -257,7 +258,7 @@ class ParsingExpression(object):
                         .format(self.name, new_pos), -1)
 
                 # If NoMatch is recorded at this position raise.
-                if result is 0:
+                if result is NOMATCH_MARKER:
                     raise parser.nm
 
                 # else return cached result
@@ -290,7 +291,7 @@ class ParsingExpression(object):
             parser.position = c_pos  # Backtracking
             # Memoize NoMatch at this position for this rule
             if parser.memoization:
-                self.result_cache[c_pos] = (0, c_pos)
+                self.result_cache[c_pos] = (NOMATCH_MARKER, c_pos)
             raise
 
         finally:

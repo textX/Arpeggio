@@ -5,63 +5,81 @@ Python 3.5.1
 1. Small file, no memoization. File: LightSwitch.rpy
 File size: 672.24 KB
 Elapsed time: 3.50 sec
-Speed = 192.24 KB/sec
+Speed = 191.80 KB/sec
 
 1. Large file, no memoization. File: LightSwitchDouble.rpy
 File size: 1344.08 KB
-Elapsed time: 7.32 sec
-Speed = 183.74 KB/sec
+Elapsed time: 7.48 sec
+Speed = 179.69 KB/sec
 
 2. Small file, no memoization. File: LightSwitch.rpy
 File size: 672.24 KB
-Elapsed time: 3.46 sec
-Speed = 194.20 KB/sec
+Elapsed time: 3.57 sec
+Speed = 188.15 KB/sec
 
 2. Large file, no memoization. File: LightSwitchDouble.rpy
 File size: 1344.08 KB
-Elapsed time: 7.15 sec
-Speed = 188.00 KB/sec
+Elapsed time: 7.37 sec
+Speed = 182.46 KB/sec
 
 3. Small file, no memoization. File: LightSwitch.rpy
 File size: 672.24 KB
-Elapsed time: 3.46 sec
-Speed = 194.18 KB/sec
+Elapsed time: 3.44 sec
+Speed = 195.48 KB/sec
 
 3. Large file, no memoization. File: LightSwitchDouble.rpy
 File size: 1344.08 KB
-Elapsed time: 7.44 sec
-Speed = 180.74 KB/sec
+Elapsed time: 7.24 sec
+Speed = 185.61 KB/sec
 
 
 *** Memoization
 
 1. Small file, with memoization. File: LightSwitch.rpy
 File size: 672.24 KB
-Elapsed time: 6.42 sec
-Speed = 104.67 KB/sec
+Elapsed time: 4.38 sec
+Speed = 153.37 KB/sec
+Cache hits =  0
+Cache misses =  248804
+Success ratio[%] =  0.0
 
 1. Large file, with memoization. File: LightSwitchDouble.rpy
 File size: 1344.08 KB
-Elapsed time: 14.12 sec
-Speed = 95.21 KB/sec
+Elapsed time: 9.07 sec
+Speed = 148.14 KB/sec
+Cache hits =  0
+Cache misses =  497454
+Success ratio[%] =  0.0
 
 2. Small file, with memoization. File: LightSwitch.rpy
 File size: 672.24 KB
-Elapsed time: 8.17 sec
-Speed = 82.27 KB/sec
+Elapsed time: 4.45 sec
+Speed = 150.93 KB/sec
+Cache hits =  0
+Cache misses =  248804
+Success ratio[%] =  0.0
 
 2. Large file, with memoization. File: LightSwitchDouble.rpy
 File size: 1344.08 KB
-Elapsed time: 16.14 sec
-Speed = 83.29 KB/sec
+Elapsed time: 9.21 sec
+Speed = 145.93 KB/sec
+Cache hits =  0
+Cache misses =  497454
+Success ratio[%] =  0.0
 
 3. Small file, with memoization. File: LightSwitch.rpy
 File size: 672.24 KB
-Elapsed time: 7.17 sec
-Speed = 93.75 KB/sec
+Elapsed time: 5.58 sec
+Speed = 120.49 KB/sec
+Cache hits =  0
+Cache misses =  248804
+Success ratio[%] =  0.0
 
 3. Large file, with memoization. File: LightSwitchDouble.rpy
 File size: 1344.08 KB
-Elapsed time: 17.19 sec
-Speed = 78.20 KB/sec
+Elapsed time: 9.68 sec
+Speed = 138.78 KB/sec
+Cache hits =  0
+Cache misses =  497454
+Success ratio[%] =  0.0
 

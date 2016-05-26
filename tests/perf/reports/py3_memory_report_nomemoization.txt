@@ -1,0 +1,25 @@
+Python 3.5.1
+Filename: test_memory_nomemoization.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    16     13.2 MiB      0.0 MiB   @profile
+    17                             def no_memoization():
+    18                             
+    19     13.2 MiB      0.0 MiB       parser = ParserPython(rhapsody, memoization=False)
+    20                             
+    21                                 # Smaller file
+    22     13.2 MiB      0.0 MiB       file_name = join(dirname(__file__), 'test_inputs', 'LightSwitch.rpy')
+    23     13.2 MiB      0.0 MiB       with codecs.open(file_name, "r", encoding="utf-8") as f:
+    24     14.0 MiB      0.9 MiB           content = f.read()
+    25                             
+    26     88.0 MiB     74.0 MiB       small = parser.parse(content)
+    27                             
+    28                                 # File that is double in size
+    29     88.0 MiB      0.0 MiB       file_name = join(dirname(__file__), 'test_inputs', 'LightSwitchDouble.rpy')
+    30     88.0 MiB      0.0 MiB       with codecs.open(file_name, "r", encoding="utf-8") as f:
+    31     90.6 MiB      2.6 MiB           content = f.read()
+    32                             
+    33    230.9 MiB    140.3 MiB       large = parser.parse(content)
+
+

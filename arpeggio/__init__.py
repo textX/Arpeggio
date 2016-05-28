@@ -356,11 +356,14 @@ class Sequence(ParsingExpression):
             old_skipws = parser.skipws
             parser.skipws = self.skipws
 
+        # Prefetching
+        append = results.append
+
         try:
             for e in self.nodes:
                 result = e.parse(parser)
                 if result:
-                    results.append(result)
+                    append(result)
 
         except NoMatch:
             parser.position = c_pos     # Backtracking
@@ -458,13 +461,17 @@ class ZeroOrMore(Repetition):
         oldin_optional = parser.in_optional
         parser.in_optional = True
 
+        # Prefetching
+        append = results.append
+        p = self.nodes[0].parse
+
         while True:
             try:
                 c_pos = parser.position
-                result = self.nodes[0].parse(parser)
+                result = p(parser)
                 if not result:
                     break
-                results.append(result)
+                append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
                 break
@@ -496,14 +503,18 @@ class OneOrMore(Repetition):
         # Set parser for optional mode
         oldin_optional = parser.in_optional
 
+        # Prefetching
+        append = results.append
+        p = self.nodes[0].parse
+
         try:
             while True:
                 try:
                     c_pos = parser.position
-                    result = self.nodes[0].parse(parser)
+                    result = p(parser)
                     if not result:
                         break
-                    results.append(result)
+                    append(result)
                     first = False
                     parser.in_optional = True
                 except NoMatch:
@@ -637,7 +648,8 @@ class Match(ParsingExpression):
                         #       attached to the first match ahead.
                         parser.comments.append(
                             parser.comments_model.parse(parser))
-                        parser._skip_ws()
+                        if parser.skipws:
+                            parser._skip_ws()
                 except NoMatch:
                     # NoMatch in comment matching is perfectly
                     # legal and no action should be taken.
@@ -647,7 +659,7 @@ class Match(ParsingExpression):
 
     def parse(self, parser):
 
-        if not parser.in_lex_rule:
+        if parser.skipws and not parser.in_lex_rule:
             parser._skip_ws()
 
         if parser.debug:
@@ -1503,10 +1515,12 @@ class Parser(DebugPrinter):
         """
         Skiping whitespace characters.
         """
-        if self.skipws:
-            while self.position < len(self.input) and \
-                    self.input[self.position] in self.ws:
-                self.position += 1
+        pos = self.position
+        ws = self.ws
+        while pos < len(self.input) and \
+                self.input[pos] in ws:
+            pos += 1
+        self.position = pos
 
     def _nm_raise(self, *args):
         """

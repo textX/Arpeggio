@@ -1261,6 +1261,7 @@ class Parser(DebugPrinter):
             self.ws = ws
         else:
             self.ws = DEFAULT_WS
+
         self.reduce_tree = reduce_tree
         self.autokwd = autokwd
         self.ignore_case = ignore_case
@@ -1338,11 +1339,13 @@ class Parser(DebugPrinter):
         self.comment_positions = {}
         self.cache_hits = 0
         self.cache_misses = 0
-        self.parse_tree = self._parse()
-
-        # At end of parsing clear memoization caches to free memory.
-        if self.memoization:
-            self._clear_caches()
+        try:
+            self.parse_tree = self._parse()
+        finally:
+            # At end of parsing clear all memoization caches.
+            # Do this here to free memory.
+            if self.memoization:
+                self._clear_caches()
 
         # In debug mode export parse tree to dot file for
         # visualization

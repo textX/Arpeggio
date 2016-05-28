@@ -186,7 +186,7 @@ class ParsingExpression(object):
 
         # Memoization. Every node cache the parsing results for the given input
         # positions.
-        self.result_cache = {}  # position -> parse tree at the position
+        self._result_cache = {}  # position -> parse tree at the position
 
     @property
     def desc(self):
@@ -206,7 +206,7 @@ class ParsingExpression(object):
         else:
             return id(self)
 
-    def clear_cache(self, processed=None):
+    def _clear_cache(self, processed=None):
         """
         Clears memoization cache. Should be called on input change and end
         of parsing.
@@ -215,14 +215,15 @@ class ParsingExpression(object):
             processed (set): Set of processed nodes to prevent infinite loops.
         """
 
-        self.result_cache = {}
+        self._result_cache = {}
+
         if not processed:
             processed = set()
 
         for node in self.nodes:
             if node not in processed:
                 processed.add(node)
-                node.clear_cache(processed)
+                node._clear_cache(processed)
 
     def parse(self, parser):
 
@@ -246,7 +247,7 @@ class ParsingExpression(object):
         # the result
         if parser.memoization:
             try:
-                result, new_pos = self.result_cache[c_pos]
+                result, new_pos = self._result_cache[c_pos]
                 parser.position = new_pos
                 parser.cache_hits += 1
                 if parser.debug:
@@ -291,7 +292,7 @@ class ParsingExpression(object):
             parser.position = c_pos  # Backtracking
             # Memoize NoMatch at this position for this rule
             if parser.memoization:
-                self.result_cache[c_pos] = (NOMATCH_MARKER, c_pos)
+                self._result_cache[c_pos] = (NOMATCH_MARKER, c_pos)
             raise
 
         finally:
@@ -329,7 +330,7 @@ class ParsingExpression(object):
 
         # Result caching for use by memoization.
         if parser.memoization:
-            self.result_cache[c_pos] = (result, parser.position)
+            self._result_cache[c_pos] = (result, parser.position)
 
         return result
 
@@ -1549,9 +1550,9 @@ class Parser(DebugPrinter):
         """
         Clear memoization caches if packrat parser is used.
         """
-        self.parser_model.clear_cache()
+        self.parser_model._clear_cache()
         if self.comments_model:
-            self.comments_model.clear_cache()
+            self.comments_model._clear_cache()
 
 
 class CrossRef(object):

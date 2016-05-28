@@ -960,9 +960,6 @@ class NonTerminal(ParseTreeNode, list):
         self.extend(flatten([nodes]))
         self._filtered = _filtered
 
-        # Navigation expression cache. Used for lookup by rule name.
-        self._expr_cache = {}
-
     @property
     def value(self):
         """Terminal protocol."""
@@ -1000,9 +997,13 @@ class NonTerminal(ParseTreeNode, list):
                          'position', 'append', 'extend']:
             raise AttributeError
 
-        # First check the cache
-        if rule_name in self._expr_cache:
-            return self._expr_cache[rule_name]
+        try:
+            # First check the cache
+            if rule_name in self._expr_cache:
+                return self._expr_cache[rule_name]
+        except AttributeError:
+            # Navigation expression cache. Used for lookup by rule name.
+            self._expr_cache = {}
 
         # If result is not found in the cache collect all nodes
         # with the given rule name and create new NonTerminal

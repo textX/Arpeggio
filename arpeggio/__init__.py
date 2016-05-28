@@ -909,6 +909,10 @@ class Terminal(ParseTreeNode):
         suppress(bool): If True this terminal can be ignored in semantic
             analysis.
     """
+
+    __slots__ = ['rule', 'rule_name', 'position', 'error', 'comments',
+                 'value', 'suppress']
+
     def __init__(self, rule, position, value, error=False, suppress=False):
         super(Terminal, self).__init__(rule, position, error)
         self.value = value
@@ -950,6 +954,10 @@ class NonTerminal(ParseTreeNode, list):
             This is used internally.
 
     """
+
+    __slots__ = ['rule', 'rule_name', 'position', 'error', 'comments',
+                 '_filtered', '_expr_cache']
+
     def __init__(self, rule, nodes, error=False, _filtered=False):
 
         # Inherit position from the first child node

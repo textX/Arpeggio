@@ -1,6 +1,13 @@
 Changelog for Arpeggio
 ======================
 
+* 2016-05-31 Release 1.5
+  - Significant performance improvements (see textX issue #22)
+  - Added new performance tests to keep track of both speed and memory
+    consumption.
+  - Memoization is disabled by default. Added `memoization` parameter to
+    the `Parser` instantiation.
+
 * 2016-05-05 Release 1.4
   - Support for parse tree node suppression. Used for textX `-` operator.
   - Render `-` for suppressed ParsingExpression on dot graphs.

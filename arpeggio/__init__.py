@@ -253,10 +253,10 @@ class ParsingExpression(object):
                 if parser.debug:
                     parser.dprint(
                         "** Cache hit for [{}, {}] = '{}' : new_pos={}"
-                        .format(self.name, c_pos, text(result), text(new_pos)))
+                        .format(name, c_pos, text(result), text(new_pos)))
                     parser.dprint(
                         "<<+ Matched rule {} at position {}"
-                        .format(self.name, new_pos), -1)
+                        .format(name, new_pos), -1)
 
                 # If NoMatch is recorded at this position raise.
                 if result is NOMATCH_MARKER:
@@ -304,7 +304,7 @@ class ParsingExpression(object):
                               .format("- Not matched"
                                       if parser.position is c_pos
                                       else "+ Matched",
-                                      self.name,
+                                      name,
                                       " in {}".format(parser.in_rule)
                                       if parser.in_rule else "",
                                       parser.position,

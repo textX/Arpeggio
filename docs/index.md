@@ -39,6 +39,11 @@ tutorials.
 * [Good test coverage](https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit)
 * Beautiful mkdocs documentation - you are reading it
 
+## Python versions
+
+Arpeggio works with Python 2.7, 3.3+. Other versions might work but are not
+tested.
+
 ## Open-source projects using Arpeggio
 
 - [textX](https://github.com/igordejanovic/textX) - Meta-language for building

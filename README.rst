@@ -1,4 +1,4 @@
-.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/art/arpeggio-logo.png
+.. image:: https://raw.githubusercontent.com/igordejanovic/Arpeggio/master/docs/images/arpeggio-logo.png
    :height: 100
 
 Arpeggio - PEG parser

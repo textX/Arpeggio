@@ -43,7 +43,6 @@ nosetests.xml
 
 # Graphviz
 *.dot
-*.svg
 *.dot.png
 
 # Other
@@ -52,3 +51,4 @@ nosetests.xml
 docs/_build
 *.report
 site
+.cache

@@ -13,16 +13,18 @@
 
 from __future__ import print_function, unicode_literals
 import sys
-if sys.version < '3':
-    text = unicode
-else:
-    text = str
-
 import codecs
 import re
 import bisect
 from arpeggio.utils import isstr
 import types
+
+__version__ = "1.6.dev0"
+
+if sys.version < '3':
+    text = unicode
+else:
+    text = str
 
 DEFAULT_WS = '\t\n\r '
 NOMATCH_MARKER = 0

@@ -28,7 +28,7 @@ first_sar = None
 third_sar = None
 
 
-class TestVisitor(PTNodeVisitor):
+class Visitor(PTNodeVisitor):
 
     def visit_first(self, node, children):
         global first_sar
@@ -52,7 +52,7 @@ def test_semantic_action_results():
 
     PTDOTExporter().exportFile(result, 'test_semantic_action_results_pt.dot')
 
-    visit_parse_tree(result, TestVisitor(defaults=True))
+    visit_parse_tree(result, Visitor(defaults=True))
 
     assert isinstance(first_sar, SemanticActionResults)
     assert len(first_sar.third) == 3

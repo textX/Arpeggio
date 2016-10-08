@@ -341,8 +341,8 @@ is <code>csvfile</code> function.</p>
 <p>Create file <code>test_data.csv</code> with the following content:</p>
 <pre><code>Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
 
-Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343456.45"
-Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
+Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "34312.7"
+Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343486.12"
 </code></pre>
 <p>In <code>csv.py</code> file write:</p>
 <pre><code class="python">test_data = open('test_data.csv', 'r').read()
@@ -362,7 +362,7 @@ the test CSV data.</p>
 <p>This parse tree is <a href="../../debugging/#visualization">visualized</a> below (Tip: The
 image is large. Click on it to see it in a separate tab and to be able to use
 zooming):</p>
-<p><a href="../img/csvfile_parse_tree.dot.png" target="_blank"><img src="../img/csvfile_parse_tree.dot.png"/></a></p>
+<p><a href="../../images/csvfile_parse_tree.dot.png" target="_blank"><img src="../../images/csvfile_parse_tree.dot.png"/></a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>To visualize grammar (aka parser model) and parse tree instantiate the

@@ -44,6 +44,7 @@ nosetests.xml
 # Graphviz
 *.dot
 *.dot.png
+!docs/**/*.png
 
 # Other
 .~lock*

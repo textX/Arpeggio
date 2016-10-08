@@ -105,8 +105,8 @@ Create file `test_data.csv` with the following content:
 
     Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
 
-    Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343456.45"
-    Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343456.45"
+    Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "34312.7"
+    Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343486.12"
 
 In `csv.py` file write:
 
@@ -134,7 +134,7 @@ image is large. Click on it to see it in a separate tab and to be able to use
 zooming):
 
 
-<a href="../img/csvfile_parse_tree.dot.png" target="_blank"><img src="../img/csvfile_parse_tree.dot.png"/></a>
+<a href="../../images/csvfile_parse_tree.dot.png" target="_blank"><img src="../../images/csvfile_parse_tree.dot.png"/></a>
 
 
 !!! note

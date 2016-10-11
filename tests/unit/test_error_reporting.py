@@ -67,7 +67,7 @@ def test_file_name_reporting():
     try:
         parser.parse("\n\n   a c", file_name="test_file.peg")
     except NoMatch as e:
-        assert "Expected 'b' at test_file.peg:(3, 6)" in str(e)
+        assert "Expected 'b' at position test_file.peg:(3, 6)" in str(e)
 
 def test_comment_matching_not_reported():
     """

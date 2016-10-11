@@ -86,23 +86,14 @@ class NoMatch(Exception):
                 return rule.name
 
         what_is_expected = ["{}".format(rule_to_exp_str(r)) for r in self.rules]
+        what_str = " or ".join(what_is_expected)
 
-        if len(what_is_expected) == 0:
-            what_str = "'{}'".format(what_is_expected[0])
-        else:
-            what_str = " or ".join(what_is_expected)
-
-        if self.parser.file_name:
-            return "Expected {} at {}:{} => '{}'."\
-                .format(what_str,
-                        self.parser.file_name,
-                        text(self.parser.pos_to_linecol(self.position)),
-                        self.parser.context(position=self.position))
-        else:
-            return "Expected {} at position {} => '{}'."\
-                .format(what_str,
-                        text(self.parser.pos_to_linecol(self.position)),
-                        self.parser.context(position=self.position))
+        return "Expected {} at position {}{} => '{}'."\
+            .format(what_str,
+                    "{}:".format(self.parser.file_name)
+                        if self.parser.file_name else "",
+                    text(self.parser.pos_to_linecol(self.position)),
+                    self.parser.context(position=self.position))
 
     def __unicode__(self):
         return self.__str__()

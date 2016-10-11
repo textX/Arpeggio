@@ -85,8 +85,7 @@ class NoMatch(Exception):
             else:
                 return rule.name
 
-
-        if self.rules[0] is Parser.FIRST_NOT:
+        if not self.rules:
             err_message = "Not expected input"
         else:
             what_is_expected = ["{}".format(rule_to_exp_str(r))
@@ -1364,6 +1363,11 @@ class Parser(DebugPrinter):
         self.cache_misses = 0
         try:
             self.parse_tree = self._parse()
+        except NoMatch as e:
+            # Remove Not marker
+            if e.rules[0] is Parser.FIRST_NOT:
+                del e.rules[0]
+            raise
         finally:
             # At end of parsing clear all memoization caches.
             # Do this here to free memory.
@@ -1568,8 +1572,6 @@ class Parser(DebugPrinter):
             elif position == self.nm.position and isinstance(rule, Match) \
                     and not self.in_not:
                 self.nm.rules.append(rule)
-                if self.nm.rules[0] is Parser.FIRST_NOT:
-                    del self.nm.rules[0]
 
         raise self.nm
 

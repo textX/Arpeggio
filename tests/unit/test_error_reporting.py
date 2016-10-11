@@ -9,7 +9,7 @@
 from __future__ import unicode_literals
 import pytest
 
-from arpeggio import ZeroOrMore, Optional, ParserPython, NoMatch, EOF
+from arpeggio import ZeroOrMore, Optional, Not, ParserPython, NoMatch, EOF
 from arpeggio import RegExMatch as _
 
 
@@ -21,21 +21,19 @@ def test_non_optional_precedence():
 
     parser = ParserPython(grammar)
 
-    try:
+    with pytest.raises(NoMatch) as e:
         parser.parse('c')
-
-    except NoMatch as e:
-        assert "Expected 'a' or 'b'" in str(e)
+    assert "Expected 'a' or 'b'" in str(e)
 
     def grammar():  return ['b', Optional('a')]
 
     parser = ParserPython(grammar)
 
-    try:
+    with pytest.raises(NoMatch) as e:
         parser.parse('c')
 
-    except NoMatch as e:
-        assert "Expected 'b'" in str(e)
+    assert "Expected 'b'" in str(e)
+
 
 def test_optional_with_better_match():
     """
@@ -49,11 +47,26 @@ def test_optional_with_better_match():
 
     parser = ParserPython(grammar)
 
-    try:
+    with pytest.raises(NoMatch) as e:
         parser.parse('one two three four 5')
 
-    except NoMatch as e:
-        assert "Expected 'five'" in str(e)
+    assert "Expected 'five'" in str(e)
+
+
+def test_alternative_added():
+    """
+    Test that matches from alternative branches at the same positiona are
+    reported.
+    """
+
+    def grammar():      return ['one', 'two'], _(r'\w+')
+
+    parser = ParserPython(grammar)
+
+    with pytest.raises(NoMatch) as e:
+        parser.parse('   three ident')
+    assert "Expected 'one' or 'two'" in str(e)
+
 
 def test_file_name_reporting():
     """
@@ -64,10 +77,10 @@ def test_file_name_reporting():
 
     parser = ParserPython(grammar)
 
-    try:
+    with pytest.raises(NoMatch) as e:
         parser.parse("\n\n   a c", file_name="test_file.peg")
-    except NoMatch as e:
-        assert "Expected 'b' at position test_file.peg:(3, 6)" in str(e)
+    assert "Expected 'b' at position test_file.peg:(3, 6)" in str(e)
+
 
 def test_comment_matching_not_reported():
     """
@@ -79,17 +92,53 @@ def test_comment_matching_not_reported():
 
     parser = ParserPython(grammar, comments)
 
-    try:
+    with pytest.raises(NoMatch) as e:
         parser.parse('\n\n a // This is a comment \n c')
-    except NoMatch as e:
-        assert "Expected 'b' at position (4, 2)" in str(e)
+    assert "Expected 'b' at position (4, 2)" in str(e)
 
 
+def test_not_match_at_beginning():
+    """
+    Test that matching of Not ParsingExpression is not reported in the
+    error message.
+    """
+
+    def grammar():      return Not('one'), _(r'\w+')
+    # def grammar():      return Not(['ident', 'one', 'two']), _(r'\w+')
+
+    parser = ParserPython(grammar)
+
+    with pytest.raises(NoMatch) as e:
+        parser.parse('   one ident')
+    assert "Not expected input" in str(e)
 
 
+def test_not_match_as_alternative():
+    """
+    Test that Not is not reported if a part of OrderedChoice.
+    """
+
+    def grammar():      return ['one', Not('two')], _(r'\w+')
+
+    parser = ParserPython(grammar)
+
+    with pytest.raises(NoMatch) as e:
+        parser.parse('   three ident')
+    assert "Expected 'one' at " in str(e)
 
 
+def test_compound_not_match():
+    """
+    Test a more complex Not match error reporting.
+    """
+    def grammar():      return [Not(['two', 'three']), 'one', 'two'], _(r'\w+')
 
+    parser = ParserPython(grammar)
 
+    with pytest.raises(NoMatch) as e:
+        parser.parse('   three ident')
+    assert "Expected 'one' or 'two' at" in str(e)
 
-
+    with pytest.raises(NoMatch) as e:
+        parser.parse('   four ident')
+    assert "Expected 'one' or 'two' at" in str(e)

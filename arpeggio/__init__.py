@@ -85,11 +85,17 @@ class NoMatch(Exception):
             else:
                 return rule.name
 
-        what_is_expected = ["{}".format(rule_to_exp_str(r)) for r in self.rules]
-        what_str = " or ".join(what_is_expected)
 
-        return "Expected {} at position {}{} => '{}'."\
-            .format(what_str,
+        if self.rules[0] is Parser.FIRST_NOT:
+            err_message = "Not expected input"
+        else:
+            what_is_expected = ["{}".format(rule_to_exp_str(r))
+                                for r in self.rules]
+            what_str = " or ".join(what_is_expected)
+            err_message = "Expected {}".format(what_str)
+
+        return "{} at position {}{} => '{}'."\
+            .format(err_message,
                     "{}:".format(self.parser.file_name)
                         if self.parser.file_name else "",
                     text(self.parser.pos_to_linecol(self.position)),
@@ -560,14 +566,19 @@ class Not(SyntaxPredicate):
     """
     def _parse(self, parser):
         c_pos = parser.position
-        for e in self.nodes:
-            try:
-                e.parse(parser)
-            except NoMatch:
-                parser.position = c_pos
-                return
-        parser.position = c_pos
-        parser._nm_raise(self, c_pos, parser)
+        old_in_not = parser.in_not
+        parser.in_not = True
+        try:
+            for e in self.nodes:
+                try:
+                    e.parse(parser)
+                except NoMatch:
+                    parser.position = c_pos
+                    return
+            parser.position = c_pos
+            parser._nm_raise(self, c_pos, parser)
+        finally:
+            parser.in_not = old_in_not
 
 
 class Empty(SyntaxPredicate):
@@ -1234,8 +1245,15 @@ class Parser(DebugPrinter):
             OneOrMore after first).
         in_lex_rule (bool): True if in lexical rule. Currently used in Combine
             decorator to convert match to a single Terminal.
+        in_not (bool): True if in Not parsing expression. Used for better error
+            reporting.
         last_pexpression (ParsingExpression): Last parsing expression traversed.
     """
+
+    # Not marker for NoMatch rules list. Used if the first unsuccessful rule
+    # match is Not.
+    FIRST_NOT = Not()
+
     def __init__(self, skipws=True, ws=None, reduce_tree=False,
                  autokwd=False, ignore_case=False, memoization=False, **kwargs):
         """
@@ -1291,9 +1309,12 @@ class Parser(DebugPrinter):
         # first occurence) we do not store NoMatch for error reporting.
         self.in_optional = False
 
-        # Are we in lexical rule. If so do not
+        # Are we in lexical rule? If so do not
         # skip whitespaces.
         self.in_lex_rule = False
+
+        # Are we in Not parsing expression?
+        self.in_not = False
 
         # Last parsing expression traversed
         self.last_pexpression = None
@@ -1537,17 +1558,18 @@ class Parser(DebugPrinter):
             args: A NoMatch instance or (value, position, parser)
         """
 
-        if len(args) == 1:
-            exc = args[0]
-            if exc.position > self.nm.position:
-                self.nm = exc
-        else:
-            rule, position, parser = args
-            if self.nm is None or not parser.in_parse_comments:
-                if not self.nm or position > self.nm.position:
+        rule, position, parser = args
+        if self.nm is None or not parser.in_parse_comments:
+            if self.nm is None or position > self.nm.position:
+                if self.in_not:
+                    self.nm = NoMatch([Parser.FIRST_NOT], position, parser)
+                else:
                     self.nm = NoMatch([rule], position, parser)
-                elif position == self.nm.position and isinstance(rule, Match):
-                    self.nm.rules.append(rule)
+            elif position == self.nm.position and isinstance(rule, Match) \
+                    and not self.in_not:
+                self.nm.rules.append(rule)
+                if self.nm.rules[0] is Parser.FIRST_NOT:
+                    del self.nm.rules[0]
 
         raise self.nm
 

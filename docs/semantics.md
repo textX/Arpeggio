@@ -104,7 +104,7 @@ analysis.
 Class of object returned from the parse tree nodes evaluation. Used for
 filtering and navigation over evaluation results on children nodes.
 
-Instance of this class is given as `children`` parameter of `visitor_xxx`
+Instance of this class is given as `children` parameter of `visitor_xxx`
 methods.  This class inherits `list` so index access as well as iteration is
 available.
 

@@ -331,7 +331,8 @@ analysis.</p>
 <h2 id="semanticactionresults">SemanticActionResults</h2>
 <p>Class of object returned from the parse tree nodes evaluation. Used for
 filtering and navigation over evaluation results on children nodes.</p>
-<p>Instance of this class is given as <code>children`` parameter of</code>visitor_xxx<code>methods.  This class inherits</code>list` so index access as well as iteration is
+<p>Instance of this class is given as <code>children</code> parameter of <code>visitor_xxx</code>
+methods.  This class inherits <code>list</code> so index access as well as iteration is
 available.</p>
 <p>Furthermore, child nodes can be filtered by rule name using name lookup.</p>
 <pre><code class="python">def visit_bar(self, node, children):

@@ -1367,6 +1367,8 @@ class Parser(DebugPrinter):
             # Remove Not marker
             if e.rules[0] is Parser.FIRST_NOT:
                 del e.rules[0]
+            # Get line and column from position
+            e.line, e.col = self.pos_to_linecol(e.position)
             raise
         finally:
             # At end of parsing clear all memoization caches.

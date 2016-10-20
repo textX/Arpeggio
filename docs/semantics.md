@@ -148,10 +148,10 @@ number_in_brackets = "(" number ")"
 number = r'\d+'
 ```
 
-Than the default action for `number` will return number converted to a string
-and the default action for `(` and `)` will return `None` and thus suppress this
-nodes so the visitor method for `number_in_brackets` rule will only see one
-child (from the `number` rule reference).
+then the default action for `number` will return number node converted to
+a string and the default action for `(` and `)` will return `None` and thus
+suppress these nodes so the visitor method for `number_in_brackets` rule will
+only see one child (from the `number` rule reference).
 
 If the node is a non-terminal and there is only one child the default action
 will return that child effectively passing it to the parent node visitor.

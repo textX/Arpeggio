@@ -33,6 +33,13 @@ Each parse tree node has the following attributes:
 - **position** - the position in the input stream where this node was
   recognized.
 
+If you want to get line and column from position you can use `pos_to_linecol`
+parser method.
+
+```python
+  line, col = parser.pos_to_linecol(node.position)
+```
+
 
 ## Terminal nodes
 

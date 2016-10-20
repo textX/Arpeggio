@@ -364,10 +364,10 @@ for all those syntax noise (bracket, braces, keywords etc.).</p>
 number = r'\d+'
 </code></pre>
 
-<p>Than the default action for <code>number</code> will return number converted to a string
-and the default action for <code>(</code> and <code>)</code> will return <code>None</code> and thus suppress this
-nodes so the visitor method for <code>number_in_brackets</code> rule will only see one
-child (from the <code>number</code> rule reference).</p>
+<p>then the default action for <code>number</code> will return number node converted to
+a string and the default action for <code>(</code> and <code>)</code> will return <code>None</code> and thus
+suppress these nodes so the visitor method for <code>number_in_brackets</code> rule will
+only see one child (from the <code>number</code> rule reference).</p>
 <p>If the node is a non-terminal and there is only one child the default action
 will return that child effectively passing it to the parent node visitor.</p>
 <p>Default actions can be disabled by setting parameter <code>defaults</code> to <code>False</code> on

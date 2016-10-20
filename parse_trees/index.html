@@ -272,6 +272,11 @@ terminal/non-terminal is recognized.</p>
 <li><strong>position</strong> - the position in the input stream where this node was
   recognized.</li>
 </ul>
+<p>If you want to get line and column from position you can use <code>pos_to_linecol</code>
+parser method.</p>
+<pre><code class="python">  line, col = parser.pos_to_linecol(node.position)
+</code></pre>
+
 <h2 id="terminal-nodes">Terminal nodes</h2>
 <p>Terminals in Arpeggio are created by the specializations of the parsing
 expression <code>Match</code> class.  There are two specialization of <code>Match</code> class:</p>

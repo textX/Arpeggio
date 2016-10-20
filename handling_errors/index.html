@@ -266,8 +266,8 @@ following traceback will be printed:</p>
 arpeggio.NoMatch: Expected '+' or '-' or 'number' or 
   '(' at position (1, 6) =&gt; '23+4/*r-89'.
 </code></pre>
-<p>The place in the input stream is marked by <code>*</code> and the position in (row, col) is
-given (<code>(1, 6)</code>).</p>
+<p>The place in the input stream is marked by <code>*</code> and the position in (line,
+column) is given (<code>(1, 6)</code>).</p>
 <p>If you wish to handle syntax errors gracefully you can catch <code>NoMatch</code> in your
 code and inspect its attributes.</p>
 <pre><code class="python">try:
@@ -280,21 +280,13 @@ except NoMatch as e:
 
 <p><code>NoMatch</code> class has the following attributes:</p>
 <ul>
-<li><code>rules</code> - A list of <code>ParsingExpression</code> rules that are the sources of the exception.</li>
+<li><code>rules</code> - A list of <code>ParsingExpression</code> rules that are the sources of the
+  exception.</li>
 <li><code>position</code> - A position in the input stream where exception occurred.</li>
+<li><code>line</code>, <code>col</code> - A line and column in the input stream where exception
+  occurred.</li>
 <li><code>parser</code> - A <code>Parser</code> instance used for parsing.</li>
 </ul>
-<p>The <code>position</code> is given as the offset from the beginning of the input string.
-To convert it to row and column use <code>pos_to_linecol</code> method of the parser.</p>
-<pre><code class="python">try:
-  parser = ParserPython(calc)
-  input_expr = &quot;23+4/r-89&quot;
-  parse_tree = parser.parse(input_expr)
-except NoMatch as e:
-  line, col = e.parser.pos_to_linecol(e.position)
-  ...
-</code></pre>
-
 <p>Arpeggio is a backtracking parser, which means that it will go back and try
 another alternatives when the match does not succeeds. Nevertheless, it will 
 report the furthest place in the input where it failed. Arpeggio will

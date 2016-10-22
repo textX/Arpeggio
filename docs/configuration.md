@@ -72,7 +72,7 @@ This parameter is disabled by default.
 
 Support for comments in your language can be specified as another set of
 grammar rules.  See [simple.py
-example](https://github.com/igordejanovic/Arpeggio/blob/master/examples/simple/simple.py).
+example](https://github.com/igordejanovic/Arpeggio/blob/master/examples/simple/).
 
 Parser is constructed using two parameters.
 

@@ -964,7 +964,7 @@ class NonTerminal(ParseTreeNode, list):
     def __init__(self, rule, nodes, error=False, _filtered=False):
 
         # Inherit position from the first child node
-        position = nodes[0].position
+        position = nodes[0].position if nodes else 0
 
         super(NonTerminal, self).__init__(rule, position, error)
 
@@ -1378,7 +1378,7 @@ class Parser(DebugPrinter):
 
         # In debug mode export parse tree to dot file for
         # visualization
-        if self.debug:
+        if self.debug and self.parse_tree:
             from arpeggio.export import PTDOTExporter
             root_rule_name = self.parse_tree.rule_name
             PTDOTExporter().exportFile(

@@ -96,7 +96,7 @@ class NoMatch(Exception):
         return "{} at position {}{} => '{}'."\
             .format(err_message,
                     "{}:".format(self.parser.file_name)
-                        if self.parser.file_name else "",
+                    if self.parser.file_name else "",
                     text(self.parser.pos_to_linecol(self.position)),
                     self.parser.context(position=self.position))
 
@@ -265,7 +265,6 @@ class ParsingExpression(object):
 
             except KeyError:
                 parser.cache_misses += 1
-
 
         # Remember last parsing expression and set this as
         # the new last.
@@ -1246,15 +1245,16 @@ class Parser(DebugPrinter):
             decorator to convert match to a single Terminal.
         in_not (bool): True if in Not parsing expression. Used for better error
             reporting.
-        last_pexpression (ParsingExpression): Last parsing expression traversed.
+        last_pexpression (ParsingExpression): Last parsing expression
+            traversed.
     """
 
     # Not marker for NoMatch rules list. Used if the first unsuccessful rule
     # match is Not.
     FIRST_NOT = Not()
 
-    def __init__(self, skipws=True, ws=None, reduce_tree=False,
-                 autokwd=False, ignore_case=False, memoization=False, **kwargs):
+    def __init__(self, skipws=True, ws=None, reduce_tree=False, autokwd=False,
+                 ignore_case=False, memoization=False, **kwargs):
         """
         Args:
             skipws (bool): Should the whitespace skipping be done.  Default is

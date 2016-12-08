@@ -139,7 +139,7 @@ reference resolving).
 For each parse tree node that does not have an appropriate `visitor_xxx`
 method a default action is performed.  If the node is created by a plain string
 match action will return `None` and thus suppress this node. This is handy
-for all those syntax noise (bracket, braces, keywords etc.).
+for all those syntax noise tokens (brackets, braces, keywords etc.).
 
 For example, if your grammar is:
 

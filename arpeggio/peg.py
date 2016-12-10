@@ -14,7 +14,9 @@ if sys.version < '3':
 else:
     text = str
 
+import codecs
 import copy
+import re
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
@@ -42,12 +44,25 @@ def AND():              return "&"
 def NOT():              return "!"
 def OPEN():             return "("
 def CLOSE():            return ")"
-def regex():            return "r'", _(r"(\\\'|[^\'])*"),"'"
+def regex():            return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''),"'"),
+                                ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''),'"')]
 def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 def rule_crossref():    return rule_name
-#def literal():          return [_(r"\'(\\\'|[^\'])*\'"),_(r'"[^"]*"')]
-def str_match():        return _(r'(\'(\\\'|[^\'])*\')|("[^"]*")')
+def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+                                     r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 def comment():          return "//", _(".*\n")
+
+
+# Escape sequences supported in PEG literal string matches
+PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
+    \\ ( [\n\\'"abfnrtv]  |  # \\x single-character escapes
+         [0-7]{1,3}       |  # \\ooo octal escape
+         x[0-9A-Fa-f]{2}  |  # \\xXX hex escape
+         u[0-9A-Fa-f]{4}  |  # \\uXXXX hex escape
+         U[0-9A-Fa-f]{8}  |  # \\UXXXXXXXX hex escape
+         N\{[- 0-9A-Z]+\}    # \\N{name} Unicode name or alias
+       )
+    """, re.VERBOSE | re.UNICODE)
 
 
 class PEGVisitor(PTNodeVisitor):
@@ -203,11 +218,18 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_str_match(self, node, children):
         match_str = node.value[1:-1]
-        match_str = match_str.replace("\\'", "'")\
-                             .replace("\\\\", "\\")\
-                             .replace("\\n", "\n")\
-                             .replace("\\t", "\t")
-        match_str
+
+        # Scan the string literal, and sequentially match those escape
+        # sequences which are syntactically valid Python. Attempt to convert
+        # those, raising ``GrammarError`` for any semantically invalid ones.
+        def decode_escape(match):
+            try:
+                return codecs.decode(match.group(0), "unicode_escape")
+            except UnicodeDecodeError:
+                raise GrammarError("Invalid escape sequence '%s'." %
+                                   match.group(0))
+        match_str = PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, match_str)
+
         return StrMatch(match_str, ignore_case=self.ignore_case)
 
 

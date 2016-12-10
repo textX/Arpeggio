@@ -40,11 +40,12 @@ def AND():              return "&"
 def NOT():              return "!"
 def OPEN():             return "("
 def CLOSE():            return ")"
-def regex():            return "r'", _(r"(\\\'|[^\'])*"),"'"
+def regex():            return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''),"'"),
+                                ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''),'"')]
 def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 def rule_crossref():    return rule_name
-#def literal():          return [_(r"\'(\\\'|[^\'])*\'"),_(r'"[^"]*"')]
-def str_match():        return _(r'(\'(\\\'|[^\'])*\')|("[^"]*")')
+def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+                                     r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 def comment():          return _("#.*\n")
 
 

@@ -164,8 +164,8 @@ expression = term (("+" / "-") term)*
 calc = expression+ EOF
 ```
 
-Each grammar rule is given as an assignment where the lhs is the rule name (e.g.
-`number`) and the rhs is a PEG expression.
+Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
+`number`) and the RHS is a PEG expression.
 
 - **Literal string matches** are given as strings (e.g. `"+"`).
 - **Regex matches** are given as strings with prefix `r` (e.g.
@@ -177,18 +177,24 @@ Each grammar rule is given as an assignment where the lhs is the rule name (e.g.
 - **Zero or more** expression is specified by `*` operator (e.g. `(( "*" /
   "/" ) factor)*`).
 - **One of more** is specified by `+` operator (e.g. `expression+`).
-
-`And` and `Not` predicates are also supported.
-
 - **And predicate** is specified by `&` operator (e.g. `&expression` - not
   used in the grammar above).
 - **Not predicate** is specified by `!` operator (e.g. `!expression` - not
   used in the grammar above).
+- A special rule `EOF` will match end of input string.
 
-In the rhs a rule reference is a name of another rule. Parser will try to match
+In the RHS a rule reference is a name of another rule. Parser will try to match
 another rule at that location.
 
-Special rule `EOF` will match end of input string.
+Literal string matches and regex matches follow the same rules as
+Python itself would use for single-quoted
+[string literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals),
+regarding the escaping of embedded quotes, and the translation of
+escape sequences. Literal string matches are treated as normal
+(non-raw) string literals, and regex matches are treated as raw
+string literals. Triple-quoting, and the 'r', 'u' and 'b' prefixes,
+are not supported – note than in arpeggio PEG grammars, all strings
+are Unicode, and the 'r' prefix denotes a regular expression.
 
 Creating a parser using PEG syntax is done by the class `ParserPEG` from the
 `arpeggio.peg` or `arpeggio.cleanpeg` modules.

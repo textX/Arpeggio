@@ -128,7 +128,7 @@ def visit_bar(self, node, children):
 
 Visitor may define method with the `second_<rule_name>` name form. If this
 method exists it will be called after all parse tree node are processed and it
-will be given the results of the `visitor_<rule_name>` call.
+will be given the results of the `visit_<rule_name>` call.
 
 This is usually used when some additional post-processing is needed (e.g.
 reference resolving).
@@ -136,10 +136,10 @@ reference resolving).
 
 ## Default actions
 
-For each parse tree node that does not have an appropriate `visitor_xxx`
-method a default action is performed.  If the node is created by a plain string
-match action will return `None` and thus suppress this node. This is handy
-for all those syntax noise tokens (brackets, braces, keywords etc.).
+For each parse tree node that does not have an appropriate `visit_xxx` method a
+default action is performed. If the node is created by a plain string match
+action will return `None` and thus suppress this node. This is handy for all
+those syntax noise tokens (brackets, braces, keywords etc.).
 
 For example, if your grammar is:
 

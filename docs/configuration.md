@@ -44,9 +44,10 @@ parser = ParserPython(calc, ws='\t\r ')
     These parameters can be used on the ``Sequence`` level so one could write
     grammar like this:
 
-        def grammar():     return Sequence("one", "two", "three",
-                                           skipws=False), "four"
+        def grammar():     return Sequence("one", "two", "three", skipws=False),
+                                           "four"
         parser = ParserPython(grammar)
+        pt = parser.parse("onetwothree four")
 
 
 ## Keyword handling

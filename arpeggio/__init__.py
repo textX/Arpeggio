@@ -3,7 +3,7 @@
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009-2015 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2017 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This is an implementation of packrat parser interpreter based on PEG
@@ -61,7 +61,7 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        rules (list of ParserExpression): Rules that are tried at the position
+        rules (list of ParsingExpression): Rules that are tried at the position
             of the exception.
         position (int): A position in the input stream where exception
             occurred.

@@ -652,7 +652,14 @@ class Match(ParsingExpression):
                         parser.comments.append(
                             parser.comments_model.parse(parser))
                         if parser.skipws:
-                            parser._skip_ws()
+                            # Whitespace skipping
+                            pos = parser.position
+                            ws = parser.ws
+                            i = parser.input
+                            l = len(i)
+                            while pos < l and i[pos] in ws:
+                                pos += 1
+                            parser.position = pos
                 except NoMatch:
                     # NoMatch in comment matching is perfectly
                     # legal and no action should be taken.
@@ -663,7 +670,14 @@ class Match(ParsingExpression):
     def parse(self, parser):
 
         if parser.skipws and not parser.in_lex_rule:
-            parser._skip_ws()
+            # Whitespace skipping
+            pos = parser.position
+            ws = parser.ws
+            i = parser.input
+            l = len(i)
+            while pos < l and i[pos] in ws:
+                pos += 1
+            parser.position = pos
 
         if parser.debug:
             parser.dprint(
@@ -1543,18 +1557,6 @@ class Parser(DebugPrinter):
                 text(self.input[position:position + 10]))
 
         return retval.replace('\n', ' ').replace('\r', '')
-
-    def _skip_ws(self):
-        """
-        Skiping whitespace characters.
-        """
-        pos = self.position
-        ws = self.ws
-        l = len(self.input)
-        i = self.input
-        while pos < l and i[pos] in ws:
-            pos += 1
-        self.position = pos
 
     def _nm_raise(self, *args):
         """

@@ -1550,8 +1550,9 @@ class Parser(DebugPrinter):
         """
         pos = self.position
         ws = self.ws
-        while pos < len(self.input) and \
-                self.input[pos] in ws:
+        l = len(self.input)
+        i = self.input
+        while pos < l and i[pos] in ws:
             pos += 1
         self.position = pos
 

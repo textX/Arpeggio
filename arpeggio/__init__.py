@@ -860,6 +860,10 @@ class ParseTreeNode(object):
             root rule or empty string otherwise.
         position (int): A position in the input stream where the match
             occurred.
+        position_end (int, read-only): A position in the input stream where
+            the node ends.
+            This position is one char behind the last char contained in this
+            node. Thus, position_end - position = length of the node.
         error (bool): Is this a false parse tree node created during error
             recovery.
         comments : A parse tree of comment(s) attached to this node.
@@ -876,6 +880,11 @@ class ParseTreeNode(object):
     @property
     def name(self):
         return "%s [%s]" % (self.rule_name, self.position)
+
+    @property
+    def position_end(self):
+        "Must be implemented in subclasses."
+        raise NotImplementedError
 
     def visit(self, visitor):
         """
@@ -941,6 +950,10 @@ class Terminal(ParseTreeNode):
         else:
             return "%s [%s]" % (self.rule_name, self.position)
 
+    @property
+    def position_end(self):
+        return self.position + len(self.value)
+
     def flat_str(self):
         return self.value
 
@@ -992,6 +1005,10 @@ class NonTerminal(ParseTreeNode, list):
     @property
     def desc(self):
         return self.name
+
+    @property
+    def position_end(self):
+        return self[-1].position_end if self else self.position
 
     def flat_str(self):
         """

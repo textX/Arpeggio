@@ -32,6 +32,9 @@ Each parse tree node has the following attributes:
   otherwise.
 - **position** - the position in the input stream where this node was
   recognized.
+- **position_end** - the end of the node in the input stream. This index is one
+  char behind the last char that belongs to this node. Thus, `position_end -
+  position == length of the node`.
 
 If you want to get line and column from position you can use `pos_to_linecol`
 parser method.

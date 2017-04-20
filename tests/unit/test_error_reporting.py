@@ -133,6 +133,20 @@ def test_not_match_as_alternative():
     assert "Expected 'one' at " in str(e)
 
 
+def test_sequence_of_nots():
+    """
+    Test that sequence of Not rules is handled properly.
+    """
+
+    def grammar():      return Not('one'), Not('two'), _(r'\w+')
+
+    parser = ParserPython(grammar)
+
+    with pytest.raises(NoMatch) as e:
+        parser.parse('   two ident')
+    assert "Not expected input" in str(e)
+
+
 def test_compound_not_match():
     """
     Test a more complex Not match error reporting.

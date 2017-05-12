@@ -8,11 +8,10 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 
 # Grammar
 from arpeggio import ParserPython, ZeroOrMore, ParseTreeNode, NonTerminal
-from arpeggio.export import PTDOTExporter
 
 
 def foo(): return "a", bar, "b", baz, bar2, ZeroOrMore(bar)
@@ -65,4 +64,3 @@ def test_lookup_single():
 
     assert hasattr(result, "bar")
     assert hasattr(result, "baz")
-

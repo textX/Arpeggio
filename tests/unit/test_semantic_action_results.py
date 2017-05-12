@@ -8,13 +8,14 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 
 # Grammar
-from arpeggio import ZeroOrMore, OneOrMore, ParserPython, Terminal, NonTerminal,\
+from arpeggio import ZeroOrMore, OneOrMore, ParserPython, \
     SemanticActionResults, PTNodeVisitor, visit_parse_tree
 from arpeggio.export import PTDOTExporter
 from arpeggio import RegExMatch as _
+
 
 def grammar():      return first, "a", second
 def first():        return [fourth, third], ZeroOrMore(third)
@@ -26,6 +27,7 @@ def fourth():       return _(r'\d+')
 
 first_sar = None
 third_sar = None
+
 
 class Visitor(PTNodeVisitor):
     def visit_first(self, node, children):
@@ -55,4 +57,3 @@ def test_semantic_action_results():
     assert isinstance(first_sar, SemanticActionResults)
     assert len(first_sar.third) == 3
     assert third_sar.third_str[0] == '3'
-

@@ -10,7 +10,6 @@
 from __future__ import unicode_literals
 import pytest
 from arpeggio import ParserPython, NoMatch
-from arpeggio import RegExMatch as _
 
 
 def test_autokwd():
@@ -77,4 +76,3 @@ def test_ws():
     # But if only spaces are between words than it will
     # parse.
     parser.parse("one two  three")
-

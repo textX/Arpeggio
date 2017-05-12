@@ -8,12 +8,12 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 
 # Grammar
 from arpeggio import ZeroOrMore, OneOrMore, ParserPython, Terminal, NonTerminal
-from arpeggio.export import PTDOTExporter
 from arpeggio import RegExMatch as _
+
 
 def grammar():      return first, "a", second, [first, second]
 def first():        return [fourth, third], ZeroOrMore(third)
@@ -49,4 +49,3 @@ def test_reduce_tree():
     assert result[3].rule_name == 'fourth'
     # Check reduction for direct OrderedChoice
     assert result[2][0].rule_name == 'third_str'
-

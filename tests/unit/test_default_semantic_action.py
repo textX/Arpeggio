@@ -10,7 +10,7 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 from arpeggio import ParserPython, SemanticAction, ParseTreeNode
 from arpeggio import RegExMatch as _
 
@@ -26,16 +26,18 @@ def parentheses():  return '(', rulea, ')'
 def rulea():        return ['+', '-'], number
 def number():       return _(r'\d+')
 
+
 p_removed = False
 number_str = False
 parse_tree_node = False
+
 
 class ParenthesesSA(SemanticAction):
     def first_pass(self, parser, node, children):
         global p_removed, parse_tree_node
         p_removed = text(children[0]) != '('
         parse_tree_node = isinstance(children[0], ParseTreeNode)
-        return children[0] if len(children)==1 else children[1]
+        return children[0] if len(children) == 1 else children[1]
 
 
 class RuleSA(SemanticAction):
@@ -48,11 +50,12 @@ class RuleSA(SemanticAction):
 parentheses.sem = ParenthesesSA()
 rulea.sem = RuleSA()
 
+
 def test_default_action_enabled():
 
     parser = ParserPython(grammar)
 
-    parse_tree = parser.parse('(-34) strmatch')
+    parser.parse('(-34) strmatch')
 
     parser.getASG(defaults=True)
 
@@ -65,13 +68,10 @@ def test_default_action_disabled():
 
     parser = ParserPython(grammar)
 
-    parse_tree = parser.parse('(-34) strmatch')
+    parser.parse('(-34) strmatch')
 
     parser.getASG(defaults=False)
 
     assert not p_removed
     assert not number_str
     assert parse_tree_node
-
-
-

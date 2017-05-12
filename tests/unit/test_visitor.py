@@ -8,7 +8,7 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 
 # Grammar
 from arpeggio import ZeroOrMore, OneOrMore, ParserPython,\

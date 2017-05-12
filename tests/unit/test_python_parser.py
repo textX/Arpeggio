@@ -8,7 +8,7 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 
 # Grammar
 from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, ParserPython,\
@@ -33,6 +33,7 @@ def test_pp_construction():
     assert parser.parser_model.rule_name == 'calc'
     assert isinstance(parser.parser_model, Sequence)
     assert parser.parser_model.nodes[0].desc == 'OneOrMore'
+
 
 def test_parse_input():
 

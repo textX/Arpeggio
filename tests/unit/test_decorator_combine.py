@@ -11,8 +11,8 @@
 
 from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, ZeroOrMore, OneOrMore, NonTerminal, Terminal, NoMatch, Combine
-from arpeggio.peg import ParserPEG
+from arpeggio import ParserPython, ZeroOrMore, OneOrMore, NonTerminal, \
+    Terminal, NoMatch, Combine
 
 
 def test_combine_python():
@@ -33,10 +33,8 @@ def test_combine_python():
     ptree1 = parser.parse(input1)
 
     with pytest.raises(NoMatch):
-        ptree2 = parser.parse(input2)
+        parser.parse(input2)
 
     assert isinstance(ptree1, NonTerminal)
     assert isinstance(ptree1[0], Terminal)
     assert ptree1[0].value == "abbb"
-
-

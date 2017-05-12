@@ -8,7 +8,7 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 
 # Grammar
 from arpeggio import ParserPython
@@ -23,5 +23,3 @@ def test_unicode_match():
 
     parse_tree = parser.parse("♪ ± a")
     assert parse_tree
-
-

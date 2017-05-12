@@ -9,7 +9,7 @@
 from __future__ import unicode_literals
 import pytest
 
-from arpeggio import ZeroOrMore, Optional, Not, ParserPython, NoMatch, EOF
+from arpeggio import Optional, Not, ParserPython, NoMatch, EOF
 from arpeggio import RegExMatch as _
 
 

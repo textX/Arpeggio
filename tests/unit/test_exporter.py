@@ -36,7 +36,7 @@ def test_export_parser_model(parser):
     """
 
     PMDOTExporter().exportFile(parser.parser_model,
-                            "test_exporter_parser_model.dot")
+                               "test_exporter_parser_model.dot")
 
     assert os.path.exists("test_exporter_parser_model.dot")
 
@@ -48,7 +48,6 @@ def test_export_parse_tree(parser):
 
     parse_tree = parser.parse("-(4-1)*5+(2+4.67)+5.89/(.2+7)")
     PTDOTExporter().exportFile(parse_tree,
-                                "test_exporter_parse_tree.dot")
+                               "test_exporter_parse_tree.dot")
 
     assert os.path.exists("test_exporter_parse_tree.dot")
-

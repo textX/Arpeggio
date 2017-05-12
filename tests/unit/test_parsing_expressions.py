@@ -3,14 +3,15 @@
 # Name: test_parsing_expressions
 # Purpose: Test for parsing expressions.
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2014-2017 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
 
 from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, NoMatch, EOF, Optional, And, Not
-from arpeggio import RegExMatch as _
+from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
+    NoMatch, EOF, Optional, And, Not
+
 
 def test_sequence():
 
@@ -22,6 +23,7 @@ def test_sequence():
 
     assert str(parsed) == "a | b | c"
     assert repr(parsed) == "[  'a' [0],  'b' [2],  'c' [4] ]"
+
 
 def test_ordered_choice():
 
@@ -44,6 +46,7 @@ def test_ordered_choice():
     with pytest.raises(NoMatch):
         parser.parse("bb")
 
+
 def test_unordered_group():
 
     def grammar():     return UnorderedGroup("a", "b", "c"), EOF
@@ -64,6 +67,7 @@ def test_unordered_group():
     with pytest.raises(NoMatch):
         parser.parse("b b a c")
 
+
 def test_zero_or_more():
 
     def grammar():     return ZeroOrMore("a"), EOF
@@ -73,7 +77,8 @@ def test_zero_or_more():
     parsed = parser.parse("aaaaaaa")
 
     assert str(parsed) == "a | a | a | a | a | a | a | "
-    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],  'a' [3],  'a' [4],  'a' [5],  'a' [6], EOF [7] ]"
+    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],"\
+        "  'a' [3],  'a' [4],  'a' [5],  'a' [6], EOF [7] ]"
 
     parsed = parser.parse("")
 
@@ -82,6 +87,7 @@ def test_zero_or_more():
 
     with pytest.raises(NoMatch):
         parser.parse("bbb")
+
 
 def test_one_or_more():
 
@@ -92,7 +98,8 @@ def test_one_or_more():
     parsed = parser.parse("aaaaaa a  b")
 
     assert str(parsed) == "a | a | a | a | a | a | a | b"
-    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],  'a' [3],  'a' [4],  'a' [5],  'a' [7],  'b' [10] ]"
+    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],"\
+        "  'a' [3],  'a' [4],  'a' [5],  'a' [7],  'b' [10] ]"
 
     parser.parse("ab")
 
@@ -101,6 +108,7 @@ def test_one_or_more():
 
     with pytest.raises(NoMatch):
         parser.parse("b")
+
 
 def test_optional():
 
@@ -145,6 +153,7 @@ def test_and():
     with pytest.raises(NoMatch):
         parser.parse("abb")
 
+
 def test_not():
 
     def grammar():      return "a", Not("b"), ["b", "c"], EOF
@@ -163,4 +172,3 @@ def test_not():
     # And will not consume 'c' from the input so 'b' will never match
     with pytest.raises(NoMatch):
         parser.parse("acb")
-

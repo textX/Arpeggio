@@ -8,7 +8,7 @@
 #######################################################################
 
 from __future__ import unicode_literals
-import pytest
+import pytest  # noqa
 from arpeggio import ParserPython, Sequence
 
 
@@ -16,7 +16,8 @@ def test_sequence_suppress():
     """
     """
 
-    def grammar():     return Sequence("one", "two", "three", suppress=True), "four"
+    def grammar():     return Sequence("one", "two", "three",
+                                       suppress=True), "four"
 
     parser = ParserPython(grammar)
 

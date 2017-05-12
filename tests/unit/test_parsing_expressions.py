@@ -59,6 +59,9 @@ def test_unordered_group():
         parser.parse("a b a c")
 
     with pytest.raises(NoMatch):
+        parser.parse("a c")
+
+    with pytest.raises(NoMatch):
         parser.parse("b b a c")
 
 def test_zero_or_more():

@@ -402,6 +402,56 @@ class OrderedChoice(Sequence):
         return result
 
 
+class UnorderedGroup(Sequence):
+    """
+    Will try to match all of the parsing expression in any order.
+    """
+    def _parse(self, parser):
+        results = []
+        c_pos = parser.position
+
+        if self.ws is not None:
+            old_ws = parser.ws
+            parser.ws = self.ws
+
+        if self.skipws is not None:
+            old_skipws = parser.skipws
+            parser.skipws = self.skipws
+
+        # Prefetching
+        append = results.append
+        nodes_to_try = set(self.nodes)
+
+        while nodes_to_try:
+            match = False
+            for e in set(nodes_to_try):
+                c_loc_pos = parser.position
+                try:
+                    result = e.parse(parser)
+                    if result:
+                        match = True
+                        append(result)
+                        nodes_to_try.remove(e)
+
+                except NoMatch:
+                    parser.position = c_loc_pos     # Backtracking
+
+            if not match:
+                parser.position = c_pos     # Backtracking
+                break
+
+        if self.ws is not None:
+            parser.ws = old_ws
+        if self.skipws is not None:
+            parser.skipws = old_skipws
+
+        if not match:
+            parser._nm_raise(self, c_pos, parser)
+
+        if results:
+            return results
+
+
 class Repetition(ParsingExpression):
     """
     Base class for all repetition-like parser expressions (?,*,+)
@@ -1730,6 +1780,13 @@ class ParserPython(Parser):
 
             elif isinstance(expression, Match):
                 retval = expression
+
+            elif isinstance(expression, UnorderedGroup):
+                retval = expression
+                for n in retval.elements:
+                    retval.nodes.append(inner_from_python(n))
+                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                    __for_resolving.append(retval)
 
             elif isinstance(expression, Sequence) or \
                     isinstance(expression, Repetition) or \

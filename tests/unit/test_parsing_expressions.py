@@ -9,7 +9,7 @@
 
 from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, ZeroOrMore, OneOrMore, NoMatch, EOF, Optional, And, Not
+from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, NoMatch, EOF, Optional, And, Not
 from arpeggio import RegExMatch as _
 
 def test_sequence():
@@ -43,6 +43,23 @@ def test_ordered_choice():
 
     with pytest.raises(NoMatch):
         parser.parse("bb")
+
+def test_unordered_group():
+
+    def grammar():     return UnorderedGroup("a", "b", "c"), EOF
+
+    parser = ParserPython(grammar)
+
+    parsed = parser.parse("b a c")
+
+    assert str(parsed) == "b | a | c | "
+    assert repr(parsed) == "[  'b' [0],  'a' [2],  'c' [4], EOF [5] ]"
+
+    with pytest.raises(NoMatch):
+        parser.parse("a b a c")
+
+    with pytest.raises(NoMatch):
+        parser.parse("b b a c")
 
 def test_zero_or_more():
 

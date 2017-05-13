@@ -49,7 +49,8 @@ def test_ordered_choice():
 
 def test_unordered_group():
 
-    def grammar():     return UnorderedGroup("a", "b", "c"), EOF
+    def grammar():
+        return UnorderedGroup("a", "b", "c"), EOF
 
     parser = ParserPython(grammar)
 
@@ -67,6 +68,37 @@ def test_unordered_group():
     with pytest.raises(NoMatch):
         parser.parse("b b a c")
 
+
+def test_unordered_group_with_separator():
+
+    def grammar():
+        return UnorderedGroup("a", "b", "c", sep=StrMatch(",")), EOF
+
+    parser = ParserPython(grammar)
+
+    parsed = parser.parse("b, a , c")
+
+    assert str(parsed) == "b | , | a | , | c | "
+    assert repr(parsed) == \
+        "[  'b' [0],  ',' [1],  'a' [3],  ',' [5],  'c' [7], EOF [8] ]"
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, b, a, c")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, c")
+
+    with pytest.raises(NoMatch):
+        parser.parse("b, b, a, c")
+
+    with pytest.raises(NoMatch):
+        parser.parse(",a, b, c")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, b, c,")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, ,b, c")
 
 def test_zero_or_more():
 

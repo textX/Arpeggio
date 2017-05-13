@@ -402,56 +402,6 @@ class OrderedChoice(Sequence):
         return result
 
 
-class UnorderedGroup(Sequence):
-    """
-    Will try to match all of the parsing expression in any order.
-    """
-    def _parse(self, parser):
-        results = []
-        c_pos = parser.position
-
-        if self.ws is not None:
-            old_ws = parser.ws
-            parser.ws = self.ws
-
-        if self.skipws is not None:
-            old_skipws = parser.skipws
-            parser.skipws = self.skipws
-
-        # Prefetching
-        append = results.append
-        nodes_to_try = set(self.nodes)
-
-        while nodes_to_try:
-            match = False
-            for e in set(nodes_to_try):
-                c_loc_pos = parser.position
-                try:
-                    result = e.parse(parser)
-                    if result:
-                        match = True
-                        append(result)
-                        nodes_to_try.remove(e)
-
-                except NoMatch:
-                    parser.position = c_loc_pos     # Backtracking
-
-            if not match:
-                parser.position = c_pos     # Backtracking
-                break
-
-        if self.ws is not None:
-            parser.ws = old_ws
-        if self.skipws is not None:
-            parser.skipws = old_skipws
-
-        if not match:
-            parser._nm_raise(self, c_pos, parser)
-
-        if results:
-            return results
-
-
 class Repetition(ParsingExpression):
     """
     Base class for all repetition-like parser expressions (?,*,+)
@@ -593,6 +543,68 @@ class OneOrMore(Repetition):
             parser.in_optional = oldin_optional
 
         return results
+
+
+class UnorderedGroup(Repetition):
+    """
+    Will try to match all of the parsing expression in any order.
+    """
+    def _parse(self, parser):
+        results = []
+        c_pos = parser.position
+
+        if self.eolterm:
+            # Remember current eolterm and set eolterm of
+            # this repetition
+            old_eolterm = parser.eolterm
+            parser.eolterm = self.eolterm
+
+        # Set parser for optional mode
+        oldin_optional = parser.in_optional
+
+        # Prefetching
+        append = results.append
+        nodes_to_try = set(self.nodes)
+        sep = self.sep.parse if self.sep else None
+        result = None
+
+        while nodes_to_try:
+            match = False
+            for e in set(nodes_to_try):
+                c_loc_pos = parser.position
+                try:
+                    if sep and result:
+                        sep_result = sep(parser)
+                        if not sep_result:
+                            break
+                        append(sep_result)
+                    result = e.parse(parser)
+                    if result:
+                        match = True
+                        append(result)
+                        nodes_to_try.remove(e)
+                        break
+
+                except NoMatch:
+                    parser.position = c_loc_pos     # Backtracking
+
+            if not match:
+                parser.position = c_pos     # Backtracking
+                break
+
+        if self.eolterm:
+            # Restore previous eolterm
+            parser.eolterm = old_eolterm
+
+        # Restore in_optional state
+        parser.in_optional = oldin_optional
+
+        if not match:
+            parser._nm_raise(self, c_pos, parser)
+
+        if results:
+            return results
+
 
 
 class SyntaxPredicate(ParsingExpression):

@@ -461,10 +461,8 @@ class Repetition(ParsingExpression):
     """
     def __init__(self, *elements, **kwargs):
         super(Repetition, self).__init__(*elements, **kwargs)
-        if 'eolterm' in kwargs:
-            self.eolterm = kwargs['eolterm']
-        else:
-            self.eolterm = False
+        self.eolterm = kwargs.get('eolterm', False)
+        self.sep = kwargs.get('sep', None)
 
 
 class Optional(Repetition):
@@ -512,10 +510,17 @@ class ZeroOrMore(Repetition):
         # Prefetching
         append = results.append
         p = self.nodes[0].parse
+        sep = self.sep.parse if self.sep else None
+        result = None
 
         while True:
             try:
                 c_pos = parser.position
+                if sep and result:
+                    sep_result = sep(parser)
+                    if not sep_result:
+                        break
+                    append(sep_result)
                 result = p(parser)
                 if not result:
                     break
@@ -554,11 +559,18 @@ class OneOrMore(Repetition):
         # Prefetching
         append = results.append
         p = self.nodes[0].parse
+        sep = self.sep.parse if self.sep else None
+        result = None
 
         try:
             while True:
                 try:
                     c_pos = parser.position
+                    if sep and result:
+                        sep_result = sep(parser)
+                        if not sep_result:
+                            break
+                        append(sep_result)
                     result = p(parser)
                     if not result:
                         break

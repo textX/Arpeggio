@@ -567,6 +567,7 @@ class UnorderedGroup(Repetition):
         nodes_to_try = set(self.nodes)
         sep = self.sep.parse if self.sep else None
         result = None
+        sep_result = None
 
         while nodes_to_try:
             match = False
@@ -577,10 +578,11 @@ class UnorderedGroup(Repetition):
                         sep_result = sep(parser)
                         if not sep_result:
                             break
-                        append(sep_result)
                     result = e.parse(parser)
                     if result:
                         match = True
+                        if sep_result:
+                            append(sep_result)
                         append(result)
                         nodes_to_try.remove(e)
                         break
@@ -604,7 +606,6 @@ class UnorderedGroup(Repetition):
 
         if results:
             return results
-
 
 
 class SyntaxPredicate(ParsingExpression):

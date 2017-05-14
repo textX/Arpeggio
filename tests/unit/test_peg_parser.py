@@ -6,8 +6,7 @@
 # Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-
-import pytest
+import pytest  # noqa
 from arpeggio import Sequence, NonTerminal
 from arpeggio.peg import ParserPEG
 
@@ -20,13 +19,15 @@ grammar = '''
     calc <- expression+ EOF;
 '''
 
+
 def test_construct_parser():
 
     parser = ParserPEG(grammar, 'calc')
 
     assert parser.parser_model.rule_name == 'calc'
     assert isinstance(parser.parser_model, Sequence)
-    assert parser.parser_model.nodes[0].name  == 'OneOrMore'
+    assert parser.parser_model.nodes[0].name == 'OneOrMore'
+
 
 def test_parse_input():
 

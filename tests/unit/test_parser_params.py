@@ -16,7 +16,8 @@ def test_autokwd():
     """
     autokwd will match keywords on word boundaries.
     """
-    def grammar():     return ("one", "two", "three")
+    def grammar():
+        return ("one", "two", "three")
 
     parser = ParserPython(grammar, autokwd=True)
 
@@ -39,7 +40,8 @@ def test_skipws():
     skipws will skip whitespaces.
     """
 
-    def grammar():     return ("one", "two", "three")
+    def grammar():
+        return ("one", "two", "three")
 
     parser = ParserPython(grammar)
 
@@ -58,7 +60,8 @@ def test_ws():
     By default it consists of space, tab and newline.
     """
 
-    def grammar():     return ("one", "two", "three")
+    def grammar():
+        return ("one", "two", "three")
 
     parser = ParserPython(grammar)
 

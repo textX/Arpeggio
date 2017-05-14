@@ -10,7 +10,6 @@
 from __future__ import unicode_literals
 import pytest
 from arpeggio import ParserPython, NoMatch, Sequence
-from arpeggio import RegExMatch as _
 
 
 def test_skipws():
@@ -18,16 +17,16 @@ def test_skipws():
     skipws may be defined per Sequence.
     """
 
-    def grammar():     return Sequence("one", "two", "three"), "four"
+    def grammar():
+        return Sequence("one", "two", "three"), "four"
 
     parser = ParserPython(grammar)
 
     # By default, skipws is True and whitespaces will be skipped.
     parser.parse("one two   three  four")
 
-
-    def grammar():     return Sequence("one", "two", "three",
-                                       skipws=False), "four"
+    def grammar():
+        return Sequence("one", "two", "three", skipws=False), "four"
 
     parser = ParserPython(grammar)
 
@@ -45,7 +44,8 @@ def test_ws():
     ws can be changed per Sequence.
     """
 
-    def grammar():     return Sequence("one", "two", "three"), "four"
+    def grammar():
+        return Sequence("one", "two", "three"), "four"
 
     parser = ParserPython(grammar)
 
@@ -54,9 +54,8 @@ def test_ws():
     parser.parse("""one
             two   three  four""")
 
-
-    def grammar():     return Sequence("one", "two", "three",
-                                       ws=' '), "four"
+    def grammar():
+        return Sequence("one", "two", "three", ws=' '), "four"
 
     parser = ParserPython(grammar)
 
@@ -70,10 +69,9 @@ def test_ws():
     parser.parse("""one two  three
         four""")
 
-
     # Test for ws with more than one char.
-    def grammar():     return Sequence("one", "two", "three",
-                                       ws=' \t'), "four"
+    def grammar():
+        return Sequence("one", "two", "three", ws=' \t'), "four"
 
     parser = ParserPython(grammar)
 

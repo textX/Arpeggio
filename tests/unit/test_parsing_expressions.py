@@ -15,7 +15,8 @@ from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
 
 def test_sequence():
 
-    def grammar():     return ("a", "b", "c")
+    def grammar():
+        return ("a", "b", "c")
 
     parser = ParserPython(grammar)
 
@@ -27,7 +28,8 @@ def test_sequence():
 
 def test_ordered_choice():
 
-    def grammar():     return ["a", "b", "c"], EOF
+    def grammar():
+        return ["a", "b", "c"], EOF
 
     parser = ParserPython(grammar)
 
@@ -100,9 +102,11 @@ def test_unordered_group_with_separator():
     with pytest.raises(NoMatch):
         parser.parse("a, ,b, c")
 
+
 def test_zero_or_more():
 
-    def grammar():     return ZeroOrMore("a"), EOF
+    def grammar():
+        return ZeroOrMore("a"), EOF
 
     parser = ParserPython(grammar)
 
@@ -157,7 +161,8 @@ def test_zero_or_more_separator():
 
 def test_one_or_more():
 
-    def grammar():      return OneOrMore("a"), "b"
+    def grammar():
+        return OneOrMore("a"), "b"
 
     parser = ParserPython(grammar)
 
@@ -207,9 +212,11 @@ def test_one_or_more_with_separator():
     with pytest.raises(NoMatch):
         parser.parse(", a, a b")
 
+
 def test_optional():
 
-    def grammar():      return Optional("a"), "b", EOF
+    def grammar():
+        return Optional("a"), "b", EOF
 
     parser = ParserPython(grammar)
 
@@ -234,7 +241,8 @@ def test_optional():
 
 def test_and():
 
-    def grammar():      return "a", And("b"), ["c", "b"], EOF
+    def grammar():
+        return "a", And("b"), ["c", "b"], EOF
 
     parser = ParserPython(grammar)
 
@@ -253,7 +261,8 @@ def test_and():
 
 def test_not():
 
-    def grammar():      return "a", Not("b"), ["b", "c"], EOF
+    def grammar():
+        return "a", Not("b"), ["b", "c"], EOF
 
     parser = ParserPython(grammar)
 

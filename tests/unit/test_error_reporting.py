@@ -17,7 +17,8 @@ def test_non_optional_precedence():
     """
     Test that all tried match at position are reported.
     """
-    def grammar():  return Optional('a'), 'b'
+    def grammar():
+        return Optional('a'), 'b'
 
     parser = ParserPython(grammar)
 
@@ -26,7 +27,8 @@ def test_non_optional_precedence():
     assert "Expected 'a' or 'b'" in str(e)
     assert (e.value.line, e.value.col) == (1, 1)
 
-    def grammar():  return ['b', Optional('a')]
+    def grammar():
+        return ['b', Optional('a')]
 
     parser = ParserPython(grammar)
 
@@ -62,7 +64,8 @@ def test_alternative_added():
     reported.
     """
 
-    def grammar():      return ['one', 'two'], _(r'\w+')
+    def grammar():
+        return ['one', 'two'], _(r'\w+')
 
     parser = ParserPython(grammar)
 
@@ -109,8 +112,8 @@ def test_not_match_at_beginning():
     error message.
     """
 
-    def grammar():      return Not('one'), _(r'\w+')
-    # def grammar():      return Not(['ident', 'one', 'two']), _(r'\w+')
+    def grammar():
+        return Not('one'), _(r'\w+')
 
     parser = ParserPython(grammar)
 
@@ -124,7 +127,8 @@ def test_not_match_as_alternative():
     Test that Not is not reported if a part of OrderedChoice.
     """
 
-    def grammar():      return ['one', Not('two')], _(r'\w+')
+    def grammar():
+        return ['one', Not('two')], _(r'\w+')
 
     parser = ParserPython(grammar)
 
@@ -138,7 +142,8 @@ def test_sequence_of_nots():
     Test that sequence of Not rules is handled properly.
     """
 
-    def grammar():      return Not('one'), Not('two'), _(r'\w+')
+    def grammar():
+        return Not('one'), Not('two'), _(r'\w+')
 
     parser = ParserPython(grammar)
 
@@ -151,7 +156,8 @@ def test_compound_not_match():
     """
     Test a more complex Not match error reporting.
     """
-    def grammar():      return [Not(['two', 'three']), 'one', 'two'], _(r'\w+')
+    def grammar():
+        return [Not(['two', 'three']), 'one', 'two'], _(r'\w+')
 
     parser = ParserPython(grammar)
 

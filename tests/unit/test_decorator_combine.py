@@ -18,9 +18,12 @@ from arpeggio import ParserPython, ZeroOrMore, OneOrMore, NonTerminal, \
 def test_combine_python():
 
     # This will result in NonTerminal node
-    def root():     return my_rule(), "."
+    def root():
+        return my_rule(), "."
+
     # This will result in Terminal node
-    def my_rule():  return Combine(ZeroOrMore("a"), OneOrMore("b"))
+    def my_rule():
+        return Combine(ZeroOrMore("a"), OneOrMore("b"))
 
     parser = ParserPython(root)
 

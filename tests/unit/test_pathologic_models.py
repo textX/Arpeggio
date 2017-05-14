@@ -20,7 +20,8 @@ def test_optional_inside_zeroormore():
     to try the match again.
     Arpeggio handle this case.
     """
-    def grammar():  return ZeroOrMore(Optional('a')), EOF
+    def grammar():
+        return ZeroOrMore(Optional('a')), EOF
 
     parser = ParserPython(grammar)
 

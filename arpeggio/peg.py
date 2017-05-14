@@ -3,24 +3,38 @@
 # Name: peg.py
 # Purpose: Implementing PEG language
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009-2014 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
 
 from __future__ import print_function, unicode_literals
 import sys
+import codecs
+import copy
+import re
+from arpeggio import Sequence, OrderedChoice, Optional, ZeroOrMore, \
+    OneOrMore, EOF, EndOfFile, PTNodeVisitor, SemanticError, CrossRef, \
+    GrammarError, StrMatch, And, Not, Parser, ParserPython, \
+    visit_parse_tree
+from arpeggio import RegExMatch as _
+
 if sys.version < '3':
     text = unicode
 else:
     text = str
 
-import codecs
-import copy
-import re
-from arpeggio import *
-from arpeggio import RegExMatch as _
-
 __all__ = ['ParserPEG']
+
+# Lexical invariants
+LEFT_ARROW = "<-"
+SLASH = "/"
+STAR = "*"
+QUESTION = "?"
+PLUS = "+"
+AND = "&"
+NOT = "!"
+OPEN = "("
+CLOSE = ")"
 
 
 # PEG syntax rules
@@ -28,28 +42,19 @@ def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
 def ordered_choice():   return sequence, ZeroOrMore(SLASH, sequence)
 def sequence():         return OneOrMore(prefix)
-def prefix():           return Optional([AND,NOT]), sufix
+def prefix():           return Optional([AND, NOT]), sufix
 def sufix():            return expression, Optional([QUESTION, STAR, PLUS])
 def expression():       return [regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match]
 
 # PEG Lexical rules
-def LEFT_ARROW():       return "<-"
-def SLASH():            return "/"
-def STAR():             return "*"
-def QUESTION():         return "?"
-def PLUS():             return "+"
-def AND():              return "&"
-def NOT():              return "!"
-def OPEN():             return "("
-def CLOSE():            return ")"
-def regex():            return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''),"'"),
-                                ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''),'"')]
+def regex():            return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
+                                ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
 def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 def rule_crossref():    return rule_name
 def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-                                     r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+                                 r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 def comment():          return "//", _(".*\n")
 
 
@@ -176,7 +181,7 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_prefix(self, node, children):
         if len(children) == 2:
-            if children[0] == NOT():
+            if children[0] == NOT:
                 retval = Not()
             else:
                 retval = And()
@@ -192,9 +197,9 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_sufix(self, node, children):
         if len(children) == 2:
-            if children[1] == STAR():
+            if children[1] == STAR:
                 retval = ZeroOrMore(children[0])
-            elif children[1] == QUESTION():
+            elif children[1] == QUESTION:
                 retval = Optional(children[0])
             else:
                 retval = OneOrMore(children[0])
@@ -211,8 +216,7 @@ class PEGVisitor(PTNodeVisitor):
         return CrossRef(node.value)
 
     def visit_regex(self, node, children):
-        match = RegExMatch(children[0],
-                           ignore_case=self.ignore_case)
+        match = _(children[0], ignore_case=self.ignore_case)
         match.compile()
         return match
 

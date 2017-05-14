@@ -7,20 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <meta name="author" content="Igor Dejanović">
-  
-  <title>Grammars - Arpeggio</title>
-  
-
   <link rel="shortcut icon" href="../img/favicon.ico">
-
-  
+  <title>Grammars - Arpeggio</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
   <link rel="stylesheet" href="../css/highlight.css">
   <link href="../extra.css" rel="stylesheet">
-
   
   <script>
     // Current page data
@@ -31,9 +25,7 @@
   
   <script src="../js/jquery-2.1.1.min.js"></script>
   <script src="../js/modernizr-2.8.3.min.js"></script>
-  <script type="text/javascript" src="../js/highlight.pack.js"></script>
-  <script src="../js/theme.js"></script> 
-
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
   
   <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -63,147 +55,104 @@
       </div>
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-        <ul class="current">
+	<ul class="current">
+	  
           
-            <li>
-    <li class="toctree-l1 ">
-        <a class="" href="..">Home</a>
-        
-    </li>
-<li>
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
           
-            <li>
+            <li class="toctree-l1">
+		
+    <span class="caption-text">User Guide</span>
     <ul class="subnav">
-    <li><span>User Guide</span></li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../getting_started/">Getting started</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 current">
-        <a class="current" href="./">Grammars</a>
-        
-            <ul>
-            
-                <li class="toctree-l3"><a href="#grammars">Grammars</a></li>
-                
-                    <li><a class="toctree-l4" href="#grammars-written-in-python">Grammars written in Python</a></li>
-                
-                    <li><a class="toctree-l4" href="#grammars-written-in-peg-notations">Grammars written in PEG notations</a></li>
-                
-            
-            </ul>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../parse_trees/">Parse tree</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../handling_errors/">Handling errors</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../debugging/">Debugging</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../configuration/">Parser configuration</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../semantics/">Semantic analysis</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../troubleshooting/">Troubleshooting</a>
-        
-    </li>
-
-        
-    </ul>
-<li>
-          
-            <li>
+                <li class="">
+                    
+    <a class="" href="../getting_started/">Getting started</a>
+                </li>
+                <li class=" current">
+                    
+    <a class="current" href="./">Grammars</a>
     <ul class="subnav">
-    <li><span>Tutorials</span></li>
-
-        
             
-    <li class="toctree-l1 ">
-        <a class="" href="../tutorials/csv/">CSV</a>
+    <li class="toctree-l3"><a href="#grammars">Grammars</a></li>
+    
+        <ul>
         
-    </li>
+            <li><a class="toctree-l4" href="#grammars-written-in-python">Grammars written in Python</a></li>
+        
+            <li><a class="toctree-l4" href="#grammars-written-in-peg-notations">Grammars written in PEG notations</a></li>
+        
+        </ul>
+    
 
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../tutorials/bibtex/">BibTex</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../tutorials/calc/">Calc</a>
-        
-    </li>
-
-        
     </ul>
-<li>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../parse_trees/">Parse tree</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../handling_errors/">Handling errors</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../debugging/">Debugging</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../configuration/">Parser configuration</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../semantics/">Semantic analysis</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+    </ul>
+	    </li>
           
-            <li>
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Tutorials</span>
     <ul class="subnav">
-    <li><span>About</span></li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../about/discuss/">Discuss</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../about/contributing/">Contributing</a>
-        
-    </li>
-
-        
-            
-    <li class="toctree-l1 ">
-        <a class="" href="../about/license/">License</a>
-        
-    </li>
-
-        
+                <li class="">
+                    
+    <a class="" href="../tutorials/csv/">CSV</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../tutorials/bibtex/">BibTex</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../tutorials/calc/">Calc</a>
+                </li>
     </ul>
-<li>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">About</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../about/discuss/">Discuss</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../about/contributing/">Contributing</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../about/license/">License</a>
+                </li>
+    </ul>
+	    </li>
           
         </ul>
       </div>
@@ -234,9 +183,8 @@
     <li>Grammars</li>
     <li class="wy-breadcrumbs-aside">
       
-        
-          <a href="https://github.com/igordejanovic/Arpeggio" class="icon icon-github"> Edit on GitHub</a>
-        
+        <a href="https://github.com/igordejanovic/Arpeggio/edit/master/docs/grammars.md"
+          class="icon icon-github"> Edit on GitHub</a>
       
     </li>
   </ul>
@@ -248,9 +196,10 @@
                 <h1 id="grammars">Grammars</h1>
 <p>With grammar you teach Arpeggio how to parse your inputs.</p>
 <hr />
-<p>Arpeggio is based on <a href="https://en.wikipedia.org/wiki/Parsing_expression_grammar">PEG grammars</a>.
-PEG is a type of formal grammar that is given as a set of rules for recognizing
-strings of the language.  In a way it is similar to context-free grammars with a
+<p>Arpeggio is based
+on <a href="https://en.wikipedia.org/wiki/Parsing_expression_grammar">PEG grammars</a>. PEG
+is a type of formal grammar that is given as a set of rules for recognizing
+strings of the language. In a way it is similar to context-free grammars with a
 very important distinction that PEG are always unambiguous. This is achieved by
 making choice operator ordered. In PEGs a first choice from left to right that
 matches will be used.</p>
@@ -264,39 +213,43 @@ can reference (call) each other.</p>
 <pre><code>first = 'foo' second+ EOF
 second = 'bar' / 'baz'
 </code></pre>
-<p>In this example <code>first</code> is the root rule. This rule will match a literal
-string <code>foo</code> followed by one or more <code>second</code> rule (this is a rule
-reference) followed by end of input (<code>EOF</code>).  <code>second</code> rule is ordered
-choice and will match either <code>bar</code> or <code>baz</code> in that order.</p>
-<p>During parsing each successfully matched rule will create a parse tree node.  At
+<p>In this example <code>first</code> is the root rule. This rule will match a literal string
+<code>foo</code> followed by one or more <code>second</code> rule (this is a rule reference) followed
+by end of input (<code>EOF</code>). <code>second</code> rule is ordered choice and will match either
+<code>bar</code> or <code>baz</code> in that order.</p>
+<p>During parsing each successfully matched rule will create a parse tree node. At
 the end of parsing a complete <a href="../parse_trees/">parse tree</a> of the input will be
-returned.  .</p>
+returned. .</p>
 <p>In Arpeggio each PEG rule consists of atomic parsing expression which can be:</p>
 <ul>
 <li>
-<p><strong>terminal match rules</strong> - create a <a href="../parse_trees/#terminal-nodes">Terminal nodes</a>:</p>
+<p><strong>terminal match rules</strong> - create
+  a <a href="../parse_trees/#terminal-nodes">Terminal nodes</a>:</p>
 <ul>
-<li><strong>String match</strong> - a simple string that is matched literally from the input
-  string.</li>
+<li><strong>String match</strong> - a simple string that is matched literally from the
+  input string.</li>
 <li><strong>RegEx match</strong> - regular expression match (based on python <code>re</code> module).</li>
 </ul>
 </li>
 <li>
-<p><strong>non-terminal match rules</strong> - create a <a href="../parse_trees/#non-terminal-nodes">Non-terminal nodes</a>:</p>
+<p><strong>non-terminal match rules</strong> - create
+  a <a href="../parse_trees/#non-terminal-nodes">Non-terminal nodes</a>:</p>
 <ul>
 <li><strong>Sequence</strong> - succeeds if all parsing expressions matches at current
-  location in the defined order.  Matched input is consumed.</li>
-<li><strong>Ordered choice</strong> - succeeds if any of the given expressions matches at the
-  current location. The match is tried in the order defined. Matched input is
-  consumed.</li>
+  location in the defined order. Matched input is consumed.</li>
+<li><strong>Ordered choice</strong> - succeeds if any of the given expressions matches at
+  the current location. The match is tried in the order defined. Matched
+  input is consumed.</li>
 <li><strong>Zero or more</strong> - given expression is matched until match is successful.
   Always succeeds. Matched input is consumed.</li>
 <li><strong>One or more</strong> - given expressions is matched until match is successful.
   Succeeds if at least one match is done. Matched input is consumed.</li>
 <li><strong>Optional</strong> - matches given expression but will not fail if match can't be
   done. Matched input is consumed.</li>
-<li><strong>And predicate</strong> - succeeds if given expression matches at current location
-  but does not consume any input.</li>
+<li><strong>Unordered group</strong> - matches given expressions in any order. Each given
+  expression must be matched exacltly once. Matched input is consumed.</li>
+<li><strong>And predicate</strong> - succeeds if given expression matches at current
+  location but does not consume any input.</li>
 <li><strong>Not predicate</strong> - succeeds if given expression <strong>does not</strong> matches at
   current location but does not consume any input.</li>
 </ul>
@@ -328,6 +281,7 @@ structure that maps to PEG expressions.</p>
 <li><strong>Zero or more</strong> is represented as an instance of <code>ZeroOrMore</code> class.
   The parameters are treated as a containing sequence.</li>
 <li><strong>Optional</strong> is represented as an instance of <code>Optional</code> class.</li>
+<li><strong>Unordered group</strong> is represented as an instance of <code>UnorderedGroup</code> class.</li>
 <li><strong>And predicate</strong> is represented as an instance of <code>And</code> class.</li>
 <li><strong>Not predicate</strong> is represented as an instance of <code>Not</code> class.</li>
 <li><strong>Literal string match</strong> is represented as string or regular expression given
@@ -347,7 +301,7 @@ graph of parser expressions (see <a href="../debugging/#visualization">Grammar
 visualization</a>).  Each node of the graph is
 an instance of some of the classes described above which inherits
 <code>ParserExpression</code>.</p>
-<p>Parser model construction is done during parser instantiation.  For example, to
+<p>Parser model construction is done during parser instantiation. For example, to
 instantiate <code>calc</code> parser you do the following:</p>
 <pre><code class="python">parser = ParserPython(calc)
 </code></pre>
@@ -357,27 +311,26 @@ code generation. Parser works as an interpreter for your grammar. The grammar is
 used to configure Arpeggio parser to recognize your language (in this case the
 <code>calc</code> language). In other words, Arpeggio interprets the parser model (your
 grammar).</p>
-<p>After parser construction your can call <code>parser.parse</code> to parse your input
-text.</p>
+<p>After parser construction your can call <code>parser.parse</code> to parse your input text.</p>
 <pre><code class="python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
 parse_tree = parser.parse(input_expr)
 </code></pre>
 
 <p>Arpeggio will start from the root node and traverse <em>the parser model graph</em>
-consuming all matched input.  When all root node branches are traversed the
+consuming all matched input. When all root node branches are traversed the
 parsing is done and <em>the parse tree</em> is returned.</p>
 <p>You can navigate and analyze parse tree or transform it using visitor pattern to
 some more usable form (see <a href="../semantics/#visitors">Semantic analysis - Visitors</a>)</p>
 <h2 id="grammars-written-in-peg-notations">Grammars written in PEG notations</h2>
 <p>Grammars can also be specified using PEG notation. There are actually two of
 them at the moment and both notations are implemented using canonical Python
-based grammars (see modules
-<a href="https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py">arpeggio.peg</a>
-and
+based grammars (see
+modules
+<a href="https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py">arpeggio.peg</a> and
 <a href="https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/cleanpeg.py">arpeggio.cleanpeg</a>).</p>
 <p>There are no significant differences between those two syntax. The first one use
 more traditional approach using <code>&lt;-</code> for rule assignment, <code>//</code> for line comments
-and <code>;</code> for the rule terminator.  The second syntax (from <code>arpeggio.cleanpeg</code>)
+and <code>;</code> for the rule terminator. The second syntax (from <code>arpeggio.cleanpeg</code>)
 uses <code>=</code> for assignment, does not use rule terminator and use <code>#</code> for line
 comments. Which one you choose is totally up to you. If your don't like any of
 these syntaxes you can make your own (look at <code>arpeggio.peg</code> and
@@ -390,8 +343,8 @@ expression = term ((&quot;+&quot; / &quot;-&quot;) term)*
 calc = expression+ EOF
 </code></pre>
 
-<p>Each grammar rule is given as an assignment where the lhs is the rule name (e.g.
-<code>number</code>) and the rhs is a PEG expression.</p>
+<p>Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
+<code>number</code>) and the RHS is a PEG expression.</p>
 <ul>
 <li><strong>Literal string matches</strong> are given as strings (e.g. <code>"+"</code>).</li>
 <li><strong>Regex matches</strong> are given as strings with prefix <code>r</code> (e.g.
@@ -403,25 +356,35 @@ calc = expression+ EOF
 <li><strong>Zero or more</strong> expression is specified by <code>*</code> operator (e.g. <code>(( "*" /
   "/" ) factor)*</code>).</li>
 <li><strong>One of more</strong> is specified by <code>+</code> operator (e.g. <code>expression+</code>).</li>
-</ul>
-<p><code>And</code> and <code>Not</code> predicates are also supported.</p>
-<ul>
+<li><strong>Unordered group</strong> is specified by <code>#</code> operator (e.g. <code>sequence#</code>). It has
+  sense only if applied to the sequence expression. Elements of the sequence are
+  matched in any order.</li>
 <li><strong>And predicate</strong> is specified by <code>&amp;</code> operator (e.g. <code>&amp;expression</code> - not
   used in the grammar above).</li>
 <li><strong>Not predicate</strong> is specified by <code>!</code> operator (e.g. <code>!expression</code> - not
   used in the grammar above).</li>
+<li>A special rule <code>EOF</code> will match end of input string.</li>
 </ul>
-<p>In the rhs a rule reference is a name of another rule. Parser will try to match
+<p>In the RHS a rule reference is a name of another rule. Parser will try to match
 another rule at that location.</p>
-<p>Special rule <code>EOF</code> will match end of input string.</p>
+<p>Literal string matches and regex matches follow the same rules as Python itself
+would use for
+single-quoted
+<a href="https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals">string literals</a>,
+regarding the escaping of embedded quotes, and the translation of escape
+sequences. Literal string matches are treated as normal (non-raw) string
+literals, and regex matches are treated as raw string literals. Triple-quoting,
+and the 'r', 'u' and 'b' prefixes, are not supported – note than in arpeggio PEG
+grammars, all strings are Unicode, and the 'r' prefix denotes a regular
+expression.</p>
 <p>Creating a parser using PEG syntax is done by the class <code>ParserPEG</code> from the
 <code>arpeggio.peg</code> or <code>arpeggio.cleanpeg</code> modules.</p>
 <pre><code class="python">from arpeggio.cleanpeg import ParserPEG
 parser = ParserPEG(calc_grammar, &quot;calc&quot;)
 </code></pre>
 
-<p>Where <code>calc_grammar</code> is a string with the grammar given above and the
-<code>"calc"</code> is the name of the root rule of the grammar.</p>
+<p>Where <code>calc_grammar</code> is a string with the grammar given above and the <code>"calc"</code>
+is the name of the root rule of the grammar.</p>
 <p>After this you get the same parser as with the <code>ParserPython</code>. There is no
 difference at all so you can parse the same language.</p>
 <pre><code class="python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
@@ -468,13 +431,13 @@ both approach since the same code for parsing is used.</p>
       </div>
 
     </section>
-
+    
   </div>
 
-<div class="rst-versions" role="note" style="cursor: pointer">
+  <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/igordejanovic/Arpeggio" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/igordejanovic/Arpeggio" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../getting_started/" style="color: #fcfcfc;">&laquo; Previous</a></span>
@@ -484,6 +447,7 @@ both approach since the same code for parsing is used.</p>
       
     </span>
 </div>
+    <script src="../js/theme.js"></script>
 
 </body>
 </html>

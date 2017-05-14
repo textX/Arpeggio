@@ -21,10 +21,10 @@ __all__ = ['ParserPEG']
 
 # Lexical invariants
 ASSIGNMENT = "="
-SLASH = "/"
-STAR = "*"
-QUESTION = "?"
-PLUS = "+"
+ORDERED_CHOICE = "/"
+ZERO_OR_MORE = "*"
+ONE_OR_MORE = "+"
+OPTIONAL = "?"
 AND = "&"
 NOT = "!"
 OPEN = "("
@@ -33,10 +33,12 @@ CLOSE = ")"
 # PEG syntax rules
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, ASSIGNMENT, ordered_choice
-def ordered_choice():   return sequence, ZeroOrMore(SLASH, sequence)
+def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
 def sequence():         return OneOrMore(prefix)
 def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([QUESTION, STAR, PLUS])
+def sufix():            return expression, Optional([OPTIONAL,
+                                                     ZERO_OR_MORE,
+                                                     ONE_OR_MORE])
 def expression():       return [regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match], Not(ASSIGNMENT)

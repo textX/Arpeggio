@@ -27,10 +27,10 @@ __all__ = ['ParserPEG']
 
 # Lexical invariants
 LEFT_ARROW = "<-"
-SLASH = "/"
-STAR = "*"
-QUESTION = "?"
-PLUS = "+"
+ORDERED_CHOICE = "/"
+ZERO_OR_MORE = "*"
+ONE_OR_MORE = "+"
+OPTIONAL = "?"
 AND = "&"
 NOT = "!"
 OPEN = "("
@@ -40,10 +40,12 @@ CLOSE = ")"
 # PEG syntax rules
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
-def ordered_choice():   return sequence, ZeroOrMore(SLASH, sequence)
+def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
 def sequence():         return OneOrMore(prefix)
 def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([QUESTION, STAR, PLUS])
+def sufix():            return expression, Optional([OPTIONAL,
+                                                     ZERO_OR_MORE,
+                                                     ONE_OR_MORE])
 def expression():       return [regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match]
@@ -197,9 +199,9 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_sufix(self, node, children):
         if len(children) == 2:
-            if children[1] == STAR:
+            if children[1] == ZERO_OR_MORE:
                 retval = ZeroOrMore(children[0])
-            elif children[1] == QUESTION:
+            elif children[1] == OPTIONAL:
                 retval = Optional(children[0])
             else:
                 retval = OneOrMore(children[0])

@@ -13,9 +13,9 @@ import codecs
 import copy
 import re
 from arpeggio import Sequence, OrderedChoice, Optional, ZeroOrMore, \
-    OneOrMore, EOF, EndOfFile, PTNodeVisitor, SemanticError, CrossRef, \
-    GrammarError, StrMatch, And, Not, Parser, ParserPython, \
-    visit_parse_tree
+    OneOrMore, UnorderedGroup, EOF, EndOfFile, PTNodeVisitor, \
+    SemanticError, CrossRef, GrammarError, StrMatch, And, Not, Parser, \
+    ParserPython, visit_parse_tree
 from arpeggio import RegExMatch as _
 
 if sys.version < '3':
@@ -31,6 +31,7 @@ ORDERED_CHOICE = "/"
 ZERO_OR_MORE = "*"
 ONE_OR_MORE = "+"
 OPTIONAL = "?"
+UNORDERED_GROUP = "#"
 AND = "&"
 NOT = "!"
 OPEN = "("
@@ -45,7 +46,8 @@ def sequence():         return OneOrMore(prefix)
 def prefix():           return Optional([AND, NOT]), sufix
 def sufix():            return expression, Optional([OPTIONAL,
                                                      ZERO_OR_MORE,
-                                                     ONE_OR_MORE])
+                                                     ONE_OR_MORE,
+                                                     UNORDERED_GROUP])
 def expression():       return [regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match]
@@ -199,16 +201,18 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_sufix(self, node, children):
         if len(children) == 2:
-            if children[1] == ZERO_OR_MORE:
-                retval = ZeroOrMore(children[0])
-            elif children[1] == OPTIONAL:
-                retval = Optional(children[0])
-            else:
-                retval = OneOrMore(children[0])
             if type(children[0]) is list:
-                retval.nodes = children[0]
+                nodes = children[0]
             else:
-                retval.nodes = [children[0]]
+                nodes = [children[0]]
+            if children[1] == ZERO_OR_MORE:
+                retval = ZeroOrMore(nodes=nodes)
+            elif children[1] == ONE_OR_MORE:
+                retval = OneOrMore(nodes=nodes)
+            elif children[1] == OPTIONAL:
+                retval = Optional(nodes=nodes)
+            else:
+                retval = UnorderedGroup(nodes=nodes[0].nodes)
         else:
             retval = children[0]
 

@@ -25,6 +25,7 @@ ORDERED_CHOICE = "/"
 ZERO_OR_MORE = "*"
 ONE_OR_MORE = "+"
 OPTIONAL = "?"
+UNORDERED_GROUP = "#"
 AND = "&"
 NOT = "!"
 OPEN = "("
@@ -38,7 +39,8 @@ def sequence():         return OneOrMore(prefix)
 def prefix():           return Optional([AND, NOT]), sufix
 def sufix():            return expression, Optional([OPTIONAL,
                                                      ZERO_OR_MORE,
-                                                     ONE_OR_MORE])
+                                                     ONE_OR_MORE,
+                                                     UNORDERED_GROUP])
 def expression():       return [regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match], Not(ASSIGNMENT)

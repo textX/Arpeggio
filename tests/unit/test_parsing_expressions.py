@@ -103,6 +103,61 @@ def test_unordered_group_with_separator():
         parser.parse("a, ,b, c")
 
 
+def test_unordered_group_with_optionals():
+
+    def grammar():
+        return UnorderedGroup("a", Optional("b"), "c"), EOF
+
+    parser = ParserPython(grammar)
+
+    parsed = parser.parse("b a c")
+    assert str(parsed) == "b | a | c | "
+
+    parsed = parser.parse("a c b")
+    assert str(parsed) == "a | c | b | "
+
+    parsed = parser.parse("a c")
+    assert str(parsed) == "a | c | "
+
+    with pytest.raises(NoMatch):
+        parser.parse("a b c b")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a b ")
+
+
+def test_unordered_group_with_optionals_and_separator():
+
+    def grammar():
+        return UnorderedGroup("a", Optional("b"), "c", sep=","), EOF
+
+    parser = ParserPython(grammar)
+
+    parsed = parser.parse("b, a, c")
+    assert parsed
+
+    parsed = parser.parse("a, c, b")
+    assert parsed
+
+    parsed = parser.parse("a, c")
+    assert parsed
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, b, c, b")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, b ")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, c, ")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a, b c ")
+
+    with pytest.raises(NoMatch):
+        parser.parse(",a, c ")
+
+
 def test_zero_or_more():
 
     def grammar():
@@ -125,10 +180,10 @@ def test_zero_or_more():
         parser.parse("bbb")
 
 
-def test_zero_or_more_separator():
+def test_zero_or_more_with_separator():
 
     def grammar():
-        return ZeroOrMore("a", sep=StrMatch(",")), EOF
+        return ZeroOrMore("a", sep=","), EOF
 
     parser = ParserPython(grammar)
 
@@ -184,7 +239,7 @@ def test_one_or_more():
 def test_one_or_more_with_separator():
 
     def grammar():
-        return OneOrMore("a", sep=StrMatch(",")), "b"
+        return OneOrMore("a", sep=","), "b"
 
     parser = ParserPython(grammar)
 

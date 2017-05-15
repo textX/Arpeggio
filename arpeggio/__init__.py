@@ -544,30 +544,48 @@ class UnorderedGroup(Repetition):
         sep = self.sep.parse if self.sep else None
         result = None
         sep_result = None
+        first = True
 
         while nodes_to_try:
-            match = False
-            for e in set(nodes_to_try):
-                c_loc_pos = parser.position
+            sep_exc = None
+
+            # Separator
+            c_loc_pos_sep = parser.position
+            if sep and not first:
                 try:
-                    if sep and result:
-                        sep_result = sep(parser)
-                        if not sep_result:
-                            break
+                    sep_result = sep(parser)
+                except NoMatch as e:
+                    parser.position = c_loc_pos_sep     # Backtracking
+
+                    # This still might be valid if all remaining subexpressions
+                    # are optional and none of them will match
+                    sep_exc = e
+
+            c_loc_pos = parser.position
+            match = True
+            all_optionals_fail = True
+            for e in set(nodes_to_try):
+                try:
                     result = e.parse(parser)
                     if result:
-                        match = True
+                        if sep_exc:
+                            raise sep_exc
                         if sep_result:
                             append(sep_result)
+                        first = False
+                        match = True
+                        all_optionals_fail = False
                         append(result)
                         nodes_to_try.remove(e)
                         break
 
                 except NoMatch:
-                    parser.position = c_loc_pos     # Backtracking
+                    match = False
+                    parser.position = c_loc_pos     # local backtracking
 
-            if not match:
-                parser.position = c_pos     # Backtracking
+            if not match or all_optionals_fail:
+                # If sep is matched backtrack it
+                parser.position = c_loc_pos_sep
                 break
 
         if self.eolterm:
@@ -575,6 +593,8 @@ class UnorderedGroup(Repetition):
             parser.eolterm = old_eolterm
 
         if not match:
+            # Unsucessful match of the whole PE - full backtracking
+            parser.position = c_pos
             parser._nm_raise(self, c_pos, parser)
 
         if results:

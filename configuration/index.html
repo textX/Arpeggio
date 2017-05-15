@@ -108,6 +108,8 @@
         
             <li><a class="toctree-l4" href="#newline-termination-for-repetitions">Newline termination for Repetitions</a></li>
         
+            <li><a class="toctree-l4" href="#separator-for-repetitions">Separator for Repetitions</a></li>
+        
         </ul>
     
 
@@ -301,6 +303,19 @@ a"""
 parser = ParserPython(grammar)
 result = parser.parse(input)
 </code></pre>
+<h2 id="separator-for-repetitions">Separator for Repetitions</h2>
+<p>It is possible to specify parsing expression that will be used in between each
+two matches in repetitions.</p>
+<p>For example:</p>
+<pre><code>def grammar():        return ZeroOrMore(["a", "b"], sep=",")
+
+# so that second rule will match "a" on the new line
+input = "a , b, b, a"
+
+parser = ParserPython(grammar)
+result = parser.parse(input)
+</code></pre>
+<p><code>sep</code> can be any valid parsing expression.</p>
 <h3 id="memoization-aka-packrat-parsing">Memoization (a.k.a. packrat parsing)</h3>
 <p>This technique is based on memoizing result on each parsing expression rule.
 For some grammars with a lot of backtracking this can yield a significant

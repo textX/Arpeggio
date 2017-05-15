@@ -133,7 +133,23 @@ ensure that it terminates before entering a new line.
 
     parser = ParserPython(grammar)
     result = parser.parse(input)
+    
+## Separator for Repetitions
 
+It is possible to specify parsing expression that will be used in between each
+two matches in repetitions.
+
+For example:
+
+    def grammar():        return ZeroOrMore(["a", "b"], sep=",")
+
+    # so that second rule will match "a" on the new line
+    input = "a , b, b, a"
+
+    parser = ParserPython(grammar)
+    result = parser.parse(input)
+
+`sep` can be any valid parsing expression.
 
 ### Memoization (a.k.a. packrat parsing)
 

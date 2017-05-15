@@ -1,6 +1,20 @@
 Changelog for Arpeggio
 ======================
 
+* 2017-05-15 Release 1.6
+  - Dropped support for Python 3.2.
+  - Improved error reporting (especially for `Not` Parsing Expression).
+  - `line,col` attributes are now available on `NoMatch` exception.
+  - Fixed issue #31 - a subtle bug in empty nested parses.
+  - Issue #32 - improvements and fixes in escape sequences support.
+    Thanks smbolton@github!
+  - Added `position_end` attribute on parse tree nodes with the position
+    in the input stream where the given match ends.
+  - Added support for unordered groups (`UnorderedGroup` class). See the docs.
+  - Support for separator expression in repetitions (`sep` parameter).
+    See the docs.
+  - Various code/docs cleanup.
+
 * 2016-05-31 Release 1.5
   - Significant performance improvements (see textX issue #22)
   - Added new performance tests to keep track of both speed and memory

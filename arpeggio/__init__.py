@@ -1836,6 +1836,10 @@ class ParserPython(Parser):
                 raise GrammarError("Unrecognized grammar element '%s'." %
                                    text(expression))
 
+            # Translate separator expression.
+            if isinstance(expression, Repetition) and expression.sep:
+                expression.sep = inner_from_python(expression.sep)
+
             return retval
 
         # Cross-ref resolving

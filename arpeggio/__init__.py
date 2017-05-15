@@ -424,17 +424,10 @@ class Optional(Repetition):
         result = None
         c_pos = parser.position
 
-        # Set parser for optional mode
-        oldin_optional = parser.in_optional
-        parser.in_optional = True
-
         try:
             result = [self.nodes[0].parse(parser)]
         except NoMatch:
             parser.position = c_pos  # Backtracking
-
-        # Restore in_optional state
-        parser.in_optional = oldin_optional
 
         return result
 
@@ -452,10 +445,6 @@ class ZeroOrMore(Repetition):
             # this repetition
             old_eolterm = parser.eolterm
             parser.eolterm = self.eolterm
-
-        # Set parser for optional mode
-        oldin_optional = parser.in_optional
-        parser.in_optional = True
 
         # Prefetching
         append = results.append
@@ -483,9 +472,6 @@ class ZeroOrMore(Repetition):
             # Restore previous eolterm
             parser.eolterm = old_eolterm
 
-        # Restore in_optional state
-        parser.in_optional = oldin_optional
-
         return results
 
 
@@ -502,9 +488,6 @@ class OneOrMore(Repetition):
             # this repetition
             old_eolterm = parser.eolterm
             parser.eolterm = self.eolterm
-
-        # Set parser for optional mode
-        oldin_optional = parser.in_optional
 
         # Prefetching
         append = results.append
@@ -526,7 +509,6 @@ class OneOrMore(Repetition):
                         break
                     append(result)
                     first = False
-                    parser.in_optional = True
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
 
@@ -538,9 +520,6 @@ class OneOrMore(Repetition):
             if self.eolterm:
                 # Restore previous eolterm
                 parser.eolterm = old_eolterm
-
-            # Restore in_optional state
-            parser.in_optional = oldin_optional
 
         return results
 
@@ -558,9 +537,6 @@ class UnorderedGroup(Repetition):
             # this repetition
             old_eolterm = parser.eolterm
             parser.eolterm = self.eolterm
-
-        # Set parser for optional mode
-        oldin_optional = parser.in_optional
 
         # Prefetching
         append = results.append
@@ -597,9 +573,6 @@ class UnorderedGroup(Repetition):
         if self.eolterm:
             # Restore previous eolterm
             parser.eolterm = old_eolterm
-
-        # Restore in_optional state
-        parser.in_optional = oldin_optional
 
         if not match:
             parser._nm_raise(self, c_pos, parser)
@@ -1345,8 +1318,6 @@ class Parser(DebugPrinter):
             Terminal instances.
         in_rule (str): Current rule name.
         in_parse_comments (bool): True if parsing comments.
-        in_optional (bool): True if parsing optionals (Optional, ZeroOrMore or
-            OneOrMore after first).
         in_lex_rule (bool): True if in lexical rule. Currently used in Combine
             decorator to convert match to a single Terminal.
         in_not (bool): True if in Not parsing expression. Used for better error
@@ -1409,10 +1380,6 @@ class Parser(DebugPrinter):
         self.in_rule = ''
 
         self.in_parse_comments = False
-
-        # If under optional PE (Optional or ZeroOrMore or OneOrMore after
-        # first occurence) we do not store NoMatch for error reporting.
-        self.in_optional = False
 
         # Are we in lexical rule? If so do not
         # skip whitespaces.

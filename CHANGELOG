@@ -1,6 +1,9 @@
 Changelog for Arpeggio
 ======================
 
+* 2017-05-15 Release 1.6.1
+  - Fixed bug in unordered group with optional subexpressions.
+
 * 2017-05-15 Release 1.6
   - Dropped support for Python 3.2.
   - Improved error reporting (especially for `Not` Parsing Expression).

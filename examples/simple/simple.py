@@ -9,7 +9,7 @@
 # It is taken and adapted from pyPEG project (see http://www.fdik.org/pyPEG/).
 #######################################################################
 
-from __future__ import unicode_literals
+
 
 import os
 from arpeggio import *

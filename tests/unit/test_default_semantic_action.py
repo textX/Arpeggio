@@ -9,14 +9,14 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
+
 import pytest  # noqa
 from arpeggio import ParserPython, SemanticAction, ParseTreeNode
 from arpeggio import RegExMatch as _
 
 try:
     # For python 2.x
-    text=unicode
+    text=str
 except:
     # For python 3.x
     text=str

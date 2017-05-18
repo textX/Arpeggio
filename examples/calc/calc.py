@@ -10,9 +10,9 @@
 # notation.
 #######################################################################
 
-from __future__ import unicode_literals, print_function
+
 try:
-    text=unicode
+    text=str
 except:
     text=str
 

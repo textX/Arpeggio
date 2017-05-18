@@ -8,7 +8,7 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
+
 
 # Grammar
 from arpeggio import ParserPython, Optional, EOF

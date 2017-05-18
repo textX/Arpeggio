@@ -11,7 +11,7 @@
 # textual notation.
 ###############################################################################
 
-from __future__ import print_function, unicode_literals
+
 import sys
 import codecs
 import re
@@ -22,7 +22,7 @@ import types
 __version__ = "1.7.dev"
 
 if sys.version < '3':
-    text = unicode
+    text = str
 else:
     text = str
 

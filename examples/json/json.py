@@ -9,7 +9,7 @@
 # (see http://pyparsing.wikispaces.com/).
 ##############################################################################
 
-from __future__ import unicode_literals
+
 
 import os
 from arpeggio import *

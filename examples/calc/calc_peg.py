@@ -12,7 +12,7 @@
 # Parser model as well as parse tree exported to dot files should be
 # the same as parser model and parse tree generated in calc.py example.
 #######################################################################
-from __future__ import absolute_import, unicode_literals, print_function
+
 
 import os
 from arpeggio.peg import ParserPEG

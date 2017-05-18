@@ -6,7 +6,7 @@
 # Copyright: (c) 2015 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from __future__ import unicode_literals
+
 import pytest
 
 from arpeggio import Optional, Not, ParserPython, NoMatch, EOF

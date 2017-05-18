@@ -7,7 +7,7 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
+
 import pytest
 from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
     NoMatch, EOF, Optional, And, Not, StrMatch

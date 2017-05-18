@@ -7,7 +7,7 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import print_function, unicode_literals
+
 import sys
 import codecs
 import copy
@@ -19,7 +19,7 @@ from arpeggio import Sequence, OrderedChoice, Optional, ZeroOrMore, \
 from arpeggio import RegExMatch as _
 
 if sys.version < '3':
-    text = unicode
+    text = str
 else:
     text = str
 

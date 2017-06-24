@@ -179,6 +179,8 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
   EOF` is a sequence of two expressions).
 - **Ordered choice** is a list of expression separated with `/` (e.g. `"+" /
   "-"`).
+- **Optional** expression is specified by `?`operator (e.g. `expression?`) and
+  matches zero or one occurrence of *expression*
 - **Zero or more** expression is specified by `*` operator (e.g. `(( "*" /
   "/" ) factor)*`).
 - **One of more** is specified by `+` operator (e.g. `expression+`).

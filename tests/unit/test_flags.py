@@ -16,10 +16,11 @@ from arpeggio import RegExMatch as _
 from arpeggio import NoMatch
 
 
-def foo():    return 'r', bar, baz, Optional(buz), EOF
+def foo():    return 'r', bar, Optional(qux), baz, Optional(buz), EOF
 def bar():      return 'BAR'
 def baz():      return _(r'1\w+')
 def buz():      return _(r'Aba*', ignore_case=True)
+def qux():      return _(r'/\*.*\*/', multiline=True)
 
 
 @pytest.fixture
@@ -48,5 +49,11 @@ def test_flags_override(parser_nonci):
     # Parser is not case insensitive
     # But the buz match is.
     input_str = "r BAR 1baz abaaaaAAaaa"
+    parse_tree = parser_nonci.parse(input_str)
+    assert parse_tree is not None
+
+
+def test_multiline_comment(parser_nonci):
+    input_str = "r BAR /*1baz\nabaaaaAAaaa\n*/1baz"
     parse_tree = parser_nonci.parse(input_str)
     assert parse_tree is not None

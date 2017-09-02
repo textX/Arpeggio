@@ -781,19 +781,23 @@ class RegExMatch(Match):
             Default is None to support propagation from global parser setting.
         multiline(bool): allow regex to works on multiple lines (re.DOTALL flag)
         str_repr(str): A string that is used to represent this regex.
+        re_flags: flags parameter for re.compile if neither ignore_case
+            or multiple are set.
 
     '''
     def __init__(self, to_match, rule_name='', root=False, ignore_case=None,
-                 multiline=False, str_repr=None):
+                 multiline=False, str_repr=None, re_flags=re.MULTILINE):
         super(RegExMatch, self).__init__(rule_name, root)
         self.to_match_regex = to_match
         self.ignore_case = ignore_case
         self.multiline = multiline
+        implicit_flag = any((self.ignore_case, self.multiline, to_match is None))
+        self.flags = re.MULTILINE if implicit_flag else re_flags
 
         self.to_match = str_repr if str_repr is not None else to_match
 
     def compile(self):
-        flags = re.MULTILINE
+        flags = self.flags
         if self.multiline:
             flags |= re.DOTALL
         if self.ignore_case:

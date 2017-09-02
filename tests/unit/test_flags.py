@@ -8,6 +8,7 @@
 #######################################################################
 
 from __future__ import unicode_literals
+import re
 import pytest
 
 # Grammar
@@ -16,11 +17,12 @@ from arpeggio import RegExMatch as _
 from arpeggio import NoMatch
 
 
-def foo():    return 'r', bar, Optional(qux), baz, Optional(buz), EOF
+def foo():      return 'r', bar, Optional(qux), baz, Optional(ham), Optional(buz), EOF
 def bar():      return 'BAR'
 def baz():      return _(r'1\w+')
 def buz():      return _(r'Aba*', ignore_case=True)
 def qux():      return _(r'/\*.*\*/', multiline=True)
+def ham():      return _(r'/\*.*\*/', re_flags=re.DOTALL)  # equivalent to qux
 
 
 @pytest.fixture
@@ -55,5 +57,11 @@ def test_flags_override(parser_nonci):
 
 def test_multiline_comment(parser_nonci):
     input_str = "r BAR /*1baz\nabaaaaAAaaa\n*/1baz"
+    parse_tree = parser_nonci.parse(input_str)
+    assert parse_tree is not None
+
+
+def test_multiline_comment_by_re_flags(parser_nonci):
+    input_str = "r BAR 1baz/*this\nis\nnot\nparsed*/"
     parse_tree = parser_nonci.parse(input_str)
     assert parse_tree is not None

@@ -1,6 +1,11 @@
 Changelog for Arpeggio
 ======================
 
+* 2017-11-17 Release 1.7
+  - Added re_flag parameter to RegExMatch constructor. Thanks Aluriak@GitHub.
+  - Fix in grammar language docs. Thanks schmittlauch@GitHub.
+  - Small fixes in examples.
+
 * 2017-05-15 Release 1.6.1
   - Fixed bug in unordered group with optional subexpressions.
 

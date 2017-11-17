@@ -4,7 +4,7 @@
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009-2016 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2009-2017 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # Arpeggio is an implementation of packrat parser interpreter based on PEG
@@ -45,18 +45,18 @@ if sys.argv[-1].startswith('publish'):
     sys.exit()
 
 setup(
-    name = NAME,
-    version = VERSION,
-    description = DESC,
-    author = AUTHOR,
-    author_email = AUTHOR_EMAIL,
-    maintainer = AUTHOR,
-    maintainer_email = AUTHOR_EMAIL,
-    license = LICENSE,
-    url = URL,
-    download_url = DOWNLOAD_URL,
-    packages = ["arpeggio"],
-    keywords = "parser packrat peg",
+    name=NAME,
+    version=VERSION,
+    description=DESC,
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
+    maintainer=AUTHOR,
+    maintainer_email=AUTHOR_EMAIL,
+    license=LICENSE,
+    url=URL,
+    download_url=DOWNLOAD_URL,
+    packages=["arpeggio"],
+    keywords="parser packrat peg",
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

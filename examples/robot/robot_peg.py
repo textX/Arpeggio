@@ -2,7 +2,7 @@
 # Name: robot_peg.py
 # Purpose: Simple DSL for defining robot movement (PEG version).
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2011 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2011-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #
 # This example is inspired by an example from LISA tool (http://labraj.uni-mb.si/lisa/)
@@ -21,7 +21,7 @@
 from __future__ import print_function, unicode_literals
 
 import os
-from arpeggio import *
+from arpeggio import visit_parse_tree
 from arpeggio.cleanpeg import ParserPEG
 
 # Semantic actions visitor
@@ -51,9 +51,9 @@ def main(debug=False):
     # returned value will be the final position of the robot.
     return visit_parse_tree(parse_tree, RobotVisitor(debug=debug))
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     print("position = ", main(debug=True))
-

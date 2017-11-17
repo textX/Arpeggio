@@ -21,7 +21,9 @@
 from __future__ import print_function, unicode_literals
 
 import os
-from arpeggio import *
+from arpeggio import ZeroOrMore, EOF, PTNodeVisitor, ParserPython, \
+    visit_parse_tree
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 # Grammar rules
 def robot():      return 'begin', ZeroOrMore(command), 'end', EOF
@@ -92,9 +94,9 @@ def main(debug=False):
     if debug:
         print("position = ", result)
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

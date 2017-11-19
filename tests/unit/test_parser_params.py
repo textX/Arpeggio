@@ -10,7 +10,7 @@
 from __future__ import unicode_literals
 import pytest
 from arpeggio import ParserPython, NoMatch
-
+import sys
 
 def test_autokwd():
     """
@@ -79,3 +79,32 @@ def test_ws():
     # But if only spaces are between words than it will
     # parse.
     parser.parse("one two  three")
+
+def test_file(capsys):
+    """
+    'file' specifies an output file for the DebugPrinter mixin.
+    """
+    
+    def grammar():
+        return ("one", "two", "three")
+
+    # First use stdout
+    parser = ParserPython(grammar, debug=True, file=sys.stdout)
+    out, err = capsys.readouterr()
+
+    parser.dprint('this is stdout')
+    out, err = capsys.readouterr()
+    assert out == 'this is stdout\n'
+    assert err == ''
+
+    # Now use stderr
+    parser = ParserPython(grammar, debug=False, file=sys.stderr)
+    out, err = capsys.readouterr()
+
+    parser.dprint('this is stderr')
+    out, err = capsys.readouterr()
+    assert out == ''
+    assert err == 'this is stderr\n'
+
+
+    

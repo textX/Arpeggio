@@ -756,7 +756,7 @@ class Match(ParsingExpression):
                         parser.position,
                         parser.context()))
 
-        if parser.position in parser.comment_positions:
+        if parser.skipws and parser.position in parser.comment_positions:
             # Skip comments if already parsed.
             parser.position = parser.comment_positions[parser.position]
         else:

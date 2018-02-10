@@ -1,6 +1,9 @@
 Changelog for Arpeggio
 ======================
 
+* 2018-02-10 Release 1.7.1
+  - Fixed bug in comment parsing optimization.
+
 * 2017-11-17 Release 1.7
   - Added re_flag parameter to RegExMatch constructor. Thanks Aluriak@GitHub.
   - Fix in grammar language docs. Thanks schmittlauch@GitHub.

@@ -134,13 +134,15 @@ class DebugPrinter(object):
 
     def dprint(self, message, ident_change=0):
         """
-        Handle debug message. Print to the stream specified by the 'file' keyword argument at the current 
-        indentation level. Default stream is stdout.
+        Handle debug message. Print to the stream specified by the 'file'
+        keyword argument at the current indentation level. Default stream is
+        stdout.
         """
         if ident_change < 0:
             self._current_ident += ident_change
 
-        print(("%s%s" % ("   " * self._current_ident, message)), file=self.file)
+        print(("%s%s" % ("   " * self._current_ident, message)),
+              file=self.file)
 
         if ident_change > 0:
             self._current_ident += ident_change
@@ -725,8 +727,8 @@ class Match(ParsingExpression):
                             pos = parser.position
                             ws = parser.ws
                             i = parser.input
-                            l = len(i)
-                            while pos < l and i[pos] in ws:
+                            length = len(i)
+                            while pos < length and i[pos] in ws:
                                 pos += 1
                             parser.position = pos
                 except NoMatch:
@@ -743,8 +745,8 @@ class Match(ParsingExpression):
             pos = parser.position
             ws = parser.ws
             i = parser.input
-            l = len(i)
-            while pos < l and i[pos] in ws:
+            length = len(i)
+            while pos < length and i[pos] in ws:
                 pos += 1
             parser.position = pos
 
@@ -780,8 +782,9 @@ class RegExMatch(Match):
             It will be used to create regular expression using re.compile.
         ignore_case(bool): If case insensitive match is needed.
             Default is None to support propagation from global parser setting.
-        multiline(bool): allow regex to works on multiple lines (re.DOTALL flag).
-            Default is None to support propagation from global parser setting.
+        multiline(bool): allow regex to works on multiple lines
+            (re.DOTALL flag). Default is None to support propagation from
+            global parser setting.
         str_repr(str): A string that is used to represent this regex.
         re_flags: flags parameter for re.compile if neither ignore_case
             or multiple are set.

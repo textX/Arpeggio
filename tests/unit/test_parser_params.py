@@ -12,6 +12,7 @@ import pytest
 from arpeggio import ParserPython, NoMatch
 import sys
 
+
 def test_autokwd():
     """
     autokwd will match keywords on word boundaries.
@@ -80,11 +81,12 @@ def test_ws():
     # parse.
     parser.parse("one two  three")
 
+
 def test_file(capsys):
     """
     'file' specifies an output file for the DebugPrinter mixin.
     """
-    
+
     def grammar():
         return ("one", "two", "three")
 
@@ -105,6 +107,3 @@ def test_file(capsys):
     out, err = capsys.readouterr()
     assert out == ''
     assert err == 'this is stderr\n'
-
-
-    

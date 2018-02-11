@@ -3,11 +3,9 @@ Arpeggio - Parser interpreter based on PEG grammars
 Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 
 
-Contributors
-------------
+# Contributors
 
- Daniel Fath (Ygg01@github) - Travis CI integration
- yashpal bhardwaj (codeyash@github) - bug reports, doc contribution, improvement ideas
- Santi Villalba (sdvillal@github) - fix for arpeggio recovery after giving non-string input.
- Sean Bolton (smbolton@github) - fix PEG grammars and parsing to match Python's escape handling.
-
+- Bug reports/ideas: https://github.com/igordejanovic/Arpeggio/issues?utf8=%E2%9C%93&q=is%3Aissue
+- Code/docs contributions:
+  - https://github.com/igordejanovic/Arpeggio/graphs/contributors
+  - https://github.com/igordejanovic/Arpeggio/pulls?utf8=%E2%9C%93&q=is%3Apr+

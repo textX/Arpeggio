@@ -1,4 +1,4 @@
-# Calc grammar in clean PEG language
+// Calc grammar in clean PEG language
 
 number = r'\d*\.\d*|\d+'
 factor = ("+" / "-")?

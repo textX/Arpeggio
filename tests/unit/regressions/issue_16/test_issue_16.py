@@ -39,13 +39,13 @@ function = visibility "function" word arguments block
 block = "{" ws* r'[^}]*' ws* "}"
 arguments = "(" ws* argument* ws* ")"
 
-#$types = array("cappuccino")
-#arguments end with optional comma
+// $types = array("cappuccino")
+// arguments end with optional comma
 argument = ( byvalue / byreference ) ("=" value )* ","*
 byreference = "&" byvalue
 byvalue = variable
 
-#value may be variable or array or string or any php type
+// value may be variable or array or string or any php type
 value = variable
 
 visibility = "public" / "protected" / "private"

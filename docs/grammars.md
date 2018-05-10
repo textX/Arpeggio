@@ -152,12 +152,11 @@ modules
 [arpeggio.cleanpeg](https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/cleanpeg.py)).
 
 There are no significant differences between those two syntax. The first one use
-more traditional approach using `<-` for rule assignment, `//` for line comments
-and `;` for the rule terminator. The second syntax (from `arpeggio.cleanpeg`)
-uses `=` for assignment, does not use rule terminator and use `#` for line
-comments. Which one you choose is totally up to you. If your don't like any of
-these syntaxes you can make your own (look at `arpeggio.peg` and
-`arpeggio.cleanpeg` modules as an examples).
+more traditional approach using `<-` for rule assignment and `;` for the rule
+terminator. The second syntax (from `arpeggio.cleanpeg`) uses `=` for assignment
+and does not use rule terminator. Which one you choose is totally up to you. If
+your don't like any of these syntaxes you can make your own (look at
+`arpeggio.peg` and `arpeggio.cleanpeg` modules as an examples).
 
 An example of the `calc` grammar given in PEG syntax (`arpeggio.cleanpeg`):
 

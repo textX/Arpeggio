@@ -19,7 +19,7 @@ import bisect
 from arpeggio.utils import isstr
 import types
 
-__version__ = "1.7.1"
+__version__ = "1.8.0"
 
 if sys.version < '3':
     text = unicode

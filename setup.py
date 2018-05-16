@@ -15,10 +15,17 @@
 import os
 import sys
 from setuptools import setup
-import arpeggio
+
+VERSIONFILE = "arpeggio/__init__.py"
+VERSION = None
+for line in open(VERSIONFILE, "r").readlines():
+    if line.startswith('__version__'):
+        VERSION = line.split('"')[1]
+
+if not VERSION:
+    raise RuntimeError('No version defined in arpeggio/__init__.py')
 
 NAME = 'Arpeggio'
-VERSION = arpeggio.__version__
 DESC = 'Packrat parser interpreter'
 AUTHOR = 'Igor R. Dejanovic'
 AUTHOR_EMAIL = 'igor DOT dejanovic AT gmail DOT com'

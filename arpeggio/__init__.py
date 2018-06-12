@@ -829,7 +829,7 @@ class RegExMatch(Match):
                     (matched, c_pos, parser.context(len(matched))))
             parser.position += len(matched)
             if matched:
-                return Terminal(self, c_pos, matched)
+                return Terminal(self, c_pos, matched, extra_value=m)
         else:
             if parser.debug:
                 parser.dprint("-- NoMatch at {}".format(c_pos))
@@ -1017,15 +1017,18 @@ class Terminal(ParseTreeNode):
             name in the case of an error node.
         suppress(bool): If True this terminal can be ignored in semantic
             analysis.
+        extra_value(object): additional information (e.g. the re matcher
+            object)
     """
 
     __slots__ = ['rule', 'rule_name', 'position', 'error', 'comments',
                  'value', 'suppress']
 
-    def __init__(self, rule, position, value, error=False, suppress=False):
+    def __init__(self, rule, position, value, error=False, suppress=False, extra_value=None):
         super(Terminal, self).__init__(rule, position, error)
         self.value = value
         self.suppress = suppress
+        self.extra_value = extra_value
 
     @property
     def desc(self):

@@ -1024,7 +1024,8 @@ class Terminal(ParseTreeNode):
     __slots__ = ['rule', 'rule_name', 'position', 'error', 'comments',
                  'value', 'suppress', 'extra_info']
 
-    def __init__(self, rule, position, value, error=False, suppress=False, extra_info=None):
+    def __init__(self, rule, position, value, error=False, suppress=False,
+                 extra_info=None):
         super(Terminal, self).__init__(rule, position, error)
         self.value = value
         self.suppress = suppress

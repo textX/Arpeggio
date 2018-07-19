@@ -29,7 +29,7 @@ if not VERSION:
 NAME = 'Arpeggio'
 DESC = 'Packrat parser interpreter'
 AUTHOR = 'Igor R. Dejanovic'
-AUTHOR_EMAIL = 'igor DOT dejanovic AT gmail DOT com'
+AUTHOR_EMAIL = 'igor.dejanovic@gmail.com'
 LICENSE = 'MIT'
 URL = 'https://github.com/igordejanovic/Arpeggio'
 DOWNLOAD_URL = 'https://github.com/igordejanovic/Arpeggio/archive/v{}.tar.gz'\

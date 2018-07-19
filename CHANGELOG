@@ -1,6 +1,12 @@
 Changelog for Arpeggio
 ======================
 
+* 2018-07-19 Release 1.9.0
+  - Added `extra_info` param to `Terminal` for additional information.
+    Used by textX.
+  - Fixed problem with version string reading in non-UTF-8 environments.
+    Thanks sebix@GitHub.
+
 * 2018-05-16 Release 1.8.0
   - Fixed issue #43.
     *Backward incompatible change* for cleanpeg comment syntax.

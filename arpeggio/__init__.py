@@ -16,6 +16,8 @@ import sys
 import codecs
 import re
 import bisect
+from copy import deepcopy
+from itertools import chain
 from arpeggio.utils import isstr
 import types
 
@@ -952,6 +954,7 @@ class ParseTreeNode(object):
             recovery.
         comments : A parse tree of comment(s) attached to this node.
     """
+
     def __init__(self, rule, position, error):
         assert rule
         assert rule.rule_name is not None
@@ -1005,6 +1008,31 @@ class ParseTreeNode(object):
             # If default actions are enabled
             return visitor.visit__default__(self, children)
 
+    def __copy__(self):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        for slot_name in self.all_slots:
+            value = getattr(self, slot_name)
+            setattr(result, slot_name, value)
+        return result
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        for slot_name in self.all_slots:
+            value = getattr(self, slot_name)
+            try:
+                setattr(result, slot_name, deepcopy(value, memo))
+            except TypeError:
+                # If type is not deep-cloneable revert to shallow copy
+                setattr(result, slot_name, value)
+        for elem in self:
+            try:
+                result.append(deepcopy(elem, memo))
+            except TypeError:
+                result.append(elem)
+        return result
+
 
 class Terminal(ParseTreeNode):
     """
@@ -1056,6 +1084,11 @@ class Terminal(ParseTreeNode):
 
     def __eq__(self, other):
         return text(self) == text(other)
+
+
+Terminal.all_slots = list(
+    chain.from_iterable(getattr(cls, '__slots__', [])
+                        for cls in Terminal.__mro__))
 
 
 class NonTerminal(ParseTreeNode, list):
@@ -1121,18 +1154,18 @@ class NonTerminal(ParseTreeNode, list):
             rule_name(str): The name of the rule that is referenced from
                 this node rule.
         """
-        # Prevent infinite recursion
-        if rule_name in ['_expr_cache', '_filtered', 'rule', 'rule_name',
-                         'position', 'append', 'extend']:
-            raise AttributeError
-
-        try:
-            # First check the cache
-            if rule_name in self._expr_cache:
-                return self._expr_cache[rule_name]
-        except AttributeError:
+        if rule_name == '_expr_cache':
             # Navigation expression cache. Used for lookup by rule name.
             self._expr_cache = {}
+            return self._expr_cache
+
+        if rule_name in ['_filtered', 'rule', 'rule_name', 'position',
+                         'append', 'extend']:
+            raise AttributeError
+
+        # First check the cache
+        if rule_name in self._expr_cache:
+            return self._expr_cache[rule_name]
 
         # If result is not found in the cache collect all nodes
         # with the given rule name and create new NonTerminal
@@ -1155,6 +1188,11 @@ class NonTerminal(ParseTreeNode, list):
         result = NonTerminal(rule=rule, nodes=nodes, _filtered=True)
         self._expr_cache[rule_name] = result
         return result
+
+
+NonTerminal.all_slots = list(
+    chain.from_iterable(getattr(cls, '__slots__', [])
+                        for cls in NonTerminal.__mro__))
 
 
 # ----------------------------------------------------

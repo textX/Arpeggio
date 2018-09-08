@@ -7,7 +7,7 @@ repo_url: https://github.com/igordejanovic/Arpeggio
 google_analytics: [UA-68681917-1, igordejanovic.net]
 theme: readthedocs
 
-pages:
+nav:
 - Home: index.md
 - User Guide:
   - Getting started: getting_started.md

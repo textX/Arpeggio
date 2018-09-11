@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Parser interpreter based on PEG grammars for Python">
+  <meta name="author" content="Igor Dejanović">
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <title>Home - Arpeggio</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  <link href="css/version-select.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Home";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="js/jquery-2.1.1.min.js" defer></script>
+  <script src="js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-68681917-1', 'igordejanovic.net');
+      ga('send', 'pageview');
+  </script>
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> Arpeggio</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href=".">Home</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#features">Features</a></li>
+    
+
+    <li class="toctree-l2"><a href="#python-versions">Python versions</a></li>
+    
+
+    <li class="toctree-l2"><a href="#open-source-projects-using-arpeggio">Open-source projects using Arpeggio</a></li>
+    
+
+    <li class="toctree-l2"><a href="#why-is-it-called-arpeggio">Why is it called arpeggio?</a></li>
+    
+
+    <li class="toctree-l2"><a href="#citing-arpeggio">Citing Arpeggio</a></li>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">User Guide</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="getting_started/">Getting started</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="grammars/">Grammars</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="parse_trees/">Parse tree</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="handling_errors/">Handling errors</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="debugging/">Debugging</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="configuration/">Parser configuration</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="semantics/">Semantic analysis</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="troubleshooting/">Troubleshooting</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Tutorials</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="tutorials/csv/">CSV</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="tutorials/bibtex/">BibTex</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="tutorials/calc/">Calc</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">About</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="about/discuss/">Discuss</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="about/contributing/">Contributing</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="about/license/">License</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">Arpeggio</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/igordejanovic/Arpeggio/edit/master/docs/index.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><img alt="Arpeggio logo" src="images/arpeggio-logo.svg" /></p>
+<p>Arpeggio is recursive descent parser with backtracking and memoization (a.k.a.
+pacrat parser).  Arpeggio grammars are based on <a href="http://en.wikipedia.org/wiki/Parsing_expression_grammar">PEG
+formalism</a>.</p>
+<p>Arpeggio's main use is a foundation for a tool-chain for DSL development but it
+can be used for all sort of general purpose parsing.</p>
+<p>For more information on PEG and packrat parsers see <a href="http://bford.info/packrat/">this
+page</a>.</p>
+<p>For a higher level library for building DSLs take a look at
+<a href="https://github.com/igordejanovic/textX">textX</a>. It builds on top of Arpeggio
+and makes language parser implementation a lot easier.</p>
+<p>See <a href="getting_started/">Getting started</a> in the <code>User Guide</code> menu to get you going or read some of the
+tutorials.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>Using <a href="http://en.wikipedia.org/wiki/Parsing_expression_grammar">Parsing Expression Grammar</a>
+  and packrat parsing - unambiguous grammars, unlimited lookahead, linear time.</li>
+<li>Works as grammar interpreter - no code is generated.</li>
+<li>Multiple syntaxes for grammar definition (<a href="grammars/#grammars-written-in-python">Python</a>, 
+  <a href="grammars/#grammars-written-in-peg-notations">peg, cleanpeg</a>, make your own)</li>
+<li><a href="configuration/#case-insensitive-parsing">Case sensitive/insensitive
+  parsing</a></li>
+<li><a href="configuration/#white-space-handling">Whitespace handling control</a></li>
+<li><a href="configuration/#keyword-handling">Keyword handling</a></li>
+<li><a href="configuration/#comment-handling">Support for comments</a></li>
+<li><a href="configuration/#newline-termination-for-repetitions">Newline termination for
+  Repetition</a> (available only in Python syntax)</li>
+<li><a href="parse_trees/">Parse tree navigation</a></li>
+<li><a href="semantics/">Visitors for semantic analysis</a></li>
+<li><a href="handling_errors/">Extensive error reporting</a></li>
+<li><a href="debugging/">Good support for debugging and visualization</a></li>
+<li><a href="https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit">Good test coverage</a></li>
+<li>Beautiful mkdocs documentation - you are reading it</li>
+</ul>
+<h2 id="python-versions">Python versions</h2>
+<p>Arpeggio works with Python 2.7, 3.3+. Other versions might work but are not
+tested.</p>
+<h2 id="open-source-projects-using-arpeggio">Open-source projects using Arpeggio</h2>
+<ul>
+<li><a href="https://github.com/igordejanovic/textX">textX</a> - Meta-language for building
+  Domain-Specific Languages in Python (and all projects using textX)</li>
+<li><a href="https://github.com/sdvillal/whatami">whatami</a> - Unobtrusive object
+  self-identification for Python
+  (<a href="https://github.com/sdvillal/whatami/blob/master/whatami/parsers.py">parsers</a>
+  module)</li>
+<li><a href="https://github.com/fizyk20/ithkuil">ithkuil</a> - A Python package providing
+  tools for analysing texts in the <a href="http://ithkuil.net/">Ithkuil</a> constructed language.</li>
+</ul>
+<h2 id="why-is-it-called-arpeggio">Why is it called arpeggio?</h2>
+<p>In music, arpeggio is playing the chord notes one by one in sequence. I came up
+with the name by thinking that parsing is very similar to arpeggios in music.
+You take tokens one by one from an input and make sense out of it – make a
+chord!</p>
+<p>Well, if you don't buy this maybe it is time to tell you the truth. I searched
+the dictionary for the words that contain PEG acronym and the word arpeggio was
+at the top of the list ;)</p>
+<h2 id="citing-arpeggio">Citing Arpeggio</h2>
+<p>If you use Arpeggio please cite this paper:</p>
+<p>Dejanović I., Milosavljević G., Vaderna R.: Arpeggio: A flexible PEG parser for
+Python, Knowledge-Based Systems, 2016, 95, 71 - 74,
+<a href="http://dx.doi.org/10.1016/j.knosys.2015.12.004">doi:10.1016/j.knosys.2015.12.004</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="getting_started/" class="btn btn-neutral float-right" title="Getting started">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/igordejanovic/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+        <span style="margin-left: 15px"><a href="getting_started/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme.js" defer></script>
+      <script src="js/version-select.js" defer></script>
+      <script src="search/main.js" defer></script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2018-09-11 12:25:06
+-->

@@ -26,5 +26,5 @@ Arpeggio) see `textX <https://github.com/igordejanovic/textX>`_.
    :target: https://travis-ci.org/igordejanovic/Arpeggio
 
 .. |docs| image:: https://img.shields.io/badge/docs-latest-green.svg
-   :target: http://igordejanovic.net/Arpeggio/
+   :target: http://igordejanovic.net/Arpeggio/latest/
    :alt: Documentation Status

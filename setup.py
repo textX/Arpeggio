@@ -26,6 +26,9 @@ for line in codecs.open(VERSIONFILE, "r", encoding='utf-8').readlines():
 if not VERSION:
     raise RuntimeError('No version defined in arpeggio/__init__.py')
 
+README = codecs.open(os.path.join(os.path.dirname(__file__), 'README.rst'),
+                     'r', encoding='utf-8').read()
+
 NAME = 'Arpeggio'
 DESC = 'Packrat parser interpreter'
 AUTHOR = 'Igor R. Dejanovic'
@@ -56,6 +59,7 @@ setup(
     name=NAME,
     version=VERSION,
     description=DESC,
+    long_description=README,
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     maintainer=AUTHOR,

@@ -4,29 +4,33 @@ site_description: Parser interpreter based on PEG grammars for Python
 site_author: Igor Dejanović
 
 repo_url: https://github.com/igordejanovic/Arpeggio
-google_analytics: ['UA-68681917-1', 'igordejanovic.net']
+google_analytics: [UA-68681917-1, igordejanovic.net]
 theme: readthedocs
 
 pages:
 - Home: index.md
 - User Guide:
-    - Getting started: getting_started.md
-    - Grammars: grammars.md
-    - Parse tree: parse_trees.md
-    - Handling errors: handling_errors.md
-    - Debugging: debugging.md
-    - Parser configuration: configuration.md
-    - Semantic analysis: semantics.md
-    - Troubleshooting: troubleshooting.md
+  - Getting started: getting_started.md
+  - Grammars: grammars.md
+  - Parse tree: parse_trees.md
+  - Handling errors: handling_errors.md
+  - Debugging: debugging.md
+  - Parser configuration: configuration.md
+  - Semantic analysis: semantics.md
+  - Troubleshooting: troubleshooting.md
 - Tutorials:
-    - CSV: tutorials/csv.md
-    - BibTex: tutorials/bibtex.md
-    - Calc: tutorials/calc.md
+  - CSV: tutorials/csv.md
+  - BibTex: tutorials/bibtex.md
+  - Calc: tutorials/calc.md
 - About:
-    - Discuss: about/discuss.md
-    - Contributing: about/contributing.md
-    - License: about/license.md
+  - Discuss: about/discuss.md
+  - Contributing: about/contributing.md
+  - License: about/license.md
 
 markdown_extensions:
-    - admonition:
+- admonition:
 
+extra_css:
+- css/version-select.css
+extra_javascript:
+- js/version-select.js

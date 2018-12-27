@@ -3,9 +3,9 @@
 In this example a parser for simple language for robot control is demonstrated.
 
 `robot.py` will instantiate a parser for [grammar defined using
-Python](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-python).
+Python](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-python).
 `robot_peg.py` is the same parser but constructed using a [PEG
-grammar](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations)
+grammar](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-peg-notations)
 defined in file `robot.peg`.
 
 This example demonstrates how to interpret the program on robot language using

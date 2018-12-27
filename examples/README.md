@@ -2,9 +2,9 @@
 
 In this folders you can find various examples.  Each folder contains an example
 and the accompanying files.  Some of the examples are given in both
-[Python](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-python)
+[Python](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-python)
 and [PEG
-syntax](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations).
+syntax](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-peg-notations).
 PEG syntax variant is named `*_peg.py` and the textual PEG grammar is defined in
 separate `*.peg` file.
 
@@ -23,7 +23,7 @@ $ python <example_name>.py
 ```
 
 Install Arpeggio before trying examples. To install Arpeggio read the [Getting
-started guide](http://igordejanovic.net/Arpeggio/getting_started/).
+started guide](http://textx.github.io/Arpeggio/getting_started/).
 
 
 

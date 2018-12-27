@@ -194,7 +194,7 @@ ast = visit_parse_tree(parse_tree, BibTeXVisitor())
 `ast` is now a Python list of dictionaries in the desired format from above.
 
 A full source code for this example can be found in [the source
-code repository](https://github.com/igordejanovic/Arpeggio/tree/master/examples/bibtex).  
+code repository](https://github.com/textX/Arpeggio/tree/master/examples/bibtex).  
 
 !!! note
     Example in the repository is actually a fully working parser with the

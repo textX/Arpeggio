@@ -239,5 +239,5 @@ The grammar for textual PEG is parsed using Arpeggio itself and this shows the
 flexibility of the Arpeggio parser.
 
 The code for both parser can be found in the [Calc
-example](https://github.com/igordejanovic/Arpeggio/tree/master/examples/calc).
+example](https://github.com/textX/Arpeggio/tree/master/examples/calc).
 

@@ -13,7 +13,7 @@ recursion](https://en.wikipedia.org/wiki/Left_recursion) in the grammar.
 !!! note
     Arpeggio parser will implement a support for detecting and reporting of left
     recursions in the grammar. See [issue
-    23](https://github.com/igordejanovic/Arpeggio/issues/23)
+    23](https://github.com/textX/Arpeggio/issues/23)
 
 A left recursion is found if the parser calls the same rule again while no
 characters from the input is consumed from the previous call (e.g. we have the
@@ -113,7 +113,7 @@ Here a node `number` will be suppressed from the parser model and visitor
 for some of the rules calling `mean`.
 
 This implicit reduction can not be disabled at the moment. Please see [issue
-24](https://github.com/igordejanovic/Arpeggio/issues/24).
+24](https://github.com/textX/Arpeggio/issues/24).
 
 
 

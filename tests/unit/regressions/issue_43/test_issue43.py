@@ -1,5 +1,5 @@
 """
-See https://github.com/igordejanovic/Arpeggio/issues/43
+See https://github.com/textX/Arpeggio/issues/43
 """
 from arpeggio.cleanpeg import ParserPEG
 

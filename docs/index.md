@@ -11,7 +11,7 @@ For more information on PEG and packrat parsers see [this
 page](http://bford.info/packrat/).
 
 For a higher level library for building DSLs take a look at
-[textX](https://github.com/igordejanovic/textX). It builds on top of Arpeggio
+[textX](https://github.com/textX/textX). It builds on top of Arpeggio
 and makes language parser implementation a lot easier.
 
 See [Getting started](getting_started.md) in the `User Guide` menu to get you going or read some of the
@@ -36,7 +36,7 @@ tutorials.
 * [Visitors for semantic analysis](semantics.md)
 * [Extensive error reporting](handling_errors.md)
 * [Good support for debugging and visualization](debugging.md)
-* [Good test coverage](https://github.com/igordejanovic/Arpeggio/tree/master/tests/unit)
+* [Good test coverage](https://github.com/textX/Arpeggio/tree/master/tests/unit)
 * Beautiful mkdocs documentation - you are reading it
 
 ## Python versions
@@ -46,7 +46,7 @@ tested.
 
 ## Open-source projects using Arpeggio
 
-- [textX](https://github.com/igordejanovic/textX) - Meta-language for building
+- [textX](https://github.com/textX/textX) - Meta-language for building
   Domain-Specific Languages in Python (and all projects using textX)
 - [whatami](https://github.com/sdvillal/whatami) - Unobtrusive object
   self-identification for Python

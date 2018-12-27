@@ -10,7 +10,7 @@ Changelog for Arpeggio
 * 2018-05-16 Release 1.8.0
   - Fixed issue #43.
     *Backward incompatible change* for cleanpeg comment syntax.
-    Please see: https://github.com/igordejanovic/Arpeggio/issues/43
+    Please see: https://github.com/textX/Arpeggio/issues/43
   - Added `file` parser param used for `DebugPrinter` to allow the
     output stream to be changed from stdout. This allows doctests to
     continue to work. Thanks ianmmoir@GitHub.

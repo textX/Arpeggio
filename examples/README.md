@@ -13,7 +13,7 @@ Each folder has its own README file with the description of the example.
 
 To try out this examples clone this [git
 repository](https://help.github.com/articles/cloning-a-repository/) or [download
-source](https://github.com/igordejanovic/Arpeggio/archive/master.zip), unpack,
+source](https://github.com/textX/Arpeggio/archive/master.zip), unpack,
 and run with python:
 
 ```bash

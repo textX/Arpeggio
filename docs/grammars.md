@@ -148,8 +148,8 @@ Grammars can also be specified using PEG notation. There are actually two of
 them at the moment and both notations are implemented using canonical Python
 based grammars (see
 modules
-[arpeggio.peg](https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/peg.py) and
-[arpeggio.cleanpeg](https://github.com/igordejanovic/Arpeggio/blob/master/arpeggio/cleanpeg.py)).
+[arpeggio.peg](https://github.com/textX/Arpeggio/blob/master/arpeggio/peg.py) and
+[arpeggio.cleanpeg](https://github.com/textX/Arpeggio/blob/master/arpeggio/cleanpeg.py)).
 
 There are no significant differences between those two syntax. The first one use
 more traditional approach using `<-` for rule assignment and `;` for the rule

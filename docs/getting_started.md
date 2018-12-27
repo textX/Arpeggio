@@ -35,7 +35,7 @@ To download source distribution do:
 
 - download
 
-        $ wget https://github.com/igordejanovic/Arpeggio/archive/v1.1.tar.gz
+        $ wget https://github.com/textX/Arpeggio/archive/v1.1.tar.gz
 
 - unpack
 
@@ -141,7 +141,7 @@ Next, you can read some of the step-by-step tutorials ([CSV](tutorials/csv), [Bi
 ## Try the examples
 
 Arpeggio comes with [a lot of
-examples](https://github.com/igordejanovic/Arpeggio/tree/master/examples). To
+examples](https://github.com/textX/Arpeggio/tree/master/examples). To
 install and play around with the examples follow the instructions from the [README
-file](https://github.com/igordejanovic/Arpeggio/tree/master/examples).
+file](https://github.com/textX/Arpeggio/tree/master/examples).
 

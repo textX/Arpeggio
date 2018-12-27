@@ -34,8 +34,8 @@ DESC = 'Packrat parser interpreter'
 AUTHOR = 'Igor R. Dejanovic'
 AUTHOR_EMAIL = 'igor.dejanovic@gmail.com'
 LICENSE = 'MIT'
-URL = 'https://github.com/igordejanovic/Arpeggio'
-DOWNLOAD_URL = 'https://github.com/igordejanovic/Arpeggio/archive/v{}.tar.gz'\
+URL = 'https://github.com/textX/Arpeggio'
+DOWNLOAD_URL = 'https://github.com/textX/Arpeggio/archive/v{}.tar.gz'\
     .format(VERSION)
 
 if sys.argv[-1].startswith('publish'):

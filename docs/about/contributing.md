@@ -8,11 +8,11 @@ Arpeggio is open for contributions. You can contribute code, documentation,
 tests, bug reports.  If you plan to make a contribution it would be great if you
 first announce that on the discussion forum.
 
-For bug reports please use github [issue tracker](https://github.com/igordejanovic/Arpeggio/issues/).
+For bug reports please use github [issue tracker](https://github.com/textX/Arpeggio/issues/).
 
 For code/doc/test contributions do the following:
 
-1. Fork the [project on github](https://github.com/igordejanovic/Arpeggio/).
+1. Fork the [project on github](https://github.com/textX/Arpeggio/).
 1. Clone your fork.
 
     To clone source repository with git and install for development do:

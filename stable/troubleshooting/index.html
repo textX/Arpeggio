@@ -14,7 +14,6 @@
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-  <link href="../css/version-select.css" rel="stylesheet">
   
   <script>
     // Current page data
@@ -206,7 +205,7 @@ recursion</a> in the grammar.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Arpeggio parser will implement a support for detecting and reporting of left
-recursions in the grammar. See <a href="https://github.com/igordejanovic/Arpeggio/issues/23">issue
+recursions in the grammar. See <a href="https://github.com/textX/Arpeggio/issues/23">issue
 23</a></p>
 </div>
 <p>A left recursion is found if the parser calls the same rule again while no
@@ -279,7 +278,7 @@ def number():           return _(r'\d*\.\d*|\d+')
 <p>Here a node <code>number</code> will be suppressed from the parser model and visitor
 <code>visit_number</code> will not be called. You have to define <code>visit_mean</code> or a visitor
 for some of the rules calling <code>mean</code>.</p>
-<p>This implicit reduction can not be disabled at the moment. Please see <a href="https://github.com/igordejanovic/Arpeggio/issues/24">issue
+<p>This implicit reduction can not be disabled at the moment. Please see <a href="https://github.com/textX/Arpeggio/issues/24">issue
 24</a>.</p>
               
             </div>
@@ -328,7 +327,6 @@ for some of the rules calling <code>mean</code>.</p>
 </div>
     <script>var base_url = '..';</script>
     <script src="../js/theme.js" defer></script>
-      <script src="../js/version-select.js" defer></script>
       <script src="../search/main.js" defer></script>
 
 </body>

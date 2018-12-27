@@ -10,7 +10,7 @@ Arpeggio is a recursive descent parser with memoization based on PEG grammars
 (aka Packrat parser).
 
 Documentation with tutorials is available `here
-<http://igordejanovic.net/Arpeggio/>`_.
+<http://textx.github.io/Arpeggio/>`_.
 
 **Note:** for a higher level parsing/language tool (i.e., a nicer interface to
 Arpeggio) see `textX <https://github.com/textX/textX>`_.
@@ -26,5 +26,5 @@ Arpeggio) see `textX <https://github.com/textX/textX>`_.
    :target: https://travis-ci.org/textX/Arpeggio
 
 .. |docs| image:: https://img.shields.io/badge/docs-latest-green.svg
-   :target: http://igordejanovic.net/Arpeggio/
+   :target: http://textx.github.io/Arpeggio/latest/
    :alt: Documentation Status

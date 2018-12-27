@@ -3,7 +3,7 @@
 In this example a parser for [JSON format](http://json.org/) is built. 
 
 `json.py` will load data from `test.json` file and build a [parse
-tree](http://igordejanovic.net/Arpeggio/parse_trees/).
+tree](http://textx.github.io/Arpeggio/parse_trees/).
 
 To run the example execute:
 

@@ -41,7 +41,7 @@ def main(debug=False):
     parse_tree = parser.parse(testdata)
 
     # parse_tree can now be analysed and transformed to some other form
-    # using e.g. visitor support. See http://igordejanovic.net/Arpeggio/semantics/
+    # using e.g. visitor support. See http://textx.github.io/Arpeggio/semantics/
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

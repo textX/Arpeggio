@@ -5,16 +5,16 @@ and basic arithmetic operations (addition, subtraction, multiplication and
 division).
 
 `calc.py` defines grammar using [python
-language](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-python).
+language](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-python).
 
 `calc_peg.py` shows the same example where grammar is specified using a
 traditional textual [PEG
-notation](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations).
+notation](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-peg-notations).
 The grammar is in `calc.peg` file.
 
 `calc_cleanpeg.py` shows the same example where grammar is specified using a
 "clean" variant of textual [PEG
-notation](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-peg-notations).
+notation](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-peg-notations).
 The grammar is in `calc_clean.peg` file.
 
 
@@ -42,5 +42,5 @@ $ dot -Tpng -O *dot
 ```
 
 The full tutorial based on this example can be found
-[here](http://igordejanovic.net/Arpeggio/tutorials/calc/).
+[here](http://textx.github.io/Arpeggio/tutorials/calc/).
 

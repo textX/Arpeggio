@@ -15,6 +15,6 @@ To run this example execute:
 $ python bibtex.py bibtex_example.bib
 ```
 
-Read [the full tutorial](http://igordejanovic.net/Arpeggio/tutorials/bibtex/)
+Read [the full tutorial](http://textx.github.io/Arpeggio/tutorials/bibtex/)
 following this example.
 

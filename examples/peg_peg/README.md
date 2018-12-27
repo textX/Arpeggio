@@ -37,7 +37,7 @@ You should verify that there are three parser model graphs and all the three are
 the same:
 - parser model produced by the canonical PEG grammar definition specified in
   `arpeggio.peg` module using [Python
-  notation](http://igordejanovic.net/Arpeggio/grammars/#grammars-written-in-python).
+  notation](http://textx.github.io/Arpeggio/grammars/#grammars-written-in-python).
 - parser model produced by the `ParserPEG` construction that represent the
   grammar loaded from the `peg.peg` file.
 - parser model created by applying `PEGVisitor` explicitly to the parse tree

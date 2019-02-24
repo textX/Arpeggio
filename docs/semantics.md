@@ -108,7 +108,7 @@ Instance of this class is given as `children` parameter of `visitor_xxx`
 methods.  This class inherits `list` so index access as well as iteration is
 available.
 
-Furthermore, child nodes can be filtered by rule name using name lookup.
+Furthermore, child nodes can be filtered by rule name using attribute access.
 
 ```python
 def visit_bar(self, node, children):
@@ -119,9 +119,8 @@ def visit_bar(self, node, children):
   for child in children:
     ...
 
-  # Rule name lookup
   # Returns a list of all rules created by PEG rule 'baz'
-  baz_created = children['baz']
+  baz_created = children.baz
 ```
 
 ## Post-processing in second calls

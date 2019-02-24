@@ -283,7 +283,7 @@ filtering and navigation over evaluation results on children nodes.</p>
 <p>Instance of this class is given as <code>children</code> parameter of <code>visitor_xxx</code>
 methods.  This class inherits <code>list</code> so index access as well as iteration is
 available.</p>
-<p>Furthermore, child nodes can be filtered by rule name using name lookup.</p>
+<p>Furthermore, child nodes can be filtered by rule name using attribute access.</p>
 <pre><code class="python">def visit_bar(self, node, children):
   # Index access
   child = children[2]
@@ -292,9 +292,8 @@ available.</p>
   for child in children:
     ...
 
-  # Rule name lookup
   # Returns a list of all rules created by PEG rule 'baz'
-  baz_created = children['baz']
+  baz_created = children.baz
 </code></pre>
 
 <h2 id="post-processing-in-second-calls">Post-processing in second calls</h2>

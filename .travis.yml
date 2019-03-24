@@ -6,9 +6,9 @@ python:
     - "3.5"
     - "3.6"
 install:
-    - python setup.py install
+    - python setup.py 
 script:
-    - py.test
+    - py.test arpeggio/tests
 
 matrix:
   include:

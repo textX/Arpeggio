@@ -15,8 +15,13 @@ import imp
 
 def test_examples():
 
-    examples_pat = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                '../../examples/*/*.py')
+    examples_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                   '..', '..', 'examples')
+    if not os.path.exists(examples_folder):
+        print('Warning: Examples not found. Skipping tests.')
+        return
+
+    examples_pat = os.path.join(examples_folder, '*', '*.py')
 
     # Filter out __init__.py
     examples = [f for f in glob.glob(examples_pat) if f != '__init__.py']

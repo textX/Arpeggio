@@ -13,8 +13,9 @@ projects I am working on) easier and more fun:
   development
 - [Emacs editor](https://www.gnu.org/software/emacs/) - An extensible,
   customizable, free/libre text editor — and more
-  - ... and [spacemacs distribution](http://spacemacs.org/) - the beautiful
-    Emacs distribution
+  - ... and [spacemacs
+    distribution](http://www.igordejanovic.net/2016/11/08/my-spacemacs-odyssey.html) -
+    A beautiful Emacs distribution
 - [Vim editor](http://www.vim.org/) - The power tool for everyone!
 - [Git](http://git-scm.com/) - Distributed version control system
 

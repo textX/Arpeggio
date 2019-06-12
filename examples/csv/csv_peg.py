@@ -10,7 +10,7 @@ import os
 import pprint
 from arpeggio import visit_parse_tree
 from arpeggio.cleanpeg import ParserPEG
-from csv import CSVVisitor
+from examples.csv.csv import CSVVisitor
 
 def main(debug=False):
     # First we will make a parser - an instance of the CVS parser model.

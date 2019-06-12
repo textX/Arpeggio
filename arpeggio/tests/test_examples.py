@@ -10,8 +10,12 @@ import pytest   # noqa
 import os
 import sys
 import glob
-import imp
 
+PY2 = sys.version_info[0] < 3
+if PY2:
+    import imp
+else:
+    import importlib
 
 def test_examples():
 
@@ -29,10 +33,14 @@ def test_examples():
         example_dir = os.path.dirname(e)
         sys.path.insert(0, example_dir)
         (module_name, _) = os.path.splitext(os.path.basename(e))
-        (module_file, module_path, desc) = \
-            imp.find_module(module_name, [example_dir])
+        if PY2:
+            (module_file, module_path, desc) = \
+                imp.find_module(module_name, [example_dir])
+            mod = imp.load_module(module_name, module_file, module_path, desc)
+        else:
+            mod_spec = importlib.util.spec_from_file_location(module_name, e)
+            mod = importlib.util.module_from_spec(mod_spec)
+            mod_spec.loader.exec_module(mod)
 
-        m = imp.load_module(module_name, module_file, module_path, desc)
-
-        if hasattr(m, 'main'):
-            m.main(debug=False)
+        if hasattr(mod, 'main'):
+            mod.main(debug=False)

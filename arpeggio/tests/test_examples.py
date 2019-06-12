@@ -11,11 +11,12 @@ import os
 import sys
 import glob
 
-PY2 = sys.version_info[0] < 3
-if PY2:
+PY_LT_3_5 = sys.version_info < (3, 5)
+if PY_LT_3_5:
     import imp
 else:
     import importlib
+
 
 def test_examples():
 
@@ -33,7 +34,7 @@ def test_examples():
         example_dir = os.path.dirname(e)
         sys.path.insert(0, example_dir)
         (module_name, _) = os.path.splitext(os.path.basename(e))
-        if PY2:
+        if PY_LT_3_5:
             (module_file, module_path, desc) = \
                 imp.find_module(module_name, [example_dir])
             mod = imp.load_module(module_name, module_file, module_path, desc)

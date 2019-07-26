@@ -41,7 +41,7 @@ is doing.
 Furthermore, while running in debug mode, a `dot` file (a graph description file
 format from [GraphViz software
 package](http://www.graphviz.org/content/dot-language)) representing _the parser
-model_ ill be created if the parser model is constructed without errors. 
+model_ will be created if the parser model is constructed without errors. 
 
 This `dot` file can be rendered as image using one of available dot viewer
 software or transformed to an image using `dot` tool
@@ -57,8 +57,8 @@ opened in any ``png`` image viewer. This is how it looks like:
 <a href="../images/calc_parser_model.dot.png" target="_blank"><img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/></a>
 
 Each node in this graph is a parsing expression.  Nodes are labeled by the type
-name of the parsing expression.  If node represents the rule from the grammar
-the label is of the form `<rule_name>=<PEG type>` where `rule_name` it the
+name of the parsing expression.  If node represents the rule from the grammar,
+the label is of the form `<rule_name>=<PEG type>` where `rule_name` is the
 name of the grammar rule.  The edges connect children expressions. The labels on
 the edges represent the order in which the graph will be traversed during
 parsing.
@@ -99,11 +99,10 @@ PTDOTExporter().exportFile(parse_tree,
                            "my_parse_tree.dot")
 ```
 
-To get e.g. `png` images from `dot` files do as usuall:
+To get e.g. `png` images from `dot` files do as usual:
 
 ```bash
-$ dot -Tpng -O *dot
-
+$ dot -Tpng -O *.dot
 ```
 
 

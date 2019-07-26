@@ -7,7 +7,7 @@ This section explains how to transform parse tree to a more usable structure.
 You will surely always want to extract some information from the parse tree or
 to transform it in some more usable form.  The process of parse tree
 transformation to other forms is referred to as *semantic analysis*.  You could
-do that using parse tree navigation etc. but it is better to use some standard
+do that using parse tree navigation etc., but it is better to use some standard
 mechanism.
 
 In Arpeggio a visitor pattern is used for semantic analysis. You write a python
@@ -31,7 +31,7 @@ the grammar.
 
 During a semantic analysis a parse tree is walked in the depth-first manner and
 for each node a proper visitor method is called to transform it to some other
-form. The results are than fed to the parent node visitor method.  This is
+form. The results are then fed to the parent node visitor method.  This is
 repeated until the final, top level parse tree node is processed (its visitor is
 called). The result of the top level node is the final output of the semantic
 analysis.
@@ -60,7 +60,7 @@ During semantic analysis, each `visitor_xxx` method gets current parse tree node
 as the `node` parameter and the evaluated children nodes as the `children`
 parameter.
 
-For example, if you have `expression` rule in your grammar than the
+For example, if you have `expression` rule in your grammar then the
 transformation of the non-terminal matched by this rule can be done as:
 
     def visitor_expression(self, node, children):
@@ -101,8 +101,8 @@ analysis.
 
 ## SemanticActionResults
 
-Class of object returned from the parse tree nodes evaluation. Used for
-filtering and navigation over evaluation results on children nodes.
+`SemanticActionResults` is the class of object returned from the parse tree nodes evaluation.
+This class is used for filtering and navigation over evaluation results on children nodes.
 
 Instance of this class is given as `children` parameter of `visitor_xxx`
 methods.  This class inherits `list` so index access as well as iteration is
@@ -136,7 +136,7 @@ reference resolving).
 ## Default actions
 
 For each parse tree node that does not have an appropriate `visit_xxx` method a
-default action is performed. If the node is created by a plain string match
+default action is performed. If the node is created by a plain string match,
 action will return `None` and thus suppress this node. This is handy for all
 those syntax noise tokens (brackets, braces, keywords etc.).
 
@@ -162,7 +162,7 @@ visitor construction.
 result = visit_parse_tree(parse_tree, CalcVisitor(defaults=False))
 ```
 
-If you want to call this default behaviour from your visitor method call
+If you want to call this default behaviour from your visitor method, call
 `visit__default__(node, children)` on superclass (`PTNodeVisitor`).
 
 ```python

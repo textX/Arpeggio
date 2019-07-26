@@ -101,6 +101,8 @@ parser = ParserPython(calc, reduce_tree=True)
 In this configuration non-terminals with single child will be removed from the
 parse tree.
 
+<a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a>
+
 For example, `calc` parse tree above will look like this:
 
 <a href="../images/calc_parse_tree_reduced.dot.png" target="_blank"><img src="../images/calc_parse_tree_reduced.dot.png"/></a>
@@ -109,8 +111,8 @@ Notice the removal of each non-terminal with single child.
 
 !!! warning
     Be aware that [semantic analysis](semantics.md) operates on nodes of
-    finished parse tree. Therefore, it you use [tree
-    reduction](configuration.md#parse-tree-reduction) visitor methods will not
+    finished parse tree. Therefore, if you use [tree
+    reduction](configuration.md#parse-tree-reduction), visitor methods will not
     get called for the removed nodes.
 
 
@@ -143,7 +145,7 @@ For example:
 
     def grammar():        return ZeroOrMore(["a", "b"], sep=",")
 
-    # so that second rule will match "a" on the new line
+    # TODO: INSERT CORRECT COMMENT HERE
     input = "a , b, b, a"
 
     parser = ParserPython(grammar)

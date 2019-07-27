@@ -145,7 +145,7 @@ For example:
 
     def grammar():        return ZeroOrMore(["a", "b"], sep=",")
 
-    # Commas will be skipped during parsing
+    # Commas will be treated as separators between elements
     input = "a , b, b, a"
 
     parser = ParserPython(grammar)

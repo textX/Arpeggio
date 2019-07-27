@@ -5,7 +5,7 @@ This section describes how to alter parser default behaviour.
 ---
 
 There are some aspect of parsing that can be configured using parser and/or
-`ParsingExpression` parameters.  Arpeggio has some sane default behaviour but
+`ParsingExpression` parameters. Arpeggio has some sane default behaviour but
 gives the user possibility to alter it.
 
 This section describes various parser parameters.
@@ -118,11 +118,11 @@ Notice the removal of each non-terminal with single child.
 
 ## Newline termination for Repetitions
 
-By default `Repetition` parsing expressions (i.e. `ZeroOrMore` and
-`OneOrMore`) will obey `skipws` and `ws` settings but there are situations
-where repetitions should not pass the end of the current line. For this feature
-`eolterm` parameter is introduced which can be set on a repetition and will
-ensure that it terminates before entering a new line.
+By default `Repetition` parsing expressions (i.e. `ZeroOrMore` and `OneOrMore`)
+will obey `skipws` and `ws` settings but there are situations where repetitions
+should not pass the end of the current line. For this feature `eolterm`
+parameter is introduced which can be set on a repetition and will ensure that it
+terminates before entering a new line.
 
     def grammar():      return first, second
     def first():        return ZeroOrMore(["a", "b"], eolterm=True)
@@ -155,11 +155,11 @@ For example:
 
 ### Memoization (a.k.a. packrat parsing)
 
-This technique is based on memoizing result on each parsing expression rule.
-For some grammars with a lot of backtracking this can yield a significant
-speed increase at the expense of some memory used for the memoization cache.
+This technique is based on memoizing result on each parsing expression rule. For
+some grammars with a lot of backtracking this can yield a significant speed
+increase at the expense of some memory used for the memoization cache.
 
-Starting with Arpeggio 1.5 this feature is disabled by default.  If you think
+Starting with Arpeggio 1.5 this feature is disabled by default. If you think
 that parsing is slow, try to enable memoization by setting `memoization`
 parameter to `True` during parser instantiation.
 

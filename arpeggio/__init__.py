@@ -389,15 +389,30 @@ class OrderedChoice(Sequence):
         result = None
         match = False
         c_pos = parser.position
-        for e in self.nodes:
-            try:
-                result = e.parse(parser)
-                if result is not None:
-                    match = True
-                    result = [result]
-                    break
-            except NoMatch:
-                parser.position = c_pos  # Backtracking
+
+        if self.ws is not None:
+            old_ws = parser.ws
+            parser.ws = self.ws
+
+        if self.skipws is not None:
+            old_skipws = parser.skipws
+            parser.skipws = self.skipws
+
+        try:
+            for e in self.nodes:
+                try:
+                    result = e.parse(parser)
+                    if result is not None:
+                        match = True
+                        result = [result]
+                        break
+                except NoMatch:
+                    parser.position = c_pos  # Backtracking
+        finally:
+            if self.ws is not None:
+                parser.ws = old_ws
+            if self.skipws is not None:
+                parser.skipws = old_skipws
 
         if not match:
             parser._nm_raise(self, c_pos, parser)

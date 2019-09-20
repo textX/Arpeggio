@@ -14,6 +14,11 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+  - Fixed problem with `OrderedChoice` which hasn't maintained `skipws/ws`
+    state. [#61]
+    Reported at https://github.com/textX/textX/issues/205
+
+[#61]: https://github.com/textX/Arpeggio/issues/61
 [Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.0...HEAD
 
 ## [v1.9.0] (released: 2018-07-19)

@@ -385,7 +385,18 @@ class OrderedChoice(Sequence):
     Will match one of the parser expressions specified. Parser will try to
     match expressions in the order they are defined.
     """
+    def __init__(self, *elements, **kwargs):
+        super(OrderedChoice, self).__init__(*elements, **kwargs)
+
     def _parse(self, parser):
+        if self.ws is not None:
+            old_ws = parser.ws
+            parser.ws = self.ws
+
+        if self.skipws is not None:
+            old_skipws = parser.skipws
+            parser.skipws = self.skipws
+
         result = None
         match = False
         c_pos = parser.position
@@ -398,6 +409,11 @@ class OrderedChoice(Sequence):
                     break
             except NoMatch:
                 parser.position = c_pos  # Backtracking
+            finally:
+                if self.ws is not None:
+                    parser.ws = old_ws
+                if self.skipws is not None:
+                    parser.skipws = old_skipws
 
         if not match:
             parser._nm_raise(self, c_pos, parser)

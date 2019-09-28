@@ -14,12 +14,23 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+
+## [v1.9.1] (released: 2019-09-28)
+
+  - Lowered the required pytest version for running tests as we'll still support
+    Python 2.7 until its EOL.
   - Fixed problem with `OrderedChoice` which hasn't maintained `skipws/ws`
     state. [#61]
     Reported at https://github.com/textX/textX/issues/205
+  - Various fixes in the docs, docstrings and examples. Thanks mcepl@GitHub and
+    zetaraku@GitHub.
+  - docs support for different versions thanks to
+    [mike](https://github.com/jimporter/mike)
+
 
 [#61]: https://github.com/textX/Arpeggio/issues/61
 [Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.0...HEAD
+
 
 ## [v1.9.0] (released: 2018-07-19)
 
@@ -29,6 +40,7 @@ please take a look at related PRs and issues and see if the change affects you.
     Thanks sebix@GitHub.
 
 [v1.9.0]: https://github.com/textX/Arpeggio/compare/v1.8.0...v1.9.0
+
 
 ## [v1.8.0] (released: 2018-05-16)
 
@@ -41,11 +53,13 @@ please take a look at related PRs and issues and see if the change affects you.
 [#43]: https://github.com/textX/Arpeggio/issues/43
 [v1.8.0]: https://github.com/textX/Arpeggio/compare/v1.7.1...v1.8.0
 
+
 ## [v1.7.1] (released: 2018-02-10)
 
   - Fixed bug in comment parsing optimization.
 
 [v1.7.1]: https://github.com/textX/Arpeggio/compare/v1.7...v1.7.1
+
 
 ## [v1.7] (released: 2017-11-17)
 

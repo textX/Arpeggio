@@ -69,7 +69,7 @@ setup(
     download_url=DOWNLOAD_URL,
     packages=find_packages(),
     setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    tests_require=['pytest<5'],
     test_suite="arpeggio.tests",
     keywords="parser packrat peg",
     classifiers=[

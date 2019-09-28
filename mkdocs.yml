@@ -29,6 +29,10 @@ nav:
 
 markdown_extensions:
 - admonition:
+- toc:
+    permalink: true
+
+copyright: Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.
 
 extra_css:
 - css/version-select.css

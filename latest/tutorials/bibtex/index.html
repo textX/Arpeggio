@@ -195,7 +195,7 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="bibtex-tutorial">BibTeX tutorial</h1>
+                <h1 id="bibtex-tutorial">BibTeX tutorial<a class="headerlink" href="#bibtex-tutorial" title="Permanent link">&para;</a></h1>
 <p>A tutorial for parsing well known format for bibliographic references.</p>
 <hr />
 <p>The word <a href="http://www.BibTeX.org/">BibTeX</a> stands for a tool and a file format
@@ -225,7 +225,7 @@ The first element is the key of the entry. It should be unique.
 The rest of the entries are fields in the format:</p>
 <pre><code>&lt;field_name&gt; = &lt;field_value&gt;
 </code></pre>
-<h1 id="the-grammar">The grammar</h1>
+<h1 id="the-grammar">The grammar<a class="headerlink" href="#the-grammar" title="Permanent link">&para;</a></h1>
 <p>Let's start with the grammar.
 Create file <code>bibtex.py</code>, and import <code>arpeggio</code>.</p>
 <pre><code class="python">from arpeggio import *
@@ -287,7 +287,7 @@ def fieldvalue_inner():         return &quot;{&quot;, fieldvalue_braced_content,
 produces a <a href="../../parse_trees/#terminal-nodes">Terminal</a> node in <a href="../../parse_trees/">the parse
 tree</a>.</p>
 </div>
-<h1 id="the-parser">The parser</h1>
+<h1 id="the-parser">The parser<a class="headerlink" href="#the-parser" title="Permanent link">&para;</a></h1>
 <p>To instantiate the parser we are using <code>ParserPython</code> Arpeggio's class.</p>
 <pre><code class="python">parser = ParserPython(bibfile)
 </code></pre>
@@ -310,7 +310,7 @@ with codecs.open(file_name, &quot;r&quot;, encoding=&quot;utf-8&quot;) as bibtex
 </code></pre>
 
 <p>The parse tree is produced. </p>
-<h1 id="extracting-data-from-the-parse-tree">Extracting data from the parse tree</h1>
+<h1 id="extracting-data-from-the-parse-tree">Extracting data from the parse tree<a class="headerlink" href="#extracting-data-from-the-parse-tree" title="Permanent link">&para;</a></h1>
 <p>Let's suppose that we want our BibTeX file to be transformed to a list of
 Python dictionaries where each field is keyed by its name and the value is 
 the field value cleaned up from the BibTeX cruft.</p>
@@ -401,6 +401,8 @@ for this tutorial. You can find the details in the source code.</p>
 
   <div role="contentinfo">
     <!-- Copyright etc -->
+    
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
     
   </div>
 

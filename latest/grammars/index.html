@@ -194,7 +194,7 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="grammars">Grammars</h1>
+                <h1 id="grammars">Grammars<a class="headerlink" href="#grammars" title="Permanent link">&para;</a></h1>
 <p>With grammar you teach Arpeggio how to parse your inputs.</p>
 <hr />
 <p>Arpeggio is based
@@ -218,6 +218,14 @@ second = 'bar' / 'baz'
 <code>foo</code> followed by one or more <code>second</code> rule (this is a rule reference) followed
 by end of input (<code>EOF</code>). <code>second</code> rule is ordered choice and will match either
 <code>bar</code> or <code>baz</code> in that order.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Arpeggio requires <code>EOF</code> rule/anchor at the end of the root rule if you
+want the whole input to be consumed. If you leave out <code>EOF</code> Arpeggio will
+parse as far as it can, leaving the rest of the input unprocessed, and return
+without an error. So, be sure to always end your root rule sequence with
+<code>EOF</code> if you want a complete parse.</p>
+</div>
 <p>During parsing each successfully matched rule will create a parse tree node. At
 the end of parsing a complete <a href="../parse_trees/">parse tree</a> of the input will be
 returned. .</p>
@@ -261,7 +269,7 @@ returned. .</p>
 <li>Using Python statements and expressions.</li>
 <li>Using textual PEG syntax (currently there are two variants, see below).</li>
 </ul>
-<h2 id="grammars-written-in-python">Grammars written in Python</h2>
+<h2 id="grammars-written-in-python">Grammars written in Python<a class="headerlink" href="#grammars-written-in-python" title="Permanent link">&para;</a></h2>
 <p>Canonical form of grammar specification uses Python statements and expressions.</p>
 <p>Here is an example of arpeggio grammar for simple calculator:</p>
 <pre><code>def number():     return _(r'\d*\.\d*|\d+')
@@ -322,7 +330,7 @@ consuming all matched input. When all root node branches are traversed the
 parsing is done and <em>the parse tree</em> is returned.</p>
 <p>You can navigate and analyze parse tree or transform it using visitor pattern to
 some more usable form (see <a href="../semantics/#visitors">Semantic analysis - Visitors</a>)</p>
-<h2 id="grammars-written-in-peg-notations">Grammars written in PEG notations</h2>
+<h2 id="grammars-written-in-peg-notations">Grammars written in PEG notations<a class="headerlink" href="#grammars-written-in-peg-notations" title="Permanent link">&para;</a></h2>
 <p>Grammars can also be specified using PEG notation. There are actually two of
 them at the moment and both notations are implemented using canonical Python
 based grammars (see
@@ -423,6 +431,8 @@ both approach since the same code for parsing is used.</p>
 
   <div role="contentinfo">
     <!-- Copyright etc -->
+    
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
     
   </div>
 

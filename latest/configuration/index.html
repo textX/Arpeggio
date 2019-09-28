@@ -204,20 +204,20 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="parser-configuration">Parser configuration</h1>
+                <h1 id="parser-configuration">Parser configuration<a class="headerlink" href="#parser-configuration" title="Permanent link">&para;</a></h1>
 <p>This section describes how to alter parser default behaviour.</p>
 <hr />
 <p>There are some aspect of parsing that can be configured using parser and/or
-<code>ParsingExpression</code> parameters.  Arpeggio has some sane default behaviour but
+<code>ParsingExpression</code> parameters. Arpeggio has some sane default behaviour but
 gives the user possibility to alter it.</p>
 <p>This section describes various parser parameters.</p>
-<h2 id="case-insensitive-parsing">Case insensitive parsing</h2>
+<h2 id="case-insensitive-parsing">Case insensitive parsing<a class="headerlink" href="#case-insensitive-parsing" title="Permanent link">&para;</a></h2>
 <p>By default Arpeggio is case sensitive. If you wish to do case insensitive
 parsing set parser parameter <code>ignore_case</code> to <code>True</code>.</p>
 <pre><code class="python">parser = ParserPython(calc, ignore_case=True)
 </code></pre>
 
-<h2 id="white-space-handling">White-space handling</h2>
+<h2 id="white-space-handling">White-space handling<a class="headerlink" href="#white-space-handling" title="Permanent link">&para;</a></h2>
 <p>Arpeggio by default skips white-spaces. You can change this behaviour with the
 parameter <code>skipws</code> given to parser constructor.</p>
 <pre><code class="python">parser = ParserPython(calc, skipws=False)
@@ -240,7 +240,7 @@ parser = ParserPython(grammar)
 pt = parser.parse("onetwothree four")
 </code></pre>
 </div>
-<h2 id="keyword-handling">Keyword handling</h2>
+<h2 id="keyword-handling">Keyword handling<a class="headerlink" href="#keyword-handling" title="Permanent link">&para;</a></h2>
 <p>By setting a <code>autokwd</code> parameter to <code>True</code> a word boundary match for
 keyword-like matches will be performed.</p>
 <p>This parameter is disabled by default.</p>
@@ -255,7 +255,7 @@ keyword-like matches will be performed.</p>
   # so this is considered a one word.
   parser.parse("onetwothree")
 </code></pre>
-<h2 id="comment-handling">Comment handling</h2>
+<h2 id="comment-handling">Comment handling<a class="headerlink" href="#comment-handling" title="Permanent link">&para;</a></h2>
 <p>Support for comments in your language can be specified as another set of
 grammar rules.  See <a href="https://github.com/textX/Arpeggio/blob/master/examples/simple/">simple.py
 example</a>.</p>
@@ -267,7 +267,7 @@ example</a>.</p>
 for comments.</p>
 <p>During parsing comment parse trees are kept in the separate list thus comments
 will not show in the main parse tree.</p>
-<h2 id="parse-tree-reduction">Parse tree reduction</h2>
+<h2 id="parse-tree-reduction">Parse tree reduction<a class="headerlink" href="#parse-tree-reduction" title="Permanent link">&para;</a></h2>
 <p>Non-terminals are by default created for each rule. Sometimes it can result in
 trees of great depth.  You can alter this behaviour setting <code>reduce_tree</code>
 parameter to <code>True</code>.</p>
@@ -276,22 +276,23 @@ parameter to <code>True</code>.</p>
 
 <p>In this configuration non-terminals with single child will be removed from the
 parse tree.</p>
+<p><a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a></p>
 <p>For example, <code>calc</code> parse tree above will look like this:</p>
 <p><a href="../images/calc_parse_tree_reduced.dot.png" target="_blank"><img src="../images/calc_parse_tree_reduced.dot.png"/></a></p>
 <p>Notice the removal of each non-terminal with single child.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Be aware that <a href="../semantics/">semantic analysis</a> operates on nodes of
-finished parse tree. Therefore, it you use <a href="./#parse-tree-reduction">tree
-reduction</a> visitor methods will not
+finished parse tree. Therefore, if you use <a href="./#parse-tree-reduction">tree
+reduction</a>, visitor methods will not
 get called for the removed nodes.</p>
 </div>
-<h2 id="newline-termination-for-repetitions">Newline termination for Repetitions</h2>
-<p>By default <code>Repetition</code> parsing expressions (i.e. <code>ZeroOrMore</code> and
-<code>OneOrMore</code>) will obey <code>skipws</code> and <code>ws</code> settings but there are situations
-where repetitions should not pass the end of the current line. For this feature
-<code>eolterm</code> parameter is introduced which can be set on a repetition and will
-ensure that it terminates before entering a new line.</p>
+<h2 id="newline-termination-for-repetitions">Newline termination for Repetitions<a class="headerlink" href="#newline-termination-for-repetitions" title="Permanent link">&para;</a></h2>
+<p>By default <code>Repetition</code> parsing expressions (i.e. <code>ZeroOrMore</code> and <code>OneOrMore</code>)
+will obey <code>skipws</code> and <code>ws</code> settings but there are situations where repetitions
+should not pass the end of the current line. For this feature <code>eolterm</code>
+parameter is introduced which can be set on a repetition and will ensure that it
+terminates before entering a new line.</p>
 <pre><code>def grammar():      return first, second
 def first():        return ZeroOrMore(["a", "b"], eolterm=True)
 def second():       return "a"
@@ -304,24 +305,24 @@ a"""
 parser = ParserPython(grammar)
 result = parser.parse(input)
 </code></pre>
-<h2 id="separator-for-repetitions">Separator for Repetitions</h2>
+<h2 id="separator-for-repetitions">Separator for Repetitions<a class="headerlink" href="#separator-for-repetitions" title="Permanent link">&para;</a></h2>
 <p>It is possible to specify parsing expression that will be used in between each
 two matches in repetitions.</p>
 <p>For example:</p>
 <pre><code>def grammar():        return ZeroOrMore(["a", "b"], sep=",")
 
-# so that second rule will match "a" on the new line
+# Commas will be treated as separators between elements
 input = "a , b, b, a"
 
 parser = ParserPython(grammar)
 result = parser.parse(input)
 </code></pre>
 <p><code>sep</code> can be any valid parsing expression.</p>
-<h3 id="memoization-aka-packrat-parsing">Memoization (a.k.a. packrat parsing)</h3>
-<p>This technique is based on memoizing result on each parsing expression rule.
-For some grammars with a lot of backtracking this can yield a significant
-speed increase at the expense of some memory used for the memoization cache.</p>
-<p>Starting with Arpeggio 1.5 this feature is disabled by default.  If you think
+<h3 id="memoization-aka-packrat-parsing">Memoization (a.k.a. packrat parsing)<a class="headerlink" href="#memoization-aka-packrat-parsing" title="Permanent link">&para;</a></h3>
+<p>This technique is based on memoizing result on each parsing expression rule. For
+some grammars with a lot of backtracking this can yield a significant speed
+increase at the expense of some memory used for the memoization cache.</p>
+<p>Starting with Arpeggio 1.5 this feature is disabled by default. If you think
 that parsing is slow, try to enable memoization by setting <code>memoization</code>
 parameter to <code>True</code> during parser instantiation.</p>
 <pre><code class="python">parser = ParserPython(grammar, memoization=True)
@@ -345,6 +346,8 @@ parameter to <code>True</code> during parser instantiation.</p>
 
   <div role="contentinfo">
     <!-- Copyright etc -->
+    
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
     
   </div>
 

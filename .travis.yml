@@ -4,13 +4,8 @@ python:
     - "3.4"
     - "3.5"
     - "3.6"
+    - "3.7"
 install:
     - python setup.py install
 script:
     - py.test arpeggio/tests
-
-matrix:
-  include:
-    - python: 3.7
-      dist: xenial
-      sudo: true

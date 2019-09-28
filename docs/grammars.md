@@ -29,6 +29,14 @@ In this example `first` is the root rule. This rule will match a literal string
 by end of input (`EOF`). `second` rule is ordered choice and will match either
 `bar` or `baz` in that order.
 
+!!! warning
+    Arpeggio requires `EOF` rule/anchor at the end of the root rule if you
+    want the whole input to be consumed. If you leave out `EOF` Arpeggio will
+    parse as far as it can, leaving the rest of the input unprocessed, and return
+    without an error. So, be sure to always end your root rule sequence with
+    `EOF` if you want a complete parse.
+    
+
 During parsing each successfully matched rule will create a parse tree node. At
 the end of parsing a complete [parse tree](parse_trees.md) of the input will be
 returned. .

@@ -14,6 +14,7 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.1...HEAD
 
 ## [v1.9.1] (released: 2019-09-28)
 
@@ -29,7 +30,7 @@ please take a look at related PRs and issues and see if the change affects you.
 
 
 [#61]: https://github.com/textX/Arpeggio/issues/61
-[Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.0...HEAD
+[v1.9.1]: https://github.com/textX/Arpeggio/compare/v1.9.0...v1.9.1
 
 
 ## [v1.9.0] (released: 2018-07-19)

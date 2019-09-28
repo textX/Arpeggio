@@ -188,7 +188,7 @@
     <li>Calc</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/igordejanovic/Arpeggio/edit/master/docs/tutorials/calc.md"
+        <a href="https://github.com/textX/Arpeggio/edit/master/docs/tutorials/calc.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -198,7 +198,7 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="calculator-tutorial">Calculator tutorial</h1>
+                <h1 id="calculator-tutorial">Calculator tutorial<a class="headerlink" href="#calculator-tutorial" title="Permanent link">&para;</a></h1>
 <p>A tutorial for parsing and evaluation of arithmetic expressions.</p>
 <hr />
 <p>In this tutorial we will make a parser and evaluator for simple arithmetic
@@ -217,7 +217,7 @@ right and doing a leftmost derivation.
 There is a simple technique that will enable proper evaluation in the context
 of a different operator precedence.</p>
 <p>Let's start with grammar definition.</p>
-<h1 id="the-grammar">The grammar</h1>
+<h1 id="the-grammar">The grammar<a class="headerlink" href="#the-grammar" title="Permanent link">&para;</a></h1>
 <ul>
 <li>Each <code>calc</code> file consists of one or more expressions.</li>
 </ul>
@@ -259,7 +259,7 @@ opening bracket must be found.</p>
 <pre><code class="python">def number():     return _(r'\d*\.\d*|\d+')
 </code></pre>
 
-<h1 id="the-parser">The parser</h1>
+<h1 id="the-parser">The parser<a class="headerlink" href="#the-parser" title="Permanent link">&para;</a></h1>
 <p>Using above grammar specified in <a href="../../grammars/#grammars-written-in-python">Python
 notation</a> we instantiate the parser
 using <code>ParserPython</code> class.</p>
@@ -286,7 +286,7 @@ parse_tree = parser.parse(input_expr)
 <p>By ordering operation in the grammar form lower to upper precendence we have
 got the parse tree where the priority is retained. This will help us to easier
 make an expression evaluation.</p>
-<h1 id="evaluating-parse-tree">Evaluating parse tree</h1>
+<h1 id="evaluating-parse-tree">Evaluating parse tree<a class="headerlink" href="#evaluating-parse-tree" title="Permanent link">&para;</a></h1>
 <p>To implement evaluation we shall use Arpeggio's support for <a href="../../semantics/">semantic
 analysis</a> using visitor patter.</p>
 <p>Visitor is an object with methods named <code>visit_&lt;rule&gt;</code> which gets called for 
@@ -374,7 +374,7 @@ terms. A minor glitch here is a support for unary minus and plus sign.</p>
 </code></pre>
 
 <p>The result will be a <code>float</code> which represent the value of the given expression.</p>
-<h1 id="the-grammar-in-peg">The grammar in PEG</h1>
+<h1 id="the-grammar-in-peg">The grammar in PEG<a class="headerlink" href="#the-grammar-in-peg" title="Permanent link">&para;</a></h1>
 <p>As a final note, the same grammar can be specified in <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
 syntax</a>.</p>
 <p>Either a clean PEG variant:</p>
@@ -420,6 +420,8 @@ example</a>.</p>
   <div role="contentinfo">
     <!-- Copyright etc -->
     
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
+    
   </div>
 
   Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
@@ -435,7 +437,7 @@ example</a>.</p>
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/igordejanovic/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../bibtex/" style="color: #fcfcfc;">&laquo; Previous</a></span>

@@ -186,7 +186,7 @@
     <li>Troubleshooting</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/igordejanovic/Arpeggio/edit/master/docs/troubleshooting.md"
+        <a href="https://github.com/textX/Arpeggio/edit/master/docs/troubleshooting.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -196,10 +196,10 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="troubleshooting-guide">Troubleshooting Guide</h1>
+                <h1 id="troubleshooting-guide">Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Permanent link">&para;</a></h1>
 <p>Common problems and mistakes</p>
 <hr />
-<h2 id="left-recursion-and-recursionerror">Left recursion and RecursionError</h2>
+<h2 id="left-recursion-and-recursionerror">Left recursion and RecursionError<a class="headerlink" href="#left-recursion-and-recursionerror" title="Permanent link">&para;</a></h2>
 <p>If you get <code>RecursionError: maximum recursion depth exceeded while calling a
 Python object</code> it is a good indication that you have a <a href="https://en.wikipedia.org/wiki/Left_recursion">left
 recursion</a> in the grammar.</p>
@@ -254,7 +254,7 @@ represent terminals.</p>
 <p class="admonition-title">Danger</p>
 <p>Be aware that the parse tree will not be the same.</p>
 </div>
-<h2 id="unrecognized-grammar-element">Unrecognized grammar element '...'</h2>
+<h2 id="unrecognized-grammar-element">Unrecognized grammar element '...'<a class="headerlink" href="#unrecognized-grammar-element" title="Permanent link">&para;</a></h2>
 <p>This might happen when non-unicode literals are used. Make sure that you use
 unicode literals when defining grammars using Python notation.</p>
 <p>You might want to include:</p>
@@ -262,7 +262,7 @@ unicode literals when defining grammars using Python notation.</p>
 </code></pre>
 
 <p>This will enable unicode literals in the python &lt; 3.</p>
-<h2 id="visitor-method-is-not-called-during-semantic-analysis">Visitor method is not called during semantic analysis</h2>
+<h2 id="visitor-method-is-not-called-during-semantic-analysis">Visitor method is not called during semantic analysis<a class="headerlink" href="#visitor-method-is-not-called-during-semantic-analysis" title="Permanent link">&para;</a></h2>
 <p>Semantic analysis operates on a parse tree nodes produced by grammar rules.
 If you are using a <code>reduce_tree=True</code> option in the construction of the parser
 all non-terminal nodes with only one child will be suppressed in the parse tree.
@@ -301,6 +301,8 @@ for some of the rules calling <code>mean</code>.</p>
   <div role="contentinfo">
     <!-- Copyright etc -->
     
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
+    
   </div>
 
   Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
@@ -316,7 +318,7 @@ for some of the rules calling <code>mean</code>.</p>
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/igordejanovic/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../semantics/" style="color: #fcfcfc;">&laquo; Previous</a></span>

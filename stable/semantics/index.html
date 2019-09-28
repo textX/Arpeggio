@@ -186,7 +186,7 @@
     <li>Semantic analysis</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/igordejanovic/Arpeggio/edit/master/docs/semantics.md"
+        <a href="https://github.com/textX/Arpeggio/edit/master/docs/semantics.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -196,13 +196,13 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="semantic-analysis-visitors">Semantic analysis - Visitors</h1>
+                <h1 id="semantic-analysis-visitors">Semantic analysis - Visitors<a class="headerlink" href="#semantic-analysis-visitors" title="Permanent link">&para;</a></h1>
 <p>This section explains how to transform parse tree to a more usable structure.</p>
 <hr />
 <p>You will surely always want to extract some information from the parse tree or
 to transform it in some more usable form.  The process of parse tree
 transformation to other forms is referred to as <em>semantic analysis</em>.  You could
-do that using parse tree navigation etc. but it is better to use some standard
+do that using parse tree navigation etc., but it is better to use some standard
 mechanism.</p>
 <p>In Arpeggio a visitor pattern is used for semantic analysis. You write a python
 class that inherits <code>PTNodeVisitor</code> and has a methods of the form
@@ -223,7 +223,7 @@ the grammar.</p>
 </code></pre>
 <p>During a semantic analysis a parse tree is walked in the depth-first manner and
 for each node a proper visitor method is called to transform it to some other
-form. The results are than fed to the parent node visitor method.  This is
+form. The results are then fed to the parent node visitor method.  This is
 repeated until the final, top level parse tree node is processed (its visitor is
 called). The result of the top level node is the final output of the semantic
 analysis.</p>
@@ -246,7 +246,7 @@ visitor methods.</p>
 <p>During semantic analysis, each <code>visitor_xxx</code> method gets current parse tree node
 as the <code>node</code> parameter and the evaluated children nodes as the <code>children</code>
 parameter.</p>
-<p>For example, if you have <code>expression</code> rule in your grammar than the
+<p>For example, if you have <code>expression</code> rule in your grammar then the
 transformation of the non-terminal matched by this rule can be done as:</p>
 <pre><code>def visitor_expression(self, node, children):
   ... # transform node using 'node' and 'children' parameter
@@ -277,13 +277,13 @@ and
 <a href="https://github.com/textX/Arpeggio/blob/master/arpeggio/peg.py#L53">PEGVisitor</a>
 class where the PEG parser for the given language is built using semantic
 analysis.</p>
-<h2 id="semanticactionresults">SemanticActionResults</h2>
-<p>Class of object returned from the parse tree nodes evaluation. Used for
-filtering and navigation over evaluation results on children nodes.</p>
+<h2 id="semanticactionresults">SemanticActionResults<a class="headerlink" href="#semanticactionresults" title="Permanent link">&para;</a></h2>
+<p><code>SemanticActionResults</code> is the class of object returned from the parse tree nodes evaluation.
+This class is used for filtering and navigation over evaluation results on children nodes.</p>
 <p>Instance of this class is given as <code>children</code> parameter of <code>visitor_xxx</code>
 methods.  This class inherits <code>list</code> so index access as well as iteration is
 available.</p>
-<p>Furthermore, child nodes can be filtered by rule name using name lookup.</p>
+<p>Furthermore, child nodes can be filtered by rule name using attribute access.</p>
 <pre><code class="python">def visit_bar(self, node, children):
   # Index access
   child = children[2]
@@ -292,20 +292,19 @@ available.</p>
   for child in children:
     ...
 
-  # Rule name lookup
   # Returns a list of all rules created by PEG rule 'baz'
-  baz_created = children['baz']
+  baz_created = children.baz
 </code></pre>
 
-<h2 id="post-processing-in-second-calls">Post-processing in second calls</h2>
+<h2 id="post-processing-in-second-calls">Post-processing in second calls<a class="headerlink" href="#post-processing-in-second-calls" title="Permanent link">&para;</a></h2>
 <p>Visitor may define method with the <code>second_&lt;rule_name&gt;</code> name form. If this
 method exists it will be called after all parse tree node are processed and it
 will be given the results of the <code>visit_&lt;rule_name&gt;</code> call.</p>
 <p>This is usually used when some additional post-processing is needed (e.g.
 reference resolving).</p>
-<h2 id="default-actions">Default actions</h2>
+<h2 id="default-actions">Default actions<a class="headerlink" href="#default-actions" title="Permanent link">&para;</a></h2>
 <p>For each parse tree node that does not have an appropriate <code>visit_xxx</code> method a
-default action is performed. If the node is created by a plain string match
+default action is performed. If the node is created by a plain string match,
 action will return <code>None</code> and thus suppress this node. This is handy for all
 those syntax noise tokens (brackets, braces, keywords etc.).</p>
 <p>For example, if your grammar is:</p>
@@ -324,7 +323,7 @@ visitor construction.</p>
 <pre><code class="python">result = visit_parse_tree(parse_tree, CalcVisitor(defaults=False))
 </code></pre>
 
-<p>If you want to call this default behaviour from your visitor method call
+<p>If you want to call this default behaviour from your visitor method, call
 <code>visit__default__(node, children)</code> on superclass (<code>PTNodeVisitor</code>).</p>
 <pre><code class="python">def visitor_myrule(self, node, children):
   if some_condition:
@@ -352,6 +351,8 @@ visitor construction.</p>
   <div role="contentinfo">
     <!-- Copyright etc -->
     
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
+    
   </div>
 
   Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
@@ -367,7 +368,7 @@ visitor construction.</p>
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/igordejanovic/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../configuration/" style="color: #fcfcfc;">&laquo; Previous</a></span>

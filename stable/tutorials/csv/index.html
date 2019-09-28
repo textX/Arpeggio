@@ -190,7 +190,7 @@
     <li>CSV</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/igordejanovic/Arpeggio/edit/master/docs/tutorials/csv.md"
+        <a href="https://github.com/textX/Arpeggio/edit/master/docs/tutorials/csv.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -200,7 +200,7 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="comma-separated-values-csv-parser-tutorial">Comma-Separated Values (CSV) parser tutorial</h1>
+                <h1 id="comma-separated-values-csv-parser-tutorial">Comma-Separated Values (CSV) parser tutorial<a class="headerlink" href="#comma-separated-values-csv-parser-tutorial" title="Permanent link">&para;</a></h1>
 <p>A tutorial for building parser for well known CSV format.</p>
 <hr />
 <p>In this tutorial we will see how to make a parser for a simple data interchange
@@ -217,7 +217,7 @@ CSV file:</p>
 <p>Although, there is <a href="https://docs.python.org/3/library/csv.html">csv module</a> in
 the standard Python library this example has been made as the CSV is ubiquitous
 and easy to understand so it it a good starter for learning Arpeggio.</p>
-<h2 id="the-grammar">The grammar</h2>
+<h2 id="the-grammar">The grammar<a class="headerlink" href="#the-grammar" title="Permanent link">&para;</a></h2>
 <p>Let's start first by creating a python module called <code>csv.py</code>.</p>
 <p>Now, let's define CSV grammar. </p>
 <ul>
@@ -271,7 +271,7 @@ def field_content():            return _(r'([^,\n])+')
 def field_content_quoted():     return _(r'(("")|([^"]))+')
 def csvfile():                  return OneOrMore([record, '\n']), EOF
 </code></pre>
-<h2 id="the-parser">The parser</h2>
+<h2 id="the-parser">The parser<a class="headerlink" href="#the-parser" title="Permanent link">&para;</a></h2>
 <p>Let's instantiate parser. In order to catch newlines in <code>csvfile</code> rule we must
 tell Arpeggio not to treat newlines as whitespace, i.e. not to skip over them.
 Thus, we will be able to handle them explicitly as we do in csvfile rule. To do
@@ -285,7 +285,7 @@ considered as whitespace.  You can find more information
 character.  We give grammar root rule to the <code>ParserPython</code>. In this example it
 is <code>csvfile</code> function.</p>
 <p><code>parser</code> now refers to the parser object capable of parsing CSV inputs.</p>
-<h2 id="parsing">Parsing</h2>
+<h2 id="parsing">Parsing<a class="headerlink" href="#parsing" title="Permanent link">&para;</a></h2>
 <p>Let's parse some CSV example string.</p>
 <p>Create file <code>test_data.csv</code> with the following content:</p>
 <pre><code>Unquoted test, "Quoted test", 23234, One Two Three, "343456.45"
@@ -321,7 +321,7 @@ parser in debug mode.</p>
 <p>Transform generated <code>dot</code> files to images.
 See more <a href="../../debugging/#visualization">here</a></p>
 </div>
-<h2 id="defining-grammar-using-peg-notation">Defining grammar using PEG notation</h2>
+<h2 id="defining-grammar-using-peg-notation">Defining grammar using PEG notation<a class="headerlink" href="#defining-grammar-using-peg-notation" title="Permanent link">&para;</a></h2>
 <p>Now, let's try the same but using <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
 notation</a> for the grammar
 definition.</p>
@@ -398,7 +398,7 @@ specification approach we use.</p>
 <pre><code class="python">parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=True)
 </code></pre>
 
-<h2 id="extract-data">Extract data</h2>
+<h2 id="extract-data">Extract data<a class="headerlink" href="#extract-data" title="Permanent link">&para;</a></h2>
 <p>Our main goal is to extract data from the <code>csv</code> file.</p>
 <p>The parse tree we get as a result of parsing is not very useful on its own.
 We need to transform it to some other data structure that we can use.</p>
@@ -505,6 +505,8 @@ anymore but a proper Python types.</p>
   <div role="contentinfo">
     <!-- Copyright etc -->
     
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
+    
   </div>
 
   Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
@@ -520,7 +522,7 @@ anymore but a proper Python types.</p>
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/igordejanovic/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../../troubleshooting/" style="color: #fcfcfc;">&laquo; Previous</a></span>

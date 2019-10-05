@@ -14,11 +14,20 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+
+[Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.2...HEAD
+
+
+## [v1.9.2] (released: 2019-10-05)
+
+  - Added explicit Python versions in setup.py classifiers ([#65])
   - Removed pytest version constraint and fixed tests to work with both 5.x and
     older versions. ([#57])
 
+[#65]: https://github.com/textX/Arpeggio/issues/65
 [#57]: https://github.com/textX/Arpeggio/issues/57
-[Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.1...HEAD
+[v1.9.2]: https://github.com/textX/Arpeggio/compare/v1.9.1...v1.9.2
+
 
 ## [v1.9.1] (released: 2019-09-28)
 

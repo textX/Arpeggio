@@ -1,7 +1,7 @@
 """
 See https://github.com/textX/Arpeggio/issues/43
 """
-from arpeggio.cleanpeg import ParserPEG
+from ....cleanpeg import ParserPEG
 
 
 def try_grammer(peg):

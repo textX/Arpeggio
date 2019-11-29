@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_unicode
 # Purpose: Tests matching unicode characters
@@ -7,11 +6,10 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar
-from arpeggio import ParserPython
+from .. import ParserPython
 
 def grammar():      return first, "±", second
 def first():        return "♪"

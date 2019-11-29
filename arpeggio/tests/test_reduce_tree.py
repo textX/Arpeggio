@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_reduce_tree
 # Purpose: Test parse tree reduction
@@ -7,12 +6,11 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar
-from arpeggio import ZeroOrMore, OneOrMore, ParserPython, Terminal, NonTerminal
-from arpeggio import RegExMatch as _
+from .. import ZeroOrMore, OneOrMore, ParserPython, Terminal, NonTerminal
+from .. import RegExMatch as _
 
 
 def grammar():      return first, "a", second, [first, second]

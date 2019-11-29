@@ -1,10 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals, print_function
-
 import pytest
-from arpeggio.cleanpeg import ParserPEG
+from ....cleanpeg import ParserPEG
 
 input = """\
 <?php

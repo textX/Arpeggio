@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_semantic_action_results
 # Purpose: Tests semantic actions based on visitor
@@ -7,14 +6,13 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar
-from arpeggio import ZeroOrMore, OneOrMore, ParserPython,\
+from .. import ZeroOrMore, OneOrMore, ParserPython,\
     PTNodeVisitor, visit_parse_tree, SemanticActionResults
-from arpeggio.export import PTDOTExporter
-from arpeggio import RegExMatch as _
+from ..export import PTDOTExporter
+from .. import RegExMatch as _
 
 def grammar():      return first, "a", second
 def first():        return [fourth, third], ZeroOrMore(third)

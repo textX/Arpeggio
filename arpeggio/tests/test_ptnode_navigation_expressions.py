@@ -7,11 +7,10 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar
-from arpeggio import ParserPython, ZeroOrMore, ParseTreeNode, NonTerminal
+from .. import ParserPython, ZeroOrMore, ParseTreeNode, NonTerminal
 
 
 def foo(): return "a", bar, "b", baz, bar2, ZeroOrMore(bar)

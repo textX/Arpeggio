@@ -11,9 +11,9 @@
 
 from __future__ import print_function, unicode_literals
 
-from arpeggio import Optional, ZeroOrMore, Not, OneOrMore, EOF, ParserPython, \
+from . import Optional, ZeroOrMore, Not, OneOrMore, EOF, ParserPython, \
     visit_parse_tree
-from arpeggio import RegExMatch as _
+from . import RegExMatch as _
 from .peg import PEGVisitor
 from .peg import ParserPEG as ParserPEGOrig
 

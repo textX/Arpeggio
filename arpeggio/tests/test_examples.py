@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_examples
 # Purpose: Test that examples run without errors.
@@ -19,6 +18,8 @@ else:
 
 
 def test_examples():
+
+    add_arpeggio_folder_to_syspath()
 
     examples_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                    '..', '..', 'examples')
@@ -45,3 +46,13 @@ def test_examples():
 
         if hasattr(mod, 'main'):
             mod.main(debug=False)
+
+
+def add_arpeggio_folder_to_syspath() -> None:
+    """ add the path to arpeggio in the syspath, if it is not installed for local development testing
+        so arpeggio.py will be importable
+    """
+    arpeggio_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                   '..', '..', '..', 'Arpeggio')
+    if arpeggio_folder not in sys.path:
+        sys.path.append(arpeggio_folder)

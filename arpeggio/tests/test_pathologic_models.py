@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_pathologic_models
 # Purpose: Test for grammar models that could lead to infinite loops are
@@ -7,10 +6,10 @@
 # Copyright: (c) 2014 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from __future__ import unicode_literals
+
 import pytest
 
-from arpeggio import ZeroOrMore, Optional, ParserPython, NoMatch, EOF
+from .. import ZeroOrMore, Optional, ParserPython, NoMatch, EOF
 
 
 def test_optional_inside_zeroormore():

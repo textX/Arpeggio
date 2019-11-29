@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_default_semantic_action
 # Purpose: Default semantic action is applied during semantic analysis
@@ -11,15 +10,8 @@
 
 from __future__ import unicode_literals
 import pytest  # noqa
-from arpeggio import ParserPython, SemanticAction, ParseTreeNode
-from arpeggio import RegExMatch as _
-
-try:
-    # For python 2.x
-    text=unicode
-except:
-    # For python 3.x
-    text=str
+from .. import ParserPython, SemanticAction, ParseTreeNode
+from .. import RegExMatch as _
 
 def grammar():      return parentheses, 'strmatch'
 def parentheses():  return '(', rulea, ')'
@@ -35,7 +27,7 @@ parse_tree_node = False
 class ParenthesesSA(SemanticAction):
     def first_pass(self, parser, node, children):
         global p_removed, parse_tree_node
-        p_removed = text(children[0]) != '('
+        p_removed = str(children[0]) != '('
         parse_tree_node = isinstance(children[0], ParseTreeNode)
         return children[0] if len(children) == 1 else children[1]
 
@@ -43,7 +35,7 @@ class ParenthesesSA(SemanticAction):
 class RuleSA(SemanticAction):
     def first_pass(self, parser, node, children):
         global number_str
-        number_str = type(children[1]) == text
+        number_str = type(children[1]) == str
         return children[1]
 
 

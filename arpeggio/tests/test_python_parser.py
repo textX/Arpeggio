@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_python_parser
 # Purpose: Test for parser constructed using Python-based grammars.
@@ -11,9 +10,9 @@ from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar
-from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, ParserPython,\
+from .. import Optional, ZeroOrMore, OneOrMore, EOF, ParserPython,\
     Sequence, NonTerminal
-from arpeggio import RegExMatch as _
+from .. import RegExMatch as _
 
 
 def number():     return _(r'\d*\.\d*|\d+')

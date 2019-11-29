@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_parser_params
 # Purpose: Test for parser parameters.
@@ -7,9 +6,8 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, NoMatch
+from .. import ParserPython, NoMatch
 import sys
 
 

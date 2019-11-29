@@ -1,5 +1,4 @@
-from __future__ import unicode_literals
-from arpeggio import ParserPython, ZeroOrMore
+from .... import ParserPython, ZeroOrMore
 
 
 def test_empty_nested_parse():
@@ -14,4 +13,3 @@ def test_empty_nested_parse():
     tree = parser.parse("something")
 
     assert not tree
-

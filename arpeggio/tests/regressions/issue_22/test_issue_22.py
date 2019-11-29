@@ -1,5 +1,5 @@
 import os
-from arpeggio.cleanpeg import ParserPEG
+from ....cleanpeg import ParserPEG
 
 
 def test_issue_22():

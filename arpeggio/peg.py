@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: peg.py
 # Purpose: Implementing PEG language
@@ -7,21 +6,14 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import print_function, unicode_literals
-import sys
 import codecs
 import copy
 import re
-from arpeggio import Sequence, OrderedChoice, Optional, ZeroOrMore, \
+from . import Sequence, OrderedChoice, Optional, ZeroOrMore, \
     OneOrMore, UnorderedGroup, EOF, EndOfFile, PTNodeVisitor, \
     SemanticError, CrossRef, GrammarError, StrMatch, And, Not, Parser, \
     ParserPython, visit_parse_tree
-from arpeggio import RegExMatch as _
-
-if sys.version < '3':
-    text = unicode
-else:
-    text = str
+from . import RegExMatch as _
 
 __all__ = ['ParserPEG']
 
@@ -270,7 +262,7 @@ class ParserPEG(Parser):
         # In debug mode export parser model to dot for
         # visualization
         if self.debug:
-            from arpeggio.export import PMDOTExporter
+            from .export import PMDOTExporter
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(
                 self.parser_model, "{}_peg_parser_model.dot".format(root_rule))

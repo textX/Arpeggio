@@ -1,8 +1,7 @@
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar
-from arpeggio import ZeroOrMore, OneOrMore, UnorderedGroup, \
+from .. import ZeroOrMore, OneOrMore, UnorderedGroup, \
     ParserPython, NoMatch, EOF
 
 

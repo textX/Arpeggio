@@ -1,8 +1,7 @@
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar
-from arpeggio import ZeroOrMore, OneOrMore, ParserPython, EOF
+from .. import ZeroOrMore, OneOrMore, ParserPython, EOF
 
 
 def test_zeroormore_eolterm():

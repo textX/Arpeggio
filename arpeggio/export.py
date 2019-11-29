@@ -9,7 +9,7 @@
 
 from __future__ import unicode_literals
 import io
-from arpeggio import Terminal
+from . import Terminal
 
 
 class Exporter(object):

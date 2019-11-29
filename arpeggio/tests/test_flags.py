@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_flags
 # Purpose: Test for parser flags
@@ -7,14 +6,13 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import re
 import pytest
 
 # Grammar
-from arpeggio import ParserPython, Optional, EOF
-from arpeggio import RegExMatch as _
-from arpeggio import NoMatch
+from .. import ParserPython, Optional, EOF
+from .. import RegExMatch as _
+from .. import NoMatch
 
 
 def foo():      return 'r', bar, Optional(qux), baz, Optional(ham), Optional(buz), EOF

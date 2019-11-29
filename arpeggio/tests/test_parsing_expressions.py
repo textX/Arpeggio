@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_parsing_expressions
 # Purpose: Test for parsing expressions.
@@ -7,9 +6,8 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
+from .. import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
     NoMatch, EOF, Optional, And, Not, StrMatch
 
 

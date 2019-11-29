@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, ZeroOrMore, Sequence, OrderedChoice, \
+from .... import ParserPython, ZeroOrMore, Sequence, OrderedChoice, \
     EOF, NoMatch
 
 

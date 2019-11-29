@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_sequence_params
 # Purpose: Test Sequence expression parameters.
@@ -7,9 +6,8 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, NoMatch, Sequence
+from .. import ParserPython, NoMatch, Sequence
 
 
 def test_skipws():

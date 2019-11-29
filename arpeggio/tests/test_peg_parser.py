@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_peg_parser
 # Purpose: Test for parser constructed using PEG textual grammars.
@@ -7,9 +6,9 @@
 # License: MIT License
 #######################################################################
 import pytest  # noqa
-from arpeggio import Sequence, NonTerminal, NoMatch
-from arpeggio.peg import ParserPEG
-from arpeggio.cleanpeg import ParserPEG as ParserPEGClean
+from .. import Sequence, NonTerminal, NoMatch
+from ..peg import ParserPEG
+from ..cleanpeg import ParserPEG as ParserPEGClean
 
 grammar = r'''
     // This is a comment

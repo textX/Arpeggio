@@ -1,6 +1,4 @@
-# coding=utf-8
-from __future__ import unicode_literals, absolute_import
-from arpeggio import ParserPython, EOF
+from .. import ParserPython, EOF
 import pytest
 
 

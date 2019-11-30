@@ -13,14 +13,14 @@ from typing import Any, Tuple
 
 try:
     # for pytest
-    from ....arpeggio import ParserPython
-    from ....arpeggio import Optional
-    from ....arpeggio import EOF
-except ImportError:
+    from ....arpeggio import ParserPython       # type: ignore # pragma: no cover
+    from ....arpeggio import Optional           # type: ignore # pragma: no cover
+    from ....arpeggio import EOF                # type: ignore # pragma: no cover
+except ImportError:                             # type: ignore # pragma: no cover
     # for local Doctest
-    from arpeggio import ParserPython
-    from arpeggio import Optional
-    from arpeggio import EOF
+    from arpeggio import ParserPython           # type: ignore # pragma: no cover
+    from arpeggio import Optional               # type: ignore # pragma: no cover
+    from arpeggio import EOF                    # type: ignore # pragma: no cover
 
 
 # Grammar

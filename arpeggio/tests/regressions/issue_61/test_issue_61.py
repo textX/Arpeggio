@@ -47,12 +47,14 @@ def test_ordered_choice_skipws_ws() -> None:
     tree = parser.parse("idid .")
     assert len(tree) == 4
 
-
     # Now we change skipws flag
-    def word():  # noqa
+    def sentence2():
+        return Sequence(ZeroOrMore(word2), skipws=True), EOF
+
+    def word2():
         return OrderedChoice([(id, ' ', '.'), id, '.'], skipws=False)
 
-    parser = ParserPython(sentence)
+    parser = ParserPython(sentence2)
 
     with pytest.raises(NoMatch):
         # This can't parse anymore

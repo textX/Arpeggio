@@ -1,6 +1,12 @@
 
-# ####### PROJ
-from .arpeggio import *
+# proj
+try:
+    # imports for local pytest
+    from .arpeggio import *                 # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import *                 # type: ignore # pragma: no cover
 
 
 class GrammarBase(object):
@@ -9,7 +15,7 @@ class GrammarBase(object):
     """
 
 
-class ParserPython(Parser):
+class ParserPythonClass(Parser):
 
     def __init__(self, language_def, comment_def=None, *args, **kwargs):
         """
@@ -21,7 +27,7 @@ class ParserPython(Parser):
             comment_def (python function): A python function that defines
                 the root rule of the comments grammar.
         """
-        super(ParserPython, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # PEG Abstract Syntax Graph
         self.parser_model = self._from_python(language_def)

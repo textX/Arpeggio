@@ -6,21 +6,38 @@
 # License: MIT License
 #######################################################################
 
-import pytest
+# stdlib
+import pytest  # type: ignore
 import os
+
+# proj
+from ..arpeggio import Optional
+from ..arpeggio import ZeroOrMore
+from ..arpeggio import OneOrMore
+from ..arpeggio import EOF
+from ..arpeggio import ParserPython
+from ..arpeggio import RegExMatch as _
 from ..export import PMDOTExporter, PTDOTExporter
 
-# Grammar
-from .. import Optional, ZeroOrMore, OneOrMore, EOF, ParserPython
-from .. import RegExMatch as _
+
+def number():
+    return _(r'\d*\.\d*|\d+')
 
 
-def number():     return _(r'\d*\.\d*|\d+')
-def factor():     return Optional(["+","-"]), [number,
-                                               ("(", expression, ")")]
-def term():       return factor, ZeroOrMore(["*","/"], factor)
-def expression(): return term, ZeroOrMore(["+", "-"], term)
-def calc():       return OneOrMore(expression), EOF
+def factor():
+    return Optional(["+", "-"]), [number, ("(", expression, ")")]
+
+
+def term():
+    return factor, ZeroOrMore(["*", "/"], factor)
+
+
+def expression():
+    return term, ZeroOrMore(["+", "-"], term)
+
+
+def calc():
+    return OneOrMore(expression), EOF
 
 
 @pytest.fixture

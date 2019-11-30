@@ -7,12 +7,12 @@ from typing import List
 # proj
 try:
     # imports for local pytest
-    from .peg_nodes import *              # type: ignore # pragma: no cover
+    from .peg_nodes import *                    # type: ignore # pragma: no cover
 
 except ImportError:                             # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from peg_nodes import *              # type: ignore # pragma: no cover
+    from peg_nodes import *                     # type: ignore # pragma: no cover
 
 
 NOMATCH_MARKER = 0
@@ -150,8 +150,7 @@ class ParsingExpression(object):
 
         try:
             result = self._parse(parser)
-            if self.suppress or (type(result) is list and
-                                 result and result[0] is None):
+            if self.suppress or (type(result) is list and result and result[0] is None):
                 result = None
 
         except NoMatch:
@@ -487,12 +486,12 @@ class UnorderedGroup(Repetition):
             if sep and not first:
                 try:
                     sep_result = sep(parser)
-                except NoMatch as e:
+                except NoMatch as exc:
                     parser.position = c_loc_pos_sep     # Backtracking
 
                     # This still might be valid if all remaining subexpressions
                     # are optional and none of them will match
-                    sep_exc = e
+                    sep_exc = exc
 
             c_loc_pos = parser.position
             match = True
@@ -630,13 +629,13 @@ class Match(ParsingExpression):
     Base class for all classes that will try to match something from the input.
     """
     def __init__(self, rule_name, root=False):
-        super(Match, self).__init__(rule_name=rule_name, root=root)
+        self.to_match = None
+        super().__init__(rule_name=rule_name, root=root)
 
     @property
     def name(self):
         if self.root:
-            return "%s=%s(%s)" % (self.rule_name, self.__class__.__name__,
-                                  self.to_match)
+            return "%s=%s(%s)" % (self.rule_name, self.__class__.__name__, self.to_match)
         else:
             return "%s(%s)" % (self.__class__.__name__, self.to_match)
 
@@ -727,7 +726,6 @@ class RegExMatch(Match):
         self.ignore_case = ignore_case
         self.multiline = multiline
         self.explicit_flags = re_flags
-
         self.to_match = str_repr if str_repr is not None else to_match
 
     def compile(self):
@@ -782,7 +780,7 @@ class StrMatch(Match):
 
     def _parse(self, parser):
         c_pos = parser.position
-        input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
+        input_frag = parser.input[c_pos:c_pos + len(self.to_match)]
         if self.ignore_case:
             match = input_frag.lower() == self.to_match.lower()
         else:

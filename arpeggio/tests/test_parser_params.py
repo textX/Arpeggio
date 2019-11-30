@@ -6,9 +6,11 @@
 # License: MIT License
 #######################################################################
 
-import pytest
-from .. import ParserPython, NoMatch
+import pytest  # type: ignore
 import sys
+
+from ..arpeggio import NoMatch
+from ..arpeggio import ParserPython
 
 
 def test_autokwd():

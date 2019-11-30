@@ -22,11 +22,11 @@ class Enum {
         for( $i=0, $n=count($args); $i<$n; $i++ )
             $this->add($args[$i]);
     }
-   
+
     public function __get(  $name = null ) {
         return $this->self[$name];
     }
-   
+
     public function add(  $name = null,  $enum = null ) {
         if( isset($enum) )
             $this->self[$name] = $enum;
@@ -69,7 +69,7 @@ anyword = r'[\w]*' ws*
 ws = r'[\s]+'
 
 
-"""
+"""     # noqa
 
 
 def argument(parser: ParserPEG, node: ParseTreeNode, children: List[Any]) -> Any:

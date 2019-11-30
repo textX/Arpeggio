@@ -156,9 +156,9 @@ def test_broken_escape_translation() -> None:
 
 
 def test_multiple_backslash_sequences() -> None:
-    assert check_parser(r"'\\n'",    '\\n')     # backslash-n
-    assert check_parser(r"'\\\n'",   '\\\n')    # backslash-newline
-    assert check_parser(r"'\\\\n'",  '\\\\n')   # backslash-backslash-n
+    assert check_parser(r"'\\n'", '\\n')     # backslash-n
+    assert check_parser(r"'\\\n'", '\\\n')    # backslash-newline
+    assert check_parser(r"'\\\\n'", '\\\\n')   # backslash-backslash-n
     assert check_parser(r"'\\\\\n'", '\\\\\n')  # backslash-backslash-newline
 
 
@@ -192,18 +192,18 @@ match'  """, 'extremely_long_match')
 
 
 def test_octal_escapes() -> None:
-    assert check_parser(r"'\7'",    '\7')
-    assert check_parser(r"'\41'",   '!')
-    assert check_parser(r"'\101'",  'A')
+    assert check_parser(r"'\7'", '\7')
+    assert check_parser(r"'\41'", '!')
+    assert check_parser(r"'\101'", 'A')
     assert check_parser(r"'\1001'", '@1')  # too long
 
 
 def test_hexadecimal_escapes() -> None:
-    assert check_parser(r"'\x41'",  'A')
-    assert check_parser(r"'\x4A'",  'J')
-    assert check_parser(r"'\x4a'",  'J')
-    assert check_parser(r"'\x__'",  '\\x__')  # too short
-    assert check_parser(r"'\x1_'",  '\\x1_')  # too short
+    assert check_parser(r"'\x41'", 'A')
+    assert check_parser(r"'\x4A'", 'J')
+    assert check_parser(r"'\x4a'", 'J')
+    assert check_parser(r"'\x__'", '\\x__')  # too short
+    assert check_parser(r"'\x1_'", '\\x1_')  # too short
     assert check_parser(r"'\x411'", 'A1')     # too long
 
 

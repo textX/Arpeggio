@@ -6,8 +6,11 @@
 # License: MIT License
 #######################################################################
 
-import pytest
-from .. import ParserPython, NoMatch, Sequence
+import pytest  # type: ignore
+
+from ..arpeggio import ParserPython
+from ..arpeggio import NoMatch
+from ..arpeggio import Sequence
 
 
 def test_skipws():

@@ -1,11 +1,16 @@
 # stdlib
 from typing import Any
-import pytest                                   # type: ignore
 
 # proj
-
-from ...arpeggio import ParserPython
-from ...peg_semantic_actions import SemanticAction
+try:
+    # imports for local pytest
+    from ...arpeggio import ParserPython                    # type: ignore # pragma: no cover
+    from ...peg_semantic_actions import SemanticAction      # type: ignore # pragma: no cover
+except ImportError:                                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import ParserPython                       # type: ignore # pragma: no cover
+    from peg_semantic_actions import SemanticAction         # type: ignore # pragma: no cover
 
 
 def test_direct_rule_call() -> None:
@@ -26,14 +31,14 @@ def test_direct_rule_call() -> None:
     call_count = [0]
 
     class DummySemAction(SemanticAction):
-        def first_pass(self, parser, node, nodes) -> SemanticAction.first_pass:
+        def first_pass(self, parser, node, nodes):
             call_count[0] += 1
             return SemanticAction.first_pass(self, parser, node, nodes)
 
     # Sem action is attached to rule2 only but
     # this bug will attach it to rule1 also resulting in
     # wrong call count.
-    rule2.sem = DummySemAction()
+    rule2.sem = DummySemAction()        # type: ignore
 
     parser = ParserPython(grammar)
     parse_tree = parser.parse("aa")

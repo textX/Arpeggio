@@ -61,9 +61,14 @@ def test_optional_with_better_match():
     has precedence over non-optional.
     """
 
-    def grammar():  return [first, Optional(second)]
-    def first():    return 'one', 'two', 'three', '4'
-    def second():   return 'one', 'two', 'three', 'four', 'five'
+    def grammar():
+        return [first, Optional(second)]
+
+    def first():
+        return 'one', 'two', 'three', '4'
+
+    def second():
+        return 'one', 'two', 'three', 'four', 'five'
 
     parser = ParserPython(grammar)
 
@@ -96,7 +101,8 @@ def test_file_name_reporting():
     Test that if parser has file name set it will be reported.
     """
 
-    def grammar():      return Optional('a'), 'b', EOF
+    def grammar():
+        return Optional('a'), 'b', EOF
 
     parser = ParserPython(grammar)
 
@@ -111,8 +117,11 @@ def test_comment_matching_not_reported():
     Test that matching of comments is not reported.
     """
 
-    def grammar():      return Optional('a'), 'b', EOF
-    def comments():     return _(r'//.*$')
+    def grammar():
+        return Optional('a'), 'b', EOF
+
+    def comments():
+        return _(r'//.*$')
 
     parser = ParserPython(grammar, comments)
 

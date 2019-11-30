@@ -177,26 +177,25 @@ class PEGVisitor(PTNodeVisitor):
                                         .format(rule_name))
 
             def resolve_rule_by_name(rule_name):
+                if self.debug:
+                    self.dprint("Resolving crossref {}".format(rule_name))
 
+                resolved_rule = get_rule_by_name(rule_name)
+                while type(resolved_rule) is CrossRef:
+                    target_rule = resolved_rule.target_rule_name
+                    resolved_rule = get_rule_by_name(target_rule)
+
+                # If resolved rule hasn't got the same name it
+                # should be cloned and preserved in the peg_rules cache
+                if resolved_rule.rule_name != rule_name:
+                    resolved_rule = copy.copy(resolved_rule)
+                    resolved_rule.rule_name = rule_name
+                    self.peg_rules[rule_name] = resolved_rule
                     if self.debug:
-                        self.dprint("Resolving crossref {}".format(rule_name))
-
-                    resolved_rule = get_rule_by_name(rule_name)
-                    while type(resolved_rule) is CrossRef:
-                        target_rule = resolved_rule.target_rule_name
-                        resolved_rule = get_rule_by_name(target_rule)
-
-                    # If resolved rule hasn't got the same name it
-                    # should be cloned and preserved in the peg_rules cache
-                    if resolved_rule.rule_name != rule_name:
-                        resolved_rule = copy.copy(resolved_rule)
-                        resolved_rule.rule_name = rule_name
-                        self.peg_rules[rule_name] = resolved_rule
-                        if self.debug:
-                            self.dprint("Resolving: cloned to {} = > {}"
-                                        .format(resolved_rule.rule_name,
-                                                resolved_rule.name))
-                    return resolved_rule
+                        self.dprint("Resolving: cloned to {} = > {}"
+                                    .format(resolved_rule.rule_name,
+                                            resolved_rule.name))
+                return resolved_rule
 
             if isinstance(node, CrossRef):
                 # The root rule is a cross-ref
@@ -340,10 +339,10 @@ class ParserPEG(Parser):
         if self.debug:
             try:
                 # for pytest
-                from .export import PMDOTExporter
-            except ImportError:
-                # for local Doctest
-                from export import PMDOTExporter
+                from .export import PMDOTExporter   # type: ignore # pragma: no cover
+            except ImportError:                     # type: ignore # pragma: no cover
+                # for local Doctest                 # type: ignore # pragma: no cover
+                from export import PMDOTExporter    # type: ignore # pragma: no cover
 
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(

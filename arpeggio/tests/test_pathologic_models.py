@@ -7,7 +7,7 @@
 # License: MIT License
 #######################################################################
 
-import pytest
+import pytest  # type: ignore
 
 from .. import ZeroOrMore, Optional, ParserPython, NoMatch, EOF
 

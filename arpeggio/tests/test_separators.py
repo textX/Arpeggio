@@ -1,11 +1,16 @@
-import pytest  # noqa
+import pytest  # type: ignore
+
 
 # Grammar
-from .. import ZeroOrMore, OneOrMore, UnorderedGroup, \
-    ParserPython, NoMatch, EOF
+from ..arpeggio import ZeroOrMore
+from ..arpeggio import OneOrMore
+from ..arpeggio import UnorderedGroup
+from ..arpeggio import ParserPython
+from ..arpeggio import NoMatch
+from ..arpeggio import EOF
 
 
-def test_zeroormore_with_separator():
+def test_zero_or_more_with_separator():
 
     def grammar():
         return ZeroOrMore(['a', 'b'], sep=','), EOF
@@ -18,7 +23,7 @@ def test_zeroormore_with_separator():
         parser.parse('a, b a')
 
 
-def test_oneormore_with_ordered_choice_separator():
+def test_one_or_more_with_ordered_choice_separator():
 
     def grammar():
         return OneOrMore(['a', 'b'], sep=[',', ';']), EOF

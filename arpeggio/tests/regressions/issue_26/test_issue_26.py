@@ -10,10 +10,10 @@ except ImportError:                         # type: ignore # pragma: no cover
 
 def test_regex_with_empty_successful_match_in_repetition() -> None:
     grammar = \
-            """
-            rule = (subexpression)+
-            subexpression = r'^.*$'
-            """
+        """
+        rule = (subexpression)+
+        subexpression = r'^.*$'
+        """
     parser = ParserPEG(grammar, "rule")
     parsed = parser.parse("something simple")
 

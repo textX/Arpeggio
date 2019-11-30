@@ -42,7 +42,6 @@ if sys.version < '3':
 DEFAULT_WS = '\t\n\r '
 
 
-
 class ArpeggioError(Exception):
     """
     Base class for arpeggio errors.
@@ -186,8 +185,6 @@ def visit_parse_tree(parse_tree, visitor):
         getattr(visitor, "second_%s" % sa_name)(asg_node)
 
     return result
-
-
 
 # ----------------------------------------------------
 # Parsers
@@ -341,11 +338,12 @@ class Parser(DebugPrinter):
         # visualization
         if self.debug and self.parse_tree:
             try:
-                # for pytest
-                from .export import PTDOTExporter
-            except ImportError:
-                # for local doctest
-                from export import PTDOTExporter
+                # imports for local pytest
+                from .export import PTDOTExporter           # type: ignore # pragma: no cover
+            except ImportError:                             # type: ignore # pragma: no cover
+                # imports for doctest
+                # noinspection PyUnresolvedReferences
+                from export import PTDOTExporter            # type: ignore # pragma: no cover
 
             root_rule_name = self.parse_tree.rule_name
             PTDOTExporter().exportFile(
@@ -413,8 +411,7 @@ class Parser(DebugPrinter):
                             (node.name, str(node), type(node).__name__,
                              len(node) if isinstance(node, list) else 0))
                 for i, a in enumerate(children):
-                    self.dprint("  %d:%s type:%s" %
-                                (i+1, str(a), type(a).__name__))
+                    self.dprint("  %d:%s type:%s" % (i + 1, str(a), type(a).__name__))
 
             if node.rule_name in sem_actions:
                 sem_action = sem_actions[node.rule_name]

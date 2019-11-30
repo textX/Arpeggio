@@ -6,8 +6,8 @@
 # License: MIT License
 #######################################################################
 
-import pytest  # noqa
-from .. import ParserPython, Sequence
+from ..arpeggio import ParserPython
+from ..arpeggio import Sequence
 
 
 def test_sequence_suppress():

@@ -6,9 +6,18 @@
 # License: MIT License
 #######################################################################
 
-import pytest
-from .. import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
-    NoMatch, EOF, Optional, And, Not, StrMatch
+import pytest  # type: ignore
+
+from ..arpeggio import ParserPython
+from ..arpeggio import UnorderedGroup
+from ..arpeggio import ZeroOrMore
+from ..arpeggio import OneOrMore
+from ..arpeggio import NoMatch
+from ..arpeggio import EOF
+from ..arpeggio import Optional
+from ..arpeggio import And
+from ..arpeggio import Not
+from ..arpeggio import StrMatch
 
 
 def test_sequence():

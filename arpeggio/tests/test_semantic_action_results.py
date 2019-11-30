@@ -6,8 +6,6 @@
 # License: MIT License
 #######################################################################
 
-import pytest  # noqa
-
 # Grammar
 from .. import ZeroOrMore, OneOrMore, ParserPython, \
     SemanticActionResults, PTNodeVisitor, visit_parse_tree
@@ -15,12 +13,28 @@ from ..export import PTDOTExporter
 from .. import RegExMatch as _
 
 
-def grammar():      return first, "a", second
-def first():        return [fourth, third], ZeroOrMore(third)
-def second():       return OneOrMore(third), "b"
-def third():        return [third_str, fourth]
-def third_str():    return "3"
-def fourth():       return _(r'\d+')
+def grammar():
+    return first, "a", second
+
+
+def first():
+    return [fourth, third], ZeroOrMore(third)
+
+
+def second():
+    return OneOrMore(third), "b"
+
+
+def third():
+    return [third_str, fourth]
+
+
+def third_str():
+    return "3"
+
+
+def fourth():
+    return _(r'\d+')
 
 
 first_sar = None
@@ -43,10 +57,10 @@ def test_semantic_action_results():
 
     global first_sar, third_sar
 
-    input = "4 3 3 3 a 3 3 b"
+    peg_input = "4 3 3 3 a 3 3 b"
 
     parser = ParserPython(grammar, reduce_tree=False)
-    result = parser.parse(input)
+    result = parser.parse(peg_input)
 
     PTDOTExporter().exportFile(result, 'test_semantic_action_results_pt.dot')
 

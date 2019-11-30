@@ -1,5 +1,9 @@
-from .. import ParserPython, EOF
-import pytest
+# stdlib
+import pytest  # type: ignore
+
+# proj
+from ..arpeggio import ParserPython
+from ..arpeggio import EOF
 
 
 def test_parser_resilience():

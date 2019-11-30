@@ -6,27 +6,41 @@
 # License: MIT License
 #######################################################################
 
-import pytest  # noqa
-
 # Grammar
 from .. import ZeroOrMore, OneOrMore, ParserPython, Terminal, NonTerminal
 from .. import RegExMatch as _
 
 
-def grammar():      return first, "a", second, [first, second]
-def first():        return [fourth, third], ZeroOrMore(third)
-def second():       return OneOrMore(third), "b"
-def third():        return [third_str, fourth]
-def third_str():    return "3"
-def fourth():       return _(r'\d+')
+def grammar():
+    return first, "a", second, [first, second]
 
 
-def test_reduce_tree():
+def first():
+    return [fourth, third], ZeroOrMore(third)
 
-    input = "34 a 3 3 b 3 b"
+
+def second():
+    return OneOrMore(third), "b"
+
+
+def third():
+    return [third_str, fourth]
+
+
+def third_str():
+    return "3"
+
+
+def fourth():
+    return _(r'\d+')
+
+
+def test_reduce_tree() -> None:
+
+    peg_input = "34 a 3 3 b 3 b"
 
     parser = ParserPython(grammar, reduce_tree=False)
-    result = parser.parse(input)
+    result = parser.parse(peg_input)
 
 #    PTDOTExporter().exportFile(result, 'test_reduce_tree_pt.dot')
 
@@ -38,7 +52,7 @@ def test_reduce_tree():
     assert result[2][0].rule_name == 'third'
 
     parser = ParserPython(grammar, reduce_tree=True)
-    result = parser.parse(input)
+    result = parser.parse(peg_input)
 
     # PTDOTExporter().exportFile(result, 'test_reduce_tree_pt.dot')
 

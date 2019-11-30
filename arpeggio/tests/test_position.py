@@ -5,14 +5,14 @@
 # Copyright: (c) 2015-2017 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-import pytest
+import pytest  # type: ignore
 from .. import ParserPython
 
 
 @pytest.fixture
 def parse_tree():
-
-    def grammar(): return ("first", "second", "third")
+    def grammar():
+        return "first", "second", "third"
 
     parser = ParserPython(grammar)
 
@@ -35,7 +35,8 @@ def test_position_end(parse_tree):
 
 def test_pos_to_linecol():
 
-    def grammar(): return ("a", "b", "c")
+    def grammar():
+        return "a", "b", "c"
 
     parser = ParserPython(grammar)
 

@@ -28,7 +28,6 @@ class SemanticActionResults(list):
         return self.results.get(attr_name, [])
 
 
-
 class ParseTreeNode(object):
     """
     Abstract base class representing node of the Parse Tree.

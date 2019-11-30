@@ -5,7 +5,7 @@
 # Copyright: (c) 2014-2017 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-import pytest  # noqa
+import pytest  # type: ignore
 
 # proj
 try:
@@ -38,6 +38,7 @@ grammar = r'''
 
 clean_grammar = grammar.replace('<-', '=').replace(';', '')
 
+
 @pytest.mark.parametrize('parser', [ParserPEG(grammar, 'calc'),
                                     ParserPEGClean(clean_grammar, 'calc')])
 def test_construct_parser(parser):
@@ -50,8 +51,8 @@ def test_construct_parser(parser):
                                     ParserPEGClean(clean_grammar, 'calc')])
 def test_parse_input(parser):
 
-    input = "4+5*7/3.45*-45*(2.56+32)/-56*(2-1.34)"
-    result = parser.parse(input)
+    peg_input = "4+5*7/3.45*-45*(2.56+32)/-56*(2-1.34)"
+    result = parser.parse(peg_input)
 
     assert isinstance(result, NonTerminal)
     assert str(result) == "4 | + | 5 | * | 7 | / | 3.45 | * | - | 45 | * | ( | 2.56 | + | 32 | ) | / | - | 56 | * | ( | 2 | - | 1.34 | ) | "  # noqa
@@ -64,8 +65,8 @@ def test_parse_input(parser):
                                          reduce_tree=True)])
 def test_reduce_tree(parser):
 
-    input = "4+5*7/3.45*-45*(2.56+32)/-56*(2-1.34)"
-    result = parser.parse(input)
+    peg_input = "4+5*7/3.45*-45*(2.56+32)/-56*(2-1.34)"
+    result = parser.parse(peg_input)
 
     assert isinstance(result, NonTerminal)
 

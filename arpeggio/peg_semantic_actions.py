@@ -1,8 +1,9 @@
-
+# proj
 try:
-    from .peg_expressions import Terminal
-except ImportError:
-    from peg_expressions import Terminal
+    # imports for local pytest
+    from .peg_expressions import Terminal   # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    from peg_expressions import Terminal    # type: ignore # pragma: no cover
 
 
 class SemanticAction(object):

@@ -6,20 +6,38 @@
 # License: MIT License
 #######################################################################
 
-import pytest  # noqa
-
-# Grammar
-from .. import ZeroOrMore, OneOrMore, ParserPython,\
-    PTNodeVisitor, visit_parse_tree, SemanticActionResults
+from ..arpeggio import ZeroOrMore
+from ..arpeggio import OneOrMore
+from ..arpeggio import ParserPython
+from ..arpeggio import PTNodeVisitor
+from ..arpeggio import visit_parse_tree
+from ..arpeggio import SemanticActionResults
+from ..arpeggio import RegExMatch as _
 from ..export import PTDOTExporter
-from .. import RegExMatch as _
 
-def grammar():      return first, "a", second
-def first():        return [fourth, third], ZeroOrMore(third)
-def second():       return OneOrMore(third), "b"
-def third():        return [third_str, fourth]
-def third_str():    return "3"
-def fourth():       return _(r'\d+')
+
+def grammar():
+    return first, "a", second
+
+
+def first():
+    return [fourth, third], ZeroOrMore(third)
+
+
+def second():
+    return OneOrMore(third), "b"
+
+
+def third():
+    return [third_str, fourth]
+
+
+def third_str():
+    return "3"
+
+
+def fourth():
+    return _(r'\d+')
 
 
 first_sar = None
@@ -39,14 +57,14 @@ class Visitor(PTNodeVisitor):
         return 1
 
 
-def test_semantic_action_results():
+def test_semantic_action_results() -> None:
 
     global first_sar, third_sar
 
-    input = "4 3 3 3 a 3 3 b"
+    peg_input = "4 3 3 3 a 3 3 b"
 
     parser = ParserPython(grammar, reduce_tree=False)
-    result = parser.parse(input)
+    result = parser.parse(peg_input)
 
     PTDOTExporter().exportFile(result, 'test_semantic_action_results_pt.dot')
 
@@ -54,4 +72,4 @@ def test_semantic_action_results():
 
     assert isinstance(first_sar, SemanticActionResults)
     assert len(first_sar.third) == 3
-    assert third_sar.third_str[0] == '3'
+    assert third_sar.third_str[0] == '3'    # type: ignore

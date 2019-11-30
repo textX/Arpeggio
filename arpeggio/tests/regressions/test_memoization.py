@@ -2,10 +2,16 @@
 import pytest                                   # type: ignore
 from _pytest.fixtures import FixtureRequest     # type: ignore
 import sys
-from typing import Any, List, Tuple, Sequence
+from typing import Any, List, Tuple
 
 # proj
-from .... import ParserPython
+try:
+    # imports for local pytest
+    from ...arpeggio import ParserPython                    # type: ignore # pragma: no cover
+except ImportError:                                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import ParserPython                       # type: ignore # pragma: no cover
 
 
 def test_memoization_positive(capsys: FixtureRequest) -> None:

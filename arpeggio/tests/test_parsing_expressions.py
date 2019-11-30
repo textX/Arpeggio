@@ -8,16 +8,16 @@
 
 import pytest  # type: ignore
 
-from ..arpeggio import ParserPython
-from ..arpeggio import UnorderedGroup
-from ..arpeggio import ZeroOrMore
-from ..arpeggio import OneOrMore
-from ..arpeggio import NoMatch
-from ..arpeggio import EOF
-from ..arpeggio import Optional
-from ..arpeggio import And
-from ..arpeggio import Not
-from ..arpeggio import StrMatch
+# proj
+try:
+    # imports for local pytest
+    from ..arpeggio import *                                # type: ignore # pragma: no cover
+    from ..arpeggio import RegExMatch as _                  # type: ignore # pragma: no cover
+except ImportError:                                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import *                                  # type: ignore # pragma: no cover
+    from arpeggio import RegExMatch as _                    # type: ignore # pragma: no cover
 
 
 def test_sequence():

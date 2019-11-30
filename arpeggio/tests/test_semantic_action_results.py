@@ -6,11 +6,18 @@
 # License: MIT License
 #######################################################################
 
-# Grammar
-from .. import ZeroOrMore, OneOrMore, ParserPython, \
-    SemanticActionResults, PTNodeVisitor, visit_parse_tree
-from ..export import PTDOTExporter
-from .. import RegExMatch as _
+# proj
+try:
+    # imports for local pytest
+    from ..arpeggio import *                                # type: ignore # pragma: no cover
+    from ..arpeggio import RegExMatch as _                  # type: ignore # pragma: no cover
+    from ..export import PTDOTExporter                      # type: ignore # pragma: no cover
+except ImportError:                                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import *                                  # type: ignore # pragma: no cover
+    from arpeggio import RegExMatch as _                    # type: ignore # pragma: no cover
+    from ..export import PTDOTExporter                      # type: ignore # pragma: no cover
 
 
 def grammar():

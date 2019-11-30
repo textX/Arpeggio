@@ -4,17 +4,13 @@ from typing import Any
 # proj
 try:
     # imports for local pytest
-    from ..arpeggio import ZeroOrMore      # type: ignore # pragma: no cover
-    from ..arpeggio import OneOrMore       # type: ignore # pragma: no cover
-    from ..arpeggio import ParserPython    # type: ignore # pragma: no cover
-    from ..arpeggio import EOF             # type: ignore # pragma: no cover
+    from ..arpeggio import *    # type: ignore # pragma: no cover
+    from ..arpeggio import RegExMatch as _  # type: ignore # pragma: no cover
 except ImportError:                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from arpeggio import ZeroOrMore         # type: ignore # pragma: no cover
-    from arpeggio import OneOrMore          # type: ignore # pragma: no cover
-    from arpeggio import ParserPython       # type: ignore # pragma: no cover
-    from arpeggio import EOF                # type: ignore # pragma: no cover
+    from arpeggio import *       # type: ignore # pragma: no cover
+    from arpeggio import RegExMatch as _  # type: ignore # pragma: no cover
 
 
 def test_zeroormore_eolterm() -> None:

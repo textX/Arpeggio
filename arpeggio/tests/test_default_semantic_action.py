@@ -14,17 +14,13 @@ from typing import Any, List
 # proj
 try:
     # imports for local pytest
-    from ..arpeggio import ParserPython    # type: ignore # pragma: no cover
-    from ..peg_semantic_actions import SemanticAction      # type: ignore # pragma: no cover
-    from ..arpeggio import ParseTreeNode       # type: ignore # pragma: no cover
-    from ..arpeggio import RegExMatch as _     # type: ignore # pragma: no cover
+    from ..arpeggio import *    # type: ignore # pragma: no cover
+    from ..arpeggio import RegExMatch as _  # type: ignore # pragma: no cover
 except ImportError:                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from arpeggio import ParserPython    # type: ignore # pragma: no cover
-    from peg_semantic_actions import SemanticAction      # type: ignore # pragma: no cover
-    from arpeggio import ParseTreeNode       # type: ignore # pragma: no cover
-    from arpeggio import RegExMatch as _     # type: ignore # pragma: no cover
+    from arpeggio import *       # type: ignore # pragma: no cover
+    from arpeggio import RegExMatch as _  # type: ignore # pragma: no cover
 
 
 def grammar() -> Any:

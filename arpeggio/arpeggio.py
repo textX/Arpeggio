@@ -15,23 +15,22 @@ import bisect
 import codecs
 import sys
 import types
-from typing import List
 
 # proj
 try:
     # imports for local pytest
     from .peg_expressions import *              # type: ignore # pragma: no cover
-    from .peg_helpers import *              # type: ignore # pragma: no cover
-    from .peg_nodes import *              # type: ignore # pragma: no cover
-    from .peg_semantic_actions import *              # type: ignore # pragma: no cover
+    from .peg_helpers import *                  # type: ignore # pragma: no cover
+    from .peg_nodes import *                    # type: ignore # pragma: no cover
+    from .peg_semantic_actions import *         # type: ignore # pragma: no cover
 
 except ImportError:                             # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
     from peg_expressions import *               # type: ignore # pragma: no cover
-    from peg_helpers import *              # type: ignore # pragma: no cover
-    from peg_nodes import *              # type: ignore # pragma: no cover
-    from peg_semantic_actions import *              # type: ignore # pragma: no cover
+    from peg_helpers import *                   # type: ignore # pragma: no cover
+    from peg_nodes import *                     # type: ignore # pragma: no cover
+    from peg_semantic_actions import *          # type: ignore # pragma: no cover
 
 
 __version__ = "1.9.2"

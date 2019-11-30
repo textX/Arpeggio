@@ -11,7 +11,6 @@
 ###############################################################################
 
 from .arpeggio import *
-from .parser_python_class import *
 
 __version__ = "1.9.2"
 

@@ -6,14 +6,57 @@
 # License: MIT License
 #######################################################################
 
+# stdlib
 import codecs
 import copy
 import re
-from . import Sequence, OrderedChoice, Optional, ZeroOrMore, \
-    OneOrMore, UnorderedGroup, EOF, EndOfFile, PTNodeVisitor, \
-    SemanticError, CrossRef, GrammarError, StrMatch, And, Not, Parser, \
-    ParserPython, visit_parse_tree
-from . import RegExMatch as _
+
+# proj
+try:
+    # imports for local pytest
+    from .arpeggio import Sequence          # type: ignore # pragma: no cover
+    from .arpeggio import OrderedChoice     # type: ignore # pragma: no cover
+    from .arpeggio import Optional          # type: ignore # pragma: no cover
+    from .arpeggio import ZeroOrMore        # type: ignore # pragma: no cover
+    from .arpeggio import OneOrMore         # type: ignore # pragma: no cover
+    from .arpeggio import UnorderedGroup    # type: ignore # pragma: no cover
+    from .arpeggio import EOF               # type: ignore # pragma: no cover
+    from .arpeggio import EndOfFile         # type: ignore # pragma: no cover
+    from .arpeggio import PTNodeVisitor     # type: ignore # pragma: no cover
+    from .arpeggio import SemanticError     # type: ignore # pragma: no cover
+    from .arpeggio import CrossRef          # type: ignore # pragma: no cover
+    from .arpeggio import GrammarError      # type: ignore # pragma: no cover
+    from .arpeggio import StrMatch          # type: ignore # pragma: no cover
+    from .arpeggio import And               # type: ignore # pragma: no cover
+    from .arpeggio import Not               # type: ignore # pragma: no cover
+    from .arpeggio import Parser            # type: ignore # pragma: no cover
+    from .arpeggio import ParserPython      # type: ignore # pragma: no cover
+    from .arpeggio import visit_parse_tree  # type: ignore # pragma: no cover
+    from .arpeggio import RegExMatch as _   # type: ignore # pragma: no cover
+
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import Sequence           # type: ignore # pragma: no cover
+    from arpeggio import OrderedChoice      # type: ignore # pragma: no cover
+    from arpeggio import Optional           # type: ignore # pragma: no cover
+    from arpeggio import ZeroOrMore         # type: ignore # pragma: no cover
+    from arpeggio import OneOrMore          # type: ignore # pragma: no cover
+    from arpeggio import UnorderedGroup     # type: ignore # pragma: no cover
+    from arpeggio import EOF                # type: ignore # pragma: no cover
+    from arpeggio import EndOfFile          # type: ignore # pragma: no cover
+    from arpeggio import PTNodeVisitor      # type: ignore # pragma: no cover
+    from arpeggio import SemanticError      # type: ignore # pragma: no cover
+    from arpeggio import CrossRef           # type: ignore # pragma: no cover
+    from arpeggio import GrammarError       # type: ignore # pragma: no cover
+    from arpeggio import StrMatch           # type: ignore # pragma: no cover
+    from arpeggio import And                # type: ignore # pragma: no cover
+    from arpeggio import Not                # type: ignore # pragma: no cover
+    from arpeggio import Parser             # type: ignore # pragma: no cover
+    from arpeggio import ParserPython       # type: ignore # pragma: no cover
+    from arpeggio import visit_parse_tree   # type: ignore # pragma: no cover
+    from arpeggio import RegExMatch as _    # type: ignore # pragma: no cover
+
 
 __all__ = ['ParserPEG']
 
@@ -31,27 +74,60 @@ CLOSE = ")"
 
 
 # PEG syntax rules
-def peggrammar():       return OneOrMore(rule), EOF
-def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
-def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore(prefix)
-def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([OPTIONAL,
-                                                     ZERO_OR_MORE,
-                                                     ONE_OR_MORE,
-                                                     UNORDERED_GROUP])
-def expression():       return [regex, rule_crossref,
-                                (OPEN, ordered_choice, CLOSE),
-                                str_match]
+def peggrammar():
+    return OneOrMore(rule), EOF
+
+
+def rule():
+    return rule_name, LEFT_ARROW, ordered_choice, ";"
+
+
+def ordered_choice():
+    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
+
+
+def sequence():
+    return OneOrMore(prefix)
+
+
+def prefix():
+    return Optional([AND, NOT]), sufix
+
+
+def sufix():
+    return expression, Optional([OPTIONAL,
+                                 ZERO_OR_MORE,
+                                 ONE_OR_MORE,
+                                 UNORDERED_GROUP])
+
+
+def expression():
+    return [regex, rule_crossref,
+            (OPEN, ordered_choice, CLOSE),
+            str_match]
+
 
 # PEG Lexical rules
-def regex():            return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
-                                ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
-def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
-def rule_crossref():    return rule_name
-def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-                                 r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
-def comment():          return "//", _(".*\n")
+def regex():
+    return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
+            ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
+
+
+def rule_name():
+    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
+
+
+def rule_crossref():
+    return rule_name
+
+
+def str_match():
+    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+
+
+def comment():
+    return "//", _(".*\n")
 
 
 # Escape sequences supported in PEG literal string matches
@@ -248,7 +324,7 @@ class ParserPEG(Parser):
             root_rule_name(str): The name of the root rule.
             comment_rule_name(str): The name of the rule for comments.
         """
-        super(ParserPEG, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name
 
@@ -262,7 +338,13 @@ class ParserPEG(Parser):
         # In debug mode export parser model to dot for
         # visualization
         if self.debug:
-            from .export import PMDOTExporter
+            try:
+                # for pytest
+                from .export import PMDOTExporter
+            except ImportError:
+                # for local Doctest
+                from export import PMDOTExporter
+
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(
                 self.parser_model, "{}_peg_parser_model.dot".format(root_rule))

@@ -1,8 +1,17 @@
+# stdlib
 import os
-from ....cleanpeg import ParserPEG
+
+# proj
+try:
+    # imports for local pytest
+    from ....cleanpeg import ParserPEG      # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from cleanpeg import ParserPEG          # type: ignore # pragma: no cover
 
 
-def test_issue_22():
+def test_issue_22() -> None:
     """
     Infinite recursion during resolving of a grammar given in a clean PEG
     notation.

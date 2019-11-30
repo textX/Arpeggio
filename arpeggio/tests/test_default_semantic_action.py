@@ -8,15 +8,39 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
-import pytest  # noqa
-from .. import ParserPython, SemanticAction, ParseTreeNode
-from .. import RegExMatch as _
+# stdlib
+from typing import Any, List
 
-def grammar():      return parentheses, 'strmatch'
-def parentheses():  return '(', rulea, ')'
-def rulea():        return ['+', '-'], number
-def number():       return _(r'\d+')
+# proj
+try:
+    # imports for local pytest
+    from ..arpeggio import ParserPython    # type: ignore # pragma: no cover
+    from ..peg_semantic_actions import SemanticAction      # type: ignore # pragma: no cover
+    from ..arpeggio import ParseTreeNode       # type: ignore # pragma: no cover
+    from ..arpeggio import RegExMatch as _     # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import ParserPython    # type: ignore # pragma: no cover
+    from peg_semantic_actions import SemanticAction      # type: ignore # pragma: no cover
+    from arpeggio import ParseTreeNode       # type: ignore # pragma: no cover
+    from arpeggio import RegExMatch as _     # type: ignore # pragma: no cover
+
+
+def grammar() -> Any:
+    return parentheses, 'strmatch'
+
+
+def parentheses() -> Any:
+    return '(', rulea, ')'
+
+
+def rulea() -> Any:
+    return ['+', '-'], number
+
+
+def number() -> Any:
+    return _(r'\d+')
 
 
 p_removed = False
@@ -25,7 +49,7 @@ parse_tree_node = False
 
 
 class ParenthesesSA(SemanticAction):
-    def first_pass(self, parser, node, children):
+    def first_pass(self, parser: ParserPython, node: ParseTreeNode, children: List[Any]) -> Any:
         global p_removed, parse_tree_node
         p_removed = str(children[0]) != '('
         parse_tree_node = isinstance(children[0], ParseTreeNode)
@@ -33,17 +57,19 @@ class ParenthesesSA(SemanticAction):
 
 
 class RuleSA(SemanticAction):
-    def first_pass(self, parser, node, children):
+    def first_pass(self, parser: ParserPython, node: ParseTreeNode, children: List[Any]) -> Any:
         global number_str
         number_str = type(children[1]) == str
         return children[1]
 
 
-parentheses.sem = ParenthesesSA()
-rulea.sem = RuleSA()
+# noinspection PyTypeHints
+parentheses.sem = ParenthesesSA()   # type: ignore
+# noinspection PyTypeHints
+rulea.sem = RuleSA()                # type: ignore
 
 
-def test_default_action_enabled():
+def test_default_action_enabled() -> None:
 
     parser = ParserPython(grammar)
 
@@ -56,7 +82,7 @@ def test_default_action_enabled():
     assert not parse_tree_node
 
 
-def test_default_action_disabled():
+def test_default_action_disabled() -> None:
 
     parser = ParserPython(grammar)
 

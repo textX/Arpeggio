@@ -1,7 +1,19 @@
-import pytest
-from ....cleanpeg import ParserPEG
+# stdlib
+from typing import Any, List
 
-input = """\
+# proj
+try:
+    # imports for local pytest
+    from ....arpeggio import ParseTreeNode  # type: ignore # pragma: no cover
+    from ....cleanpeg import ParserPEG      # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import ParseTreeNode      # type: ignore # pragma: no cover
+    from cleanpeg import ParserPEG          # type: ignore # pragma: no cover
+
+
+parser_input = """\
 <?php
 class Enum {
     protected $self = array();
@@ -60,7 +72,7 @@ ws = r'[\s]+'
 """
 
 
-def argument(parser, node, children):
+def argument(parser: ParserPEG, node: ParseTreeNode, children: List[Any]) -> Any:
     """
     Removes parenthesis if exists and returns what was contained inside.
     """
@@ -74,13 +86,16 @@ def argument(parser, node, children):
 
     return sign * children[-1]
 
+
 # Rules are mapped to semantic actions
-sem_actions = {
-    "argument": argument,
-}
+sem_actions = {"argument": argument}
 
 
-def test_issue_16():
+def test_issue_16() -> None:
+    """
+    >>> test_issue_16()
+
+    """
 
     parser = ParserPEG(grammar, "calc", skipws=False)
 
@@ -89,5 +104,4 @@ def test_issue_16():
 
     # Do semantic analysis. Do not use default actions.
     asg = parser.getASG(sem_actions=sem_actions, defaults=False)
-
     assert asg

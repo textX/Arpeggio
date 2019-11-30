@@ -7,10 +7,25 @@
 # License: MIT License
 #######################################################################
 
-# Grammar
-from .... import ParserPython, Optional, EOF
+# stdlib
+from typing import Any, Tuple
 
-def g():    return [Optional('first'), Optional('second'), Optional('third')], EOF
+
+try:
+    # for pytest
+    from ....arpeggio import ParserPython
+    from ....arpeggio import Optional
+    from ....arpeggio import EOF
+except ImportError:
+    # for local Doctest
+    from arpeggio import ParserPython
+    from arpeggio import Optional
+    from arpeggio import EOF
+
+
+# Grammar
+def g() -> Tuple[Any, ...]:
+    return [Optional('first'), Optional('second'), Optional('third')], EOF
 
 
 def test_optional_in_choice():

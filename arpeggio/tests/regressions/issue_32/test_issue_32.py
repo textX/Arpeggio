@@ -2,17 +2,28 @@
 # cleanpeg grammars are properly converted, and ensure that escaping of those
 # sequences works as well.
 
+# stdlib
+import pytest   # type: ignore
 import re
 import sys
 
-import pytest
+# proj
+try:
+    # imports for local pytest
+    from .... import arpeggio                               # type: ignore # pragma: no cover
+    from ....arpeggio import *                              # type: ignore # pragma: no cover
+    from ....cleanpeg import ParserPEG as ParserCleanPEG    # type: ignore # pragma: no cover
+    from ....peg import ParserPEG                           # type: ignore # pragma: no cover
+except ImportError:                                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    import arpeggio                                         # type: ignore # pragma: no cover
+    from arpeggio import *                                  # type: ignore # pragma: no cover
+    from cleanpeg import ParserPEG as ParserCleanPEG        # type: ignore # pragma: no cover
+    from peg import ParserPEG                               # type: ignore # pragma: no cover
 
-from .... import *
-from ....cleanpeg import ParserPEG as ParserCleanPEG
-from ....peg import ParserPEG
 
-
-def check_parser(grammar, text):
+def check_parser(grammar: str, text: str) -> bool:
     """Test that the PEG parsers correctly parse a grammar and match the given
     text. Test both the peg and cleanpeg parsers. Raise an exception if the
     grammar parse failed, and returns False if the match fails. Otherwise,
@@ -36,7 +47,7 @@ def check_parser(grammar, text):
     return True
 
 
-def check_regex(grammar, text):
+def check_regex(grammar: str, text: str) -> bool:
     """Before calling check_parser(), verify that the regular expression
     given in ``grammar`` matches ``text``. Only works for single regexs.
     """
@@ -47,7 +58,7 @@ def check_regex(grammar, text):
 
 # ==== Make sure things are working as expected. ====
 
-def test_harness():
+def test_harness() -> None:
     assert check_parser(r"'x'", 'x')
     with pytest.raises(arpeggio.NoMatch):
         check_parser(r"'x'", 'y')
@@ -62,7 +73,7 @@ def test_harness():
 
 # ---- string literal quoting ----
 
-def test_literal_quoting_1():
+def test_literal_quoting_1() -> None:
     # this happens to work in 25dae48 if there are no subsequent single quotes
     # in the grammar:
     assert check_parser(r"'\\'", '\\')
@@ -70,13 +81,13 @@ def test_literal_quoting_1():
     assert check_parser(r"""  '\\' 'x'  """, '\\x')
 
 
-def test_literal_quoting_2():
+def test_literal_quoting_2() -> None:
     # this grammar should fail to parse, but passes on 25dae48:
     with pytest.raises(arpeggio.NoMatch):
         check_parser(r"""  '\\'x'  """, r"\'x")
 
 
-def test_literal_quoting_3():
+def test_literal_quoting_3() -> None:
     # escaping double quotes within double-quoted strings was not implemented
     # in 25dae48:
     assert check_parser(r'''  "x\"y"  ''', 'x"y')
@@ -84,17 +95,17 @@ def test_literal_quoting_3():
 
 # ---- now repeat the above section with single and double quotes swapped ----
 
-def test_literal_quoting_4():
+def test_literal_quoting_4() -> None:
     assert check_parser(r'"\\"', '\\')
     assert check_parser(r'''  "\\" "x"  ''', '\\x')
 
 
-def test_literal_quoting_5():
+def test_literal_quoting_5() -> None:
     with pytest.raises(arpeggio.NoMatch):
         check_parser(r'''  "\\"x"  ''', r'\"x')
 
 
-def test_literal_quoting_6():
+def test_literal_quoting_6() -> None:
     assert check_parser(r"""  'x\'y'  """, "x'y")
 
 
@@ -117,43 +128,43 @@ def test_literal_quoting_6():
 #
 # [1] https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals
 
-def test_regex_quoting_1():
+def test_regex_quoting_1() -> None:
     assert check_regex(r"r'\\'", '\\')
     assert check_regex(r'r"\\"', '\\')
     assert check_parser(r"""  r'\\' r'x'  """, '\\x')
     assert check_parser(r'''  r"\\" r"x"  ''', '\\x')
 
 
-def test_regex_quoting_2():
+def test_regex_quoting_2() -> None:
     with pytest.raises(arpeggio.NoMatch):
         check_parser(r"""  r'\\' '  """, "\\' ")
     with pytest.raises(arpeggio.NoMatch):
         check_parser(r'''  r"\\" "  ''', '\\" ')
 
 
-def test_regex_quoting_3():
+def test_regex_quoting_3() -> None:
     assert check_regex(r"""  r'x\'y'  """, "x'y")
     assert check_regex(r'''  r"x\"y"  ''', 'x"y')
 
 
 # ---- string literal escape sequence translation ----
 
-def test_broken_escape_translation():
+def test_broken_escape_translation() -> None:
     # 25dae48 would translate this as 'newline-newline', not 'backslash-n-newline'.
     assert check_parser(r"'\\n\n'", '\\n\n')
     assert check_parser(r"'\\t\t'", '\\t\t')
 
 
-def test_multiple_backslash_sequences():
-    assert check_parser(r"'\\n'",    '\\n')    # backslash-n
-    assert check_parser(r"'\\\n'",   '\\\n')   # backslash-newline
-    assert check_parser(r"'\\\\n'",  '\\\\n')  # backslash-backslash-n
-    assert check_parser(r"'\\\\\n'", '\\\\\n') # backslash-backslash-newline
+def test_multiple_backslash_sequences() -> None:
+    assert check_parser(r"'\\n'",    '\\n')     # backslash-n
+    assert check_parser(r"'\\\n'",   '\\\n')    # backslash-newline
+    assert check_parser(r"'\\\\n'",  '\\\\n')   # backslash-backslash-n
+    assert check_parser(r"'\\\\\n'", '\\\\\n')  # backslash-backslash-newline
 
 
 # ==== Check newly-implemented escape sequences ====
 
-def test_single_character_escapes():
+def test_single_character_escapes() -> None:
     # make sure parsing across newlines works, otherwise the following
     # backslash-newline test won't work:
     assert check_parser(" \n 'x' \n ", 'x')
@@ -180,14 +191,14 @@ match'  """, 'extremely_long_match')
     assert check_parser(r"'\x'", '\\x')
 
 
-def test_octal_escapes():
+def test_octal_escapes() -> None:
     assert check_parser(r"'\7'",    '\7')
     assert check_parser(r"'\41'",   '!')
     assert check_parser(r"'\101'",  'A')
     assert check_parser(r"'\1001'", '@1')  # too long
 
 
-def test_hexadecimal_escapes():
+def test_hexadecimal_escapes() -> None:
     assert check_parser(r"'\x41'",  'A')
     assert check_parser(r"'\x4A'",  'J')
     assert check_parser(r"'\x4a'",  'J')
@@ -196,7 +207,7 @@ def test_hexadecimal_escapes():
     assert check_parser(r"'\x411'", 'A1')     # too long
 
 
-def test_small_u_unicode_escapes():
+def test_small_u_unicode_escapes() -> None:
     assert check_parser(r"'\u0041'", 'A')
     assert check_parser(r"'\u004A'", 'J')
     assert check_parser(r"'\u004a'", 'J')
@@ -207,7 +218,7 @@ def test_small_u_unicode_escapes():
     assert check_parser(r"'\u00411'", 'A1')      # too long
 
 
-def test_big_u_unicode_escapes():
+def test_big_u_unicode_escapes() -> None:
     assert check_parser(r"'\U00000041'", 'A')
     assert check_parser(r"'\U0000004A'", 'J')
     assert check_parser(r"'\U0000004a'", 'J')
@@ -224,7 +235,7 @@ def test_big_u_unicode_escapes():
         check_parser(r"'\U00110000'", '?')  # out-of-range
 
 
-def test_unicode_name_escapes():
+def test_unicode_name_escapes() -> None:
     assert check_parser(r"'\N{LATIN SMALL LETTER B}'", 'b')
 
     if sys.version_info >= (3, 3):

@@ -8,19 +8,40 @@
 # License: MIT License
 #######################################################################
 
-import pytest
-from .. import ParserPython, ZeroOrMore, OneOrMore, NonTerminal, \
-    Terminal, NoMatch, Combine
+# stdlib
+import pytest   # type: ignore
+from typing import Any
+
+# proj
+try:
+    # imports for local pytest
+    from ..arpeggio import ParserPython    # type: ignore # pragma: no cover
+    from ..arpeggio import ZeroOrMore      # type: ignore # pragma: no cover
+    from ..arpeggio import OneOrMore       # type: ignore # pragma: no cover
+    from ..arpeggio import NonTerminal     # type: ignore # pragma: no cover
+    from ..arpeggio import Terminal        # type: ignore # pragma: no cover
+    from ..arpeggio import NoMatch         # type: ignore # pragma: no cover
+    from ..arpeggio import Combine         # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import ParserPython       # type: ignore # pragma: no cover
+    from arpeggio import ZeroOrMore         # type: ignore # pragma: no cover
+    from arpeggio import OneOrMore          # type: ignore # pragma: no cover
+    from arpeggio import NonTerminal        # type: ignore # pragma: no cover
+    from arpeggio import Terminal           # type: ignore # pragma: no cover
+    from arpeggio import NoMatch            # type: ignore # pragma: no cover
+    from arpeggio import Combine            # type: ignore # pragma: no cover
 
 
-def test_combine_python():
+def test_combine_python() -> None:
 
     # This will result in NonTerminal node
-    def root():
+    def root() -> Any:
         return my_rule(), "."
 
     # This will result in Terminal node
-    def my_rule():
+    def my_rule() -> Any:
         return Combine(ZeroOrMore("a"), OneOrMore("b"))
 
     parser = ParserPython(root)

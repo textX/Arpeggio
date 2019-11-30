@@ -1,14 +1,32 @@
-import pytest  # noqa
+# stdlib
+from typing import Any
 
-# Grammar
-from .. import ZeroOrMore, OneOrMore, ParserPython, EOF
+# proj
+try:
+    # imports for local pytest
+    from ..arpeggio import ZeroOrMore      # type: ignore # pragma: no cover
+    from ..arpeggio import OneOrMore       # type: ignore # pragma: no cover
+    from ..arpeggio import ParserPython    # type: ignore # pragma: no cover
+    from ..arpeggio import EOF             # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import ZeroOrMore         # type: ignore # pragma: no cover
+    from arpeggio import OneOrMore          # type: ignore # pragma: no cover
+    from arpeggio import ParserPython       # type: ignore # pragma: no cover
+    from arpeggio import EOF                # type: ignore # pragma: no cover
 
 
-def test_zeroormore_eolterm():
+def test_zeroormore_eolterm() -> None:
 
-    def grammar():      return first, second, EOF
-    def first():        return ZeroOrMore(["a", "b"], eolterm=True)
-    def second():       return "a"
+    def grammar() -> Any:
+        return first, second, EOF
+
+    def first() -> Any:
+        return ZeroOrMore(["a", "b"], eolterm=True)
+
+    def second() -> Any:
+        return "a"
 
     # first rule should match only first line
     # so that second rule will match "a" on the new line
@@ -21,11 +39,16 @@ def test_zeroormore_eolterm():
     assert result
 
 
-def test_oneormore_eolterm():
+def test_oneormore_eolterm() -> None:
 
-    def grammar():      return first, second, EOF
-    def first():        return OneOrMore(["a", "b"], eolterm=True)
-    def second():       return "a"
+    def grammar() -> Any:
+        return first, second, EOF
+
+    def first() -> Any:
+        return OneOrMore(["a", "b"], eolterm=True)
+
+    def second() -> Any:
+        return "a"
 
     # first rule should match only first line
     # so that second rule will match "a" on the new line

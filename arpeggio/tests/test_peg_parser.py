@@ -6,9 +6,23 @@
 # License: MIT License
 #######################################################################
 import pytest  # noqa
-from .. import Sequence, NonTerminal, NoMatch
-from ..peg import ParserPEG
-from ..cleanpeg import ParserPEG as ParserPEGClean
+
+# proj
+try:
+    # imports for local pytest
+    from ..arpeggio import Sequence                     # type: ignore # pragma: no cover
+    from ..arpeggio import NonTerminal                  # type: ignore # pragma: no cover
+    from ..arpeggio import NoMatch                      # type: ignore # pragma: no cover
+    from ..peg import ParserPEG                         # type: ignore # pragma: no cover
+    from ..cleanpeg import ParserPEG as ParserPEGClean  # type: ignore # pragma: no cover
+except ImportError:                                     # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import Sequence                       # type: ignore # pragma: no cover
+    from arpeggio import NonTerminal                    # type: ignore # pragma: no cover
+    from arpeggio import NoMatch                        # type: ignore # pragma: no cover
+    from peg import ParserPEG                           # type: ignore # pragma: no cover
+    from cleanpeg import ParserPEG as ParserPEGClean    # type: ignore # pragma: no cover
 
 grammar = r'''
     // This is a comment

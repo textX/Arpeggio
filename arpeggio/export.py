@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: export.py
 # Purpose: Export support for arpeggio
@@ -7,9 +6,17 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
+# stdlib
 import io
-from . import Terminal
+
+# proj
+try:
+    # imports for local pytest
+    from .arpeggio import Terminal  # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import Terminal      # type: ignore # pragma: no cover
 
 
 class Exporter(object):

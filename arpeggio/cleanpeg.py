@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: cleanpeg.py
 # Purpose: This module is a variation of the original peg.py.
@@ -9,13 +8,32 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import print_function, unicode_literals
+try:
+    # imports for local pytest
+    from .arpeggio import Optional                  # type: ignore # pragma: no cover
+    from .arpeggio import OneOrMore                 # type: ignore # pragma: no cover
+    from .arpeggio import ZeroOrMore                # type: ignore # pragma: no cover
+    from .arpeggio import Not                       # type: ignore # pragma: no cover
+    from .arpeggio import EOF                       # type: ignore # pragma: no cover
+    from .arpeggio import ParserPython              # type: ignore # pragma: no cover
+    from .arpeggio import visit_parse_tree          # type: ignore # pragma: no cover
+    from .arpeggio import RegExMatch as _           # type: ignore # pragma: no cover
+    from .peg import PEGVisitor                     # type: ignore # pragma: no cover
+    from .peg import ParserPEG as ParserPEGOrig     # type: ignore # pragma: no cover
+except ImportError:                                 # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import Optional                   # type: ignore # pragma: no cover
+    from arpeggio import OneOrMore                  # type: ignore # pragma: no cover
+    from arpeggio import ZeroOrMore                 # type: ignore # pragma: no cover
+    from arpeggio import Not                        # type: ignore # pragma: no cover
+    from arpeggio import EOF                        # type: ignore # pragma: no cover
+    from arpeggio import ParserPython               # type: ignore # pragma: no cover
+    from arpeggio import visit_parse_tree           # type: ignore # pragma: no cover
+    from arpeggio import RegExMatch as _           # type: ignore # pragma: no cover
+    from peg import PEGVisitor                      # type: ignore # pragma: no cover
+    from peg import ParserPEG as ParserPEGOrig      # type: ignore # pragma: no cover
 
-from . import Optional, ZeroOrMore, Not, OneOrMore, EOF, ParserPython, \
-    visit_parse_tree
-from . import RegExMatch as _
-from .peg import PEGVisitor
-from .peg import ParserPEG as ParserPEGOrig
 
 __all__ = ['ParserPEG']
 
@@ -31,28 +49,62 @@ NOT = "!"
 OPEN = "("
 CLOSE = ")"
 
+
 # PEG syntax rules
-def peggrammar():       return OneOrMore(rule), EOF
-def rule():             return rule_name, ASSIGNMENT, ordered_choice
-def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore(prefix)
-def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([OPTIONAL,
-                                                     ZERO_OR_MORE,
-                                                     ONE_OR_MORE,
-                                                     UNORDERED_GROUP])
-def expression():       return [regex, rule_crossref,
-                                (OPEN, ordered_choice, CLOSE),
-                                str_match], Not(ASSIGNMENT)
+def peggrammar():
+    return OneOrMore(rule), EOF
+
+
+def rule():
+    return rule_name, ASSIGNMENT, ordered_choice
+
+
+def ordered_choice():
+    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
+
+
+def sequence():
+    return OneOrMore(prefix)
+
+
+def prefix():
+    return Optional([AND, NOT]), sufix
+
+
+def sufix():
+    return expression, Optional([OPTIONAL,
+                                 ZERO_OR_MORE,
+                                 ONE_OR_MORE,
+                                 UNORDERED_GROUP])
+
+
+def expression():
+    return [regex, rule_crossref,
+            (OPEN, ordered_choice, CLOSE),
+            str_match], Not(ASSIGNMENT)
+
 
 # PEG Lexical rules
-def regex():            return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
-                                ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
-def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
-def rule_crossref():    return rule_name
-def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-                                 r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
-def comment():          return "//", _(".*\n")
+def regex():
+    return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
+            ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
+
+
+def rule_name():
+    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
+
+
+def rule_crossref():
+    return rule_name
+
+
+def str_match():
+    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+
+
+def comment():
+    return "//", _(".*\n")
 
 
 class ParserPEG(ParserPEGOrig):

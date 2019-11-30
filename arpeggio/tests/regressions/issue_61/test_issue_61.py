@@ -1,9 +1,27 @@
-import pytest
-from .... import ParserPython, ZeroOrMore, Sequence, OrderedChoice, \
-    EOF, NoMatch
+# stdlib
+import pytest   # type: ignore
+
+# proj
+try:
+    # imports for local pytest
+    from ....arpeggio import ParserPython   # type: ignore # pragma: no cover
+    from ....arpeggio import ZeroOrMore     # type: ignore # pragma: no cover
+    from ....arpeggio import Sequence       # type: ignore # pragma: no cover
+    from ....arpeggio import OrderedChoice  # type: ignore # pragma: no cover
+    from ....arpeggio import EOF            # type: ignore # pragma: no cover
+    from ....arpeggio import NoMatch        # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    from arpeggio import ParserPython       # type: ignore # pragma: no cover
+    from arpeggio import ZeroOrMore         # type: ignore # pragma: no cover
+    from arpeggio import Sequence           # type: ignore # pragma: no cover
+    from arpeggio import OrderedChoice      # type: ignore # pragma: no cover
+    from arpeggio import EOF                # type: ignore # pragma: no cover
+    from arpeggio import NoMatch            # type: ignore # pragma: no cover
 
 
-def test_ordered_choice_skipws_ws():
+def test_ordered_choice_skipws_ws() -> None:
 
     # Both rules will skip white-spaces
     def sentence():
@@ -28,6 +46,7 @@ def test_ordered_choice_skipws_ws():
     assert len(tree) == 4
     tree = parser.parse("idid .")
     assert len(tree) == 4
+
 
     # Now we change skipws flag
     def word():  # noqa

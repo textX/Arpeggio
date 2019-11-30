@@ -8,7 +8,6 @@ from typing import List
 try:
     # imports for local pytest
     from .peg_nodes import *                    # type: ignore # pragma: no cover
-
 except ImportError:                             # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences

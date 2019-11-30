@@ -20,7 +20,6 @@ import types
 try:
     # imports for local pytest
     from .peg_expressions import *              # type: ignore # pragma: no cover
-    from .peg_helpers import *                  # type: ignore # pragma: no cover
     from .peg_nodes import *                    # type: ignore # pragma: no cover
     from .peg_semantic_actions import *         # type: ignore # pragma: no cover
 
@@ -28,7 +27,6 @@ except ImportError:                             # type: ignore # pragma: no cove
     # imports for doctest
     # noinspection PyUnresolvedReferences
     from peg_expressions import *               # type: ignore # pragma: no cover
-    from peg_helpers import *                   # type: ignore # pragma: no cover
     from peg_nodes import *                     # type: ignore # pragma: no cover
     from peg_semantic_actions import *          # type: ignore # pragma: no cover
 

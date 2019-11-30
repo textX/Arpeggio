@@ -14,47 +14,13 @@ import re
 # proj
 try:
     # imports for local pytest
-    from .arpeggio import Sequence          # type: ignore # pragma: no cover
-    from .arpeggio import OrderedChoice     # type: ignore # pragma: no cover
-    from .arpeggio import Optional          # type: ignore # pragma: no cover
-    from .arpeggio import ZeroOrMore        # type: ignore # pragma: no cover
-    from .arpeggio import OneOrMore         # type: ignore # pragma: no cover
-    from .arpeggio import UnorderedGroup    # type: ignore # pragma: no cover
-    from .arpeggio import EOF               # type: ignore # pragma: no cover
-    from .arpeggio import EndOfFile         # type: ignore # pragma: no cover
-    from .arpeggio import PTNodeVisitor     # type: ignore # pragma: no cover
-    from .arpeggio import SemanticError     # type: ignore # pragma: no cover
-    from .arpeggio import CrossRef          # type: ignore # pragma: no cover
-    from .arpeggio import GrammarError      # type: ignore # pragma: no cover
-    from .arpeggio import StrMatch          # type: ignore # pragma: no cover
-    from .arpeggio import And               # type: ignore # pragma: no cover
-    from .arpeggio import Not               # type: ignore # pragma: no cover
-    from .arpeggio import Parser            # type: ignore # pragma: no cover
-    from .arpeggio import ParserPython      # type: ignore # pragma: no cover
-    from .arpeggio import visit_parse_tree  # type: ignore # pragma: no cover
+    from .arpeggio import *                 # type: ignore # pragma: no cover
     from .arpeggio import RegExMatch as _   # type: ignore # pragma: no cover
 
 except ImportError:                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from arpeggio import Sequence           # type: ignore # pragma: no cover
-    from arpeggio import OrderedChoice      # type: ignore # pragma: no cover
-    from arpeggio import Optional           # type: ignore # pragma: no cover
-    from arpeggio import ZeroOrMore         # type: ignore # pragma: no cover
-    from arpeggio import OneOrMore          # type: ignore # pragma: no cover
-    from arpeggio import UnorderedGroup     # type: ignore # pragma: no cover
-    from arpeggio import EOF                # type: ignore # pragma: no cover
-    from arpeggio import EndOfFile          # type: ignore # pragma: no cover
-    from arpeggio import PTNodeVisitor      # type: ignore # pragma: no cover
-    from arpeggio import SemanticError      # type: ignore # pragma: no cover
-    from arpeggio import CrossRef           # type: ignore # pragma: no cover
-    from arpeggio import GrammarError       # type: ignore # pragma: no cover
-    from arpeggio import StrMatch           # type: ignore # pragma: no cover
-    from arpeggio import And                # type: ignore # pragma: no cover
-    from arpeggio import Not                # type: ignore # pragma: no cover
-    from arpeggio import Parser             # type: ignore # pragma: no cover
-    from arpeggio import ParserPython       # type: ignore # pragma: no cover
-    from arpeggio import visit_parse_tree   # type: ignore # pragma: no cover
+    from arpeggio import *                  # type: ignore # pragma: no cover
     from arpeggio import RegExMatch as _    # type: ignore # pragma: no cover
 
 

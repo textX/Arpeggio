@@ -10,26 +10,14 @@
 
 try:
     # imports for local pytest
-    from .arpeggio import Optional                  # type: ignore # pragma: no cover
-    from .arpeggio import OneOrMore                 # type: ignore # pragma: no cover
-    from .arpeggio import ZeroOrMore                # type: ignore # pragma: no cover
-    from .arpeggio import Not                       # type: ignore # pragma: no cover
-    from .arpeggio import EOF                       # type: ignore # pragma: no cover
-    from .arpeggio import ParserPython              # type: ignore # pragma: no cover
-    from .arpeggio import visit_parse_tree          # type: ignore # pragma: no cover
+    from .arpeggio import *                         # type: ignore # pragma: no cover
     from .arpeggio import RegExMatch as _           # type: ignore # pragma: no cover
     from .peg import PEGVisitor                     # type: ignore # pragma: no cover
     from .peg import ParserPEG as ParserPEGOrig     # type: ignore # pragma: no cover
 except ImportError:                                 # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from arpeggio import Optional                   # type: ignore # pragma: no cover
-    from arpeggio import OneOrMore                  # type: ignore # pragma: no cover
-    from arpeggio import ZeroOrMore                 # type: ignore # pragma: no cover
-    from arpeggio import Not                        # type: ignore # pragma: no cover
-    from arpeggio import EOF                        # type: ignore # pragma: no cover
-    from arpeggio import ParserPython               # type: ignore # pragma: no cover
-    from arpeggio import visit_parse_tree           # type: ignore # pragma: no cover
+    from arpeggio import *                          # type: ignore # pragma: no cover
     from arpeggio import RegExMatch as _           # type: ignore # pragma: no cover
     from peg import PEGVisitor                      # type: ignore # pragma: no cover
     from peg import ParserPEG as ParserPEGOrig      # type: ignore # pragma: no cover

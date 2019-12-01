@@ -1,4 +1,5 @@
 # stdlib
+import abc
 import bisect
 import codecs
 import re
@@ -23,7 +24,7 @@ except ImportError:                         # type: ignore # pragma: no cover
     import peg_utils                        # type: ignore # pragma: no cover
 
 
-class Parser(peg_utils.DebugPrinter):
+class Parser(peg_utils.DebugPrinter, abc.ABC):
     """
     Abstract base class for all parsers.
 
@@ -82,8 +83,8 @@ class Parser(peg_utils.DebugPrinter):
         self.memoization = memoization
         self.comments_model = None
         self.comments: List[peg_nodes.ParseTreeNode] = []
-        self.comment_positions: Dict[int, int] = {}
-        self.sem_actions: Dict[Any, Any] = {}                           # Dict [rule_name] = Semantic Action  ToDo: narrow down typing
+        self.comment_positions: Dict[int, int] = dict()
+        self.sem_actions: Dict[Any, Any] = dict()                           # Dict [rule_name] = Semantic Action  ToDo: narrow down typing
         self.parse_tree = None
 
         # Create regex used for autokwd matching
@@ -134,7 +135,12 @@ class Parser(peg_utils.DebugPrinter):
         else:
             self._ws = self._real_ws
 
-    def parse(self, _input, file_name=None):
+    @abc.abstractmethod
+    def _parse(self):
+        """ actual implementation of the parser"""
+        pass
+
+    def parse(self, _input: str, file_name=None):
         """
         Parses input and produces parse tree.
 
@@ -143,14 +149,14 @@ class Parser(peg_utils.DebugPrinter):
             file_name(str): If input is loaded from file this can be
                 set to file name. It is used in error messages.
         """
-        self.position = 0  # Input position
-        self.nm = None  # Last NoMatch exception
-        self.line_ends = []
-        self.input = _input
+        self.position: int = 0      # Input position
+        self.nm = None              # Last NoMatch exception
+        self.line_ends: List[int] = list()
+        self.input: str = _input
         self.file_name = file_name
-        self.comment_positions = {}
-        self.cache_hits = 0
-        self.cache_misses = 0
+        self.comment_positions = dict()
+        self.cache_hits: int = 0
+        self.cache_misses: int = 0
         try:
             self.parse_tree = self._parse()
         except peg_expressions.NoMatch as e:

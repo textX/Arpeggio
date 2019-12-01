@@ -1,10 +1,11 @@
 # stdlib
+import abc
 import sys
 
 
-class DebugPrinter(object):
+class DebugPrinter(abc.ABC):
     """
-    Mixin class for adding debug print support.
+    Mixin Metaclass for adding debug print support.
 
     Attributes:
         debug (bool): If true debugging messages will be printed.

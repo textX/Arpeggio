@@ -62,6 +62,7 @@ def rule_crossref():
 
 
 def str_match():
+    """ matches single quoted or double quoted strings """
     return peg_expressions.RegExMatch(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
                                       r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 

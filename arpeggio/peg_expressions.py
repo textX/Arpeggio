@@ -1,23 +1,24 @@
 # Parser Model (PEG Abstract Semantic Graph) elements
 
 # stdlib
+import abc
 import re
-from typing import List
+from typing import List, Union
 
 # proj
 try:
     # imports for local pytest
-    from . import peg_nodes                    # type: ignore # pragma: no cover
+    from . import peg_nodes                     # type: ignore # pragma: no cover
 except ImportError:                             # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    import peg_nodes                     # type: ignore # pragma: no cover
+    import peg_nodes                            # type: ignore # pragma: no cover
 
 
 NOMATCH_MARKER = 0
 
 
-class ParsingExpression(object):
+class ParsingExpression(abc.ABC):
     """
     An abstract class for all parsing expressions.
     Represents the node of the Parser Model.
@@ -91,6 +92,11 @@ class ParsingExpression(object):
                 processed.add(node)
                 node._clear_cache(processed)
 
+    @abc.abstractmethod
+    def _parse(self, parser):
+        """ actual implementation of the parser"""
+        pass
+
     def parse(self, parser):
 
         if parser.debug:
@@ -138,6 +144,8 @@ class ParsingExpression(object):
         # the new last.
         last_pexpression = parser.last_pexpression
         parser.last_pexpression = self
+
+        previous_root_rule_name = None
 
         if self.rule_name:
             # If we are entering root rule
@@ -215,6 +223,8 @@ class NoMatch(Exception):
         self.rules = rules
         self.position = position
         self.parser = parser
+        self.line: Union[int, None] = None
+        self.col: Union[int, None] = None
 
     def __str__(self) -> str:
         def rule_to_exp_str(rule) -> str:
@@ -856,9 +866,16 @@ class EndOfFile(Match):
     """
     The Match class that will succeed in case end of input is reached.
 
-    >>> import arpeggio
-
-
+    >>> try:
+    ...     from . import parser_python
+    ...     from . import peg_lexical
+    ... except ImportError:
+    ...     import parser_python
+    ...     import peg_lexical
+    >>> def some_string():
+    ...    return peg_lexical.str_match()
+    >>> parser = parser_python.ParserPython(some_string)
+    >>> peg_tree = parser.parse('"test"')
 
     """
     def __init__(self):

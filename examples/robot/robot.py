@@ -18,20 +18,40 @@
 #        right
 #    end
 #######################################################################
-from __future__ import print_function, unicode_literals
 
 import os
-from arpeggio import ZeroOrMore, EOF, PTNodeVisitor, ParserPython, \
-    visit_parse_tree
-from arpeggio.export import PMDOTExporter, PTDOTExporter
+from arpeggio import ZeroOrMore
+from arpeggio import EOF
+from arpeggio import PTNodeVisitor
+from arpeggio import ParserPython
+from arpeggio import visit_parse_tree
+from arpeggio.export import PMDOTExporter
+from arpeggio.export import PTDOTExporter
+
 
 # Grammar rules
-def robot():      return 'begin', ZeroOrMore(command), 'end', EOF
-def command():      return [UP, DOWN, LEFT, RIGHT]
-def UP():           return 'up'
-def DOWN():         return 'down'
-def LEFT():         return 'left'
-def RIGHT():        return 'right'
+def robot():
+    return 'begin', ZeroOrMore(command), 'end', EOF
+
+
+def command():
+    return [UP, DOWN, LEFT, RIGHT]
+
+
+def UP():
+    return 'up'
+
+
+def DOWN():
+    return 'down'
+
+
+def LEFT():
+    return 'left'
+
+
+def RIGHT():
+    return 'right'
 
 
 # Semantic actions visitor

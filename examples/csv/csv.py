@@ -6,18 +6,34 @@
 # License: MIT License
 ##############################################################################
 
-from __future__ import unicode_literals
 import pprint
 import os
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
-def record():                   return field, ZeroOrMore(",", field)
-def field():                    return [quoted_field, field_content]
-def quoted_field():             return '"', field_content_quoted, '"'
-def field_content():            return _(r'([^,\n])+')
-def field_content_quoted():     return _(r'(("")|([^"]))+')
-def csvfile():                  return OneOrMore([record, '\n']), EOF
+
+def record():
+    return field, ZeroOrMore(",", field)
+
+
+def field():
+    return [quoted_field, field_content]
+
+
+def quoted_field():
+    return '"', field_content_quoted, '"'
+
+
+def field_content():
+    return _(r'([^,\n])+')
+
+
+def field_content_quoted():
+    return _(r'(("")|([^"]))+')
+
+
+def csvfile():
+    return OneOrMore([record, '\n']), EOF
 
 
 class CSVVisitor(PTNodeVisitor):
@@ -42,7 +58,6 @@ class CSVVisitor(PTNodeVisitor):
         return [x for x in children if x!='\n']
 
 
-
 def main(debug=False):
     # First we will make a parser - an instance of the CVS parser model.
     # Parser model is given in the form of python constructs therefore we
@@ -62,9 +77,9 @@ def main(debug=False):
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(csv_content)
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

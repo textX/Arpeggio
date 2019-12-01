@@ -17,7 +17,7 @@ except ImportError:                                         # type: ignore # pra
     # noinspection PyUnresolvedReferences
     from arpeggio import *                                  # type: ignore # pragma: no cover
     from arpeggio import RegExMatch as _                    # type: ignore # pragma: no cover
-    from ..export import PTDOTExporter                      # type: ignore # pragma: no cover
+    from export import PTDOTExporter                        # type: ignore # pragma: no cover
 
 
 def grammar():

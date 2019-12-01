@@ -48,7 +48,7 @@ class PEGVisitor(visitor_base.PTNodeVisitor):
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,
                  *args, **kwargs):
-        super(PEGVisitor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name
         self.ignore_case = ignore_case
@@ -131,14 +131,16 @@ class PEGVisitor(visitor_base.PTNodeVisitor):
         self.peg_rules[rule_name] = retval
         return retval
 
-    def visit_sequence(self, node, children):
+    @staticmethod
+    def visit_sequence(node, children):
         if len(children) > 1:
             return peg_expressions.Sequence(nodes=children[:])
         else:
             # If only one child rule exists reduce.
             return children[0]
 
-    def visit_ordered_choice(self, node, children):
+    @staticmethod
+    def visit_ordered_choice(node, children):
         if len(children) > 1:
             retval = peg_expressions.OrderedChoice(nodes=children[:])
         else:
@@ -146,7 +148,8 @@ class PEGVisitor(visitor_base.PTNodeVisitor):
             retval = children[0]
         return retval
 
-    def visit_prefix(self, node, children):
+    @staticmethod
+    def visit_prefix(node, children):
         if len(children) == 2:
             if children[0] == peg_lexical.NOT:
                 retval = peg_expressions.Not()
@@ -162,7 +165,8 @@ class PEGVisitor(visitor_base.PTNodeVisitor):
 
         return retval
 
-    def visit_sufix(self, node, children):
+    @staticmethod
+    def visit_sufix(node, children):
         if len(children) == 2:
             if type(children[0]) is list:
                 nodes = children[0]
@@ -181,7 +185,8 @@ class PEGVisitor(visitor_base.PTNodeVisitor):
 
         return retval
 
-    def visit_rule_crossref(self, node, children):
+    @staticmethod
+    def visit_rule_crossref(node, children):
         return peg_utils.CrossRef(node.value)
 
     def visit_regex(self, node, children):

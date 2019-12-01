@@ -1,13 +1,10 @@
 try:
     # imports for local pytest
-    from .peg_expressions import *                         # type: ignore # pragma: no cover
-    from .peg_expressions import RegExMatch as _           # type: ignore # pragma: no cover
-
+    from . import peg_expressions                          # type: ignore # pragma: no cover
 except ImportError:                                        # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from peg_expressions import *                          # type: ignore # pragma: no cover
-    from peg_expressions import RegExMatch as _            # type: ignore # pragma: no cover
+    import peg_expressions                                 # type: ignore # pragma: no cover
 
 # Lexical invariants
 LEFT_ARROW = "<-"
@@ -21,24 +18,27 @@ NOT = "!"
 OPEN = "("
 CLOSE = ")"
 
+# Lexical invariants only used on peg_clean
+ASSIGNMENT = "="
+
 
 def ordered_choice():
-    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
+    return sequence, peg_expressions.ZeroOrMore(ORDERED_CHOICE, sequence)
 
 
 def sequence():
-    return OneOrMore(prefix)
+    return peg_expressions.OneOrMore(prefix)
 
 
 def prefix():
-    return Optional([AND, NOT]), sufix
+    return peg_expressions.Optional([AND, NOT]), sufix
 
 
 def sufix():
-    return expression, Optional([OPTIONAL,
-                                 ZERO_OR_MORE,
-                                 ONE_OR_MORE,
-                                 UNORDERED_GROUP])
+    return expression, peg_expressions.Optional([OPTIONAL,
+                                                 ZERO_OR_MORE,
+                                                 ONE_OR_MORE,
+                                                 UNORDERED_GROUP])
 
 
 def expression():
@@ -49,12 +49,12 @@ def expression():
 
 # PEG Lexical rules
 def regex():
-    return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
-            ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
+    return [("r'", peg_expressions.RegExMatch(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
+            ('r"', peg_expressions.RegExMatch(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
 
 
 def rule_name():
-    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
+    return peg_expressions.RegExMatch(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 
 
 def rule_crossref():
@@ -62,9 +62,9 @@ def rule_crossref():
 
 
 def str_match():
-    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+    return peg_expressions.RegExMatch(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+                                      r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 
 
 def comment():
-    return "//", _(".*\n")
+    return "//", peg_expressions.RegExMatch(".*\n")

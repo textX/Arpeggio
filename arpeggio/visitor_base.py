@@ -1,8 +1,16 @@
-from .peg_nodes import Terminal
-from .peg_utils import *
+# proj
+try:
+    # imports for local pytest
+    from . import peg_nodes                     # type: ignore # pragma: no cover
+    from . import peg_utils                     # type: ignore # pragma: no cover
+except ImportError:                             # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    import peg_nodes                            # type: ignore # pragma: no cover
+    import peg_utils                            # type: ignore # pragma: no cover
 
 
-class PTNodeVisitor(DebugPrinter):
+class PTNodeVisitor(peg_utils.DebugPrinter):
     """
     Base class for all parse tree visitors.
     """
@@ -25,7 +33,7 @@ class PTNodeVisitor(DebugPrinter):
             node(ParseTreeNode):
             children(processed children ParseTreeNode-s):
         """
-        if isinstance(node, Terminal):
+        if isinstance(node, peg_nodes.Terminal):
             # Default for Terminal is to convert to string unless suppress flag
             # is set in which case it is suppressed by setting to None.
             retval = str(node) if not node.suppress else None

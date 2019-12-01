@@ -1,31 +1,37 @@
 # proj
 try:
     # imports for local pytest
-    from .arpeggio import *                  # type: ignore # pragma: no cover
-    from .peg_lexical import *               # type: ignore # pragma: no cover
-    from .visitor_peg import *               # type: ignore # pragma: no cover
-    from .parser_base import Parser          # type: ignore # pragma: no cover
-    from .parser_python import ParserPython  # type: ignore # pragma: no cover
+    # from . import arpeggio                 # type: ignore # pragma: no cover
+    from . import parser_base                # type: ignore # pragma: no cover
+    from . import parser_python              # type: ignore # pragma: no cover
+    from . import peg_expressions            # type: ignore # pragma: no cover
+    from . import peg_lexical                # type: ignore # pragma: no cover
+    from . import visitor_base               # type: ignore # pragma: no cover
+    from . import visitor_peg                # type: ignore # pragma: no cover
+
 except ImportError:                          # type: ignore # pragma: no cover
-    from arpeggio import *                   # type: ignore # pragma: no cover
-    from peg_lexical import *                # type: ignore # pragma: no cover
-    from visitor_peg import *                # type: ignore # pragma: no cover
-    from parser_base import Parser           # type: ignore # pragma: no cover
-    from parser_python import ParserPython   # type: ignore # pragma: no cover
+    # import arpeggio                        # type: ignore # pragma: no cover
+    import parser_base                       # type: ignore # pragma: no cover
+    import parser_python                     # type: ignore # pragma: no cover
+    import peg_expressions                   # type: ignore # pragma: no cover
+    import peg_lexical                       # type: ignore # pragma: no cover
+    import visitor_base                      # type: ignore # pragma: no cover
+    import visitor_peg                       # type: ignore # pragma: no cover
+
 
 __all__ = ['ParserPEG']
 
 
 def rule():
-    return rule_name, LEFT_ARROW, ordered_choice, ";"
+    return peg_lexical.rule_name, peg_lexical.LEFT_ARROW, peg_lexical.ordered_choice, ";"
 
 
 # PEG syntax rules
 def peggrammar():
-    return OneOrMore(rule), EOF
+    return peg_expressions.OneOrMore(rule), peg_expressions.EOF
 
 
-class ParserPEG(Parser):
+class ParserPEG(parser_base.Parser):
 
     def __init__(self, language_def, root_rule_name, comment_rule_name=None, *args, **kwargs):
         """
@@ -66,12 +72,11 @@ class ParserPEG(Parser):
         return self.parser_model.parse(self)
 
     def _from_peg(self, language_def):
-        parser = ParserPython(peggrammar, comment, reduce_tree=False,
-                              debug=self.debug)
+        parser = parser_python.ParserPython(peggrammar, peg_lexical.comment, reduce_tree=False, debug=self.debug)
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)
 
-        return visit_parse_tree(parse_tree, PEGVisitor(self.root_rule_name,
-                                                       self.comment_rule_name,
-                                                       self.ignore_case,
-                                                       debug=self.debug))
+        return visitor_base.visit_parse_tree(parse_tree, visitor_peg.PEGVisitor(self.root_rule_name,
+                                                                                self.comment_rule_name,
+                                                                                self.ignore_case,
+                                                                                debug=self.debug))

@@ -1,9 +1,11 @@
 # proj
 try:
     # imports for local pytest
-    from .peg_nodes import Terminal   # type: ignore # pragma: no cover
-except ImportError:                  # type: ignore # pragma: no cover
-    from peg_nodes import Terminal    # type: ignore # pragma: no cover
+    from . import peg_nodes         # type: ignore # pragma: no cover
+except ImportError:                 # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    import peg_nodes                # type: ignore # pragma: no cover
 
 
 class SemanticAction(object):
@@ -24,7 +26,7 @@ class SemanticAction(object):
         This is the default implementation used if no semantic action is
         defined.
         """
-        if isinstance(node, Terminal):
+        if isinstance(node, peg_nodes.Terminal):
             # Default for Terminal is to convert to string unless suppress flag
             # is set in which case it is suppressed by setting to None.
             retval = str(node) if not node.suppress else None

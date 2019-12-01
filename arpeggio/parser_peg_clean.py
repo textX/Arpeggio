@@ -10,79 +10,68 @@
 
 try:
     # imports for local pytest
-    from .arpeggio import *                               # type: ignore # pragma: no cover
-    from .arpeggio import RegExMatch as _                 # type: ignore # pragma: no cover
-    from .visitor_peg import PEGVisitor                   # type: ignore # pragma: no cover
-    from .parser_peg import ParserPEG as ParserPEGOrig    # type: ignore # pragma: no cover
-    from .parser_python import ParserPython               # type: ignore # pragma: no cover
+    from . import parser_peg                     # type: ignore # pragma: no cover
+    from . import parser_python                  # type: ignore # pragma: no cover
+    from . import peg_expressions                # type: ignore # pragma: no cover
+    from . import peg_lexical                    # type: ignore # pragma: no cover
+    from . import visitor_base                   # type: ignore # pragma: no cover
+    from . import visitor_peg                    # type: ignore # pragma: no cover
 
-except ImportError:                                 # type: ignore # pragma: no cover
+except ImportError:                              # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from arpeggio import *                          # type: ignore # pragma: no cover
-    from arpeggio import RegExMatch as _           # type: ignore # pragma: no cover
-    from visitor_peg import PEGVisitor                      # type: ignore # pragma: no cover
-    from parser_peg import ParserPEG as ParserPEGOrig      # type: ignore # pragma: no cover
-    from parser_python import ParserPython               # type: ignore # pragma: no cover
-
+    import parser_peg                            # type: ignore # pragma: no cover
+    import parser_python                         # type: ignore # pragma: no cover
+    import peg_expressions                       # type: ignore # pragma: no cover
+    import peg_lexical                           # type: ignore # pragma: no cover
+    import visitor_base                          # type: ignore # pragma: no cover
+    import visitor_peg                           # type: ignore # pragma: no cover
 
 __all__ = ['ParserPEG']
-
-# Lexical invariants
-ASSIGNMENT = "="
-ORDERED_CHOICE = "/"
-ZERO_OR_MORE = "*"
-ONE_OR_MORE = "+"
-OPTIONAL = "?"
-UNORDERED_GROUP = "#"
-AND = "&"
-NOT = "!"
-OPEN = "("
-CLOSE = ")"
 
 
 # PEG syntax rules
 def peggrammar():
-    return OneOrMore(rule), EOF
+    return peg_expressions.OneOrMore(rule), peg_expressions.EOF
 
 
 def rule():
-    return rule_name, ASSIGNMENT, ordered_choice
+    return rule_name, peg_lexical.ASSIGNMENT, ordered_choice
 
 
 def ordered_choice():
-    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
+    return sequence, peg_expressions.ZeroOrMore(peg_lexical.ORDERED_CHOICE, sequence)
 
 
 def sequence():
-    return OneOrMore(prefix)
+    return peg_expressions.OneOrMore(prefix)
 
 
 def prefix():
-    return Optional([AND, NOT]), sufix
+    return peg_expressions.Optional([peg_lexical.AND, peg_lexical.NOT]), sufix
 
 
 def sufix():
-    return expression, Optional([OPTIONAL,
-                                 ZERO_OR_MORE,
-                                 ONE_OR_MORE,
-                                 UNORDERED_GROUP])
+    return expression, peg_expressions.Optional([peg_lexical.OPTIONAL,
+                                                 peg_lexical.ZERO_OR_MORE,
+                                                 peg_lexical.ONE_OR_MORE,
+                                                 peg_lexical.UNORDERED_GROUP])
 
 
 def expression():
     return [regex, rule_crossref,
-            (OPEN, ordered_choice, CLOSE),
-            str_match], Not(ASSIGNMENT)
+            (peg_lexical.OPEN, ordered_choice, peg_lexical.CLOSE),
+            str_match], peg_expressions.Not(peg_lexical.ASSIGNMENT)
 
 
 # PEG Lexical rules
 def regex():
-    return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
-            ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
+    return [("r'", peg_expressions.RegExMatch(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
+            ('r"', peg_expressions.RegExMatch(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
 
 
 def rule_name():
-    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
+    return peg_expressions.RegExMatch(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 
 
 def rule_crossref():
@@ -90,23 +79,22 @@ def rule_crossref():
 
 
 def str_match():
-    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+    return peg_expressions.RegExMatch(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+                                      r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 
 
 def comment():
-    return "//", _(".*\n")
+    return "//", peg_expressions.RegExMatch(".*\n")
 
 
-class ParserPEG(ParserPEGOrig):
+class ParserPEG(parser_peg.ParserPEG):
 
     def _from_peg(self, language_def):
-        parser = ParserPython(peggrammar, comment, reduce_tree=False,
-                              debug=self.debug)
+        parser = parser_python.ParserPython(peggrammar, comment, reduce_tree=False, debug=self.debug)
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)
-
-        return visit_parse_tree(parse_tree, PEGVisitor(self.root_rule_name,
-                                                       self.comment_rule_name,
-                                                       self.ignore_case,
-                                                       debug=self.debug))
+        return visitor_base.visit_parse_tree(parse_tree,
+                                             visitor_peg.PEGVisitor(self.root_rule_name,
+                                                                    self.comment_rule_name,
+                                                                    self.ignore_case,
+                                                                    debug=self.debug))

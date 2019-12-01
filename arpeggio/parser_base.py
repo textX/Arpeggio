@@ -3,15 +3,27 @@ import bisect
 import codecs
 import re
 import types
-from typing import Any, List, Union
+from typing import Any, Dict, List
 
-from .arpeggio_settings import *
-from .peg_utils import DebugPrinter
-from .peg_lexical import *
-from .peg_semantic_actions import SemanticAction
+# proj
+try:
+    # imports for local pytest
+    from . import arpeggio_settings         # type: ignore # pragma: no cover
+    from . import peg_expressions           # type: ignore # pragma: no cover
+    from . import peg_nodes                 # type: ignore # pragma: no cover
+    from . import peg_semantic_actions      # type: ignore # pragma: no cover
+    from . import peg_utils                 # type: ignore # pragma: no cover
+except ImportError:                         # type: ignore # pragma: no cover
+    # imports for doctest
+    # noinspection PyUnresolvedReferences
+    import arpeggio_settings                # type: ignore # pragma: no cover
+    import peg_expressions                  # type: ignore # pragma: no cover
+    import peg_nodes                        # type: ignore # pragma: no cover
+    import peg_semantic_actions             # type: ignore # pragma: no cover
+    import peg_utils                        # type: ignore # pragma: no cover
 
 
-class Parser(DebugPrinter):
+class Parser(peg_utils.DebugPrinter):
     """
     Abstract base class for all parsers.
 
@@ -34,10 +46,10 @@ class Parser(DebugPrinter):
 
     # Not marker for NoMatch rules list. Used if the first unsuccessful rule
     # match is Not.
-    FIRST_NOT = Not()
+    FIRST_NOT = peg_expressions.Not()
 
     def __init__(self, skipws: bool = True,
-                 ws: str = DEFAULT_WS,
+                 ws: str = arpeggio_settings.DEFAULT_WS,
                  reduce_tree: bool = False,
                  autokwd: bool = False,
                  ignore_case: bool = False,
@@ -56,7 +68,7 @@ class Parser(DebugPrinter):
                 (a.k.a. packrat parsing)
         """
 
-        super().__init__(**kwargs)
+        super().__init__(**kwargs)  # init debug printer
 
         # Used to indicate state in which parser should not
         # treat newlines as whitespaces.
@@ -69,7 +81,7 @@ class Parser(DebugPrinter):
         self.ignore_case = ignore_case
         self.memoization = memoization
         self.comments_model = None
-        self.comments: List[ParseTreeNode] = []
+        self.comments: List[peg_nodes.ParseTreeNode] = []
         self.comment_positions: Dict[int, int] = {}
         self.sem_actions: Dict[Any, Any] = {}                           # Dict [rule_name] = Semantic Action  ToDo: narrow down typing
         self.parse_tree = None
@@ -141,7 +153,7 @@ class Parser(DebugPrinter):
         self.cache_misses = 0
         try:
             self.parse_tree = self._parse()
-        except NoMatch as e:
+        except peg_expressions.NoMatch as e:
             # Remove Not marker
             if e.rules[0] is Parser.FIRST_NOT:
                 del e.rules[0]
@@ -219,8 +231,8 @@ class Parser(DebugPrinter):
                     "Walking down %s   type: %s  str: %s" %
                     (node.name, type(node).__name__, str(node)))
 
-            children = SemanticActionResults()
-            if isinstance(node, NonTerminal):
+            children = peg_nodes.SemanticActionResults()
+            if isinstance(node, peg_nodes.NonTerminal):
                 for n in node:
                     child = tree_walk(n)
                     if child is not None:
@@ -255,7 +267,7 @@ class Parser(DebugPrinter):
                     if self.debug:
                         self.dprint("  Applying default semantic action.")
 
-                    retval = SemanticAction().first_pass(self, node, children)
+                    retval = peg_semantic_actions.SemanticAction().first_pass(self, node, children)
 
                 else:
                     retval = node
@@ -341,10 +353,10 @@ class Parser(DebugPrinter):
         if self.nm is None or not parser.in_parse_comments:
             if self.nm is None or position > self.nm.position:
                 if self.in_not:
-                    self.nm = NoMatch([Parser.FIRST_NOT], position, parser)
+                    self.nm = peg_expressions.NoMatch([Parser.FIRST_NOT], position, parser)
                 else:
-                    self.nm = NoMatch([rule], position, parser)
-            elif position == self.nm.position and isinstance(rule, Match) \
+                    self.nm = peg_expressions.NoMatch([rule], position, parser)
+            elif position == self.nm.position and isinstance(rule, peg_expressions.Match) \
                     and not self.in_not:
                 self.nm.rules.append(rule)
 

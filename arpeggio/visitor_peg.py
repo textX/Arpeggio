@@ -14,20 +14,19 @@ import re
 # proj
 try:
     # imports for local pytest
-    from .arpeggio import *                 # type: ignore # pragma: no cover
-    from .arpeggio import RegExMatch as _   # type: ignore # pragma: no cover
-    from .error_classes import *            # type: ignore # pragma: no cover
-    from .peg_lexical import *              # type: ignore # pragma: no cover
-    from .peg_utils import *                # type: ignore # pragma: no cover
-
+    from . import error_classes             # type: ignore # pragma: no cover
+    from . import peg_expressions           # type: ignore # pragma: no cover
+    from . import peg_lexical               # type: ignore # pragma: no cover
+    from . import peg_utils                 # type: ignore # pragma: no cover
+    from . import visitor_base              # type: ignore # pragma: no cover
 except ImportError:                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from arpeggio import *                  # type: ignore # pragma: no cover
-    from arpeggio import RegExMatch as _    # type: ignore # pragma: no cover
-    from error_classes import *             # type: ignore # pragma: no cover
-    from peg_lexical import *               # type: ignore # pragma: no cover
-    from peg_utils import *                 # type: ignore # pragma: no cover
+    import error_classes                    # type: ignore # pragma: no cover
+    import peg_expressions                  # type: ignore # pragma: no cover
+    import peg_lexical                      # type: ignore # pragma: no cover
+    import peg_utils                        # type: ignore # pragma: no cover
+    import visitor_base                     # type: ignore # pragma: no cover
 
 
 # Escape sequences supported in PEG literal string matches
@@ -42,7 +41,7 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
     """, re.VERBOSE | re.UNICODE)
 
 
-class PEGVisitor(PTNodeVisitor):
+class PEGVisitor(visitor_base.PTNodeVisitor):
     """
     Visitor that transforms parse tree to a PEG parser for the given language.
     """
@@ -54,9 +53,7 @@ class PEGVisitor(PTNodeVisitor):
         self.comment_rule_name = comment_rule_name
         self.ignore_case = ignore_case
         # Used for linking phase
-        self.peg_rules = {
-            "EOF": EndOfFile()
-        }
+        self.peg_rules = {"EOF": peg_expressions.EndOfFile()}
 
     def visit_peggrammar(self, node, children):
 
@@ -73,15 +70,14 @@ class PEGVisitor(PTNodeVisitor):
                 try:
                     return self.peg_rules[rule_name]
                 except KeyError:
-                    raise SemanticError("Rule \"{}\" does not exists."
-                                        .format(rule_name))
+                    raise error_classes.SemanticError("Rule \"{}\" does not exists.".format(rule_name))
 
             def resolve_rule_by_name(rule_name):
                 if self.debug:
                     self.dprint("Resolving crossref {}".format(rule_name))
 
                 resolved_rule = get_rule_by_name(rule_name)
-                while type(resolved_rule) is CrossRef:
+                while type(resolved_rule) is peg_utils.CrossRef:
                     target_rule = resolved_rule.target_rule_name
                     resolved_rule = get_rule_by_name(target_rule)
 
@@ -97,7 +93,7 @@ class PEGVisitor(PTNodeVisitor):
                                             resolved_rule.name))
                 return resolved_rule
 
-            if isinstance(node, CrossRef):
+            if isinstance(node, peg_utils.CrossRef):
                 # The root rule is a cross-ref
                 resolved_rule = resolve_rule_by_name(node.target_rule_name)
                 return _resolve(resolved_rule)
@@ -123,7 +119,7 @@ class PEGVisitor(PTNodeVisitor):
     def visit_rule(self, node, children):
         rule_name = children[0]
         if len(children) > 2:
-            retval = Sequence(nodes=children[1:])
+            retval = peg_expressions.Sequence(nodes=children[1:])
         else:
             retval = children[1]
 
@@ -137,14 +133,14 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_sequence(self, node, children):
         if len(children) > 1:
-            return Sequence(nodes=children[:])
+            return peg_expressions.Sequence(nodes=children[:])
         else:
             # If only one child rule exists reduce.
             return children[0]
 
     def visit_ordered_choice(self, node, children):
         if len(children) > 1:
-            retval = OrderedChoice(nodes=children[:])
+            retval = peg_expressions.OrderedChoice(nodes=children[:])
         else:
             # If only one child rule exists reduce.
             retval = children[0]
@@ -152,10 +148,10 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_prefix(self, node, children):
         if len(children) == 2:
-            if children[0] == NOT:
-                retval = Not()
+            if children[0] == peg_lexical.NOT:
+                retval = peg_expressions.Not()
             else:
-                retval = And()
+                retval = peg_expressions.And()
             if type(children[1]) is list:
                 retval.nodes = children[1]
             else:
@@ -172,24 +168,24 @@ class PEGVisitor(PTNodeVisitor):
                 nodes = children[0]
             else:
                 nodes = [children[0]]
-            if children[1] == ZERO_OR_MORE:
-                retval = ZeroOrMore(nodes=nodes)
-            elif children[1] == ONE_OR_MORE:
-                retval = OneOrMore(nodes=nodes)
-            elif children[1] == OPTIONAL:
-                retval = Optional(nodes=nodes)
+            if children[1] == peg_lexical.ZERO_OR_MORE:
+                retval = peg_expressions.ZeroOrMore(nodes=nodes)
+            elif children[1] == peg_lexical.ONE_OR_MORE:
+                retval = peg_expressions.OneOrMore(nodes=nodes)
+            elif children[1] == peg_lexical.OPTIONAL:
+                retval = peg_expressions.Optional(nodes=nodes)
             else:
-                retval = UnorderedGroup(nodes=nodes[0].nodes)
+                retval = peg_expressions.UnorderedGroup(nodes=nodes[0].nodes)
         else:
             retval = children[0]
 
         return retval
 
     def visit_rule_crossref(self, node, children):
-        return CrossRef(node.value)
+        return peg_utils.CrossRef(node.value)
 
     def visit_regex(self, node, children):
-        match = _(children[0], ignore_case=self.ignore_case)
+        match = peg_expressions.RegExMatch(children[0], ignore_case=self.ignore_case)
         match.compile()
         return match
 
@@ -203,8 +199,8 @@ class PEGVisitor(PTNodeVisitor):
             try:
                 return codecs.decode(match.group(0), "unicode_escape")
             except UnicodeDecodeError:
-                raise GrammarError("Invalid escape sequence '%s'." %
-                                   match.group(0))
+                raise error_classes.GrammarError("Invalid escape sequence '%s'." %
+                                                 match.group(0))
         match_str = PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, match_str)
 
-        return StrMatch(match_str, ignore_case=self.ignore_case)
+        return peg_expressions.StrMatch(match_str, ignore_case=self.ignore_case)

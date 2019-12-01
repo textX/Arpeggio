@@ -3,19 +3,17 @@ import types
 # proj
 try:
     # imports for local pytest
-    from .arpeggio import *                 # type: ignore # pragma: no cover
-    from .error_classes import *            # type: ignore # pragma: no cover
-    from .parser_base import Parser         # type: ignore # pragma: no cover
-    from .peg_lexical import *              # type: ignore # pragma: no cover
-    from .peg_utils import CrossRef         # type: ignore # pragma: no cover
-except ImportError:                         # type: ignore # pragma: no cover
+    from . import error_classes           # type: ignore # pragma: no cover
+    from . import parser_base             # type: ignore # pragma: no cover
+    from . import peg_expressions         # type: ignore # pragma: no cover
+    from . import peg_utils               # type: ignore # pragma: no cover
+except ImportError:                       # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from arpeggio import *                  # type: ignore # pragma: no cover
-    from error_classes import *             # type: ignore # pragma: no cover
-    from parser_base import Parser          # type: ignore # pragma: no cover
-    from .peg_lexical import *              # type: ignore # pragma: no cover
-    from peg_utils import CrossRef          # type: ignore # pragma: no cover
+    import error_classes                  # type: ignore # pragma: no cover
+    import parser_base                    # type: ignore # pragma: no cover
+    import peg_expressions                # type: ignore # pragma: no cover
+    import peg_utils                      # type: ignore # pragma: no cover
 
 
 class GrammarBase(object):
@@ -24,7 +22,7 @@ class GrammarBase(object):
     """
 
 
-class ParserPythonClass(Parser):
+class ParserPythonClass(parser_base.Parser):
 
     def __init__(self, language_def, comment_def=None, *args, **kwargs):
         """
@@ -67,7 +65,7 @@ class ParserPythonClass(Parser):
         Returns:
             Parser Model (PEG Abstract Semantic Graph)
         """
-        __rule_cache = {"EndOfFile": EndOfFile()}
+        __rule_cache = {"EndOfFile": peg_expressions.EndOfFile()}
         __for_resolving = []  # Expressions that needs cross reference resolving
         self.__cross_refs = 0
 
@@ -81,7 +79,7 @@ class ParserPythonClass(Parser):
                     if self.debug:
                         self.dprint("Rule {} founded in cache."
                                     .format(rule_name))
-                    if isinstance(c_rule, CrossRef):
+                    if isinstance(c_rule, peg_utils.CrossRef):
                         self.__cross_refs += 1
                         if self.debug:
                             self.dprint("CrossRef usage: {}"
@@ -93,9 +91,10 @@ class ParserPythonClass(Parser):
                     self.sem_actions[rule_name] = expression.sem
 
                 # Register rule cross-ref to support recursion
-                __rule_cache[rule_name] = CrossRef(rule_name)
+                __rule_cache[rule_name] = peg_utils.CrossRef(rule_name)
 
                 curr_expr = expression
+
                 while isinstance(curr_expr, types.FunctionType):
                     # If function directly returns another function
                     # go into until non-function is returned.
@@ -110,9 +109,9 @@ class ParserPythonClass(Parser):
                     self.dprint("New rule: {} -> {}"
                                 .format(rule_name, retval.__class__.__name__))
 
-            elif type(expression) is str or isinstance(expression, StrMatch):
+            elif type(expression) is str or isinstance(expression, peg_expressions.StrMatch):
                 if type(expression) is str:
-                    retval = StrMatch(expression, ignore_case=self.ignore_case)
+                    retval = peg_expressions.StrMatch(expression, ignore_case=self.ignore_case)
                 else:
                     retval = expression
                     if expression.ignore_case is None:
@@ -122,12 +121,12 @@ class ParserPythonClass(Parser):
                     to_match = retval.to_match
                     match = self.keyword_regex.match(to_match)
                     if match and match.span() == (0, len(to_match)):
-                        retval = RegExMatch(r'{}\b'.format(to_match),
-                                            ignore_case=self.ignore_case,
-                                            str_repr=to_match)
+                        retval = peg_expressions.RegExMatch(r'{}\b'.format(to_match),
+                                                            ignore_case=self.ignore_case,
+                                                            str_repr=to_match)
                         retval.compile()
 
-            elif isinstance(expression, RegExMatch):
+            elif isinstance(expression, peg_expressions.RegExMatch):
                 # Regular expression are not compiled yet
                 # to support global settings propagation from
                 # parser.
@@ -137,41 +136,41 @@ class ParserPythonClass(Parser):
 
                 retval = expression
 
-            elif isinstance(expression, Match):
+            elif isinstance(expression, peg_expressions.Match):
                 retval = expression
 
-            elif isinstance(expression, UnorderedGroup):
+            elif isinstance(expression, peg_expressions.UnorderedGroup):
                 retval = expression
                 for n in retval.elements:
                     retval.nodes.append(inner_from_python(n))
-                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                if any((isinstance(x, peg_utils.CrossRef) for x in retval.nodes)):
                     __for_resolving.append(retval)
 
-            elif isinstance(expression, Sequence) or \
-                    isinstance(expression, Repetition) or \
-                    isinstance(expression, SyntaxPredicate) or \
-                    isinstance(expression, Decorator):
+            elif isinstance(expression, peg_expressions.Sequence) or \
+                    isinstance(expression, peg_expressions.Repetition) or \
+                    isinstance(expression, peg_expressions.SyntaxPredicate) or \
+                    isinstance(expression, peg_expressions.Decorator):
                 retval = expression
                 retval.nodes.append(inner_from_python(retval.elements))
-                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                if any((isinstance(x, peg_utils.CrossRef) for x in retval.nodes)):
                     __for_resolving.append(retval)
 
             elif type(expression) in [list, tuple]:
                 if type(expression) is list:
-                    retval = OrderedChoice(expression)
+                    retval = peg_expressions.OrderedChoice(expression)
                 else:
-                    retval = Sequence(expression)
+                    retval = peg_expressions.Sequence(expression)
 
                 retval.nodes = [inner_from_python(e) for e in expression]
-                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                if any((isinstance(x, peg_utils.CrossRef) for x in retval.nodes)):
                     __for_resolving.append(retval)
 
             else:
-                raise GrammarError("Unrecognized grammar element '%s'." %
-                                   str(expression))
+                raise error_classes.GrammarError("Unrecognized grammar element '%s'." %
+                                                 str(expression))
 
             # Translate separator expression.
-            if isinstance(expression, Repetition) and expression.sep:
+            if isinstance(expression, peg_expressions.Repetition) and expression.sep:
                 expression.sep = inner_from_python(expression.sep)
 
             return retval
@@ -180,7 +179,7 @@ class ParserPythonClass(Parser):
         def resolve():
             for e in __for_resolving:
                 for i, node in enumerate(e.nodes):
-                    if isinstance(node, CrossRef):
+                    if isinstance(node, peg_utils.CrossRef):
                         self.__cross_refs -= 1
                         e.nodes[i] = __rule_cache[node.target_rule_name]
 

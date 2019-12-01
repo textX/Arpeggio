@@ -7,11 +7,11 @@ from typing import List
 # proj
 try:
     # imports for local pytest
-    from .peg_nodes import *                    # type: ignore # pragma: no cover
+    from . import peg_nodes                    # type: ignore # pragma: no cover
 except ImportError:                             # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from peg_nodes import *                     # type: ignore # pragma: no cover
+    import peg_nodes                     # type: ignore # pragma: no cover
 
 
 NOMATCH_MARKER = 0
@@ -179,9 +179,9 @@ class ParsingExpression(object):
                 parser.in_rule = previous_root_rule_name
 
         # For root rules flatten non-terminal/list
-        if self.root and result and not isinstance(result, Terminal):
-            if not isinstance(result, NonTerminal):
-                result = flatten(result)
+        if self.root and result and not isinstance(result, peg_nodes.Terminal):
+            if not isinstance(result, peg_nodes.NonTerminal):
+                result = peg_nodes.flatten(result)
 
             # Tree reduction will eliminate Non-terminal with single child.
             if parser.reduce_tree and len(result) == 1:
@@ -189,8 +189,8 @@ class ParsingExpression(object):
 
             # If the result is not parse tree node it must be a plain list
             # so create a new NonTerminal.
-            if not isinstance(result, ParseTreeNode):
-                result = NonTerminal(self, result)
+            if not isinstance(result, peg_nodes.ParseTreeNode):
+                result = peg_nodes.NonTerminal(self, result)
 
         # Result caching for use by memoization.
         if parser.memoization:
@@ -223,8 +223,7 @@ class NoMatch(Exception):
                 return rule._exp_str
             elif rule.root:
                 return rule.rule_name
-            elif isinstance(rule, Match) and \
-                    not isinstance(rule, EndOfFile):
+            elif isinstance(rule, Match) and not isinstance(rule, EndOfFile):
                 return "'{}'".format(rule.to_match)
             else:
                 return rule.name
@@ -254,7 +253,7 @@ class Sequence(ParsingExpression):
     """
 
     def __init__(self, *elements, **kwargs):
-        super(Sequence, self).__init__(*elements, **kwargs)
+        super().__init__(*elements, **kwargs)
         self.ws = kwargs.pop('ws', None)
         self.skipws = kwargs.pop('skipws', None)
 
@@ -611,11 +610,11 @@ class Combine(Decorator):
             for parser_model_node in self.nodes:
                 results.append(parser_model_node.parse(parser))
 
-            results = flatten(results)
+            results = peg_nodes.flatten(results)
 
             # Create terminal from result
-            return Terminal(self, c_pos,
-                            "".join([x.flat_str() for x in results]))
+            return peg_nodes.Terminal(self, c_pos,
+                                      "".join([x.flat_str() for x in results]))
         except NoMatch:
             parser.position = c_pos  # Backtracking
             raise
@@ -702,7 +701,7 @@ class Match(ParsingExpression):
 
 
 class RegExMatch(Match):
-    '''
+    """
     This Match class will perform input matching based on Regular Expressions.
 
     Args:
@@ -717,10 +716,10 @@ class RegExMatch(Match):
         re_flags: flags parameter for re.compile if neither ignore_case
             or multiple are set.
 
-    '''
+    """
     def __init__(self, to_match, rule_name='', root=False, ignore_case=None,
                  multiline=None, str_repr=None, re_flags=re.MULTILINE):
-        super(RegExMatch, self).__init__(rule_name, root)
+        super().__init__(rule_name, root)
         self.to_match_regex = to_match
         self.ignore_case = ignore_case
         self.multiline = multiline
@@ -756,7 +755,7 @@ class RegExMatch(Match):
                     (matched, c_pos, parser.context(len(matched))))
             parser.position += len(matched)
             if matched:
-                return Terminal(self, c_pos, matched, extra_info=m)
+                return peg_nodes.Terminal(self, c_pos, matched, extra_info=m)
         else:
             if parser.debug:
                 parser.dprint("-- NoMatch at {}".format(c_pos))
@@ -773,7 +772,7 @@ class StrMatch(Match):
             Default is None to support propagation from global parser setting.
     """
     def __init__(self, to_match, rule_name='', root=False, ignore_case=None):
-        super(StrMatch, self).__init__(rule_name, root)
+        super().__init__(rule_name, root)
         self.to_match = to_match
         self.ignore_case = ignore_case
 
@@ -795,7 +794,7 @@ class StrMatch(Match):
             # If this match is inside sequence than mark for suppression
             suppress = type(parser.last_pexpression) is Sequence
 
-            return Terminal(self, c_pos, self.to_match, suppress=suppress)
+            return peg_nodes.Terminal(self, c_pos, self.to_match, suppress=suppress)
         else:
             if parser.debug:
                 parser.dprint(
@@ -824,18 +823,19 @@ class Kwd(StrMatch):
     A specialization of StrMatch to specify keywords of the language.
     """
     def __init__(self, to_match):
-        super(Kwd, self).__init__(to_match)
+        super().__init__(to_match)
         self.to_match = to_match
         self.root = True
         self.rule_name = 'keyword'
 
 
-class EndOfFile(Match):
+'''
+class EOF(Match):
     """
     The Match class that will succeed in case end of input is reached.
     """
     def __init__(self):
-        super(EndOfFile, self).__init__("EOF")
+        super().__init__("EOF")
 
     @property
     def name(self):
@@ -844,7 +844,34 @@ class EndOfFile(Match):
     def _parse(self, parser):
         c_pos = parser.position
         if len(parser.input) == c_pos:
-            return Terminal(EOF(), c_pos, '', suppress=True)
+            return peg_nodes.Terminal(self, c_pos, '', suppress=True)
+        else:
+            if parser.debug:
+                parser.dprint("!! EOF not matched.")
+            parser._nm_raise(self, c_pos, parser)
+'''
+
+
+class EndOfFile(Match):
+    """
+    The Match class that will succeed in case end of input is reached.
+
+    >>> import arpeggio
+
+
+
+    """
+    def __init__(self):
+        super().__init__("EOF")
+
+    @property
+    def name(self):
+        return "EOF"
+
+    def _parse(self, parser):
+        c_pos = parser.position
+        if len(parser.input) == c_pos:
+            return peg_nodes.Terminal(EOF(), c_pos, '', suppress=True)
         else:
             if parser.debug:
                 parser.dprint("!! EOF not matched.")

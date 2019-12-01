@@ -206,7 +206,7 @@ parse inputs.  This time we shall instantiate different parser class
 (`ParserPEG`). The whole content of `csv_peg.py` should be:
 
 ```python
-from arpeggio.cleanpeg import ParserPEG
+from arpeggio.parser_peg_clean import ParserPEG
 
 csv_grammar = open('csv.peg', 'r').read()
 parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ')

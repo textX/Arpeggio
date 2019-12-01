@@ -1,30 +1,13 @@
 import types
 
-# proj
-try:
-    # imports for local pytest
-    from .arpeggio import *                 # type: ignore # pragma: no cover
-    from .error_classes import *            # type: ignore # pragma: no cover
-    from .parser_base import Parser         # type: ignore # pragma: no cover
-    from .peg_lexical import *              # type: ignore # pragma: no cover
-    from .peg_utils import CrossRef         # type: ignore # pragma: no cover
-except ImportError:                         # type: ignore # pragma: no cover
-    # imports for doctest
-    # noinspection PyUnresolvedReferences
-    from arpeggio import *                  # type: ignore # pragma: no cover
-    from error_classes import *             # type: ignore # pragma: no cover
-    from parser_base import Parser          # type: ignore # pragma: no cover
-    from .peg_lexical import *              # type: ignore # pragma: no cover
-    from peg_utils import CrossRef          # type: ignore # pragma: no cover
+
+from .parser_base import Parser
+from .peg_lexical import *
+from .peg_utils import CrossRef
+from .error_classes import *
 
 
-class GrammarBase(object):
-    """
-    Base Class for Grammar Rules ParserPythonClass
-    """
-
-
-class ParserPythonClass(Parser):
+class ParserPython(Parser):
 
     def __init__(self, language_def, comment_def=None, *args, **kwargs):
         """
@@ -50,7 +33,13 @@ class ParserPythonClass(Parser):
         # In debug mode export parser model to dot for
         # visualization
         if self.debug:
-            from .export import PMDOTExporter
+            try:
+                # for Pytest
+                from .export import PMDOTExporter   # type: ignore # pragma: no cover
+            except ImportError:                     # type: ignore # pragma: no cover
+                # for local Doctest
+                from export import PMDOTExporter    # type: ignore # pragma: no cover
+
             root_rule = language_def.__name__
             PMDOTExporter().exportFile(self.parser_model,
                                        "{}_parser_model.dot".format(root_rule))
@@ -68,7 +57,7 @@ class ParserPythonClass(Parser):
             Parser Model (PEG Abstract Semantic Graph)
         """
         __rule_cache = {"EndOfFile": EndOfFile()}
-        __for_resolving = []  # Expressions that needs cross reference resolving
+        __for_resolving = []  # Expressions that needs crossref resolving
         self.__cross_refs = 0
 
         def inner_from_python(expression):
@@ -186,7 +175,7 @@ class ParserPythonClass(Parser):
 
         parser_model = inner_from_python(expression)
         resolve()
-        assert self.__cross_refs == 0, "Not all cross references are resolved!"
+        assert self.__cross_refs == 0, "Not all crossrefs are resolved!"
         return parser_model
 
     def errors(self):

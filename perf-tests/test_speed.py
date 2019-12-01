@@ -1,18 +1,17 @@
-#-*- coding: utf-8 -*-
 #######################################################################
 # Testing parsing speed. This is used for the purpose of testing
-#   of performance gains/loses for various approaches.
+#   of performance gains/losses for various approaches.
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2016 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from __future__ import print_function, unicode_literals
 
 import codecs
 import time
 from os.path import dirname, join, getsize
 from arpeggio import ParserPython
 from grammar import rhapsody
+
 
 def timeit(parser, file_name, message):
     print(message, 'File:', file_name)
@@ -62,6 +61,7 @@ def main():
                '{}. Small file, with memoization.'.format(i + 1))
         timeit(parser, file_name_large,
                '{}. Large file, with memoization.'.format(i + 1))
+
 
 if __name__ == '__main__':
     main()

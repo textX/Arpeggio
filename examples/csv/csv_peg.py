@@ -9,7 +9,7 @@
 import os
 import pprint
 from arpeggio import visit_parse_tree
-from arpeggio.cleanpeg import ParserPEG
+from arpeggio.parser_peg_clean import ParserPEG
 from examples.csv.csv import CSVVisitor
 
 def main(debug=False):

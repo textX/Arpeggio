@@ -16,7 +16,8 @@ from __future__ import unicode_literals
 import os
 from arpeggio import *
 from arpeggio.export import PMDOTExporter
-from arpeggio.peg import PEGVisitor, ParserPEG
+from arpeggio.visitor_peg import PEGVisitor
+from arpeggio.parser_peg import ParserPEG
 
 
 def main(debug=False):

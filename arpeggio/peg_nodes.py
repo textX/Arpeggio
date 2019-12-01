@@ -1,6 +1,8 @@
 # ---------------------------------------------------
 # Parse Tree node classes
 
+from typing import Dict, List
+
 
 class SemanticActionResults(list):
     """
@@ -10,8 +12,9 @@ class SemanticActionResults(list):
     tree navigation.
     Enables index access as well as iteration.
     """
-    def __init__(self):
-        self.results = {}
+    # no call to super().__init__ is ok here
+    def __init__(self) -> None:
+        self.results: Dict[str, List] = {}
 
     def append_result(self, name, result):
         if name:
@@ -61,8 +64,8 @@ class ParseTreeNode(object):
         return "%s [%s]" % (self.rule_name, self.position)
 
     @property
-    def position_end(self):
-        "Must be implemented in subclasses."
+    def position_end(self) -> None:
+        """ Must be implemented in subclasses. """
         raise NotImplementedError
 
     def visit(self, visitor):

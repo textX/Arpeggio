@@ -1,9 +1,9 @@
 # proj
 try:
     # imports for local pytest
-    from .arpeggio import Terminal   # type: ignore # pragma: no cover
+    from .peg_nodes import Terminal   # type: ignore # pragma: no cover
 except ImportError:                  # type: ignore # pragma: no cover
-    from arpeggio import Terminal    # type: ignore # pragma: no cover
+    from peg_nodes import Terminal    # type: ignore # pragma: no cover
 
 
 class SemanticAction(object):

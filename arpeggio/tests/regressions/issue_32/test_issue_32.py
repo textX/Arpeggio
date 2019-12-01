@@ -12,15 +12,15 @@ try:
     # imports for local pytest
     from .... import arpeggio                               # type: ignore # pragma: no cover
     from ....arpeggio import *                              # type: ignore # pragma: no cover
-    from ....cleanpeg import ParserPEG as ParserCleanPEG    # type: ignore # pragma: no cover
-    from ....peg import ParserPEG                           # type: ignore # pragma: no cover
+    from ....parser_peg_clean import ParserPEG as ParserCleanPEG    # type: ignore # pragma: no cover
+    from ....parser_peg import ParserPEG                # type: ignore # pragma: no cover
 except ImportError:                                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
     import arpeggio                                         # type: ignore # pragma: no cover
     from arpeggio import *                                  # type: ignore # pragma: no cover
-    from cleanpeg import ParserPEG as ParserCleanPEG        # type: ignore # pragma: no cover
-    from peg import ParserPEG                               # type: ignore # pragma: no cover
+    from parser_peg_clean import ParserPEG as ParserCleanPEG        # type: ignore # pragma: no cover
+    from parser_peg import ParserPEG                    # type: ignore # pragma: no cover
 
 
 def check_parser(grammar: str, text: str) -> bool:

@@ -9,6 +9,7 @@
 # grammars. Grammars are defined using Python language constructs or the PEG
 # textual notation.
 ###############################################################################
+import sys
 
 from .arpeggio import *
 

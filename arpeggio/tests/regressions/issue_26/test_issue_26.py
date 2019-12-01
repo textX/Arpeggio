@@ -2,10 +2,10 @@
 
 try:
     # for pytest
-    from ....cleanpeg import ParserPEG      # type: ignore # pragma: no cover
+    from ....parser_peg_clean import ParserPEG      # type: ignore # pragma: no cover
 except ImportError:                         # type: ignore # pragma: no cover
     # for local Doctest
-    from cleanpeg import ParserPEG          # type: ignore # pragma: no cover
+    from parser_peg_clean import ParserPEG          # type: ignore # pragma: no cover
 
 
 def test_regex_with_empty_successful_match_in_repetition() -> None:

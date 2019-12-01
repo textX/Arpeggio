@@ -15,7 +15,7 @@
 from __future__ import absolute_import, unicode_literals, print_function
 
 import os
-from arpeggio.cleanpeg import ParserPEG
+from arpeggio.parser_peg_clean import ParserPEG
 from arpeggio import visit_parse_tree
 from calc import CalcVisitor
 

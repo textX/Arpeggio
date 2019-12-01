@@ -1,5 +1,5 @@
 #######################################################################
-# Name: peg.py
+# Name: visitor_peg.py
 # Purpose: Implementing PEG language
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2009-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
@@ -16,84 +16,18 @@ try:
     # imports for local pytest
     from .arpeggio import *                 # type: ignore # pragma: no cover
     from .arpeggio import RegExMatch as _   # type: ignore # pragma: no cover
+    from .error_classes import *            # type: ignore # pragma: no cover
+    from .peg_lexical import *              # type: ignore # pragma: no cover
+    from .peg_utils import *                # type: ignore # pragma: no cover
 
 except ImportError:                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
     from arpeggio import *                  # type: ignore # pragma: no cover
     from arpeggio import RegExMatch as _    # type: ignore # pragma: no cover
-
-
-__all__ = ['ParserPEG']
-
-# Lexical invariants
-LEFT_ARROW = "<-"
-ORDERED_CHOICE = "/"
-ZERO_OR_MORE = "*"
-ONE_OR_MORE = "+"
-OPTIONAL = "?"
-UNORDERED_GROUP = "#"
-AND = "&"
-NOT = "!"
-OPEN = "("
-CLOSE = ")"
-
-
-# PEG syntax rules
-def peggrammar():
-    return OneOrMore(rule), EOF
-
-
-def rule():
-    return rule_name, LEFT_ARROW, ordered_choice, ";"
-
-
-def ordered_choice():
-    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-
-
-def sequence():
-    return OneOrMore(prefix)
-
-
-def prefix():
-    return Optional([AND, NOT]), sufix
-
-
-def sufix():
-    return expression, Optional([OPTIONAL,
-                                 ZERO_OR_MORE,
-                                 ONE_OR_MORE,
-                                 UNORDERED_GROUP])
-
-
-def expression():
-    return [regex, rule_crossref,
-            (OPEN, ordered_choice, CLOSE),
-            str_match]
-
-
-# PEG Lexical rules
-def regex():
-    return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
-            ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
-
-
-def rule_name():
-    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
-
-
-def rule_crossref():
-    return rule_name
-
-
-def str_match():
-    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
-
-
-def comment():
-    return "//", _(".*\n")
+    from error_classes import *             # type: ignore # pragma: no cover
+    from peg_lexical import *               # type: ignore # pragma: no cover
+    from peg_utils import *                 # type: ignore # pragma: no cover
 
 
 # Escape sequences supported in PEG literal string matches
@@ -274,56 +208,3 @@ class PEGVisitor(PTNodeVisitor):
         match_str = PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, match_str)
 
         return StrMatch(match_str, ignore_case=self.ignore_case)
-
-
-class ParserPEG(Parser):
-
-    def __init__(self, language_def, root_rule_name, comment_rule_name=None,
-                 *args, **kwargs):
-        """
-        Constructs parser from textual PEG definition.
-
-        Args:
-            language_def (str): A string describing language grammar using
-                PEG notation.
-            root_rule_name(str): The name of the root rule.
-            comment_rule_name(str): The name of the rule for comments.
-        """
-        super().__init__(*args, **kwargs)
-        self.root_rule_name = root_rule_name
-        self.comment_rule_name = comment_rule_name
-
-        # PEG Abstract Syntax Graph
-        self.parser_model, self.comments_model = self._from_peg(language_def)
-        # Comments should be optional and there can be more of them
-        if self.comments_model:
-            self.comments_model.root = True
-            self.comments_model.rule_name = comment_rule_name
-
-        # In debug mode export parser model to dot for
-        # visualization
-        if self.debug:
-            try:
-                # for pytest
-                from .export import PMDOTExporter   # type: ignore # pragma: no cover
-            except ImportError:                     # type: ignore # pragma: no cover
-                # for local Doctest                 # type: ignore # pragma: no cover
-                from export import PMDOTExporter    # type: ignore # pragma: no cover
-
-            root_rule = self.parser_model.rule_name
-            PMDOTExporter().exportFile(
-                self.parser_model, "{}_peg_parser_model.dot".format(root_rule))
-
-    def _parse(self):
-        return self.parser_model.parse(self)
-
-    def _from_peg(self, language_def):
-        parser = ParserPython(peggrammar, comment, reduce_tree=False,
-                              debug=self.debug)
-        parser.root_rule_name = self.root_rule_name
-        parse_tree = parser.parse(language_def)
-
-        return visit_parse_tree(parse_tree, PEGVisitor(self.root_rule_name,
-                                                       self.comment_rule_name,
-                                                       self.ignore_case,
-                                                       debug=self.debug))

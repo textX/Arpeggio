@@ -4,11 +4,11 @@ import os
 # proj
 try:
     # imports for local pytest
-    from ....cleanpeg import ParserPEG      # type: ignore # pragma: no cover
+    from ....parser_peg_clean import ParserPEG      # type: ignore # pragma: no cover
 except ImportError:                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
-    from cleanpeg import ParserPEG          # type: ignore # pragma: no cover
+    from parser_peg_clean import ParserPEG          # type: ignore # pragma: no cover
 
 
 def test_issue_22() -> None:

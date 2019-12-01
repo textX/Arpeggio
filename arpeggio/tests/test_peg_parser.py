@@ -13,15 +13,15 @@ try:
     # imports for local pytest
     from ..arpeggio import *                                # type: ignore # pragma: no cover
     from ..arpeggio import RegExMatch as _                  # type: ignore # pragma: no cover
-    from ..peg import ParserPEG                             # type: ignore # pragma: no cover
-    from ..cleanpeg import ParserPEG as ParserPEGClean      # type: ignore # pragma: no cover
+    from ..parser_peg import ParserPEG                  # type: ignore # pragma: no cover
+    from ..parser_peg_clean import ParserPEG as ParserPEGClean      # type: ignore # pragma: no cover
 except ImportError:                                         # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
     from arpeggio import *                                  # type: ignore # pragma: no cover
     from arpeggio import RegExMatch as _                    # type: ignore # pragma: no cover
-    from peg import ParserPEG                               # type: ignore # pragma: no cover
-    from cleanpeg import ParserPEG as ParserPEGClean        # type: ignore # pragma: no cover
+    from parser_peg import ParserPEG                    # type: ignore # pragma: no cover
+    from parser_peg_clean import ParserPEG as ParserPEGClean        # type: ignore # pragma: no cover
 
 grammar = r'''
     // This is a comment

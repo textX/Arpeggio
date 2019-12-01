@@ -1,6 +1,6 @@
 #######################################################################
-# Name: cleanpeg.py
-# Purpose: This module is a variation of the original peg.py.
+# Name: parser_peg_clean.py
+# Purpose: This module is a variation of the original visitor_peg.py.
 #   The syntax is slightly changed to be more readable and familiar to
 #   python users. It is based on the Yash's suggestion - issue 11
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
@@ -10,17 +10,20 @@
 
 try:
     # imports for local pytest
-    from .arpeggio import *                         # type: ignore # pragma: no cover
-    from .arpeggio import RegExMatch as _           # type: ignore # pragma: no cover
-    from .peg import PEGVisitor                     # type: ignore # pragma: no cover
-    from .peg import ParserPEG as ParserPEGOrig     # type: ignore # pragma: no cover
+    from .arpeggio import *                               # type: ignore # pragma: no cover
+    from .arpeggio import RegExMatch as _                 # type: ignore # pragma: no cover
+    from .visitor_peg import PEGVisitor                   # type: ignore # pragma: no cover
+    from .parser_peg import ParserPEG as ParserPEGOrig    # type: ignore # pragma: no cover
+    from .parser_python import ParserPython               # type: ignore # pragma: no cover
+
 except ImportError:                                 # type: ignore # pragma: no cover
     # imports for doctest
     # noinspection PyUnresolvedReferences
     from arpeggio import *                          # type: ignore # pragma: no cover
     from arpeggio import RegExMatch as _           # type: ignore # pragma: no cover
-    from peg import PEGVisitor                      # type: ignore # pragma: no cover
-    from peg import ParserPEG as ParserPEGOrig      # type: ignore # pragma: no cover
+    from visitor_peg import PEGVisitor                      # type: ignore # pragma: no cover
+    from parser_peg import ParserPEG as ParserPEGOrig      # type: ignore # pragma: no cover
+    from parser_python import ParserPython               # type: ignore # pragma: no cover
 
 
 __all__ = ['ParserPEG']

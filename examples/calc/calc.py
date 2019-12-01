@@ -10,22 +10,28 @@
 # notation.
 #######################################################################
 
-from __future__ import unicode_literals, print_function
-try:
-    text=unicode
-except:
-    text=str
-
-from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, \
-    ParserPython, PTNodeVisitor, visit_parse_tree
+from arpeggio import *
 from arpeggio import RegExMatch as _
 
-def number():     return _(r'\d*\.\d*|\d+')
-def factor():     return Optional(["+","-"]), [number,
-                          ("(", expression, ")")]
-def term():       return factor, ZeroOrMore(["*","/"], factor)
-def expression(): return term, ZeroOrMore(["+", "-"], term)
-def calc():       return OneOrMore(expression), EOF
+
+def number():
+    return _(r'\d*\.\d*|\d+')
+
+
+def factor():
+    return Optional(["+", "-"]), [number, ("(", expression, ")")]
+
+
+def term():
+    return factor, ZeroOrMore(["*", "/"], factor)
+
+
+def expression():
+    return term, ZeroOrMore(["+", "-"], term)
+
+
+def calc():
+    return OneOrMore(expression), EOF
 
 
 class CalcVisitor(PTNodeVisitor):
@@ -112,4 +118,3 @@ if __name__ == "__main__":
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

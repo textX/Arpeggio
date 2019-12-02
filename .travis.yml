@@ -10,4 +10,5 @@ install:
     - pip install pytest-mypy
     - python setup.py install
 script:
-    - py.test arpeggio/tests
+    # - py.test arpeggio/tests
+    - pytest ./

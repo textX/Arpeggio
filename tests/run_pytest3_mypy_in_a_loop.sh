@@ -9,7 +9,6 @@ own_dir="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"  # this gives the fu
 pytest_root_dir="$(dirname "${own_dir}")"                      # one level up
 sleeptime_on_error=5
 echo "Pytest Root Dir: ${pytest_root_dir}"
-export PATH="${pytest_root_dir}":"${PATH}"
 
 
 function install_or_update_lib_bash {

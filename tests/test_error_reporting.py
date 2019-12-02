@@ -46,14 +46,9 @@ def test_optional_with_better_match():
     has precedence over non-optional.
     """
 
-    def grammar():
-        return [first, Optional(second)]
-
-    def first():
-        return 'one', 'two', 'three', '4'
-
-    def second():
-        return 'one', 'two', 'three', 'four', 'five'
+    def grammar():  return [first, Optional(second)]
+    def first():    return 'one', 'two', 'three', '4'
+    def second():   return 'one', 'two', 'three', 'four', 'five'
 
     parser = ParserPython(grammar)
 

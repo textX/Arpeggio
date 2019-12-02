@@ -16,20 +16,10 @@ from arpeggio import *
 from arpeggio import RegExMatch as _
 
 
-def grammar() -> Any:
-    return parentheses, 'strmatch'
-
-
-def parentheses() -> Any:
-    return '(', rulea, ')'
-
-
-def rulea() -> Any:
-    return ['+', '-'], number
-
-
-def number() -> Any:
-    return _(r'\d+')
+def grammar() -> Any: return parentheses, 'strmatch'
+def parentheses() -> Any: return '(', rulea, ')'
+def rulea() -> Any: return ['+', '-'], number
+def number() -> Any: return _(r'\d+')
 
 
 p_removed = False

@@ -11,14 +11,9 @@ def test_direct_rule_call() -> None:
     erroneously attached to both caller and callee.
     """
 
-    def grammar() -> Any:
-        return rule1, rule2
-
-    def rule1() -> Any:
-        return "a"
-
-    def rule2() -> Any:
-        return rule1
+    def grammar():  return rule1, rule2
+    def rule1():    return "a"
+    def rule2():    return rule1
 
     call_count = [0]
 

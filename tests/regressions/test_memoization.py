@@ -15,20 +15,19 @@ def test_memoization_positive(capsys: FixtureRequest) -> None:
     Args: capsys - pytest fixture for output capture
     """
 
-    def grammar() -> List[Any]:
-        return [(rule1, ruleb), (rule1, rulec)]
+    '''
+    def grammar() -> List[Any]:  return [(rule1, ruleb), (rule1, rulec)]
+    def rule1() -> Tuple[Any, ...]:    return rulea, ruleb
+    def rulea() -> str:    return "a"
+    def ruleb() -> str:    return "b"
+    def rulec() -> str:    return "c"
+    '''
 
-    def rule1() -> Tuple[Any, ...]:
-        return rulea, ruleb
-
-    def rulea() -> str:
-        return "a"
-
-    def ruleb() -> str:
-        return "b"
-
-    def rulec() -> str:
-        return "c"
+    def grammar():  return [(rule1, ruleb), (rule1, rulec)]
+    def rule1():    return rulea, ruleb
+    def rulea():    return "a"
+    def ruleb():    return "b"
+    def rulec():    return "c"
 
     parser = ParserPython(grammar, memoization=True, debug=True)
 

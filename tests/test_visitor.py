@@ -12,28 +12,12 @@ from arpeggio import RegExMatch as _
 from arpeggio.export import PTDOTExporter
 
 
-def grammar():
-    return first, "a", second
-
-
-def first():
-    return [fourth, third], ZeroOrMore(third)
-
-
-def second():
-    return OneOrMore(third), "b"
-
-
-def third():
-    return [third_str, fourth]
-
-
-def third_str():
-    return "3"
-
-
-def fourth():
-    return _(r'\d+')
+def grammar():      return first, "a", second
+def first():        return [fourth, third], ZeroOrMore(third)
+def second():       return OneOrMore(third), "b"
+def third():        return [third_str, fourth]
+def third_str():    return "3"
+def fourth():       return _(r'\d+')
 
 
 first_sar = None

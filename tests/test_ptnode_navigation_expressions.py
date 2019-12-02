@@ -10,28 +10,12 @@
 from arpeggio import *
 
 
-def foo():
-    return "a", bar, "b", baz, bar2, ZeroOrMore(bar)
-
-
-def bar():
-    return [bla, bum], baz, "c"
-
-
-def bar2():
-    return ZeroOrMore(bla)
-
-
-def baz():
-    return "d"
-
-
-def bla():
-    return "bla"
-
-
-def bum():
-    return ["bum", "bam"]
+def foo():  return "a", bar, "b", baz, bar2, ZeroOrMore(bar)
+def bar():  return [bla, bum], baz, "c"
+def bar2(): return ZeroOrMore(bla)
+def baz():  return "d"
+def bla():  return "bla"
+def bum():  return ["bum", "bam"]
 
 
 def test_lookup_single():

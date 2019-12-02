@@ -93,4 +93,3 @@ function pytest_loop {
 # upgrade_mypy
 clean_caches
 pytest_loop "${sleeptime_on_error}" "${pytest_root_dir}"
-# pytest_loop "${sleeptime_on_error}" "${own_dir}"

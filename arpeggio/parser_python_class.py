@@ -1,3 +1,7 @@
+"""
+This is for now just a copy of parser_python.py - in Development !
+"""
+# stdlib
 import types
 
 # proj
@@ -5,12 +9,6 @@ from . import error_classes
 from . import parser_base
 from . import peg_expressions
 from . import peg_utils
-
-
-class GrammarBase(object):
-    """
-    Base Class for Grammar Rules ParserPythonClass
-    """
 
 
 class ParserPythonClass(parser_base.Parser):
@@ -39,7 +37,13 @@ class ParserPythonClass(parser_base.Parser):
         # In debug mode export parser model to dot for
         # visualization
         if self.debug:
-            from .export import PMDOTExporter
+            try:
+                # for Pytest
+                from .export import PMDOTExporter   # type: ignore # pragma: no cover
+            except ImportError:                     # type: ignore # pragma: no cover
+                # for local Doctest
+                from export import PMDOTExporter    # type: ignore # pragma: no cover
+
             root_rule = language_def.__name__
             PMDOTExporter().exportFile(self.parser_model,
                                        "{}_parser_model.dot".format(root_rule))
@@ -57,7 +61,7 @@ class ParserPythonClass(parser_base.Parser):
             Parser Model (PEG Abstract Semantic Graph)
         """
         __rule_cache = {"EndOfFile": peg_expressions.EndOfFile()}
-        __for_resolving = []  # Expressions that needs cross reference resolving
+        __for_resolving = []  # Expressions that needs crossref resolving
         self.__cross_refs = 0
 
         def inner_from_python(expression):
@@ -85,7 +89,6 @@ class ParserPythonClass(parser_base.Parser):
                 __rule_cache[rule_name] = peg_utils.CrossRef(rule_name)
 
                 curr_expr = expression
-
                 while isinstance(curr_expr, types.FunctionType):
                     # If function directly returns another function
                     # go into until non-function is returned.
@@ -176,7 +179,7 @@ class ParserPythonClass(parser_base.Parser):
 
         parser_model = inner_from_python(expression)
         resolve()
-        assert self.__cross_refs == 0, "Not all cross references are resolved!"
+        assert self.__cross_refs == 0, "Not all crossrefs are resolved!"
         return parser_model
 
     def errors(self):

@@ -14,3 +14,7 @@ install:
     - python setup.py install
 script:
     - pytest ./ --cov
+
+after_success:
+    - coverage report
+    - codecov

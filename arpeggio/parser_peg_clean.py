@@ -8,24 +8,14 @@
 # License: MIT License
 #######################################################################
 
-try:
-    # imports for local pytest
-    from . import parser_peg                     # type: ignore # pragma: no cover
-    from . import parser_python                  # type: ignore # pragma: no cover
-    from . import peg_expressions                # type: ignore # pragma: no cover
-    from . import peg_lexical                    # type: ignore # pragma: no cover
-    from . import visitor_base                   # type: ignore # pragma: no cover
-    from . import visitor_peg                    # type: ignore # pragma: no cover
+# proj
+from . import parser_peg
+from . import parser_python
+from . import peg_expressions
+from . import peg_lexical
+from . import visitor_base
+from . import visitor_peg
 
-except ImportError:                              # type: ignore # pragma: no cover
-    # imports for doctest
-    # noinspection PyUnresolvedReferences
-    import parser_peg                            # type: ignore # pragma: no cover
-    import parser_python                         # type: ignore # pragma: no cover
-    import peg_expressions                       # type: ignore # pragma: no cover
-    import peg_lexical                           # type: ignore # pragma: no cover
-    import visitor_base                          # type: ignore # pragma: no cover
-    import visitor_peg                           # type: ignore # pragma: no cover
 
 __all__ = ['ParserPEG']
 

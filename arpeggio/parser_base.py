@@ -7,21 +7,11 @@ import types
 from typing import Any, Dict, List
 
 # proj
-try:
-    # imports for local pytest
-    from . import arpeggio_settings         # type: ignore # pragma: no cover
-    from . import peg_expressions           # type: ignore # pragma: no cover
-    from . import peg_nodes                 # type: ignore # pragma: no cover
-    from . import peg_semantic_actions      # type: ignore # pragma: no cover
-    from . import peg_utils                 # type: ignore # pragma: no cover
-except ImportError:                         # type: ignore # pragma: no cover
-    # imports for doctest
-    # noinspection PyUnresolvedReferences
-    import arpeggio_settings                # type: ignore # pragma: no cover
-    import peg_expressions                  # type: ignore # pragma: no cover
-    import peg_nodes                        # type: ignore # pragma: no cover
-    import peg_semantic_actions             # type: ignore # pragma: no cover
-    import peg_utils                        # type: ignore # pragma: no cover
+from . import arpeggio_settings
+from . import peg_expressions
+from . import peg_nodes
+from . import peg_semantic_actions
+from . import peg_utils
 
 
 class Parser(peg_utils.DebugPrinter, abc.ABC):

@@ -12,21 +12,11 @@ import copy
 import re
 
 # proj
-try:
-    # imports for local pytest
-    from . import error_classes             # type: ignore # pragma: no cover
-    from . import peg_expressions           # type: ignore # pragma: no cover
-    from . import peg_lexical               # type: ignore # pragma: no cover
-    from . import peg_utils                 # type: ignore # pragma: no cover
-    from . import visitor_base              # type: ignore # pragma: no cover
-except ImportError:                         # type: ignore # pragma: no cover
-    # imports for doctest
-    # noinspection PyUnresolvedReferences
-    import error_classes                    # type: ignore # pragma: no cover
-    import peg_expressions                  # type: ignore # pragma: no cover
-    import peg_lexical                      # type: ignore # pragma: no cover
-    import peg_utils                        # type: ignore # pragma: no cover
-    import visitor_base                     # type: ignore # pragma: no cover
+from . import error_classes
+from . import peg_expressions
+from . import peg_lexical
+from . import peg_utils
+from . import visitor_base
 
 
 # Escape sequences supported in PEG literal string matches

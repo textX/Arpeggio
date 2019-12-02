@@ -1,19 +1,10 @@
 import types
 
 # proj
-try:
-    # imports for local pytest
-    from . import error_classes           # type: ignore # pragma: no cover
-    from . import parser_base             # type: ignore # pragma: no cover
-    from . import peg_expressions         # type: ignore # pragma: no cover
-    from . import peg_utils               # type: ignore # pragma: no cover
-except ImportError:                       # type: ignore # pragma: no cover
-    # imports for doctest
-    # noinspection PyUnresolvedReferences
-    import error_classes                  # type: ignore # pragma: no cover
-    import parser_base                    # type: ignore # pragma: no cover
-    import peg_expressions                # type: ignore # pragma: no cover
-    import peg_utils                      # type: ignore # pragma: no cover
+from . import error_classes
+from . import parser_base
+from . import peg_expressions
+from . import peg_utils
 
 
 class GrammarBase(object):

@@ -16,7 +16,7 @@
 import os
 from arpeggio.parser_peg_clean import ParserPEG
 from arpeggio import visit_parse_tree
-from calc import CalcVisitor
+from .calc import CalcVisitor
 
 
 def main(debug=False):

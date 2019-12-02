@@ -6,8 +6,11 @@
 # License: MIT License
 ##############################################################################
 
+# stdlib
 import pprint
 import os
+
+# proj
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
@@ -41,11 +44,11 @@ class CSVVisitor(PTNodeVisitor):
         value = children[0]
         try:
             return float(value)
-        except:
+        except Exception:
             pass
         try:
             return int(value)
-        except:
+        except Exception:
             return value
 
     def visit_record(self, node, children):
@@ -55,7 +58,7 @@ class CSVVisitor(PTNodeVisitor):
 
     def visit_csvfile(self, node, children):
         # We are not interested in newlines so we will filter them.
-        return [x for x in children if x!='\n']
+        return [x for x in children if x != '\n']
 
 
 def main(debug=False):

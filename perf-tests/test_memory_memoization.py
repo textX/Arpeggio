@@ -7,9 +7,10 @@
 
 import codecs
 from os.path import dirname, join
-from memory_profiler import profile
+from memory_profiler import profile  # type: ignore
 from arpeggio import ParserPython
 from grammar import rhapsody
+
 
 @profile
 def memoization():
@@ -29,6 +30,7 @@ def memoization():
         content = f.read()
 
     large = parser.parse(content)
+
 
 if __name__ == '__main__':
     memoization()

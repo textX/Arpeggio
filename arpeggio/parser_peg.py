@@ -1,22 +1,10 @@
 # proj
-try:
-    # imports for local pytest
-    # from . import arpeggio                 # type: ignore # pragma: no cover
-    from . import parser_base                # type: ignore # pragma: no cover
-    from . import parser_python              # type: ignore # pragma: no cover
-    from . import peg_expressions            # type: ignore # pragma: no cover
-    from . import peg_lexical                # type: ignore # pragma: no cover
-    from . import visitor_base               # type: ignore # pragma: no cover
-    from . import visitor_peg                # type: ignore # pragma: no cover
-
-except ImportError:                          # type: ignore # pragma: no cover
-    # import arpeggio                        # type: ignore # pragma: no cover
-    import parser_base                       # type: ignore # pragma: no cover
-    import parser_python                     # type: ignore # pragma: no cover
-    import peg_expressions                   # type: ignore # pragma: no cover
-    import peg_lexical                       # type: ignore # pragma: no cover
-    import visitor_base                      # type: ignore # pragma: no cover
-    import visitor_peg                       # type: ignore # pragma: no cover
+from . import parser_base
+from . import parser_python
+from . import peg_expressions
+from . import peg_lexical
+from . import visitor_base
+from . import visitor_peg
 
 
 __all__ = ['ParserPEG']

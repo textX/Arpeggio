@@ -1,10 +1,5 @@
-try:
-    # imports for local pytest
-    from . import peg_expressions                          # type: ignore # pragma: no cover
-except ImportError:                                        # type: ignore # pragma: no cover
-    # imports for doctest
-    # noinspection PyUnresolvedReferences
-    import peg_expressions                                 # type: ignore # pragma: no cover
+# proj
+from . import peg_expressions
 
 # Lexical invariants
 LEFT_ARROW = "<-"

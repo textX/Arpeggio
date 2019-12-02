@@ -16,7 +16,7 @@ from arpeggio import RegExMatch as _
 
 # Grammar
 def comment():
-    return [_("//.*"), _("/\*.*\*/")]
+    return [_(r"//.*"), _(r"/\*.*\*/")]
 
 
 def literal():

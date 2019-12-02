@@ -64,7 +64,7 @@ class CalcVisitor(PTNodeVisitor):
             print("Term {}".format(children))
         term = children[0]
         for i in range(2, len(children), 2):
-            if children[i-1] == "*":
+            if children[i - 1] == "*":
                 term *= children[i]
             else:
                 term /= children[i]
@@ -112,6 +112,7 @@ def main(debug=False):
     assert (result - -7.51194444444) < 0.0001
 
     print("{} = {}".format(input_expr, result))
+
 
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model

@@ -9,14 +9,7 @@
 # stdlib
 import io
 
-# proj
-try:
-    # imports for local pytest
-    from . import peg_nodes                 # type: ignore # pragma: no cover
-except ImportError:                         # type: ignore # pragma: no cover
-    # imports for doctest
-    # noinspection PyUnresolvedReferences
-    import peg_nodes                        # type: ignore # pragma: no cover
+from . import peg_nodes
 
 
 class Exporter(object):

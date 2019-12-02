@@ -8,6 +8,7 @@ python:
 install:
     - pip install pytest-codestyle
     - pip install pytest-mypy
+    - pip install memory_profiler
     - python setup.py install
 script:
     # - py.test arpeggio/tests

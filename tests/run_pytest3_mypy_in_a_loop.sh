@@ -49,7 +49,6 @@ function upgrade_mypy {
     pip3 install --upgrade "git+https://github.com/python/mypy.git"
 }
 
-
 function pytest_loop {
     local sleeptime_on_error pytest_root_dir
     sleeptime_on_error="${1}"
@@ -58,6 +57,8 @@ function pytest_loop {
     while true; do
         echo "Pytest Root Dir: ${pytest_root_dir}"
         echo "Projects Root Dir: ${projects_dir}"
+
+        clean_caches "${pytest_root_dir}"
 
         clr_green "*** PYTEST **************************************************************************************"
         python3 -m pytest "${pytest_root_dir}" --disable-warnings
@@ -96,6 +97,5 @@ function pytest_loop {
 
 # upgrade_pytest
 # upgrade_mypy
-clean_caches "${pytest_root_dir}"
 pytest_loop "${sleeptime_on_error}" "${pytest_root_dir}"
 

@@ -1,4 +1,3 @@
-#-*- coding: utf-8 -*-
 #######################################################################
 # Name: bibtex.py
 # Purpose: Parser for bibtex files
@@ -6,36 +5,77 @@
 # Copyright: (c) 2013-2015 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from __future__ import print_function, unicode_literals
 
-import pprint
+# stdlib
+import codecs
 import os
+import pprint
 import sys
+
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
 
 # Grammar
-def bibfile():                  return ZeroOrMore([comment_entry, bibentry, comment]), EOF
-def comment_entry():            return "@comment", "{", _(r'[^}]*'), "}"
-def bibentry():                 return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
-def field():                    return fieldname, "=", fieldvalue
-def fieldvalue():               return [fieldvalue_braces, fieldvalue_quotes]
-def fieldvalue_braces():        return "{", fieldvalue_braced_content, "}"
-def fieldvalue_quotes():        return '"', fieldvalue_quoted_content, '"'
+def bibfile():
+    return ZeroOrMore([comment_entry, bibentry, comment]), EOF
+
+
+def comment_entry():
+    return "@comment", "{", _(r'[^}]*'), "}"
+
+
+def bibentry():
+    return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
+
+
+def field():
+    return fieldname, "=", fieldvalue
+
+
+def fieldvalue():
+    return [fieldvalue_braces, fieldvalue_quotes]
+
+
+def fieldvalue_braces():
+    return "{", fieldvalue_braced_content, "}"
+
+
+def fieldvalue_quotes():
+    return '"', fieldvalue_quoted_content, '"'
+
 
 # Lexical rules
-def fieldname():                return _(r'[-\w]+')
-def comment():                  return _(r'[^@]+')
-def bibtype():                  return _(r'@\w+')
-def bibkey():                   return _(r'[^\s,]+')
-def fieldvalue_quoted_content():    return _(r'((\\")|[^"])*')
-def fieldvalue_braced_content():    return Combine(
-                                            ZeroOrMore([Optional(And("{"), fieldvalue_inner),\
-                                                        fieldvalue_part]))
+def fieldname():
+    return _(r'[-\w]+')
 
-def fieldvalue_part():          return _(r'((\\")|[^{}])+')
-def fieldvalue_inner():         return "{", fieldvalue_braced_content, "}"
+
+def comment():
+    return _(r'[^@]+')
+
+
+def bibtype():
+    return _(r'@\w+')
+
+
+def bibkey():
+    return _(r'[^\s,]+')
+
+
+def fieldvalue_quoted_content():
+    return _(r'((\\")|[^"])*')
+
+
+def fieldvalue_braced_content():
+    return Combine(ZeroOrMore([Optional(And("{"), fieldvalue_inner), fieldvalue_part]))
+
+
+def fieldvalue_part():
+    return _(r'((\\")|[^{}])+')
+
+
+def fieldvalue_inner():
+    return "{", fieldvalue_braced_content, "}"
 
 
 # Semantic actions visitor
@@ -116,6 +156,7 @@ def main(debug=False, file_name=None):
     ast = visit_parse_tree(parse_tree, BibtexVisitor(debug=debug))
 
     return ast
+
 
 if __name__ == "__main__":
     # First parameter is bibtex file

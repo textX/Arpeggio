@@ -12,12 +12,11 @@
 # Parser model as well as parse tree exported to dot files should be
 # the same as parser model and parse tree generated in calc.py example.
 #######################################################################
-from __future__ import absolute_import, unicode_literals, print_function
 
 import os
-from arpeggio.peg import ParserPEG
+from arpeggio.parser_peg import ParserPEG
 from arpeggio import visit_parse_tree
-from calc import CalcVisitor
+from .calc import CalcVisitor
 
 
 def main(debug=False):
@@ -49,9 +48,9 @@ def main(debug=False):
 
     print("{} = {}".format(input_expr, result))
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

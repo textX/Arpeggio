@@ -10,22 +10,28 @@
 # notation.
 #######################################################################
 
-from __future__ import unicode_literals, print_function
-try:
-    text=unicode
-except:
-    text=str
-
-from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, \
-    ParserPython, PTNodeVisitor, visit_parse_tree
+from arpeggio import *
 from arpeggio import RegExMatch as _
 
-def number():     return _(r'\d*\.\d*|\d+')
-def factor():     return Optional(["+","-"]), [number,
-                          ("(", expression, ")")]
-def term():       return factor, ZeroOrMore(["*","/"], factor)
-def expression(): return term, ZeroOrMore(["+", "-"], term)
-def calc():       return OneOrMore(expression), EOF
+
+def number():
+    return _(r'\d*\.\d*|\d+')
+
+
+def factor():
+    return Optional(["+", "-"]), [number, ("(", expression, ")")]
+
+
+def term():
+    return factor, ZeroOrMore(["*", "/"], factor)
+
+
+def expression():
+    return term, ZeroOrMore(["+", "-"], term)
+
+
+def calc():
+    return OneOrMore(expression), EOF
 
 
 class CalcVisitor(PTNodeVisitor):
@@ -58,7 +64,7 @@ class CalcVisitor(PTNodeVisitor):
             print("Term {}".format(children))
         term = children[0]
         for i in range(2, len(children), 2):
-            if children[i-1] == "*":
+            if children[i - 1] == "*":
                 term *= children[i]
             else:
                 term /= children[i]
@@ -107,9 +113,9 @@ def main(debug=False):
 
     print("{} = {}".format(input_expr, result))
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

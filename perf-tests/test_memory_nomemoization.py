@@ -1,17 +1,16 @@
-#-*- coding: utf-8 -*-
 #######################################################################
 # Purpose: Testing memory consumption with memoization disabled
 # Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2016 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from __future__ import print_function, unicode_literals
 
 import codecs
 from os.path import dirname, join
-from memory_profiler import profile
+from memory_profiler import profile  # type: ignore
 from arpeggio import ParserPython
 from grammar import rhapsody
+
 
 @profile
 def no_memoization():
@@ -31,6 +30,7 @@ def no_memoization():
         content = f.read()
 
     large = parser.parse(content)
+
 
 if __name__ == '__main__':
     no_memoization()

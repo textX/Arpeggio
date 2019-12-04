@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 ###############################################################################
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
@@ -15,7 +14,9 @@
 import codecs
 import os
 import sys
-from setuptools import setup, find_packages
+
+from setuptools import find_packages    # type: ignore
+from setuptools import setup            # type: ignore
 
 VERSIONFILE = "arpeggio/__init__.py"
 VERSION = None
@@ -55,41 +56,35 @@ if sys.argv[-1].startswith('publish'):
         print("  git push --tags")
     sys.exit()
 
-setup(
-    name=NAME,
-    version=VERSION,
-    description=DESC,
-    long_description=README,
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
-    maintainer=AUTHOR,
-    maintainer_email=AUTHOR_EMAIL,
-    license=LICENSE,
-    url=URL,
-    download_url=DOWNLOAD_URL,
-    packages=find_packages(),
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
-    test_suite="arpeggio.tests",
-    keywords="parser packrat peg",
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Information Technology',
-        'Intended Audience :: Science/Research',
-        'Topic :: Software Development :: Interpreters',
-        'Topic :: Software Development :: Compilers',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'
-        ]
-
-)
+setup(name=NAME,
+      version=VERSION,
+      description=DESC,
+      long_description=README,
+      author=AUTHOR,
+      author_email=AUTHOR_EMAIL,
+      maintainer=AUTHOR,
+      maintainer_email=AUTHOR_EMAIL,
+      license=LICENSE,
+      url=URL,
+      download_url=DOWNLOAD_URL,
+      packages=find_packages(),
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'],
+      test_suite="arpeggio.tests",
+      keywords="parser packrat peg",
+      classifiers=['Development Status :: 5 - Production/Stable',
+                   'Intended Audience :: Developers',
+                   'Intended Audience :: Information Technology',
+                   'Intended Audience :: Science/Research',
+                   'Topic :: Software Development :: Interpreters',
+                   'Topic :: Software Development :: Compilers',
+                   'Topic :: Software Development :: Libraries :: Python Modules',
+                   'License :: OSI Approved :: MIT License',
+                   'Operating System :: OS Independent',
+                   'Programming Language :: Python :: 3',
+                   'Programming Language :: Python :: 3.5',
+                   'Programming Language :: Python :: 3.6',
+                   'Programming Language :: Python :: 3.7',
+                   'Programming Language :: Python :: 3.8'
+                   ]
+      )

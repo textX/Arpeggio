@@ -80,15 +80,6 @@ Removing left recursion yields:
 This might happen when non-unicode literals are used. Make sure that you use
 unicode literals when defining grammars using Python notation.
 
-You might want to include:
-
-```python
-from __future__ import unicode_literals
-```
-
-This will enable unicode literals in the python < 3.
-
-
 ## Visitor method is not called during semantic analysis
 
 Semantic analysis operates on a parse tree nodes produced by grammar rules.

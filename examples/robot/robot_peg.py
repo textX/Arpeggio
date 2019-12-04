@@ -18,11 +18,10 @@
 #        right
 #    end
 #######################################################################
-from __future__ import print_function, unicode_literals
 
 import os
 from arpeggio import visit_parse_tree
-from arpeggio.cleanpeg import ParserPEG
+from arpeggio.parser_peg_clean import ParserPEG
 
 # Semantic actions visitor
 from robot import RobotVisitor

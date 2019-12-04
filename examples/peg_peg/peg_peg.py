@@ -11,12 +11,11 @@
 # grammar definition language.
 ##############################################################################
 
-from __future__ import unicode_literals
-
 import os
 from arpeggio import *
 from arpeggio.export import PMDOTExporter
-from arpeggio.peg import PEGVisitor, ParserPEG
+from arpeggio.visitor_peg import PEGVisitor
+from arpeggio.parser_peg import ParserPEG
 
 
 def main(debug=False):
@@ -56,6 +55,6 @@ def main(debug=False):
     parser.parser_model = parser_model
     parser.parse(peg_grammar)
 
+
 if __name__ == '__main__':
     main(debug=True)
-

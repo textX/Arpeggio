@@ -9,8 +9,9 @@
 import os
 import pprint
 from arpeggio import visit_parse_tree
-from arpeggio.cleanpeg import ParserPEG
+from arpeggio.parser_peg_clean import ParserPEG
 from examples.csv.csv import CSVVisitor
+
 
 def main(debug=False):
     # First we will make a parser - an instance of the CVS parser model.
@@ -33,9 +34,9 @@ def main(debug=False):
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(csv_content)
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

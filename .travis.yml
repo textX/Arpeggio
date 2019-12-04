@@ -1,12 +1,65 @@
 language: python
-python:
-    - "2.7"
-    - "3.4"
-    - "3.5"
-    - "3.6"
-    - "3.7"
-    - "3.8"
+group: travis_latest
+dist: xenial
+sudo: true
+
+env:
+    global:
+        - pip_command="pip"
+        - python_command="python"
+
+matrix:
+    include:
+
+    - os: windows
+      language: sh
+      name: "Windows Python 3.8"
+
+      # oddly a secure password under env: global: causes that choco fails
+      # so we need to put the option : filter_secrets: false
+      # this can be a security issue, check that You dont leak secrets here !
+      filter_secrets: false
+      before_install:
+          - choco install python3
+          - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
+
+    - os: linux
+      language: python
+      python: '3.6'
+
+    - os: linux
+      language: python
+      python: '3.7'
+
+    - os: linux
+      language: python
+      python: '3.8'
+
+    - os: linux
+      language: python
+      python: '3.8-dev'
+
+    - os: osx
+      language: sh
+      name: "osX Python 3.8"
+      python: "3.8"
+      osx_image: xcode11
+      env:
+        # on osx pip and python points to python 2.7 - therefore we have to use pip3 and python3 here
+        - pip_command="pip3"
+        - python_command="python3"
+
+
 install:
-    - python setup.py install
+    - ${pip_command} install codecov
+    - ${pip_command} install pytest-codestyle
+    - ${pip_command} install pytest-cov
+    - ${pip_command} install pytest-mypy
+    - ${pip_command} install memory_profiler
+    - ${python_command} setup.py install
 script:
-    - py.test arpeggio/tests
+    - pytest ./ --cov
+
+after_success:
+    - coverage report
+    - codecov

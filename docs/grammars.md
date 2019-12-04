@@ -218,7 +218,7 @@ Creating a parser using PEG syntax is done by the class `ParserPEG` from the
 `arpeggio.peg` or `arpeggio.cleanpeg` modules.
 
 ```python
-from arpeggio.cleanpeg import ParserPEG
+from arpeggio.parser_peg_clean import ParserPEG
 parser = ParserPEG(calc_grammar, "calc")
 ```
 

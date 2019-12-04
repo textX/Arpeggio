@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: export.py
 # Purpose: Export support for arpeggio
@@ -7,9 +6,10 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
+# stdlib
 import io
-from arpeggio import Terminal
+
+from . import peg_nodes
 
 
 class Exporter(object):
@@ -21,13 +21,15 @@ class Exporter(object):
         super(Exporter, self).__init__()
 
         # Export initialization
-        self._render_set = set()        # Used in rendering to prevent
-                                        # rendering
-                                        # of the same node multiple times
+        # Used in rendering to prevent
+        # rendering
+        # of the same node multiple times
+        self._render_set = set()
 
-        self._adapter_map = {}          # Used as a registry of adapters to
-                                        # ensure that the same adapter is
-                                        # returned for the same adaptee object
+        # Used as a registry of adapters to
+        # ensure that the same adapter is
+        # returned for the same adapter object
+        self._adapter_map = {}
 
     def export(self, obj):
         """
@@ -124,7 +126,7 @@ class PMDOTExportAdapter(DOTExportAdapter):
     @property
     def neighbours(self):
         if not hasattr(self, "_neighbours"):
-            self._neighbours= []
+            self._neighbours = []
 
             # Registry of adapters used in this export
             adapter_map = self.export._adapter_map
@@ -151,7 +153,7 @@ class PTDOTExportAdapter(PMDOTExportAdapter):
     """
     @property
     def neighbours(self):
-        if isinstance(self.adaptee, Terminal):
+        if isinstance(self.adaptee, peg_nodes.Terminal):
             return []
         else:
             if not hasattr(self, "_neighbours"):
@@ -167,15 +169,16 @@ class DOTExporter(Exporter):
     Export to DOT language (part of GraphViz, see http://www.graphviz.org/)
     """
     def _render_node(self, node):
-        if not node in self._render_set:
+        if node not in self._render_set:
             self._render_set.add(node)
             self._outf.write('\n%s [label="%s"];' %
                              (node.id, self._dot_label_esc(node.desc)))
-            #TODO Comment handling
-#            if hasattr(node, "comments") and root.comments:
-#                retval += self.node(root.comments)
-#                retval += '\n%s->%s [label="comment"]' % \
-                            #(id(root), id(root.comments))
+            # TODO Comment handling
+            '''
+            if hasattr(node, "comments") and root.comments:
+                retval += self.node(root.comments)
+                retval += '\n%s->%s [label="comment"]' % (id(root), id(root.comments))
+            '''
             for name, n in node.neighbours:
                 self._outf.write('\n%s->%s [label="%s"]' %
                                  (node.id, n.id, name))

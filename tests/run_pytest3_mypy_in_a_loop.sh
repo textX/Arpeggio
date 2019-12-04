@@ -12,6 +12,9 @@ pytest_root_dir="$(dirname "${own_dir}")"                   # one level up
 # if we have other Projects stored in that directory, we can import them without installing, otherwise not harmful
 projects_dir="$(dirname "${pytest_root_dir}")"              # one level up
 export PYTHONPATH="${projects_dir}":"${PYTHONPATH}"
+# if we have other Projects stored in that directory, we can import them without installing, otherwise not harmful
+projects_dir_upper="$(dirname "${projects_dir}")"              # one level up
+export PYTHONPATH="${projects_dir_upper}":"${PYTHONPATH}"
 
 
 function install_or_update_lib_bash {

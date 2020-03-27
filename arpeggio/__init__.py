@@ -121,31 +121,31 @@ class DebugPrinter(object):
 
     Attributes:
         debug (bool): If true debugging messages will be printed.
-        _current_ident(int): Current identation level for prints.
+        _current_indent(int): Current indentation level for prints.
     """
 
     def __init__(self, **kwargs):
 
         self.debug = kwargs.pop("debug", False)
         self.file = kwargs.pop("file", sys.stdout)
-        self._current_ident = 0
+        self._current_indent = 0
 
         super(DebugPrinter, self).__init__(**kwargs)
 
-    def dprint(self, message, ident_change=0):
+    def dprint(self, message, indent_change=0):
         """
         Handle debug message. Print to the stream specified by the 'file'
         keyword argument at the current indentation level. Default stream is
         stdout.
         """
-        if ident_change < 0:
-            self._current_ident += ident_change
+        if indent_change < 0:
+            self._current_indent += indent_change
 
-        print(("%s%s" % ("   " * self._current_ident, message)),
+        print(("%s%s" % ("   " * self._current_indent, message)),
               file=self.file)
 
-        if ident_change > 0:
-            self._current_ident += ident_change
+        if indent_change > 0:
+            self._current_indent += indent_change
 
 
 # ---------------------------------------------------------

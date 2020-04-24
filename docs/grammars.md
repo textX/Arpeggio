@@ -63,7 +63,10 @@ In Arpeggio each PEG rule consists of atomic parsing expression which can be:
     - **Optional** - matches given expression but will not fail if match can't be
       done. Matched input is consumed.
     - **Unordered group** - matches given expressions in any order. Each given
-      expression must be matched exacltly once. Matched input is consumed.
+      expression must be matched exactly once. Expressions are repeatedly tried
+      from left to right until any succeeds, the process is repeated ignoring
+      already matched expressions, thus the behavior is deterministic. Matched
+      input is consumed.
     - **And predicate** - succeeds if given expression matches at current
       location but does not consume any input.
     - **Not predicate** - succeeds if given expression **does not** matches at

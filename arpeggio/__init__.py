@@ -558,7 +558,7 @@ class UnorderedGroup(Repetition):
 
         # Prefetching
         append = results.append
-        nodes_to_try = set(self.nodes)
+        nodes_to_try = list(self.nodes)
         sep = self.sep.parse if self.sep else None
         result = None
         sep_result = None
@@ -582,7 +582,7 @@ class UnorderedGroup(Repetition):
             c_loc_pos = parser.position
             match = True
             all_optionals_fail = True
-            for e in set(nodes_to_try):
+            for e in list(nodes_to_try):
                 try:
                     result = e.parse(parser)
                     if result:

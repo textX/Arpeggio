@@ -52,7 +52,7 @@ matrix:
 
 install:
     - ${pip_command} install codecov
-    - ${pip_command} install pytest-codestyle
+    - ${pip_command} install pytest-pycodestyle
     - ${pip_command} install pytest-cov
     - ${pip_command} install pytest-mypy
     - ${pip_command} install memory_profiler

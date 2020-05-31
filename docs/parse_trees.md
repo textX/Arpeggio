@@ -119,6 +119,56 @@ assert result.bar[1].position == 14
 ```
 
 
+## Printing parse trees
+
+Elements of the parse tree has `tree_str` method which can be used to print the
+tree.
+
+For example:
+
+```python
+...
+parse_tree = parser.parse(some_input)
+print(parse_tree.tree_str())
+```
+
+Result might look something like:
+
+```
+simpleLanguage=Sequence [0-191]
+  keyword=Kwd(function) [0-8]: function
+  symbol=RegExMatch(\w+) [9-12]: fak
+  parameterlist=Sequence [13-20]
+    symbol=RegExMatch(\w+) [13-14]: n
+    symbol=RegExMatch(\w+) [16-17]: x
+    symbol=RegExMatch(\w+) [19-20]: p
+  block=Sequence [22-191]
+    StrMatch({) [22-23]: {
+    statement=Sequence [28-189]
+      ifstatement=Sequence [28-188]
+        keyword=Kwd(if) [28-30]: if
+        StrMatch(() [31-32]: (
+        expression=OrderedChoice [32-36]
+          operation=Sequence [32-36]
+            symbol=RegExMatch(\w+) [32-33]: n
+            operator=RegExMatch(\+|\-|\*|\/|\=\=) [33-35]: ==
+            literal=RegExMatch(\d*\.\d*|\d+|".*?") [35-36]: 0
+        StrMatch()) [36-37]: )
+        block=Sequence [38-93]
+          StrMatch({) [38-39]: {
+          statement=Sequence [78-87]
+            returnstatement=Sequence [78-86]
+              keyword=Kwd(return) [78-84]: return
+              expression=OrderedChoice [85-86]
+                literal=RegExMatch(\d*\.\d*|\d+|".*?") [85-86]: 0
+            StrMatch(;) [86-87]: ;
+
+```
+
+Each line contains information about the rule and the span of the input where
+the match occurred.
+
+
 ## Parse tree reduction
 
 Parser can be configured to create a reduced parse tree. More information can be

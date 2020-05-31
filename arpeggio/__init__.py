@@ -1020,6 +1020,10 @@ class ParseTreeNode(object):
             # If default actions are enabled
             return visitor.visit__default__(self, children)
 
+    def tree_str(self, indent=0):
+        return '{}{} [{}-{}]'.format('  ' * indent, self.rule.name,
+                                     self.position, self.position_end)
+
 
 class Terminal(ParseTreeNode):
     """
@@ -1068,6 +1072,10 @@ class Terminal(ParseTreeNode):
 
     def __repr__(self):
         return self.desc
+
+    def tree_str(self, indent=0):
+        return '{}: {}'.format(super(Terminal, self).tree_str(indent),
+                               self.value)
 
     def __eq__(self, other):
         return text(self) == text(other)
@@ -1127,6 +1135,11 @@ class NonTerminal(ParseTreeNode, list):
 
     def __repr__(self):
         return "[ %s ]" % ", ".join([repr(x) for x in self])
+
+    def tree_str(self, indent=0):
+        return '{}\n{}'.format(super(NonTerminal, self).tree_str(indent),
+                               '\n'.join([c.tree_str(indent + 1)
+                                          for c in self]))
 
     def __getattr__(self, rule_name):
         """

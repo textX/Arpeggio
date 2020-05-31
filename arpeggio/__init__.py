@@ -169,6 +169,9 @@ class ParsingExpression(object):
         suppress (bool): If this is set to True than no ParseTreeNode will be
             created for this ParsingExpression. Default False.
     """
+
+    suppress = False
+
     def __init__(self, *elements, **kwargs):
 
         if len(elements) == 1:
@@ -183,7 +186,8 @@ class ParsingExpression(object):
             nodes = [nodes]
         self.nodes = nodes
 
-        self.suppress = kwargs.get('suppress', False)
+        if 'suppress' in kwargs:
+            self.suppress = kwargs['suppress']
 
         # Memoization. Every node cache the parsing results for the given input
         # positions.

@@ -718,8 +718,8 @@ class Match(ParsingExpression):
     """
     Base class for all classes that will try to match something from the input.
     """
-    def __init__(self, rule_name, root=False):
-        super(Match, self).__init__(rule_name=rule_name, root=root)
+    def __init__(self, rule_name, root=False, **kwargs):
+        super(Match, self).__init__(rule_name=rule_name, root=root, **kwargs)
 
     @property
     def name(self):
@@ -810,8 +810,9 @@ class RegExMatch(Match):
 
     '''
     def __init__(self, to_match, rule_name='', root=False, ignore_case=None,
-                 multiline=None, str_repr=None, re_flags=re.MULTILINE):
-        super(RegExMatch, self).__init__(rule_name, root)
+                 multiline=None, str_repr=None, re_flags=re.MULTILINE,
+                 **kwargs):
+        super(RegExMatch, self).__init__(rule_name, root, **kwargs)
         self.to_match_regex = to_match
         self.ignore_case = ignore_case
         self.multiline = multiline
@@ -864,8 +865,9 @@ class StrMatch(Match):
         ignore_case(bool): If case insensitive match is needed.
             Default is None to support propagation from global parser setting.
     """
-    def __init__(self, to_match, rule_name='', root=False, ignore_case=None):
-        super(StrMatch, self).__init__(rule_name, root)
+    def __init__(self, to_match, rule_name='', root=False, ignore_case=None,
+                 **kwargs):
+        super(StrMatch, self).__init__(rule_name, root, **kwargs)
         self.to_match = to_match
         self.ignore_case = ignore_case
 
@@ -907,6 +909,7 @@ class StrMatch(Match):
 
     def __hash__(self):
         return hash(self.to_match)
+
 
 
 # HACK: Kwd class is a bit hackish. Need to find a better way to
@@ -1731,7 +1734,8 @@ class CrossRef(object):
 
 class ParserPython(Parser):
 
-    def __init__(self, language_def, comment_def=None, *args, **kwargs):
+    def __init__(self, language_def, comment_def=None, syntax_classes=None,
+                 *args, **kwargs):
         """
         Constructs parser from python statements and expressions.
 
@@ -1740,8 +1744,13 @@ class ParserPython(Parser):
                 the root rule of the grammar.
             comment_def (python function): A python function that defines
                 the root rule of the comments grammar.
+            syntax_classes (dict): Overrides of special syntax parser
+                expression classes (StrMatch, Sequence, OrderedChoice).
+
         """
         super(ParserPython, self).__init__(*args, **kwargs)
+
+        self.syntax_classes = syntax_classes if syntax_classes else {}
 
         # PEG Abstract Syntax Graph
         self.parser_model = self._from_python(language_def)
@@ -1775,6 +1784,10 @@ class ParserPython(Parser):
         __rule_cache = {"EndOfFile": EndOfFile()}
         __for_resolving = []  # Expressions that needs crossref resolvnih
         self.__cross_refs = 0
+        _StrMatch = self.syntax_classes.get('StrMatch', StrMatch)
+        _OrderedChoice = self.syntax_classes.get('OrderedChoice',
+                                                 OrderedChoice)
+        _Sequence = self.syntax_classes.get('Sequence', Sequence)
 
         def inner_from_python(expression):
             retval = None
@@ -1815,9 +1828,10 @@ class ParserPython(Parser):
                     self.dprint("New rule: {} -> {}"
                                 .format(rule_name, retval.__class__.__name__))
 
-            elif type(expression) is text or isinstance(expression, StrMatch):
+            elif type(expression) is text or isinstance(expression, _StrMatch):
                 if type(expression) is text:
-                    retval = StrMatch(expression, ignore_case=self.ignore_case)
+                    retval = _StrMatch(expression,
+                                       ignore_case=self.ignore_case)
                 else:
                     retval = expression
                     if expression.ignore_case is None:
@@ -1852,7 +1866,7 @@ class ParserPython(Parser):
                 if any((isinstance(x, CrossRef) for x in retval.nodes)):
                     __for_resolving.append(retval)
 
-            elif isinstance(expression, Sequence) or \
+            elif isinstance(expression, _Sequence) or \
                     isinstance(expression, Repetition) or \
                     isinstance(expression, SyntaxPredicate) or \
                     isinstance(expression, Decorator):
@@ -1863,9 +1877,9 @@ class ParserPython(Parser):
 
             elif type(expression) in [list, tuple]:
                 if type(expression) is list:
-                    retval = OrderedChoice(expression)
+                    retval = _OrderedChoice(expression)
                 else:
-                    retval = Sequence(expression)
+                    retval = _Sequence(expression)
 
                 retval.nodes = [inner_from_python(e) for e in expression]
                 if any((isinstance(x, CrossRef) for x in retval.nodes)):

@@ -168,7 +168,7 @@ class Parser(peg_utils.DebugPrinter, abc.ABC):
             try:
                 # imports for local pytest
                 from .export import PTDOTExporter           # type: ignore # pragma: no cover
-            except ImportError:                             # type: ignore # pragma: no cover
+            except (ImportError, ModuleNotFoundError):      # type: ignore # pragma: no cover
                 # imports for doctest
                 # noinspection PyUnresolvedReferences
                 from export import PTDOTExporter            # type: ignore # pragma: no cover

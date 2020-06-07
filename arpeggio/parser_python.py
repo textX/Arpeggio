@@ -36,10 +36,10 @@ class ParserPython(parser_base.Parser):
         if self.debug:
             try:
                 # for Pytest
-                from .export import PMDOTExporter   # type: ignore # pragma: no cover
-            except ImportError:                     # type: ignore # pragma: no cover
+                from .export import PMDOTExporter           # type: ignore # pragma: no cover
+            except (ImportError, ModuleNotFoundError):      # type: ignore # pragma: no cover
                 # for local Doctest
-                from export import PMDOTExporter    # type: ignore # pragma: no cover
+                from export import PMDOTExporter            # type: ignore # pragma: no cover
 
             root_rule = language_def.__name__
             PMDOTExporter().exportFile(self.parser_model,

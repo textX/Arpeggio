@@ -47,10 +47,10 @@ class ParserPEG(parser_base.Parser):
         if self.debug:
             try:
                 # for pytest
-                from .export import PMDOTExporter   # type: ignore # pragma: no cover
-            except ImportError:                     # type: ignore # pragma: no cover
-                # for local Doctest                 # type: ignore # pragma: no cover
-                from export import PMDOTExporter    # type: ignore # pragma: no cover
+                from .export import PMDOTExporter           # type: ignore # pragma: no cover
+            except (ImportError, ModuleNotFoundError):      # type: ignore # pragma: no cover
+                # for local Doctest                         # type: ignore # pragma: no cover
+                from export import PMDOTExporter            # type: ignore # pragma: no cover
 
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(

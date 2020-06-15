@@ -56,7 +56,7 @@ site
 .cache
 venv
 .ropeproject
-
+.idea
 
 # Performance Test Reports
 perf-tests/reports/

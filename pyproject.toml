@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.2.0", "wheel", "setuptools_scm[toml]>=3.4.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Arpeggio"
+authors = [{name = "Igor R. Dejanovic", email = "igor.dejanovic@gmail.com"}]
+license = {text = "MIT"}
+description = "Packrat parser interpreter"
+readme = "README.md"
+keywords = ["parser", "PEG", "packrat", "library", "interpreter"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Interpreters",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/textX/Arpeggio"
+
+[project.optional-dependencies]
+dev = [
+    "wheel",
+    "mkdocs",
+    "mike",
+    "twine",
+]
+test = [
+    "flake8",
+    "coverage",
+    "coveralls",
+    "pytest",
+]
+testing = ["pytest"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+exclude = [
+    "arpeggio.tests",
+    "examples",
+    "examples.*",
+]
+namespaces = false
+
+[tool.distutils.bdist_wheel]
+universal = 1
+
+[tool.aliases]
+test = "pytest"
+
+[tool.pytest.ini_options]
+addopts = "--verbose"
+python_files = ["arpeggio/tests/*.py"]
+
+[tool.flake8]
+ignore = "E741,W503"
+max-line-length = "90"
+exclude = """
+.git/*,.eggs/*,
+build/*,site/*,venv*,
+.ropeproject/*"""
+
+[tool.setuptools_scm]
+write_to_template = "__version__ = \"{version}\"\n"
+write_to = "arpeggio/version.py"

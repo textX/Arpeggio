@@ -46,7 +46,7 @@ def term():       return factor, ZeroOrMore(["*","/"], factor)
 ```
 
 !!! note
-    Notice that the order of precendence is from lower to upper.
+    Notice that the order of precedence is from lower to upper.
     The deeper is the grammar rule, the tighter is the bonding.
 
 - Each factor is either a number or an expression inside brackets. The prefix
@@ -99,7 +99,7 @@ input_expr = "-(4-1)*5+(2+4.67)+5.89/(.2+7)"
 parse_tree = parser.parse(input_expr)
 ```
 
-By ordering operation in the grammar form lower to upper precendence we have
+By ordering operation in the grammar form lower to upper precedence we have
 got the parse tree where the priority is retained. This will help us to easier
 make an expression evaluation.
 
@@ -177,7 +177,7 @@ At the end we return the evaluated `term`.
 ```python
     def visit_expression(self, node, children):
         """
-        Adds or substracts terms.
+        Adds or subtracts terms.
         Term nodes will be already evaluated.
         """
         expr = 0

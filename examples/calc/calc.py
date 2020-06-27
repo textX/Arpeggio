@@ -68,7 +68,7 @@ class CalcVisitor(PTNodeVisitor):
 
     def visit_expression(self, node, children):
         """
-        Adds or substracts terms.
+        Adds or subtracts terms.
         Term nodes will be already evaluated.
         """
         if self.debug:

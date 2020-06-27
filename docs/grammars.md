@@ -39,7 +39,7 @@ by end of input (`EOF`). `second` rule is ordered choice and will match either
 
 During parsing each successfully matched rule will create a parse tree node. At
 the end of parsing a complete [parse tree](parse_trees.md) of the input will be
-returned. .
+returned.
 
 In Arpeggio each PEG rule consists of atomic parsing expression which can be:
 
@@ -69,7 +69,7 @@ In Arpeggio each PEG rule consists of atomic parsing expression which can be:
       input is consumed.
     - **And predicate** - succeeds if given expression matches at current
       location but does not consume any input.
-    - **Not predicate** - succeeds if given expression **does not** matches at
+    - **Not predicate** - succeeds if given expression **does not** match at
       current location but does not consume any input.
 
 PEG grammars in Arpeggio may be written twofold:

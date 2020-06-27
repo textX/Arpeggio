@@ -127,7 +127,7 @@ the test CSV data.
 $ python csv.py
 ```
 
-**Congratulations!! You have successfuly parsed CSV file.**
+**Congratulations!! You have successfully parsed CSV file.**
 
 This parse tree is [visualized](../debugging.md#visualization) below (Tip: The
 image is large. Click on it to see it in a separate tab and to be able to use

@@ -611,7 +611,7 @@ class UnorderedGroup(Repetition):
             parser.eolterm = old_eolterm
 
         if not match:
-            # Unsucessful match of the whole PE - full backtracking
+            # Unsuccessful match of the whole PE - full backtracking
             parser.position = c_pos
             parser._nm_raise(self, c_pos, parser)
 

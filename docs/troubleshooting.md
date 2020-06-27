@@ -33,7 +33,7 @@ like Arpeggio will try to loop indefinitely trying to match `A` over and over
 again in the same spot of the input string.
 
 Although, there are techniques to handle left-recursion in top-down parsers
-automatically, Arpeggio does not implements them and a classic approach of
+automatically, Arpeggio does not implement them and a classic approach of
 [removing left
 recursion](https://en.wikipedia.org/wiki/Left_recursion#Removing_left_recursion)
 must be used.

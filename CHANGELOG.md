@@ -257,7 +257,7 @@ please take a look at related PRs and issues and see if the change affects you.
   - Basic error reporting.
   - Basic support for comments handling (needs refactoring)
   - Raw parse tree.
-  - Support for semantic actions with abbility to transform parse 
+  - Support for semantic actions with ability to transform parse
       tree to semantic representation - aka Abstract Semantic Graphs (see examples).
 
 [keepachangelog]: https://keepachangelog.com/

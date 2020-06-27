@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_optional_in_choice
-# Purpose: Optional matches always succeds but should not stop alternative
+# Purpose: Optional matches always succeeds but should not stop alternative
 #          probing on failed match.
 # Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # Copyright: (c) 2015 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>

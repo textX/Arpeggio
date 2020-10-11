@@ -12,14 +12,20 @@ Backward incompatible changes are marked with **(BIC)**. These changes are the
 reason for the major version increase so when upgrading between major versions
 please take a look at related PRs and issues and see if the change affects you.
 
+
 ## [Unreleased]
 
 - Raise `AttributeError` when accessing unexisting rule name on parse tree node.
   ([#82])
+- Added `tree_str` method to parse tree nodes for nice string representation of
+  parse trees. ([#76])
+- Added parse tree node suppression support and overriding of special Python
+  rule syntax. (#76)
 - UnorderedGroup matching made deterministic ([#73])
 
 
 [#82]: https://github.com/textX/Arpeggio/issues/82
+[#76]: https://github.com/textX/Arpeggio/issues/76
 [#73]: https://github.com/textX/Arpeggio/issues/73
 [Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.2...HEAD
 

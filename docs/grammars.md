@@ -153,6 +153,43 @@ You can navigate and analyze parse tree or transform it using visitor pattern to
 some more usable form (see [Semantic analysis - Visitors](semantics.md#visitors))
 
 
+### Overriding of special rule classes
+
+As we noted above some parsing rules are mapped to Python types (`Sequence` to
+a tuple, `OrderedChoice` to a list and `StrMatch` to a string). Sometimes it is
+useful to override classes that will be instantiated by Arpeggio to provide
+altered behavior.
+
+For example, if we want to [suppress all string
+matches](parse_trees.md#suppressing-parse-tree-nodes) we can register our version
+of `StrMatch` which sets `suppress` to `True`:
+
+```python
+class SuppressStrMatch(StrMatch):
+    suppress = True
+
+def grammar():
+    return "one", "two", RegExMatch(r'\d+'), "three"
+
+parser = ParserPython(grammar,
+                      syntax_classes={'StrMatch': SuppressStrMatch})
+
+result = parser.parse("one two 42 three")
+
+# Only regex will end up in the tree
+assert len(result) == 1
+assert result[0] == "42"
+
+```
+
+We use `syntax_classes` parameter to `ParserPython` of `dict` type where keys
+are names of the original classes and values are our modified class. Now,
+Arpeggio will instantiate our class whenever it encounters Python string in the
+grammar.
+
+This feature is, obviously, only available for grammars written in Python.
+
+
 ## Grammars written in PEG notations
 
 Grammars can also be specified using PEG notation. There are actually two of

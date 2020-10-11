@@ -98,7 +98,7 @@ parameter to `True`.
 parser = ParserPython(calc, reduce_tree=True)
 ```
 
-In this configuration non-terminals with single child will be removed from the
+In this configuration non-terminals a with single child will be removed from the
 parse tree.
 
 <a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a>
@@ -107,7 +107,7 @@ For example, `calc` parse tree above will look like this:
 
 <a href="../images/calc_parse_tree_reduced.dot.png" target="_blank"><img src="../images/calc_parse_tree_reduced.dot.png"/></a>
 
-Notice the removal of each non-terminal with single child.
+Notice the removal of each non-terminal with a single child.
 
 !!! warning
     Be aware that [semantic analysis](semantics.md) operates on nodes of

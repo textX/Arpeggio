@@ -41,6 +41,7 @@ def test_suppress_string_match():
 
     result = parser.parse("one two three four")
     assert len(result) == 3
+    assert result[1] == "two"
     assert result[2] == "four"
 
 

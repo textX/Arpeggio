@@ -174,3 +174,28 @@ the match occurred.
 Parser can be configured to create a reduced parse tree. More information can be
 found [here](configuration.md#parse-tree-reduction).
 
+
+## Suppressing parse tree nodes
+
+This feature is available for `ParserPython` only. Rule classes may have a class
+level `suppress` attribute set to `True`. Parse tree nodes produced by these
+rules will be removed from the resulting parse tree. This may be handy to reduce
+syntax noise from the punctuation and such in the resulting parse tree.
+
+```python
+class SuppressStrMatch(StrMatch):
+    suppress = True
+
+def grammar():
+    return "one", "two", SuppressStrMatch("three"), "four"
+
+parser = ParserPython(grammar)
+
+result = parser.parse("one two three four")
+assert len(result) == 3
+assert result[1] == "two"
+assert result[2] == "four"
+```
+
+This feature can nicely be combined with [overriding of special rule
+classes](grammars.md#overriding-of-special-rule-classes).

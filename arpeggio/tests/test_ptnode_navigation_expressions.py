@@ -64,3 +64,7 @@ def test_lookup_single():
 
     assert hasattr(result, "bar")
     assert hasattr(result, "baz")
+
+    # Test that accessing an invalid rule name raises AttributeError
+    with pytest.raises(AttributeError):
+        result.unexisting

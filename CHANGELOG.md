@@ -14,9 +14,12 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- Raise `AttributeError` when accessing unexisting rule name on parse tree node.
+  ([#82])
 - UnorderedGroup matching made deterministic ([#73])
 
 
+[#82]: https://github.com/textX/Arpeggio/issues/82
 [#73]: https://github.com/textX/Arpeggio/issues/73
 [Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.2...HEAD
 

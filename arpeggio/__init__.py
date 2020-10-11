@@ -1167,6 +1167,10 @@ class NonTerminal(ParseTreeNode, list):
                     nodes.append(n)
                     rule = n.rule
 
+        if rule is None:
+            # If rule is not found resort to default behavior
+            return self.__getattribute__(rule_name)
+
         result = NonTerminal(rule=rule, nodes=nodes, _filtered=True)
         self._expr_cache[rule_name] = result
         return result

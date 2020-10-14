@@ -15,6 +15,7 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- Fix reporting duplicate rule names in `NoMatch` exception ([a1f14bede])
 - Raise `AttributeError` when accessing unexisting rule name on parse tree node.
   ([#82])
 - Added `tree_str` method to parse tree nodes for nice string representation of
@@ -24,6 +25,7 @@ please take a look at related PRs and issues and see if the change affects you.
 - UnorderedGroup matching made deterministic ([#73])
 
 
+[a1f14bede]: https://github.com/textX/Arpeggio/commit/a1f14bedec14aa742c5a40c15be240d3a31addfa
 [#82]: https://github.com/textX/Arpeggio/issues/82
 [#76]: https://github.com/textX/Arpeggio/issues/76
 [#73]: https://github.com/textX/Arpeggio/issues/73

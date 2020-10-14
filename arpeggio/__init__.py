@@ -13,6 +13,7 @@
 
 from __future__ import print_function, unicode_literals
 import sys
+from collections import OrderedDict
 import codecs
 import re
 import bisect
@@ -88,8 +89,8 @@ class NoMatch(Exception):
         if not self.rules:
             err_message = "Not expected input"
         else:
-            what_is_expected = ["{}".format(rule_to_exp_str(r))
-                                for r in self.rules]
+            what_is_expected = OrderedDict.fromkeys(
+                ["{}".format(rule_to_exp_str(r)) for r in self.rules])
             what_str = " or ".join(what_is_expected)
             err_message = "Expected {}".format(what_str)
 

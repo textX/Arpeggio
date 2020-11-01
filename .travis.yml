@@ -9,7 +9,10 @@ python:
     - "3.9"
 
 install:
-    - pip install -e .[test]
+    - ./install-test.sh
 
 script:
     - ./runtests.sh
+
+after_success:
+    - coveralls

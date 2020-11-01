@@ -179,9 +179,8 @@ called). The result of the top level node is the final output of the semantic
 analysis.</p>
 <p>To run semantic analysis apply your visitor class to the parse tree using
 <code>visit_parse_tree</code> function.</p>
-<pre><code class="python">result = visit_parse_tree(parse_tree, CalcVisitor(debug=True))
+<pre><code class="language-python">result = visit_parse_tree(parse_tree, CalcVisitor(debug=True))
 </code></pre>
-
 <p>The first parameter is a parse tree you get from the <code>parser.parse</code> call while
 the second parameter is an instance of your visitor class. Semantic analysis can
 be run in debug mode if you set <code>debug</code> parameter to <code>True</code> during visitor
@@ -234,7 +233,7 @@ This class is used for filtering and navigation over evaluation results on child
 methods.  This class inherits <code>list</code> so index access as well as iteration is
 available.</p>
 <p>Furthermore, child nodes can be filtered by rule name using attribute access.</p>
-<pre><code class="python">def visit_bar(self, node, children):
+<pre><code class="language-python">def visit_bar(self, node, children):
   # Index access
   child = children[2]
 
@@ -245,7 +244,6 @@ available.</p>
   # Returns a list of all rules created by PEG rule 'baz'
   baz_created = children.baz
 </code></pre>
-
 <h2 id="post-processing-in-second-calls">Post-processing in second calls<a class="headerlink" href="#post-processing-in-second-calls" title="Permanent link">&para;</a></h2>
 <p>Visitor may define method with the <code>second_&lt;rule_name&gt;</code> name form. If this
 method exists it will be called after all parse tree node are processed and it
@@ -258,10 +256,9 @@ default action is performed. If the node is created by a plain string match,
 action will return <code>None</code> and thus suppress this node. This is handy for all
 those syntax noise tokens (brackets, braces, keywords etc.).</p>
 <p>For example, if your grammar is:</p>
-<pre><code class="python">number_in_brackets = &quot;(&quot; number &quot;)&quot;
+<pre><code class="language-python">number_in_brackets = &quot;(&quot; number &quot;)&quot;
 number = r'\d+'
 </code></pre>
-
 <p>then the default action for <code>number</code> will return number node converted to
 a string and the default action for <code>(</code> and <code>)</code> will return <code>None</code> and thus
 suppress these nodes so the visitor method for <code>number_in_brackets</code> rule will
@@ -270,12 +267,11 @@ only see one child (from the <code>number</code> rule reference).</p>
 will return that child effectively passing it to the parent node visitor.</p>
 <p>Default actions can be disabled by setting parameter <code>defaults</code> to <code>False</code> on
 visitor construction.</p>
-<pre><code class="python">result = visit_parse_tree(parse_tree, CalcVisitor(defaults=False))
+<pre><code class="language-python">result = visit_parse_tree(parse_tree, CalcVisitor(defaults=False))
 </code></pre>
-
 <p>If you want to call this default behaviour from your visitor method, call
 <code>visit__default__(node, children)</code> on superclass (<code>PTNodeVisitor</code>).</p>
-<pre><code class="python">def visitor_myrule(self, node, children):
+<pre><code class="language-python">def visitor_myrule(self, node, children):
   if some_condition:
     ...
   else:

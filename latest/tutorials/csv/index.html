@@ -159,11 +159,10 @@ CSV is a textual format for tabular data interchange. It is described by
 <a href="https://tools.ietf.org/html/rfc4180">RFC 4180</a>.</p>
 <p><a href="https://en.wikipedia.org/wiki/Comma-separated_values">Here</a> is an example of
 CSV file:</p>
-<pre><code class="csv">Year,Make,Model,Length
+<pre><code class="language-csv">Year,Make,Model,Length
 1997,Ford,E350,2.34
 2000,Mercury,Cougar,2.38
 </code></pre>
-
 <p>Although, there is <a href="https://docs.python.org/3/library/csv.html">csv module</a> in
 the standard Python library this example has been made as the CSV is ubiquitous
 and easy to understand so it it a good starter for learning Arpeggio.</p>
@@ -244,19 +243,17 @@ Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "343
 Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343486.12"
 </code></pre>
 <p>In <code>csv.py</code> file write:</p>
-<pre><code class="python">test_data = open('test_data.csv', 'r').read()
+<pre><code class="language-python">test_data = open('test_data.csv', 'r').read()
 parse_tree = parser.parse(test_data)
 
 </code></pre>
-
 <p><code>test_data</code> is Python string containing test CSV data from the file. Calling
 <code>parser.parse</code> on the data will produce the <a href="../../parse_trees/">parse tree</a>.</p>
 <p>If you run <code>csv.py</code> module, and there are no syntax errors in the <code>test_data.csv</code>
 file, <code>parse_tree</code> will be a reference to <a href="../../parse_trees/">parse tree</a> of
 the test CSV data.</p>
-<pre><code class="bash">$ python csv.py
+<pre><code class="language-bash">$ python csv.py
 </code></pre>
-
 <p><strong>Congratulations!! You have successfully parsed CSV file.</strong></p>
 <p>This parse tree is <a href="../../debugging/#visualization">visualized</a> below (Tip: The
 image is large. Click on it to see it in a separate tab and to be able to use
@@ -327,27 +324,24 @@ We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module).</p>
 <p>Now, we shall create <code>csv_peg.py</code> file in order to instantiate our parser and
 parse inputs.  This time we shall instantiate different parser class
 (<code>ParserPEG</code>). The whole content of <code>csv_peg.py</code> should be:</p>
-<pre><code class="python">from arpeggio.cleanpeg import ParserPEG
+<pre><code class="language-python">from arpeggio.cleanpeg import ParserPEG
 
 csv_grammar = open('csv.peg', 'r').read()
 parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ')
 </code></pre>
-
 <p>Here we load the grammar from <code>csv.peg</code> file and construct the parser using
 <code>ParserPEG</code> class.</p>
 <p>The rest of the code is the same as in <code>csv.py</code>. We load <code>test_data.csv</code> and
 call <code>parser.parse</code> on it to produce parse tree.</p>
 <p>To verify that everything works without errors execute <code>csv_peg.py</code> module.</p>
-<pre><code class="bash">$ python csv_peg.py
+<pre><code class="language-bash">$ python csv_peg.py
 </code></pre>
-
 <p>If we put the parser in debug mode and generate parse tree image we can 
 verify that we are getting the same parse tree regardless of the grammar
 specification approach we use.</p>
 <p>To put parser in debug mode add <code>debug=True</code> to the parser parameters list.</p>
-<pre><code class="python">parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=True)
+<pre><code class="language-python">parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=True)
 </code></pre>
-
 <h2 id="extract-data">Extract data<a class="headerlink" href="#extract-data" title="Permanent link">&para;</a></h2>
 <p>Our main goal is to extract data from the <code>csv</code> file.</p>
 <p>The parse tree we get as a result of parsing is not very useful on its own.
@@ -367,7 +361,7 @@ nodes and building the required target data structure.
 But, it is easier to use Arpeggio's support for <a href="../../semantics/">semantic analysis - Visitor
 Pattern</a>.</p>
 <p>Let's make a Visitor for CSV that will build our list of lists.</p>
-<pre><code class="python">class CSVVisitor(PTNodeVisitor):
+<pre><code class="language-python">class CSVVisitor(PTNodeVisitor):
     def visit_record(self, node, children):
         # record is a list of fields. The children nodes are fields so just
         # transform it to python list.
@@ -377,13 +371,11 @@ Pattern</a>.</p>
         # We are not interested in empty lines so we will filter them.
         return [x for x in children if x!='\n']
 </code></pre>
-
 <p>and apply this visitor to the parse tree:</p>
-<pre><code class="python">csv_content = visit_parse_tree(parse_tree, CSVVisitor())
+<pre><code class="language-python">csv_content = visit_parse_tree(parse_tree, CSVVisitor())
 </code></pre>
-
 <p>Now if we pretty-print <code>csv_content</code> we can see that it is exactly what we wanted:</p>
-<pre><code class="python">[   [   u'Unquoted test',
+<pre><code class="language-python">[   [   u'Unquoted test',
         u'Quoted test',
         u'23234',
         u'One Two Three',
@@ -399,12 +391,11 @@ Pattern</a>.</p>
         u'One Two Three',
         u'343486.12']]
 </code></pre>
-
 <p>But, there is more we can do. If we look at our data we can see that some fields
 are of numeric type but they end up as strings in our target structure. Let's
 convert them to Python floats or ints.  To do this conversion we will introduce
 <code>visit_field</code> method in our <code>CSVVisitor</code> class.</p>
-<pre><code class="python">class CSVVisitor(PTNodeVisitor):
+<pre><code class="language-python">class CSVVisitor(PTNodeVisitor):
   ...
   def visit_field(self, node, children):
       value = children[0]
@@ -418,10 +409,9 @@ convert them to Python floats or ints.  To do this conversion we will introduce
           return value
   ...
 </code></pre>
-
 <p>If we pretty-print <code>csv_content</code> now we can see that numeric values are not strings
 anymore but a proper Python types.</p>
-<pre><code class="python">[   [u'Unquoted test', u'Quoted test', 23234.0, u'One Two Three', 343456.45],
+<pre><code class="language-python">[   [u'Unquoted test', u'Quoted test', 23234.0, u'One Two Three', 343456.45],
     [   u'Unquoted test 2',
         u'Quoted test with &quot;&quot;inner&quot;&quot; quotes',
         23234.0,
@@ -433,7 +423,6 @@ anymore but a proper Python types.</p>
         u'One Two Three',
         343486.12]]
 </code></pre>
-
 <p>This example code can be found <a href="https://github.com/textX/Arpeggio/tree/master/examples/csv">here</a>.</p>
               
             </div>

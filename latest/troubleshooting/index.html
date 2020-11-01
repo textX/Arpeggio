@@ -208,9 +208,8 @@ represent terminals.</p>
 <p>This might happen when non-unicode literals are used. Make sure that you use
 unicode literals when defining grammars using Python notation.</p>
 <p>You might want to include:</p>
-<pre><code class="python">from __future__ import unicode_literals
+<pre><code class="language-python">from __future__ import unicode_literals
 </code></pre>
-
 <p>This will enable unicode literals in the python &lt; 3.</p>
 <h2 id="visitor-method-is-not-called-during-semantic-analysis">Visitor method is not called during semantic analysis<a class="headerlink" href="#visitor-method-is-not-called-during-semantic-analysis" title="Permanent link">&para;</a></h2>
 <p>Semantic analysis operates on a parse tree nodes produced by grammar rules.
@@ -222,10 +221,9 @@ Thus, visitor methods for those nodes will not be called.</p>
 parse tree node with more than one child.</p>
 <p>As a side note, there is implicit reduction of nodes whose grammar rule is a 
 sequence with only one child.</p>
-<pre><code class="python">def mean():             return number
+<pre><code class="language-python">def mean():             return number
 def number():           return _(r'\d*\.\d*|\d+')
 </code></pre>
-
 <p>Here a node <code>number</code> will be suppressed from the parser model and visitor
 <code>visit_number</code> will not be called. You have to define <code>visit_mean</code> or a visitor
 for some of the rules calling <code>mean</code>.</p>

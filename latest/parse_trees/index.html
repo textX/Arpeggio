@@ -180,9 +180,8 @@ terminal/non-terminal is recognized.</p>
 </ul>
 <p>If you want to get line and column from position you can use <code>pos_to_linecol</code>
 parser method.</p>
-<pre><code class="python">  line, col = parser.pos_to_linecol(node.position)
+<pre><code class="language-python">  line, col = parser.pos_to_linecol(node.position)
 </code></pre>
-
 <h2 id="terminal-nodes">Terminal nodes<a class="headerlink" href="#terminal-nodes" title="Permanent link">&para;</a></h2>
 <p>Terminals in Arpeggio are created by the specializations of the parsing
 expression <code>Match</code> class.  There are two specialization of <code>Match</code> class:</p>
@@ -201,17 +200,15 @@ the above parse tree are non-terminal nodes created by the rules with the same
 names.</p>
 <p><code>NonTerminal</code> inherits from <code>list</code>. The elements of <code>NonTerminal</code> are its
 children nodes.  So, you can use index access:</p>
-<pre><code class="python">child = pt_node[2]
+<pre><code class="language-python">child = pt_node[2]
 </code></pre>
-
 <p>Or iteration:</p>
-<pre><code class="python">for child in pt_node:
+<pre><code class="language-python">for child in pt_node:
   ...
 </code></pre>
-
 <p>Additionally, you can access children by the child rule name:</p>
 <p>For example:</p>
-<pre><code class="python"># Grammar
+<pre><code class="language-python"># Grammar
 def foo(): return &quot;a&quot;, bar, &quot;b&quot;, baz, &quot;c&quot;, ZeroOrMore(bar)
 def bar(): return &quot;bar&quot;
 def baz(): return &quot;baz&quot;
@@ -243,16 +240,14 @@ assert result.bar[0].position == 2
 assert result.bar[1].position == 14
 
 </code></pre>
-
 <h2 id="printing-parse-trees">Printing parse trees<a class="headerlink" href="#printing-parse-trees" title="Permanent link">&para;</a></h2>
 <p>Elements of the parse tree has <code>tree_str</code> method which can be used to print the
 tree.</p>
 <p>For example:</p>
-<pre><code class="python">...
+<pre><code class="language-python">...
 parse_tree = parser.parse(some_input)
 print(parse_tree.tree_str())
 </code></pre>
-
 <p>Result might look something like:</p>
 <pre><code>simpleLanguage=Sequence [0-191]
   keyword=Kwd(function) [0-8]: function
@@ -283,7 +278,6 @@ print(parse_tree.tree_str())
             StrMatch(;) [86-87]: ;
 
 </code></pre>
-
 <p>Each line contains information about the rule and the span of the input where
 the match occurred.</p>
 <h2 id="parse-tree-reduction">Parse tree reduction<a class="headerlink" href="#parse-tree-reduction" title="Permanent link">&para;</a></h2>
@@ -294,7 +288,7 @@ found <a href="../configuration/#parse-tree-reduction">here</a>.</p>
 level <code>suppress</code> attribute set to <code>True</code>. Parse tree nodes produced by these
 rules will be removed from the resulting parse tree. This may be handy to reduce
 syntax noise from the punctuation and such in the resulting parse tree.</p>
-<pre><code class="python">class SuppressStrMatch(StrMatch):
+<pre><code class="language-python">class SuppressStrMatch(StrMatch):
     suppress = True
 
 def grammar():
@@ -307,7 +301,6 @@ assert len(result) == 3
 assert result[1] == &quot;two&quot;
 assert result[2] == &quot;four&quot;
 </code></pre>
-
 <p>This feature can nicely be combined with <a href="../grammars/#overriding-of-special-rule-classes">overriding of special rule
 classes</a>.</p>
               

@@ -151,13 +151,12 @@ the error at the console.  The exact location will be reported, the context
 (part of the input where the error occurred) and all the rules that were tried
 at that location.</p>
 <p>Example:</p>
-<pre><code class="python">parser = ParserPython(calc)
+<pre><code class="language-python">parser = ParserPython(calc)
 # 'r' in the following expression can't be recognized by
 # calc grammar
 input_expr = &quot;23+4/r-89&quot;
 parse_tree = parser.parse(input_expr)
 </code></pre>
-
 <p>As there is an error in the <code>input_expr</code> string (<code>r</code> is not expected) the 
 following traceback will be printed:</p>
 <pre><code>Traceback (most recent call last):
@@ -169,14 +168,13 @@ arpeggio.NoMatch: Expected '+' or '-' or 'number' or
 column) is given (<code>(1, 6)</code>).</p>
 <p>If you wish to handle syntax errors gracefully you can catch <code>NoMatch</code> in your
 code and inspect its attributes.</p>
-<pre><code class="python">try:
+<pre><code class="language-python">try:
   parser = ParserPython(calc)
   input_expr = &quot;23+4/r-89&quot;
   parse_tree = parser.parse(input_expr)
 except NoMatch as e:
   # Do something with e
 </code></pre>
-
 <p><code>NoMatch</code> class has the following attributes:</p>
 <ul>
 <li><code>rules</code> - A list of <code>ParsingExpression</code> rules that are the sources of the

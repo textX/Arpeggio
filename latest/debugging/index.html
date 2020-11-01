@@ -153,9 +153,8 @@ report any syntax error with all the necessary information whether you are
 building parser from python expressions or from a textual PEG notation.</p>
 <p>For semantic error you have a debugging mode of operation which is entered by
 setting <code>debug</code> parameter to <code>True</code> in the parser construction call. </p>
-<pre><code class="python">parser = ParserPython(calc, debug=True)
+<pre><code class="language-python">parser = ParserPython(calc, debug=True)
 </code></pre>
-
 <p>When Arpeggio runs in debug mode it will print a detailed information of what it
 is doing.</p>
 <pre><code>&gt;&gt; Entering rule calc=Sequence at position 0 =&gt; *-(4-1)*5+(
@@ -181,9 +180,8 @@ model</em> will be created if the parser model is constructed without errors. </
 <p>This <code>dot</code> file can be rendered as image using one of available dot viewer
 software or transformed to an image using <code>dot</code> tool
 <a href="http://graphviz.org/">GraphViz</a> software.</p>
-<pre><code class="bash">$ dot -Tpng -O calc_parser_model.dot
+<pre><code class="language-bash">$ dot -Tpng -O calc_parser_model.dot
 </code></pre>
-
 <p>After this command you will get <code>calc_parser_model.dot.png</code> file which can be
 opened in any <code>png</code> image viewer. This is how it looks like:</p>
 <p><a href="../images/calc_parser_model.dot.png" target="_blank"><img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/></a></p>
@@ -195,33 +193,28 @@ the edges represent the order in which the graph will be traversed during
 parsing.</p>
 <p>Furthermore, if you parse some input while the parser is in debug mode, the
 parse tree <code>dot</code> file will be generated also.</p>
-<pre><code class="python">parse_tree = parser.parse(&quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;)
+<pre><code class="language-python">parse_tree = parser.parse(&quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;)
 </code></pre>
-
 <p>This <code>dot</code> file can also be converted to <code>png</code> with the command:</p>
-<pre><code class="bash">$ dot -Tpng -O calc_parse_tree.dot
+<pre><code class="language-bash">$ dot -Tpng -O calc_parse_tree.dot
 </code></pre>
-
 <p>Which produces <code>png</code> image given bellow.</p>
 <p><a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a></p>
 <p>You can also explicitly render your parser model or parse tree to <code>dot</code> file
 even if the parser is not in the debug mode.</p>
 <p>For parser model this is achieved with the following Python code:</p>
-<pre><code class="python">from arpeggio.export import PMDOTExporter
+<pre><code class="language-python">from arpeggio.export import PMDOTExporter
 PMDOTExporter().exportFile(parser.parser_model,
                             &quot;my_parser_model.dot&quot;)
 </code></pre>
-
 <p>For parse tree it is achieved with:</p>
-<pre><code class="python">from arpeggio.export import PTDOTExporter
+<pre><code class="language-python">from arpeggio.export import PTDOTExporter
 PTDOTExporter().exportFile(parse_tree,
                            &quot;my_parse_tree.dot&quot;)
 </code></pre>
-
 <p>To get e.g. <code>png</code> images from <code>dot</code> files do as usual:</p>
-<pre><code class="bash">$ dot -Tpng -O *.dot
+<pre><code class="language-bash">$ dot -Tpng -O *.dot
 </code></pre>
-
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>All tree images in this docs are rendered using Arpeggio's visualization and

@@ -168,22 +168,19 @@ gives the user possibility to alter it.</p>
 <h2 id="case-insensitive-parsing">Case insensitive parsing<a class="headerlink" href="#case-insensitive-parsing" title="Permanent link">&para;</a></h2>
 <p>By default Arpeggio is case sensitive. If you wish to do case insensitive
 parsing set parser parameter <code>ignore_case</code> to <code>True</code>.</p>
-<pre><code class="python">parser = ParserPython(calc, ignore_case=True)
+<pre><code class="language-python">parser = ParserPython(calc, ignore_case=True)
 </code></pre>
-
 <h2 id="white-space-handling">White-space handling<a class="headerlink" href="#white-space-handling" title="Permanent link">&para;</a></h2>
 <p>Arpeggio by default skips white-spaces. You can change this behaviour with the
 parameter <code>skipws</code> given to parser constructor.</p>
-<pre><code class="python">parser = ParserPython(calc, skipws=False)
+<pre><code class="language-python">parser = ParserPython(calc, skipws=False)
 </code></pre>
-
 <p>You can also change what is considered a whitespace by Arpeggio using the <code>ws</code>
 parameter. It is a plain string that consists of white-space characters. By
 default it is set to <code>"\t\n\r "</code>.</p>
 <p>For example, to prevent a newline to be treated as whitespace you could write:</p>
-<pre><code class="python">parser = ParserPython(calc, ws='\t\r ')
+<pre><code class="language-python">parser = ParserPython(calc, ws='\t\r ')
 </code></pre>
-
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>These parameters can be used on the <code>Sequence</code> level so one could write
@@ -214,9 +211,8 @@ keyword-like matches will be performed.</p>
 grammar rules.  See <a href="https://github.com/textX/Arpeggio/blob/master/examples/simple/">simple.py
 example</a>.</p>
 <p>Parser is constructed using two parameters.</p>
-<pre><code class="python">parser = ParserPython(simpleLanguage, comment)
+<pre><code class="language-python">parser = ParserPython(simpleLanguage, comment)
 </code></pre>
-
 <p>First parameter is the root rule of main parse model while the second is a rule
 for comments.</p>
 <p>During parsing comment parse trees are kept in the separate list thus comments
@@ -225,9 +221,8 @@ will not show in the main parse tree.</p>
 <p>Non-terminals are by default created for each rule. Sometimes it can result in
 trees of great depth.  You can alter this behaviour setting <code>reduce_tree</code>
 parameter to <code>True</code>.</p>
-<pre><code class="python">parser = ParserPython(calc, reduce_tree=True)
+<pre><code class="language-python">parser = ParserPython(calc, reduce_tree=True)
 </code></pre>
-
 <p>In this configuration non-terminals a with single child will be removed from the
 parse tree.</p>
 <p><a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a></p>
@@ -279,7 +274,7 @@ increase at the expense of some memory used for the memoization cache.</p>
 <p>Starting with Arpeggio 1.5 this feature is disabled by default. If you think
 that parsing is slow, try to enable memoization by setting <code>memoization</code>
 parameter to <code>True</code> during parser instantiation.</p>
-<pre><code class="python">parser = ParserPython(grammar, memoization=True)
+<pre><code class="language-python">parser = ParserPython(grammar, memoization=True)
 </code></pre>
               
             </div>

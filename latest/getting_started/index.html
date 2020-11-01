@@ -160,13 +160,11 @@
 setuptools support. If you have <code>pip</code> tool installed the most recent stable
 version of Arpeggio can be installed form
 <a href="https://pypi.python.org/pypi/Arpeggio/">PyPI</a> with the following command:</p>
-<pre><code class="bash">    $ pip install Arpeggio
+<pre><code class="language-bash">    $ pip install Arpeggio
 </code></pre>
-
 <p>To verify that you have installed Arpeggio correctly run the following command:</p>
-<pre><code class="bash">$ python -c 'import arpeggio'
+<pre><code class="language-bash">$ python -c 'import arpeggio'
 </code></pre>
-
 <p>If you get no error, Arpeggio is correctly installed.</p>
 <p>To install Arpeggio for contribution see <a href="../about/contributing/">here</a>.</p>
 <h3 id="installing-from-source">Installing from source<a class="headerlink" href="#installing-from-source" title="Permanent link">&para;</a></h3>
@@ -237,17 +235,15 @@ Feel free to implement your own grammar syntax if you don't like these
 </ul>
 <p><strong>Instantiate a parser</strong>. Parser works as a grammar interpreter. There is no
 code generation.</p>
-<pre><code class="python">from arpeggio import ParserPython
+<pre><code class="language-python">from arpeggio import ParserPython
 parser = ParserPython(calc)   # calc is the root rule of your grammar
                               # Use param debug=True for verbose debugging
                               # messages and grammar and parse tree visualization
                               # using graphviz and dot
 </code></pre>
-
 <p><strong>Parse your inputs</strong></p>
-<pre><code class="python">parse_tree = parser.parse(&quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;)
+<pre><code class="language-python">parse_tree = parser.parse(&quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;)
 </code></pre>
-
 <p>If parsing is successful (e.g. no syntax error if found) you get a <a href="../parse_trees/">parse
 tree</a>.</p>
 <p><strong>Analyze parse tree</strong> directly or write a <a href="../semantics/">visitor class</a> to

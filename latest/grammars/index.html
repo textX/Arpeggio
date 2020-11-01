@@ -269,19 +269,17 @@ an instance of some of the classes described above which inherits
 <code>ParserExpression</code>.</p>
 <p>Parser model construction is done during parser instantiation. For example, to
 instantiate <code>calc</code> parser you do the following:</p>
-<pre><code class="python">parser = ParserPython(calc)
+<pre><code class="language-python">parser = ParserPython(calc)
 </code></pre>
-
 <p>Where <code>calc</code> is the function defining the root rule of your grammar. There is no
 code generation. Parser works as an interpreter for your grammar. The grammar is
 used to configure Arpeggio parser to recognize your language (in this case the
 <code>calc</code> language). In other words, Arpeggio interprets the parser model (your
 grammar).</p>
 <p>After parser construction your can call <code>parser.parse</code> to parse your input text.</p>
-<pre><code class="python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
+<pre><code class="language-python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
 parse_tree = parser.parse(input_expr)
 </code></pre>
-
 <p>Arpeggio will start from the root node and traverse <em>the parser model graph</em>
 consuming all matched input. When all root node branches are traversed the
 parsing is done and <em>the parse tree</em> is returned.</p>
@@ -295,7 +293,7 @@ altered behavior.</p>
 <p>For example, if we want to <a href="../parse_trees/#suppressing-parse-tree-nodes">suppress all string
 matches</a> we can register our version
 of <code>StrMatch</code> which sets <code>suppress</code> to <code>True</code>:</p>
-<pre><code class="python">class SuppressStrMatch(StrMatch):
+<pre><code class="language-python">class SuppressStrMatch(StrMatch):
     suppress = True
 
 def grammar():
@@ -311,7 +309,6 @@ assert len(result) == 1
 assert result[0] == &quot;42&quot;
 
 </code></pre>
-
 <p>We use <code>syntax_classes</code> parameter to <code>ParserPython</code> of <code>dict</code> type where keys
 are names of the original classes and values are our modified class. Now,
 Arpeggio will instantiate our class whenever it encounters Python string in the
@@ -331,13 +328,12 @@ and does not use rule terminator. Which one you choose is totally up to you. If
 your don't like any of these syntaxes you can make your own (look at
 <code>arpeggio.peg</code> and <code>arpeggio.cleanpeg</code> modules as an examples).</p>
 <p>An example of the <code>calc</code> grammar given in PEG syntax (<code>arpeggio.cleanpeg</code>):</p>
-<pre><code class="python">number = r'\d*\.\d*|\d+'
+<pre><code class="language-python">number = r'\d*\.\d*|\d+'
 factor = (&quot;+&quot; / &quot;-&quot;)? (number / &quot;(&quot; expression &quot;)&quot;)
 term = factor (( &quot;*&quot; / &quot;/&quot;) factor)*
 expression = term ((&quot;+&quot; / &quot;-&quot;) term)*
 calc = expression+ EOF
 </code></pre>
-
 <p>Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
 <code>number</code>) and the RHS is a PEG expression.</p>
 <ul>
@@ -376,18 +372,16 @@ grammars, all strings are Unicode, and the 'r' prefix denotes a regular
 expression.</p>
 <p>Creating a parser using PEG syntax is done by the class <code>ParserPEG</code> from the
 <code>arpeggio.peg</code> or <code>arpeggio.cleanpeg</code> modules.</p>
-<pre><code class="python">from arpeggio.cleanpeg import ParserPEG
+<pre><code class="language-python">from arpeggio.cleanpeg import ParserPEG
 parser = ParserPEG(calc_grammar, &quot;calc&quot;)
 </code></pre>
-
 <p>Where <code>calc_grammar</code> is a string with the grammar given above and the <code>"calc"</code>
 is the name of the root rule of the grammar.</p>
 <p>After this you get the same parser as with the <code>ParserPython</code>. There is no
 difference at all so you can parse the same language.</p>
-<pre><code class="python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
+<pre><code class="language-python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
 parse_tree = parser.parse(input_expr)
 </code></pre>
-
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Just remember that using textual PEG syntax imposes a slight overhead since

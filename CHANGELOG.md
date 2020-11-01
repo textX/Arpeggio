@@ -12,8 +12,13 @@ Backward incompatible changes are marked with **(BIC)**. These changes are the
 reason for the major version increase so when upgrading between major versions
 please take a look at related PRs and issues and see if the change affects you.
 
-
 ## [Unreleased]
+
+
+[Unreleased]: https://github.com/textX/Arpeggio/compare/1.10.0...HEAD
+
+
+## [1.10.0] (released: 2020-11-01)
 
 - Fix reporting duplicate rule names in `NoMatch` exception ([a1f14bede])
 - Raise `AttributeError` when accessing unexisting rule name on parse tree node.
@@ -29,7 +34,7 @@ please take a look at related PRs and issues and see if the change affects you.
 [#82]: https://github.com/textX/Arpeggio/issues/82
 [#76]: https://github.com/textX/Arpeggio/issues/76
 [#73]: https://github.com/textX/Arpeggio/issues/73
-[Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.2...HEAD
+[Unreleased]: https://github.com/textX/Arpeggio/compare/v1.9.2...1.10.0
 
 
 ## [v1.9.2] (released: 2019-10-05)

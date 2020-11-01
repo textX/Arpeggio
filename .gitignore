@@ -8,7 +8,7 @@
 *.egg-info
 dist
 build
-eggs
+.eggs
 parts
 bin
 var
@@ -56,3 +56,4 @@ site
 .cache
 venv
 .ropeproject
+coverage

@@ -20,9 +20,10 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [1.10.1] (released: 2020-11-01)
 
-- Fix packaging, exclude examples from wheel.
+- Fix packaging, exclude examples from wheel. Thanks mgorny@GitHub ([#83])
 
 [1.10.1]: https://github.com/textX/Arpeggio/compare/v1.10.0...1.10.1
+[#83]: https://github.com/textX/Arpeggio/pull/83
 
 
 ## [1.10.0] (released: 2020-11-01)

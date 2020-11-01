@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Igor Dejanović">
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Debugging - Arpeggio</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Debugging";
+    var mkdocs_page_input_path = "debugging.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-68681917-1', 'igordejanovic.net');
+      ga('send', 'pageview');
+  </script>
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Arpeggio</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">User Guide</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../getting_started/">Getting started</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../grammars/">Grammars</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../parse_trees/">Parse tree</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../handling_errors/">Handling errors</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Debugging</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#parser-debug-mode">Parser debug mode</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../configuration/">Parser configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../semantics/">Semantic analysis</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Tutorials</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../tutorials/csv/">CSV</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../tutorials/bibtex/">BibTex</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../tutorials/calc/">Calc</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">About</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../about/discuss/">Discuss</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../about/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../about/license/">License</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Arpeggio</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>User Guide &raquo;</li>
+        
+      
+    
+    <li>Debugging</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/textX/Arpeggio/edit/master/docs/debugging.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="debugging">Debugging<a class="headerlink" href="#debugging" title="Permanent link">&para;</a></h1>
+<p>When the stuff goes wrong you will want to debug your parser.</p>
+<hr />
+<h2 id="parser-debug-mode">Parser debug mode<a class="headerlink" href="#parser-debug-mode" title="Permanent link">&para;</a></h2>
+<p>During grammar design you can make syntax and semantic errors. Arpeggio will
+report any syntax error with all the necessary information whether you are
+building parser from python expressions or from a textual PEG notation.</p>
+<p>For semantic error you have a debugging mode of operation which is entered by
+setting <code>debug</code> parameter to <code>True</code> in the parser construction call. </p>
+<pre><code class="language-python">parser = ParserPython(calc, debug=True)
+</code></pre>
+<p>When Arpeggio runs in debug mode it will print a detailed information of what it
+is doing.</p>
+<pre><code>&gt;&gt; Entering rule calc=Sequence at position 0 =&gt; *-(4-1)*5+(
+  &gt;&gt; Entering rule OneOrMore in calc at position 0 =&gt; *-(4-1)*5+(
+      &gt;&gt; Entering rule expression=Sequence in calc at position 0 =&gt; *-(4-1)*5+(
+        &gt;&gt; Entering rule term=Sequence in expression at position 0 =&gt; *-(4-1)*5+(
+            &gt;&gt; Entering rule factor=Sequence in term at position 0 =&gt; *-(4-1)*5+(
+              &gt;&gt; Entering rule Optional in factor at position 0 =&gt; *-(4-1)*5+(
+                  &gt;&gt; Entering rule OrderedChoice in factor at position 0 =&gt; *-(4-1)*5+(
+                    &gt;&gt; Match rule StrMatch(+) in factor at position 0 =&gt; *-(4-1)*5+(
+                        -- No match '+' at 0 =&gt; '*-*(4-1)*5+('
+                    &gt;&gt; Match rule StrMatch(-) in factor at position 0 =&gt; *-(4-1)*5+(
+                        ++ Match '-' at 0 =&gt; '*-*(4-1)*5+('
+                  &lt;&lt; Leaving rule OrderedChoice
+              &lt;&lt; Leaving rule Optional
+              &gt;&gt; Entering rule OrderedChoice in factor at position 1 =&gt; -*(4-1)*5+(2
+</code></pre>
+<h2 id="visualization">Visualization<a class="headerlink" href="#visualization" title="Permanent link">&para;</a></h2>
+<p>Furthermore, while running in debug mode, a <code>dot</code> file (a graph description file
+format from <a href="http://www.graphviz.org/content/dot-language">GraphViz software
+package</a>) representing <em>the parser
+model</em> will be created if the parser model is constructed without errors. </p>
+<p>This <code>dot</code> file can be rendered as image using one of available dot viewer
+software or transformed to an image using <code>dot</code> tool
+<a href="http://graphviz.org/">GraphViz</a> software.</p>
+<pre><code class="language-bash">$ dot -Tpng -O calc_parser_model.dot
+</code></pre>
+<p>After this command you will get <code>calc_parser_model.dot.png</code> file which can be
+opened in any <code>png</code> image viewer. This is how it looks like:</p>
+<p><a href="../images/calc_parser_model.dot.png" target="_blank"><img src="../images/calc_parser_model.dot.png" style="display:block; width: 15cm; margin-left:auto; margin-right:auto;"/></a></p>
+<p>Each node in this graph is a parsing expression.  Nodes are labeled by the type
+name of the parsing expression.  If node represents the rule from the grammar,
+the label is of the form <code>&lt;rule_name&gt;=&lt;PEG type&gt;</code> where <code>rule_name</code> is the
+name of the grammar rule.  The edges connect children expressions. The labels on
+the edges represent the order in which the graph will be traversed during
+parsing.</p>
+<p>Furthermore, if you parse some input while the parser is in debug mode, the
+parse tree <code>dot</code> file will be generated also.</p>
+<pre><code class="language-python">parse_tree = parser.parse(&quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;)
+</code></pre>
+<p>This <code>dot</code> file can also be converted to <code>png</code> with the command:</p>
+<pre><code class="language-bash">$ dot -Tpng -O calc_parse_tree.dot
+</code></pre>
+<p>Which produces <code>png</code> image given bellow.</p>
+<p><a href="../images/calc_parse_tree.dot.png" target="_blank"><img src="../images/calc_parse_tree.dot.png"/></a></p>
+<p>You can also explicitly render your parser model or parse tree to <code>dot</code> file
+even if the parser is not in the debug mode.</p>
+<p>For parser model this is achieved with the following Python code:</p>
+<pre><code class="language-python">from arpeggio.export import PMDOTExporter
+PMDOTExporter().exportFile(parser.parser_model,
+                            &quot;my_parser_model.dot&quot;)
+</code></pre>
+<p>For parse tree it is achieved with:</p>
+<pre><code class="language-python">from arpeggio.export import PTDOTExporter
+PTDOTExporter().exportFile(parse_tree,
+                           &quot;my_parse_tree.dot&quot;)
+</code></pre>
+<p>To get e.g. <code>png</code> images from <code>dot</code> files do as usual:</p>
+<pre><code class="language-bash">$ dot -Tpng -O *.dot
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All tree images in this docs are rendered using Arpeggio's visualization and
+<code>dot</code> tool from the <a href="http://graphviz.org/">GraphViz</a> software.</p>
+</div>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../configuration/" class="btn btn-neutral float-right" title="Parser configuration">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../handling_errors/" class="btn btn-neutral" title="Handling errors"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../handling_errors/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../configuration/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../js/version-select.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

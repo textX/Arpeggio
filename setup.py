@@ -12,13 +12,14 @@
 # Parsers are defined using python language construction or PEG language.
 ###############################################################################
 
+from io import open
 import os
 import sys
 from setuptools import setup
 
 VERSIONFILE = "arpeggio/__init__.py"
 VERSION = None
-for line in open(VERSIONFILE, "r").readlines():
+for line in open(VERSIONFILE, "r", encoding='utf8').readlines():
     if line.startswith('__version__'):
         VERSION = line.split('"')[1]
 

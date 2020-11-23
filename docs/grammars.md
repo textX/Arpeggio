@@ -204,7 +204,7 @@ more traditional approach using `<-` for rule assignment and `;` for the rule
 terminator. The second syntax (from `arpeggio.cleanpeg`) uses `=` for assignment
 and does not use rule terminator. Which one you choose is totally up to you. If
 your don't like any of these syntaxes you can make your own (look at
-`arpeggio.peg` and `arpeggio.cleanpeg` modules as an examples).
+`arpeggio.peg` and `arpeggio.cleanpeg` modules as an example).
 
 An example of the `calc` grammar given in PEG syntax (`arpeggio.cleanpeg`):
 

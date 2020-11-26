@@ -14,8 +14,11 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- Fix parsing of version from `setup.py` when global encoding isn't UTF-8
+  ([#86]). Thanks neirbowj@GitHub
 
 [Unreleased]: https://github.com/textX/Arpeggio/compare/1.10.1...HEAD
+[#86]: https://github.com/textX/Arpeggio/pull/86
 
 
 ## [1.10.1] (released: 2020-11-01)

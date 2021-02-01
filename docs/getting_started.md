@@ -12,7 +12,7 @@ version of Arpeggio can be installed form
 [PyPI](https://pypi.python.org/pypi/Arpeggio/) with the following command:
 
 ```bash
-    $ pip install Arpeggio
+$ pip install Arpeggio
 ```
 
 To verify that you have installed Arpeggio correctly run the following command:

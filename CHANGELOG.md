@@ -17,8 +17,10 @@ please take a look at related PRs and issues and see if the change affects you.
 - Added EditorConfig configuration ([#77]). Thanks KOLANICH@GitHub
 - Fixed parsing of version from `setup.py` when global encoding isn't UTF-8
   ([#86]). Thanks neirbowj@GitHub
+- Fix repetition termination on a successful empty separator match ([#92]).
 
 [Unreleased]: https://github.com/textX/Arpeggio/compare/1.10.1...HEAD
+[#92]: https://github.com/textX/Arpeggio/issues/92
 [#86]: https://github.com/textX/Arpeggio/pull/86
 [#77]: https://github.com/textX/Arpeggio/pull/77
 

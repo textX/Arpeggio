@@ -10,7 +10,7 @@
 from __future__ import unicode_literals
 import pytest
 from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
-    NoMatch, EOF, Optional, And, Not, StrMatch
+    NoMatch, EOF, Optional, And, Not, StrMatch, RegExMatch
 
 
 def test_sequence():
@@ -214,6 +214,39 @@ def test_zero_or_more_with_separator():
         parser.parse("bbb")
 
 
+def test_zero_or_more_with_optional_separator():
+
+    def grammar():
+        return ZeroOrMore("a", sep=RegExMatch(",?")), EOF
+
+    parser = ParserPython(grammar)
+
+    parsed = parser.parse("a, a , a   a ,  a,a, a")
+
+    assert str(parsed) == \
+        "a | , | a | , | a | a | , | a | , | a | , | a | "
+    assert repr(parsed) == \
+        "[  'a' [0],  ',' [1],  'a' [3],  ',' [5],  'a' [7],  "\
+        "'a' [11],  ',' [13],  'a' [16],  ',' [17],  'a' [18],  ',' [19],"\
+        "  'a' [21], EOF [22] ]"
+
+    parsed = parser.parse("")
+
+    assert str(parsed) == ""
+    assert repr(parsed) == "[ EOF [0] ]"
+
+    parser.parse("aa a")
+
+    with pytest.raises(NoMatch):
+        parser.parse(",a,a ,a")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a,a ,a,")
+
+    with pytest.raises(NoMatch):
+        parser.parse("bbb")
+
+
 def test_one_or_more():
 
     def grammar():
@@ -260,6 +293,35 @@ def test_one_or_more_with_separator():
 
     with pytest.raises(NoMatch):
         parser.parse("a a b")
+
+    with pytest.raises(NoMatch):
+        parser.parse("a a, b")
+
+    with pytest.raises(NoMatch):
+        parser.parse(", a, a b")
+
+
+def test_one_or_more_with_optional_separator():
+
+    def grammar():
+        return OneOrMore("a", sep=RegExMatch(",?")), "b"
+
+    parser = ParserPython(grammar)
+
+    parsed = parser.parse("a, a  a, a  b")
+
+    assert str(parsed) == "a | , | a | a | , | a | b"
+    assert repr(parsed) == \
+        "[  'a' [0],  ',' [1],  'a' [3],  'a' [6],  ',' [7],  "\
+        "'a' [9],  'b' [12] ]"
+
+    parser.parse("a b")
+
+    with pytest.raises(NoMatch):
+        parser.parse("")
+
+    with pytest.raises(NoMatch):
+        parser.parse("b")
 
     with pytest.raises(NoMatch):
         parser.parse("a a, b")

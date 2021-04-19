@@ -480,9 +480,8 @@ class ZeroOrMore(Repetition):
                 c_pos = parser.position
                 if sep and result:
                     sep_result = sep(parser)
-                    if not sep_result:
-                        break
-                    append(sep_result)
+                    if sep_result:
+                        append(sep_result)
                 result = p(parser)
                 if not result:
                     break
@@ -524,9 +523,8 @@ class OneOrMore(Repetition):
                     c_pos = parser.position
                     if sep and result:
                         sep_result = sep(parser)
-                        if not sep_result:
-                            break
-                        append(sep_result)
+                        if sep_result:
+                            append(sep_result)
                     result = p(parser)
                     if not result:
                         break

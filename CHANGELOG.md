@@ -12,14 +12,20 @@ Backward incompatible changes are marked with **(BIC)**. These changes are the
 reason for the major version increase so when upgrading between major versions
 please take a look at related PRs and issues and see if the change affects you.
 
+
 ## [Unreleased]
+
+[Unreleased]: https://github.com/textX/Arpeggio/compare/1.10.2...HEAD
+
+
+## [1.10.2] (released: 2021-04-25)
 
 - Added EditorConfig configuration ([#77]). Thanks KOLANICH@GitHub
 - Fixed parsing of version from `setup.py` when global encoding isn't UTF-8
   ([#86]). Thanks neirbowj@GitHub
 - Fix repetition termination on a successful empty separator match ([#92]).
 
-[Unreleased]: https://github.com/textX/Arpeggio/compare/1.10.1...HEAD
+[1.10.2]: https://github.com/textX/Arpeggio/compare/1.10.1...1.10.2
 [#92]: https://github.com/textX/Arpeggio/issues/92
 [#86]: https://github.com/textX/Arpeggio/pull/86
 [#77]: https://github.com/textX/Arpeggio/pull/77

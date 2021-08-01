@@ -44,6 +44,8 @@ try:
   parse_tree = parser.parse(input_expr)
 except NoMatch as e:
   # Do something with e
+  # Call e.eval_attrs() if you want to create a custom message
+  # call str(e) for the default message
 ```
 
 
@@ -52,9 +54,15 @@ except NoMatch as e:
 - `rules` - A list of `ParsingExpression` rules that are the sources of the
   exception.
 - `position` - A position in the input stream where exception occurred.
+- `parser` - A `Parser` instance used for parsing.
+
+After `eval_attrs()` method is called on the exception (happens automatically if
+`__str__` is called) these additional attributes are available:
+
+- `message` - An error message.
+- `context` - A context (part of the input) in which error occurred.
 - `line`, `col` - A line and column in the input stream where exception
   occurred.
-- `parser` - A `Parser` instance used for parsing.
 
 Arpeggio is a backtracking parser, which means that it will go back and try
 another alternatives when the match does not succeeds. Nevertheless, it will 

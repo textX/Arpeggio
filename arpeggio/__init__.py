@@ -73,7 +73,11 @@ class NoMatch(Exception):
         self.position = position
         self.parser = parser
 
-    def __str__(self):
+
+    def eval_attrs(self):
+        """
+        Call this to evaluate `message`, `context`, `line` and `col`. Called by __str__.
+        """
         def rule_to_exp_str(rule):
             if hasattr(rule, '_exp_str'):
                 # Rule may override expected report string
@@ -87,19 +91,24 @@ class NoMatch(Exception):
                 return rule.name
 
         if not self.rules:
-            err_message = "Not expected input"
+            self.message = "Not expected input"
         else:
             what_is_expected = OrderedDict.fromkeys(
                 ["{}".format(rule_to_exp_str(r)) for r in self.rules])
             what_str = " or ".join(what_is_expected)
-            err_message = "Expected {}".format(what_str)
+            self.message = "Expected {}".format(what_str)
 
+        self.context = self.parser.context(position=self.position)
+        self.line, self.col = self.parser.pos_to_linecol(self.position)
+
+    def __str__(self):
+        self.eval_attrs()
         return "{} at position {}{} => '{}'."\
-            .format(err_message,
+            .format(self.message,
                     "{}:".format(self.parser.file_name)
                     if self.parser.file_name else "",
-                    text(self.parser.pos_to_linecol(self.position)),
-                    self.parser.context(position=self.position))
+                    (self.line, self.col),
+                    self.context)
 
     def __unicode__(self):
         return self.__str__()

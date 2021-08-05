@@ -4,8 +4,11 @@ site_description: Parser interpreter based on PEG grammars for Python
 site_author: Igor Dejanović
 
 repo_url: https://github.com/textX/Arpeggio
-google_analytics: [UA-68681917-1, igordejanovic.net]
-theme: readthedocs
+
+theme:
+  name: readthedocs
+  analytics:
+    gtag: UA-68681917-1
 
 nav:
 - Home: index.md
@@ -32,9 +35,7 @@ markdown_extensions:
 - toc:
     permalink: true
 
-copyright: Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.
+plugins:
+  - mike
 
-extra_css:
-- css/version-select.css
-extra_javascript:
-- js/version-select.js
+copyright: Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.

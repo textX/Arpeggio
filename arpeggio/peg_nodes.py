@@ -78,8 +78,7 @@ class ParseTreeNode(object):
             visitor(PTNodeVisitor): The visitor object.
         """
         if visitor.debug:
-            visitor.dprint("Visiting {}  type:{} str:{}"
-                           .format(self.name, type(self).__name__, str(self)))
+            visitor.dprint(f"Visiting {self.name}  type:{type(self).__name__} str:{str(self)}")
 
         children = SemanticActionResults()
         if isinstance(self, NonTerminal):

@@ -51,12 +51,12 @@ class ParsingExpression(abc.ABC):
 
     @property
     def desc(self):
-        return "{}{}".format(self.name, "-" if self.suppress else "")
+        return f'{self.name}{"-" if self.suppress else ""}'
 
     @property
     def name(self):
         if self.root:
-            return "%s=%s" % (self.rule_name, self.__class__.__name__)
+            return f"{self.rule_name}={self.__class__.__name__}"
         else:
             return self.__class__.__name__
 

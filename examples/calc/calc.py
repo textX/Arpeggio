@@ -41,7 +41,7 @@ class CalcVisitor(PTNodeVisitor):
         Converts node value to float.
         """
         if self.debug:
-            print("Converting {}.".format(node.value))
+            print(f"Converting {node.value}.")
         return float(node.value)
 
     def visit_factor(self, node, children):
@@ -49,7 +49,7 @@ class CalcVisitor(PTNodeVisitor):
         Applies a sign to the expression or number.
         """
         if self.debug:
-            print("Factor {}".format(children))
+            print(f"Factor {children}")
         if len(children) == 1:
             return children[0]
         sign = -1 if children[0] == '-' else 1
@@ -61,7 +61,7 @@ class CalcVisitor(PTNodeVisitor):
         Factor nodes will be already evaluated.
         """
         if self.debug:
-            print("Term {}".format(children))
+            print(f"Term {children}")
         term = children[0]
         for i in range(2, len(children), 2):
             if children[i - 1] == "*":
@@ -69,7 +69,7 @@ class CalcVisitor(PTNodeVisitor):
             else:
                 term /= children[i]
         if self.debug:
-            print("Term = {}".format(term))
+            print(f"Term = {term}")
         return term
 
     def visit_expression(self, node, children):
@@ -78,7 +78,7 @@ class CalcVisitor(PTNodeVisitor):
         Term nodes will be already evaluated.
         """
         if self.debug:
-            print("Expression {}".format(children))
+            print(f"Expression {children}")
         expr = children[0]
         for i in range(2, len(children), 2):
             if i and children[i - 1] == "-":
@@ -86,7 +86,7 @@ class CalcVisitor(PTNodeVisitor):
             else:
                 expr += children[i]
         if self.debug:
-            print("Expression = {}".format(expr))
+            print(f"Expression = {expr}")
         return expr
 
 
@@ -111,7 +111,7 @@ def main(debug=False):
     # Check that result is valid
     assert (result - -7.51194444444) < 0.0001
 
-    print("{} = {}".format(input_expr, result))
+    print(f"{input_expr} = {result}")
 
 
 if __name__ == "__main__":

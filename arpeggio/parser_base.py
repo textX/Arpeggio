@@ -175,7 +175,7 @@ class Parser(peg_utils.DebugPrinter, abc.ABC):
 
             root_rule_name = self.parse_tree.rule_name
             PTDOTExporter().exportFile(
-                self.parse_tree, "{}_parse_tree.dot".format(root_rule_name))
+                self.parse_tree, f"{root_rule_name}_parse_tree.dot")
         return self.parse_tree
 
     def parse_file(self, file_name):

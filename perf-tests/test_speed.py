@@ -48,19 +48,15 @@ def main():
     parser = ParserPython(rhapsody)
     print('\n*** No memoization\n')
     for i in range(3):
-        timeit(parser, file_name_small,
-               '{}. Small file, no memoization.'.format(i + 1))
-        timeit(parser, file_name_large,
-               '{}. Large file, no memoization.'.format(i + 1))
+        timeit(parser, file_name_small, f'{i + 1}. Small file, no memoization.')
+        timeit(parser, file_name_large, f'{i + 1}. Large file, no memoization.')
 
     # Memoization
     parser = ParserPython(rhapsody, memoization=True)
     print('\n*** Memoization\n')
     for i in range(3):
-        timeit(parser, file_name_small,
-               '{}. Small file, with memoization.'.format(i + 1))
-        timeit(parser, file_name_large,
-               '{}. Large file, with memoization.'.format(i + 1))
+        timeit(parser, file_name_small, f'{i + 1}. Small file, with memoization.')
+        timeit(parser, file_name_large, f'{i + 1}. Large file, with memoization.')
 
 
 if __name__ == '__main__':

@@ -54,7 +54,7 @@ class ParserPEG(parser_base.Parser):
 
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(
-                self.parser_model, "{}_peg_parser_model.dot".format(root_rule))
+                self.parser_model, f"{root_rule}_peg_parser_model.dot")
 
     def _parse(self):
         return self.parser_model.parse(self)

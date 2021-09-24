@@ -46,7 +46,7 @@ def main(debug=False):
     # Check that result is valid
     assert (result - -7.51194444444) < 0.0001
 
-    print("{} = {}".format(input_expr, result))
+    print(f"{input_expr} = {result}")
 
 
 if __name__ == "__main__":

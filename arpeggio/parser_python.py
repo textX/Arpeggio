@@ -42,8 +42,7 @@ class ParserPython(parser_base.Parser):
                 from export import PMDOTExporter            # type: ignore # pragma: no cover
 
             root_rule = language_def.__name__
-            PMDOTExporter().exportFile(self.parser_model,
-                                       "{}_parser_model.dot".format(root_rule))
+            PMDOTExporter().exportFile(self.parser_model, f"{root_rule}_parser_model.dot")
 
     def _parse(self):
         return self.parser_model.parse(self)

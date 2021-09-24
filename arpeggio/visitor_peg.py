@@ -60,7 +60,7 @@ class PEGVisitor(visitor_base.PTNodeVisitor):
                 try:
                     return self.peg_rules[rule_name]
                 except KeyError:
-                    raise error_classes.SemanticError("Rule \"{}\" does not exists.".format(rule_name))
+                    raise error_classes.SemanticError(f"Rule \"{rule_name}\" does not exists.")
 
             def resolve_rule_by_name(rule_name):
                 if self.debug:
@@ -78,9 +78,7 @@ class PEGVisitor(visitor_base.PTNodeVisitor):
                     resolved_rule.rule_name = rule_name
                     self.peg_rules[rule_name] = resolved_rule
                     if self.debug:
-                        self.dprint("Resolving: cloned to {} = > {}"
-                                    .format(resolved_rule.rule_name,
-                                            resolved_rule.name))
+                        self.dprint(f"Resolving: cloned to {resolved_rule.rule_name} = > {resolved_rule.name}")
                 return resolved_rule
 
             if isinstance(node, peg_utils.CrossRef):

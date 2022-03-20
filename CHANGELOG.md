@@ -15,12 +15,18 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+
+[Unreleased]: https://github.com/textX/Arpeggio/compare/1.11.0...HEAD
+
+
+## [1.11.0] (released: 2022-03-20)
+
 - Added `eval_attrs` call to `NoMatch` exceptions ([ebfd60]). See [the
   docs](https://textx.github.io/Arpeggio/latest/handling_errors/).
 
 
 [ebfd60]: https://github.com/textX/Arpeggio/commit/ebfd60a7330cd5e6aaacfd5be7001be0f7506ce8
-[Unreleased]: https://github.com/textX/Arpeggio/compare/1.10.2...HEAD
+[1.11.0]: https://github.com/textX/Arpeggio/compare/1.10.2...1.11.0
 
 
 ## [1.10.2] (released: 2021-04-25)

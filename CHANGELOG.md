@@ -28,7 +28,7 @@ please take a look at related PRs and issues and see if the change affects you.
 
 
 [ebfd60]: https://github.com/textX/Arpeggio/commit/ebfd60a7330cd5e6aaacfd5be7001be0f7506ce8
-[1.11.0]: https://github.com/textX/Arpeggio/compare/1.10.2...2.0.0
+[2.0.0]: https://github.com/textX/Arpeggio/compare/1.10.2...2.0.0
 
 
 ## [1.10.2] (released: 2021-04-25)

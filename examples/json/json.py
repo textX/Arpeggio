@@ -18,8 +18,8 @@ from arpeggio import RegExMatch as _
 def TRUE():     return "true"
 def FALSE():    return "false"
 def NULL():     return "null"
-def jsonString():       return '"', _('[^"]*'),'"'
-def jsonNumber():       return _('-?\d+((\.\d*)?((e|E)(\+|-)?\d+)?)?')
+def jsonString():       return '"', _(r'[^"]*'),'"'
+def jsonNumber():       return _(r'-?\d+((\.\d*)?((e|E)(\+|-)?\d+)?)?')
 def jsonValue():        return [jsonString, jsonNumber, jsonObject, jsonArray, TRUE, FALSE, NULL]
 def jsonArray():        return "[", Optional(jsonElements), "]"
 def jsonElements():     return jsonValue, ZeroOrMore(",", jsonValue)

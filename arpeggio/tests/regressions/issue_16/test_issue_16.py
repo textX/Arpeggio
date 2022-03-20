@@ -30,7 +30,7 @@ class Enum {
 
 """
 
-grammar = """
+grammar = r"""
 
 calc = test
 

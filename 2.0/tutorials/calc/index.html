@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Igor Dejanović">
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Calc - Arpeggio</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Calc";
+    var mkdocs_page_input_path = "tutorials/calc.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-68681917-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-68681917-1');
+  </script>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Arpeggio</a>
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">User Guide</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../getting_started/">Getting started</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../grammars/">Grammars</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../parse_trees/">Parse tree</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../handling_errors/">Handling errors</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../debugging/">Debugging</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Parser configuration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../semantics/">Semantic analysis</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/">Troubleshooting</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Tutorials</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../csv/">CSV</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../bibtex/">BibTex</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Calc</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">About</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../about/discuss/">Discuss</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../about/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../about/license/">License</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Arpeggio</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Tutorials &raquo;</li>
+        
+      
+    
+    <li>Calc</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/textX/Arpeggio/edit/master/docs/tutorials/calc.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="calculator-tutorial">Calculator tutorial<a class="headerlink" href="#calculator-tutorial" title="Permanent link">&para;</a></h1>
+<p>A tutorial for parsing and evaluation of arithmetic expressions.</p>
+<hr />
+<p>In this tutorial we will make a parser and evaluator for simple arithmetic
+expression (numbers and operations - addition, subtraction, multiplication and
+division).  The parser will be able to recognize and evaluate following
+expressions:</p>
+<pre><code>2+7-3.6
+3/(3-1)+45*2.17+8
+4*12+5-4*(2-8)
+...
+</code></pre>
+<p>Evaluation will be done using <a href="../../semantics/">support for semantic analysis</a>.</p>
+<p>Parsing infix expression has additional constraints related to operator
+precedence. Arpeggio is recursive-descent parser, parsing the input from left to
+right and doing a leftmost derivation. 
+There is a simple technique that will enable proper evaluation in the context
+of a different operator precedence.</p>
+<p>Let's start with grammar definition.</p>
+<h1 id="the-grammar">The grammar<a class="headerlink" href="#the-grammar" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Each <code>calc</code> file consists of one or more expressions.</li>
+</ul>
+<pre><code class="language-python">def calc():       return OneOrMore(expression), EOF
+</code></pre>
+<ul>
+<li>Each expression is a sum or subtraction of terms.</li>
+</ul>
+<pre><code class="language-python">def expression(): return term, ZeroOrMore([&quot;+&quot;, &quot;-&quot;], term)
+</code></pre>
+<ul>
+<li>Each term is a multiplication or division of factors.</li>
+</ul>
+<pre><code class="language-python">def term():       return factor, ZeroOrMore([&quot;*&quot;,&quot;/&quot;], factor)
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice that the order of precedence is from lower to upper.
+The deeper is the grammar rule, the tighter is the bonding.</p>
+</div>
+<ul>
+<li>Each factor is either a number or an expression inside brackets. The prefix
+  sign is optional. This is a support for unary minus.</li>
+</ul>
+<pre><code class="language-python">def factor():     return Optional([&quot;+&quot;,&quot;-&quot;]), [number, (&quot;(&quot;, expression, &quot;)&quot;)]
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice indirect recursion here to <code>expression</code>. It is not left since the
+opening bracket must be found.</p>
+</div>
+<ul>
+<li>And finally we define <code>number</code> using regular expression as</li>
+</ul>
+<pre><code class="language-python">def number():     return _(r'\d*\.\d*|\d+')
+</code></pre>
+<h1 id="the-parser">The parser<a class="headerlink" href="#the-parser" title="Permanent link">&para;</a></h1>
+<p>Using above grammar specified in <a href="../../grammars/#grammars-written-in-python">Python
+notation</a> we instantiate the parser
+using <code>ParserPython</code> class.</p>
+<pre><code class="language-python">  parser = ParserPython(calc)
+</code></pre>
+<p>This parser is able to parse arithmetic expression like this</p>
+<pre><code>-(4-1)*5+(2+4.67)+5.89/(.2+7)
+</code></pre>
+<p>and produce parse tree like this</p>
+<p><a href="../../images/calc_parse_tree.dot.png" target="_blank"><img src="../../images/calc_parse_tree.dot.png"/></a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All tree images in this documentation are produced by running the parser
+in <a href="../../debugging/">debug mode</a> and using <a href="../../debugging/#visualization">visualization
+support</a>.</p>
+</div>
+<p>The parsing is done like this:</p>
+<pre><code class="language-python">input_expr = &quot;-(4-1)*5+(2+4.67)+5.89/(.2+7)&quot;
+parse_tree = parser.parse(input_expr)
+</code></pre>
+<p>By ordering operation in the grammar form lower to upper precedence we have
+got the parse tree where the priority is retained. This will help us to easier
+make an expression evaluation.</p>
+<h1 id="evaluating-parse-tree">Evaluating parse tree<a class="headerlink" href="#evaluating-parse-tree" title="Permanent link">&para;</a></h1>
+<p>To implement evaluation we shall use Arpeggio's support for <a href="../../semantics/">semantic
+analysis</a> using visitor patter.</p>
+<p>Visitor is an object with methods named <code>visit_&lt;rule&gt;</code> which gets called for 
+each node of parse tree produced with the given rule. The processing of the 
+tree nodes is done bottom-up.</p>
+<pre><code class="language-python">class CalcVisitor(PTNodeVisitor):
+
+    def visit_number(self, node, children):
+        &quot;&quot;&quot;
+        Converts node value to float.
+        &quot;&quot;&quot;
+        return float(node.value)
+
+    ...
+
+</code></pre>
+<p>Visit method for the <code>number</code> rule will do the conversion of the matched text
+to <code>float</code> type. This nodes will always be the terminal nodes and will be
+evaluated first.</p>
+<pre><code class="language-python">
+    def visit_factor(self, node, children):
+        &quot;&quot;&quot;
+        Applies a sign to the expression or number.
+        &quot;&quot;&quot;
+        if len(children) == 1:
+            return children[0]
+        sign = -1 if children[0] == '-' else 1
+        return sign * children[-1]
+
+</code></pre>
+<p>Factor will have an optional sign as the first child and whatever matches first
+from the ordered choice of number and expression.
+We take the last element. It must be the result of <code>number</code> or <code>expression</code>
+evaluation and apply an optional sing on it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that the constant string matches will be removed by the Arpeggio, thus
+you will never get a constant string match in the children list.</p>
+</div>
+<pre><code class="language-python">
+    def visit_term(self, node, children):
+        &quot;&quot;&quot;
+        Divides or multiplies factors.
+        Factor nodes will be already evaluated.
+        &quot;&quot;&quot;
+        term = children[0]
+        for i in range(2, len(children), 2):
+            if children[i-1] == &quot;*&quot;:
+                term *= children[i]
+            else:
+                term /= children[i]
+        return term
+</code></pre>
+<p><code>term</code> consist of multiplication or divisions. Both operations are left
+associative so we shall run from left to right. Each even element will be
+evaluated <code>factor</code> while each odd element will be an operation to perform.
+At the end we return the evaluated <code>term</code>.</p>
+<pre><code class="language-python">    def visit_expression(self, node, children):
+        &quot;&quot;&quot;
+        Adds or subtracts terms.
+        Term nodes will be already evaluated.
+        &quot;&quot;&quot;
+        expr = 0
+        start = 0
+        # Check for unary + or - operator
+        if text(children[0]) in &quot;+-&quot;:
+            start = 1
+
+        for i in range(start, len(children), 2):
+            if i and children[i - 1] == &quot;-&quot;:
+                expr -= children[i]
+            else:
+                expr += children[i]
+
+        return expr
+</code></pre>
+<p>And finally the whole expression consists of additions and subtractions of
+terms. A minor glitch here is a support for unary minus and plus sign.</p>
+<p>Let's apply this visitor to our parse tree.</p>
+<pre><code class="language-python">result = visit_parse_tree(parse_tree, CalcVisitor(debug=debug))
+</code></pre>
+<p>The result will be a <code>float</code> which represent the value of the given expression.</p>
+<h1 id="the-grammar-in-peg">The grammar in PEG<a class="headerlink" href="#the-grammar-in-peg" title="Permanent link">&para;</a></h1>
+<p>As a final note, the same grammar can be specified in <a href="../../grammars/#grammars-written-in-peg-notations">textual PEG
+syntax</a>.</p>
+<p>Either a clean PEG variant:</p>
+<pre><code>number = r'\d*\.\d*|\d+'
+factor = (&quot;+&quot; / &quot;-&quot;)?
+          (number / &quot;(&quot; expression &quot;)&quot;)
+term = factor (( &quot;*&quot; / &quot;/&quot;) factor)*
+expression = term ((&quot;+&quot; / &quot;-&quot;) term)*
+calc = expression+ EOF
+
+</code></pre>
+<p>or traditional PEG variant:</p>
+<pre><code>number &lt;- r'\d*\.\d*|\d+';
+factor &lt;- (&quot;+&quot; / &quot;-&quot;)?
+          (number / &quot;(&quot; expression &quot;)&quot;);
+term &lt;- factor (( &quot;*&quot; / &quot;/&quot;) factor)*;
+expression &lt;- term ((&quot;+&quot; / &quot;-&quot;) term)*;
+calc &lt;- expression+ EOF;
+</code></pre>
+<p>The grammar for textual PEG is parsed using Arpeggio itself and this shows the
+flexibility of the Arpeggio parser.</p>
+<p>The code for both parser can be found in the <a href="https://github.com/textX/Arpeggio/tree/master/examples/calc">Calc
+example</a>.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../about/discuss/" class="btn btn-neutral float-right" title="Discuss">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../bibtex/" class="btn btn-neutral" title="BibTex"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../bibtex/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../about/discuss/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

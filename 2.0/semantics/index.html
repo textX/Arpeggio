@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Igor Dejanović">
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Semantic analysis - Arpeggio</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Semantic analysis";
+    var mkdocs_page_input_path = "semantics.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-68681917-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-68681917-1');
+  </script>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Arpeggio</a>
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">User Guide</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../getting_started/">Getting started</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../grammars/">Grammars</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../parse_trees/">Parse tree</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../handling_errors/">Handling errors</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../debugging/">Debugging</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../configuration/">Parser configuration</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Semantic analysis</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#semanticactionresults">SemanticActionResults</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#post-processing-in-second-calls">Post-processing in second calls</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#default-actions">Default actions</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Tutorials</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../tutorials/csv/">CSV</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../tutorials/bibtex/">BibTex</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../tutorials/calc/">Calc</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">About</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../about/discuss/">Discuss</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../about/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../about/license/">License</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Arpeggio</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>User Guide &raquo;</li>
+        
+      
+    
+    <li>Semantic analysis</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/textX/Arpeggio/edit/master/docs/semantics.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="semantic-analysis-visitors">Semantic analysis - Visitors<a class="headerlink" href="#semantic-analysis-visitors" title="Permanent link">&para;</a></h1>
+<p>This section explains how to transform parse tree to a more usable structure.</p>
+<hr />
+<p>You will surely always want to extract some information from the parse tree or
+to transform it in some more usable form.  The process of parse tree
+transformation to other forms is referred to as <em>semantic analysis</em>.  You could
+do that using parse tree navigation etc., but it is better to use some standard
+mechanism.</p>
+<p>In Arpeggio a visitor pattern is used for semantic analysis. You write a python
+class that inherits <code>PTNodeVisitor</code> and has a methods of the form
+<code>visit_&lt;rule name&gt;(self, node, children)</code> where rule name is a rule name from
+the grammar.</p>
+<pre><code>class CalcVisitor(PTNodeVisitor):
+
+    def visit_number(self, node, children):
+        return float(node.value)
+
+    def visit_factor(self, node, children):
+        if len(children) == 1:
+            return children[0]
+        sign = -1 if children[0] == '-' else 1
+        return sign * children[-1]
+
+    ...
+</code></pre>
+<p>During a semantic analysis a parse tree is walked in the depth-first manner and
+for each node a proper visitor method is called to transform it to some other
+form. The results are then fed to the parent node visitor method.  This is
+repeated until the final, top level parse tree node is processed (its visitor is
+called). The result of the top level node is the final output of the semantic
+analysis.</p>
+<p>To run semantic analysis apply your visitor class to the parse tree using
+<code>visit_parse_tree</code> function.</p>
+<pre><code class="language-python">result = visit_parse_tree(parse_tree, CalcVisitor(debug=True))
+</code></pre>
+<p>The first parameter is a parse tree you get from the <code>parser.parse</code> call while
+the second parameter is an instance of your visitor class. Semantic analysis can
+be run in debug mode if you set <code>debug</code> parameter to <code>True</code> during visitor
+construction. You can use this flag to print your own debug information from
+visitor methods.</p>
+<pre><code>class MyLanguageVisitor(PTNodeVisitor):
+
+  def visit_somerule(self, node, children):
+    if self.debug:
+      print("Visiting some rule!")
+</code></pre>
+<p>During semantic analysis, each <code>visitor_xxx</code> method gets current parse tree node
+as the <code>node</code> parameter and the evaluated children nodes as the <code>children</code>
+parameter.</p>
+<p>For example, if you have <code>expression</code> rule in your grammar then the
+transformation of the non-terminal matched by this rule can be done as:</p>
+<pre><code>def visitor_expression(self, node, children):
+  ... # transform node using 'node' and 'children' parameter
+  return transformed_node
+</code></pre>
+<p><code>node</code> is the current <code>NonTerminal</code> or <code>Terminal</code> from the parse tree while the
+<code>children</code> is an instance of <code>SemanticActionResults</code> class. This class is a
+list-like structure that holds the results of semantic evaluation from the
+children parse tree nodes (analysis is done bottom-up).</p>
+<p>To suppress node completely return <code>None</code> from visitor method. In this case
+the parent visitor method will not get this node in its <code>children</code> parameter.</p>
+<p>In the <a href="https://github.com/textX/Arpeggio/blob/master/examples/calc/calc.py">calc.py
+example</a>
+a semantic analysis
+(<a href="https://github.com/textX/Arpeggio/blob/master/examples/calc/calc.py#L31">CalcVisitor</a>
+class) will evaluate the result of arithmetic expression. The parse tree is thus
+transformed to a single numeric value that represent the result of the
+expression.</p>
+<p>In the <a href="https://github.com/textX/Arpeggio/tree/master/examples/robot">robot.py
+example</a> a
+semantic analysis
+(<a href="https://github.com/textX/Arpeggio/blob/master/examples/robot/robot.py#L36">RobotVisitor</a>
+class) will evaluate robot program (transform its parse tree) to the final robot
+location.</p>
+<p>Semantic analysis can do a complex stuff. For example, see
+<a href="https://github.com/textX/Arpeggio/blob/master/examples/peg_peg/peg_peg.py">peg_peg.py</a>
+and
+<a href="https://github.com/textX/Arpeggio/blob/master/arpeggio/peg.py#L53">PEGVisitor</a>
+class where the PEG parser for the given language is built using semantic
+analysis.</p>
+<h2 id="semanticactionresults">SemanticActionResults<a class="headerlink" href="#semanticactionresults" title="Permanent link">&para;</a></h2>
+<p><code>SemanticActionResults</code> is the class of object returned from the parse tree nodes evaluation.
+This class is used for filtering and navigation over evaluation results on children nodes.</p>
+<p>Instance of this class is given as <code>children</code> parameter of <code>visitor_xxx</code>
+methods.  This class inherits <code>list</code> so index access as well as iteration is
+available.</p>
+<p>Furthermore, child nodes can be filtered by rule name using attribute access.</p>
+<pre><code class="language-python">def visit_bar(self, node, children):
+  # Index access
+  child = children[2]
+
+  # Iteration
+  for child in children:
+    ...
+
+  # Returns a list of all rules created by PEG rule 'baz'
+  baz_created = children.baz
+</code></pre>
+<h2 id="post-processing-in-second-calls">Post-processing in second calls<a class="headerlink" href="#post-processing-in-second-calls" title="Permanent link">&para;</a></h2>
+<p>Visitor may define method with the <code>second_&lt;rule_name&gt;</code> name form. If this
+method exists it will be called after all parse tree node are processed and it
+will be given the results of the <code>visit_&lt;rule_name&gt;</code> call.</p>
+<p>This is usually used when some additional post-processing is needed (e.g.
+reference resolving).</p>
+<h2 id="default-actions">Default actions<a class="headerlink" href="#default-actions" title="Permanent link">&para;</a></h2>
+<p>For each parse tree node that does not have an appropriate <code>visit_xxx</code> method a
+default action is performed. If the node is created by a plain string match,
+action will return <code>None</code> and thus suppress this node. This is handy for all
+those syntax noise tokens (brackets, braces, keywords etc.).</p>
+<p>For example, if your grammar is:</p>
+<pre><code class="language-python">number_in_brackets = &quot;(&quot; number &quot;)&quot;
+number = r'\d+'
+</code></pre>
+<p>then the default action for <code>number</code> will return number node converted to
+a string and the default action for <code>(</code> and <code>)</code> will return <code>None</code> and thus
+suppress these nodes so the visitor method for <code>number_in_brackets</code> rule will
+only see one child (from the <code>number</code> rule reference).</p>
+<p>If the node is a non-terminal and there is only one child the default action
+will return that child effectively passing it to the parent node visitor.</p>
+<p>Default actions can be disabled by setting parameter <code>defaults</code> to <code>False</code> on
+visitor construction.</p>
+<pre><code class="language-python">result = visit_parse_tree(parse_tree, CalcVisitor(defaults=False))
+</code></pre>
+<p>If you want to call this default behaviour from your visitor method, call
+<code>visit__default__(node, children)</code> on superclass (<code>PTNodeVisitor</code>).</p>
+<pre><code class="language-python">def visitor_myrule(self, node, children):
+  if some_condition:
+    ...
+  else:
+    return super(MyVisitor, self).visit__default__(node, children)
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../troubleshooting/" class="btn btn-neutral float-right" title="Troubleshooting">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../configuration/" class="btn btn-neutral" title="Parser configuration"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../configuration/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../troubleshooting/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

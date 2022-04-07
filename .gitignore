@@ -1,3 +1,5 @@
+arpeggio/version.py
+
 *.py[cod]
 
 # C extensions

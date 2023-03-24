@@ -377,7 +377,7 @@ class Sequence(ParsingExpression):
         try:
             for e in self.nodes:
                 result = e.parse(parser)
-                if result:
+                if result is not None:
                     append(result)
 
         except NoMatch:

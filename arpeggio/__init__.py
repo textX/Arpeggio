@@ -878,6 +878,8 @@ class StrMatch(Match):
         super(StrMatch, self).__init__(rule_name, root, **kwargs)
         self.to_match = to_match
         self.ignore_case = ignore_case
+        if "\n" in to_match:
+            self._exp_str = "'" + to_match.replace("\n", "\\n") + "'"
 
     def _parse(self, parser):
         c_pos = parser.position

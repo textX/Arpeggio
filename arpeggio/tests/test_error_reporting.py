@@ -168,3 +168,29 @@ def test_compound_not_match():
     with pytest.raises(NoMatch) as e:
         parser.parse('   four ident')
     assert "Expected 'one' or 'two' at" in str(e.value)
+
+
+def test_not_succeed_in_ordered_choice():
+    """
+    Test that Not can succeed in ordered choice leading to ordered choice
+    to succeed.
+    See: https://github.com/textX/Arpeggio/issues/96
+    """
+
+    def grammar():
+        return [Not("a"), "a"], Optional("b")
+
+    parser = ParserPython(grammar)
+    parser.parse('b')
+
+
+def test_reporting_newline_symbols_when_not_matched():
+    def grammar():
+        return "first", "\n"
+
+    parser = ParserPython(grammar, skipws=False)
+
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('first')
+
+    assert "Expected '\\n' at position (1, 6)" in str(e.value)

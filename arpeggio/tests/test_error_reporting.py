@@ -176,5 +176,17 @@ def test_not_succeed_in_ordered_choice():
     def grammar():
         return [Not("a"), "a"], Optional("b")
 
-    parser=ParserPython(grammar)
+    parser = ParserPython(grammar)
     parser.parse('b')
+
+
+def test_reporting_newline_symbols_when_not_matched():
+    def grammar():
+        return "first", "\n"
+
+    parser = ParserPython(grammar, skipws=False)
+
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('first')
+
+    assert "Expected '\\n' at position (1, 6)" in str(e.value)

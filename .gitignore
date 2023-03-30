@@ -47,6 +47,9 @@ nosetests.xml
 *.dot.png
 !docs/**/*.png
 
+# JetBrains IDE artifacts.
+.idea
+
 # Other
 .~lock*
 *.log
@@ -57,3 +60,4 @@ site
 venv
 .ropeproject
 coverage
+

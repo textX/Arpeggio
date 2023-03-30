@@ -168,3 +168,15 @@ def test_compound_not_match():
     with pytest.raises(NoMatch) as e:
         parser.parse('   four ident')
     assert "Expected 'one' or 'two' at" in str(e.value)
+
+
+def test_reporting_newline_symbols_when_not_matched():
+    def grammar():
+        return "first", "\n"
+
+    parser = ParserPython(grammar, skipws=False)
+
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('first')
+
+    assert "Expected '\\n' at position (1, 6)" in str(e.value)

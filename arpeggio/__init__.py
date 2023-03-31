@@ -79,7 +79,10 @@ class NoMatch(Exception):
         Call this to evaluate `message`, `context`, `line` and `col`. Called by __str__.
         """
         def rule_to_exp_str(rule):
-            if hasattr(rule, '_exp_str'):
+            if hasattr(rule, 'get_diagnostics'):
+                # Rule may override expected report string
+                return rule.get_diagnostics()
+            elif hasattr(rule, '_exp_str'):
                 # Rule may override expected report string
                 return rule._exp_str
             elif rule.root:
@@ -382,7 +385,7 @@ class Sequence(ParsingExpression):
 
         except NoMatch:
             parser.position = c_pos     # Backtracking
-            raise
+            parser._nm_raise(self, c_pos, parser)
 
         finally:
             if self.ws is not None:
@@ -392,6 +395,15 @@ class Sequence(ParsingExpression):
 
         if results:
             return results
+
+    def get_diagnostics(self):
+        if len(self.nodes) == 1:
+            return self.nodes[0].get_diagnostics()
+        return (
+            "("
+            + " AND ".join(map(lambda n: n.get_diagnostics(), self.nodes))
+            + ")"
+        )
 
 
 class OrderedChoice(Sequence):
@@ -433,6 +445,15 @@ class OrderedChoice(Sequence):
 
         return result
 
+    def get_diagnostics(self):
+        if len(self.nodes) == 1:
+            return self.nodes.get_diagnostics()
+        return (
+            "("
+            + " OR ".join(map(lambda n: n.get_diagnostics(), self.nodes))
+            + ")"
+        )
+
 
 class Repetition(ParsingExpression):
     """
@@ -462,6 +483,9 @@ class Optional(Repetition):
             parser.position = c_pos  # Backtracking
 
         return result
+
+    def get_diagnostics(self):
+        return "Optional(" + self.nodes[0].get_diagnostics() + ")"
 
 
 class ZeroOrMore(Repetition):
@@ -671,10 +695,16 @@ class Not(SyntaxPredicate):
                 except NoMatch:
                     parser.position = c_pos
                     return
+            # WIP: If there was a match, we want to report the parser's actual
+            # position
+            parser._nm_raise(self, parser.position, parser)
             parser.position = c_pos
-            parser._nm_raise(self, c_pos, parser)
         finally:
             parser.in_not = old_in_not
+
+    def get_diagnostics(self):
+        nodes_str = self.nodes[0].get_diagnostics()
+        return f"NOT({nodes_str})"
 
 
 class Empty(SyntaxPredicate):
@@ -863,6 +893,9 @@ class RegExMatch(Match):
                 parser.dprint("-- NoMatch at {}".format(c_pos))
             parser._nm_raise(self, c_pos, parser)
 
+    def get_diagnostics(self):
+        return "/" + self.to_match + "/"
+
 
 class StrMatch(Match):
     """
@@ -892,7 +925,9 @@ class StrMatch(Match):
                     "++ Match '{}' at {} => '{}'"
                     .format(self.to_match, c_pos,
                             parser.context(len(self.to_match))))
-            parser.position += len(self.to_match)
+
+            if not parser.in_not:
+                parser.position += len(self.to_match)
 
             # If this match is inside sequence than mark for suppression
             suppress = type(parser.last_pexpression) is Sequence
@@ -918,6 +953,8 @@ class StrMatch(Match):
     def __hash__(self):
         return hash(self.to_match)
 
+    def get_diagnostics(self):
+        return f"'{self.to_match}'"
 
 
 # HACK: Kwd class is a bit hackish. Need to find a better way to
@@ -953,6 +990,8 @@ class EndOfFile(Match):
                 parser.dprint("!! EOF not matched.")
             parser._nm_raise(self, c_pos, parser)
 
+    def get_diagnostics(self):
+        return "EOF"
 
 def EOF():
     return EndOfFile()
@@ -1413,10 +1452,6 @@ class Parser(DebugPrinter):
             traversed.
     """
 
-    # Not marker for NoMatch rules list. Used if the first unsuccessful rule
-    # match is Not.
-    FIRST_NOT = Not()
-
     def __init__(self, skipws=True, ws=None, reduce_tree=False, autokwd=False,
                  ignore_case=False, memoization=False, **kwargs):
         """
@@ -1524,9 +1559,6 @@ class Parser(DebugPrinter):
         try:
             self.parse_tree = self._parse()
         except NoMatch as e:
-            # Remove Not marker
-            if e.rules[0] is Parser.FIRST_NOT:
-                del e.rules[0]
             # Get line and column from position
             e.line, e.col = self.pos_to_linecol(e.position)
             raise
@@ -1714,16 +1746,7 @@ class Parser(DebugPrinter):
         """
 
         rule, position, parser = args
-        if self.nm is None or not parser.in_parse_comments:
-            if self.nm is None or position > self.nm.position:
-                if self.in_not:
-                    self.nm = NoMatch([Parser.FIRST_NOT], position, parser)
-                else:
-                    self.nm = NoMatch([rule], position, parser)
-            elif position == self.nm.position and isinstance(rule, Match) \
-                    and not self.in_not:
-                self.nm.rules.append(rule)
-
+        self.nm = NoMatch([rule], position, parser)
         raise self.nm
 
     def _clear_caches(self):

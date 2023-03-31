@@ -9,7 +9,8 @@
 from __future__ import unicode_literals
 import pytest
 
-from arpeggio import Optional, Not, ParserPython, NoMatch, EOF
+from arpeggio import Optional, Not, ParserPython, NoMatch, EOF, UnorderedGroup, OrderedChoice, Sequence, RegExMatch, \
+    StrMatch
 from arpeggio import RegExMatch as _
 
 
@@ -54,9 +55,11 @@ def test_optional_with_better_match():
         parser.parse('one two three four 5')
 
     assert (
-       "Expected 'five' at position (1, 20) => 'hree four *5'."
-    ) == str(e.value)
-    assert (e.value.line, e.value.col) == (1, 20)
+        "Expected "
+        "'4' at position (1, 15) or 'five' or 'six' at position (1, 20) => "
+        "'two three *four 5'."
+    ) in str(e.value)
+    assert (e.value.line, e.value.col) == (1, 15)
 
 
 def test_alternative_added():
@@ -90,7 +93,7 @@ def test_file_name_reporting():
     with pytest.raises(NoMatch) as e:
         parser.parse("\n\n   a c", file_name="test_file.peg")
     assert (
-        "Expected 'b' at position test_file.peg:(3, 6) => '     a *c'."
+        "test_file.peg: Expected 'b' at position (3, 6) => '     a *c'."
     ) == str(e.value)
     assert (e.value.line, e.value.col) == (3, 6)
 
@@ -126,11 +129,7 @@ def test_not_match_at_beginning():
 
     with pytest.raises(NoMatch) as e:
         parser.parse('   one ident')
-    # FIXME: It would be great to have the error reported at (1, 4) because the
-    # whitespace is consumed.
-    assert (
-        "Not expected input at position (1, 1) => '*   one ide'."
-    ) == str(e.value)
+    assert "Expected not('one') at position (1, 4) => '   *one ident'." == str(e.value)
 
 
 def test_not_match_as_alternative():
@@ -147,7 +146,7 @@ def test_not_match_as_alternative():
     with pytest.raises(NoMatch) as e:
         parser.parse('   two ident')
     assert (
-        "Expected 'one' at position (1, 4) => '   *two ident'."
+        "Expected 'one' or not('two') at position (1, 4) => '   *two ident'."
     ) == str(e.value)
 
 
@@ -164,7 +163,8 @@ def test_sequence_of_nots():
     with pytest.raises(NoMatch) as e:
         parser.parse('   two ident')
     assert (
-        "Not expected input at position (1, 4) => '   *two ident'."
+       "Expected "
+       "not('one') or not('two') at position (1, 4) => '   *two ident'."
     ) == str(e.value)
 
 
@@ -180,7 +180,9 @@ def test_compound_not_match():
     with pytest.raises(NoMatch) as e:
         parser.parse('   three ident')
     assert (
-        "Expected 'one' or 'two' at position (1, 4) => '   *three iden'."
+        "Expected "
+        "not('two' or 'three') or 'one' or 'two' at position (1, 4) => "
+        "'   *three iden'."
     ) == str(e.value)
 
     parser.parse('   four ident')
@@ -201,7 +203,6 @@ def test_not_succeed_in_ordered_choice():
 
 
 def test_reporting_newline_symbols_when_not_matched():
-
     # A case when a string match has newline
     def grammar():
         return "first", "\n"
@@ -216,7 +217,6 @@ def test_reporting_newline_symbols_when_not_matched():
     ) == str(e.value)
 
     # A case when regex match has newline
-    from arpeggio import RegExMatch
     def grammar():
         return "first", RegExMatch("\n")
 
@@ -225,15 +225,97 @@ def test_reporting_newline_symbols_when_not_matched():
     with pytest.raises(NoMatch) as e:
         _ = parser.parse('first')
 
-    assert "Expected '\\n' at position (1, 6)" in str(e.value)
+    assert (
+        "Expected /\\n/ at position (1, 6) => 'first*'."
+    ) == str(e.value)
 
     # A case when the match is the root rule
-    def grammar():
-        return "root\nrule"
-
-    parser = ParserPython(grammar, skipws=False)
+    parser = ParserPython("root\nrule", skipws=False)
 
     with pytest.raises(NoMatch) as e:
         _ = parser.parse('something')
 
-    assert "Expected grammar at position (1, 1)" in str(e.value)
+    assert (
+        "Expected 'root\\nrule' at position (1, 1) => '*something'."
+    ) == str(e.value)
+
+
+def test_unordered_group_with_optionals():
+
+    def root():
+        return 'word1', UnorderedGroup(some_rule, 'word2', some_rule), EOF
+
+    def some_rule():
+        return Optional('word2'), Optional('word3')
+
+    parser = ParserPython(root)
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('word1 word2 ')
+
+    assert (
+        "Expected 'word2' or 'word2' or 'word3' at position (1, 13) => 'rd1 word2 *'."
+    ) == str(e.value)
+
+
+def test_reporting_rule_names_string():
+    parser = ParserPython(StrMatch("String", rule_name='STRING', root=True))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected STRING at position (1, 1) => '*...'."
+    ) == str(e.value)
+
+    parser = ParserPython(StrMatch("String", rule_name='STRING', root=False))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected 'String' at position (1, 1) => '*...'."
+    ) == str(e.value)
+
+
+def test_reporting_rule_names_regex():
+    parser = ParserPython(RegExMatch(r'[^\d\W]\w*\b', rule_name='REGEX', root=True))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected REGEX at position (1, 1) => '*...'."
+    ) == str(e.value)
+
+    parser = ParserPython(RegExMatch(r'[^\d\W]\w*\b', rule_name='REGEX', root=False))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected /[^\\d\\W]\\w*\\b/ at position (1, 1) => '*...'."
+    ) == str(e.value)
+
+
+def test_reporting_rule_names_sequence():
+    parser = ParserPython(Sequence("A", "B", "C", rule_name='SEQUENCE', root=True))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected 'A' at position (1, 1) => '*...'."
+    ) == str(e.value)
+
+    parser = ParserPython(Sequence("A", "B", "C", rule_name='SEQUENCE', root=False))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected 'A' at position (1, 1) => '*...'."
+    ) == str(e.value)
+
+
+def test_reporting_rule_names_ordered_choice():
+    parser = ParserPython(OrderedChoice(["A", "B"], rule_name='ORDERED_CHOICE', root=True))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected 'A' or 'B' at position (1, 1) => '*...'."
+    ) == str(e.value)
+
+    parser = ParserPython(OrderedChoice(["A", "B"], rule_name='ORDERED_CHOICE', root=False))
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('...')
+    assert (
+        "Expected 'A' or 'B' at position (1, 1) => '*...'."
+    ) == str(e.value)

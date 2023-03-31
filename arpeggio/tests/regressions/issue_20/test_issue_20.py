@@ -25,4 +25,6 @@ def test_optional_in_choice():
     with pytest.raises(NoMatch) as e:
         parser.parse(input_str)
 
-    assert "Expected 'first' or EOF" in str(e.value)
+    assert (
+        "Expected 'first' or EOF at position (1, 1) => '*second'."
+   ) == str(e.value)

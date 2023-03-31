@@ -10,7 +10,7 @@
 from __future__ import unicode_literals
 import pytest
 from arpeggio import ParserPython, UnorderedGroup, ZeroOrMore, OneOrMore, \
-    NoMatch, EOF, Optional, And, Not, StrMatch, RegExMatch
+    NoMatch, EOF, Optional, And, Not, StrMatch, RegExMatch, OrderedChoice, Sequence
 
 
 def test_sequence():
@@ -107,7 +107,7 @@ def test_unordered_group_with_separator():
     with pytest.raises(NoMatch) as e:
         parser.parse("a, c")
     assert (
-       "Expected ',' or 'b' at position (1, 5) => 'a, c*'."
+       "Expected 'b' or ',' at position (1, 5) => 'a, c*'."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
@@ -164,6 +164,27 @@ def test_unordered_group_with_optionals():
     ) == str(e.value)
 
 
+def test_unordered_group_with_sequence_of_optionals():
+    """
+    This test corresponds to textX's test:
+    test_issue358.py/test_unordered_group_with_optional_assignments
+    """
+    def grammar():
+        return (
+            "begin",
+            UnorderedGroup(
+                [
+                    Sequence([Optional("first"), Optional("second")]), Optional("third")
+                ]
+            ),
+            EOF
+        )
+
+    parser = ParserPython(grammar)
+
+    parsed = parser.parse("begin")
+
+
 def test_unordered_group_with_optionals_and_separator():
 
     def grammar():
@@ -199,11 +220,10 @@ def test_unordered_group_with_optionals_and_separator():
        "Expected 'b' at position (1, 7) => 'a, c, *'."
     ) == str(e.value)
 
-    # FIXME: Shouldn't the ',' be at position 5?
     with pytest.raises(NoMatch) as e:
         parser.parse("a, b c ")
     assert (
-        "Expected ',' at position (1, 6) => 'a, b *c '."
+       "Expected ',' at position (1, 5) => 'a, b* c '."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
@@ -234,7 +254,7 @@ def test_zero_or_more():
     with pytest.raises(NoMatch) as e:
         parser.parse("bbb")
     assert (
-       "Expected 'a' or EOF at position (1, 1) => '*bbb'."
+        "Expected 'a' or EOF at position (1, 1) => '*bbb'."
     ) == str(e.value)
 
 
@@ -268,13 +288,13 @@ def test_zero_or_more_with_separator():
     with pytest.raises(NoMatch) as e:
         parser.parse(",a,a ,a")
     assert (
-       "Expected 'a' or EOF at position (1, 1) => '*,a,a ,a'."
+        "Expected 'a' or EOF at position (1, 1) => '*,a,a ,a'."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a,a ,a,")
     assert (
-       "Expected 'a' at position (1, 8) => 'a,a ,a,*'."
+        "Expected 'a' at position (1, 8) or EOF at position (1, 7) => 'a,a ,a,*'."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
@@ -316,13 +336,13 @@ def test_zero_or_more_with_optional_separator():
     with pytest.raises(NoMatch) as e:
         parser.parse("a,a ,a,")
     assert (
-       "Expected 'a' at position (1, 8) => 'a,a ,a,*'."
+        "Expected 'a' at position (1, 8) or EOF at position (1, 7) => 'a,a ,a,*'."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
         parser.parse("bbb")
     assert (
-       "Expected 'a' or EOF at position (1, 1) => '*bbb'."
+        "Expected 'a' or EOF at position (1, 1) => '*bbb'."
     ) == str(e.value)
 
 
@@ -385,13 +405,13 @@ def test_one_or_more_with_separator():
     with pytest.raises(NoMatch) as e:
         parser.parse("a a b")
     assert (
-       "Expected ',' or 'b' at position (1, 3) => 'a *a b'."
+        "Expected ',' or 'b' at position (1, 3) => 'a *a b'."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a a, b")
     assert (
-       "Expected ',' or 'b' at position (1, 3) => 'a *a, b'."
+        "Expected ',' or 'b' at position (1, 3) => 'a *a, b'."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
@@ -432,7 +452,7 @@ def test_one_or_more_with_optional_separator():
     with pytest.raises(NoMatch) as e:
         parser.parse("a a, b")
     assert (
-       "Expected 'a' at position (1, 6) => 'a a, *b'."
+       "Expected 'a' at position (1, 6) or 'b' at position (1, 4) => 'a a, *b'."
     ) == str(e.value)
 
     with pytest.raises(NoMatch) as e:
@@ -496,7 +516,7 @@ def test_and():
     with pytest.raises(NoMatch) as e:
         parser.parse("abb")
     assert (
-       "Expected EOF at position (1, 3) => 'ab*b'."
+        "Expected EOF at position (1, 3) => 'ab*b'."
     ) == str(e.value)
 
 
@@ -516,12 +536,12 @@ def test_not():
     with pytest.raises(NoMatch) as e:
         parser.parse("ab")
     assert (
-       "Not expected input at position (1, 2) => 'a*b'."
+       "Expected not('b') at position (1, 2) => 'a*b'."
     ) == str(e.value)
 
     # And will not consume 'c' from the input so 'b' will never match
     with pytest.raises(NoMatch) as e:
         parser.parse("acb")
     assert (
-       "Expected EOF at position (1, 3) => 'ac*b'."
+       "Expected not('b') at position (1, 2) or EOF at position (1, 3) => 'ac*b'."
     ) == str(e.value)

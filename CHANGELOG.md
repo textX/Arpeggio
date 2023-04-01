@@ -15,8 +15,48 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- fix!: non-consuming alternatives in ordered choices **(BIC)** [#96]. Thanks
+  @vprat, @mettta and @stanislaw for reporting the issue.
+
+  Now, ordered choice alternatives may succeed even if no input is consumed.
+  This means that e.g. `Optional` in an ordered choice will always succeed and
+  no further choices will ever be tried.
+
+- fix!: do not use soft failure in zero/one-or-more **(BIC)**. This is related
+  to [#96].
+
+  **Warning:** Previously, we used a kind of "soft failures" of parsing
+  expression which were based on treating `None` returned from child expressions
+  in repetitions (`ZeroOrMore`, `OneOrMore`) to signalize soft failure and avoid
+  infinite loops if the inner expression succeeds without consuming the input.
+  While convenient in some cases it has lead to confusion (see #96). Now, the
+  parser behaves consistently by always using `NoMatch` to signalize failure.
+
+  This means that now is perfectly possible to make a pathologic grammar that
+  will make the parser loop endlessly. For example:
+
+  ```python
+  def grammar():
+      ZeroOrMore(a), EOF
+  def a():
+      RegExMatch('.*')
+  ```
+
+  Rule `a` is a `RegExMatch` which may succeed by matching empty string thus
+  inducing `ZeroOrMore` to repeat endlessly when we reach the end of input.
+
+  In the future Arpeggio might introduce a way to detect these situations during
+  parser construction but for now if you find yourself in a situation that the
+  parser has stuck watch out for non-consuming matches (especially regex
+  matches) inside repetitions or turn on debugging output to see why the parser
+  is looping.
+
+- fix: #98 suppressed match in zero-or-more [#98]. Thanks @vpavlu for reporting
+  the issue.
 
 [Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...HEAD
+[#98]: https://github.com/textX/Arpeggio/issues/98
+[#96]: https://github.com/textX/Arpeggio/issues/96
 
 
 ## [2.0.0] (released: 2022-03-20)

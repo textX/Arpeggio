@@ -1789,7 +1789,7 @@ class ParserPython(Parser):
             Parser Model (PEG Abstract Semantic Graph)
         """
         __rule_cache = {"EndOfFile": EndOfFile()}
-        __for_resolving = []  # Expressions that needs crossref resolvnih
+        __for_resolving = []  # Expressions that need crossref resolving
         self.__cross_refs = 0
         _StrMatch = self.syntax_classes.get('StrMatch', StrMatch)
         _OrderedChoice = self.syntax_classes.get('OrderedChoice',

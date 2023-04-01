@@ -9,15 +9,20 @@
 #######################################################################
 
 from __future__ import unicode_literals
+import pytest
 
 # Grammar
-from arpeggio import ParserPython, Optional, EOF
+from arpeggio import ParserPython, Optional, NoMatch, EOF
 
 def g():    return [Optional('first'), Optional('second'), Optional('third')], EOF
 
 
 def test_optional_in_choice():
     parser = ParserPython(g)
+    # This input fails as the ordered choice will succeed on the first optional
+    # without consuming the input.
     input_str = "second"
-    parse_tree = parser.parse(input_str)
-    assert parse_tree is not None
+    with pytest.raises(NoMatch) as e:
+        parser.parse(input_str)
+
+    assert "Expected 'first' or EOF" in str(e.value)

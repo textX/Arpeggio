@@ -27,16 +27,13 @@ def test_non_optional_precedence():
     assert "Expected 'a' or 'b'" in str(e.value)
     assert (e.value.line, e.value.col) == (1, 1)
 
+    # This grammar always succeeds due to the optional match
     def grammar():
         return ['b', Optional('a')]
 
     parser = ParserPython(grammar)
-
-    with pytest.raises(NoMatch) as e:
-        parser.parse('c')
-
-    assert "Expected 'b'" in str(e.value)
-    assert (e.value.line, e.value.col) == (1, 1)
+    parser.parse('b')
+    parser.parse('c')
 
 
 def test_optional_with_better_match():
@@ -45,7 +42,7 @@ def test_optional_with_better_match():
     has precedence over non-optional.
     """
 
-    def grammar():  return [first, Optional(second)]
+    def grammar():  return [first, (Optional(second), 'six')]
     def first():    return 'one', 'two', 'three', '4'
     def second():   return 'one', 'two', 'three', 'four', 'five'
 
@@ -131,9 +128,10 @@ def test_not_match_as_alternative():
         return ['one', Not('two')], _(r'\w+')
 
     parser = ParserPython(grammar)
+    parser.parse('three ident')
 
     with pytest.raises(NoMatch) as e:
-        parser.parse('   three ident')
+        parser.parse('   two ident')
     assert "Expected 'one' at " in str(e.value)
 
 
@@ -165,6 +163,18 @@ def test_compound_not_match():
         parser.parse('   three ident')
     assert "Expected 'one' or 'two' at" in str(e.value)
 
-    with pytest.raises(NoMatch) as e:
-        parser.parse('   four ident')
-    assert "Expected 'one' or 'two' at" in str(e.value)
+    parser.parse('   four ident')
+
+
+def test_not_succeed_in_ordered_choice():
+    """
+    Test that Not can succeed in ordered choice leading to ordered choice
+    to succeed.
+    See: https://github.com/textX/Arpeggio/issues/96
+    """
+
+    def grammar():
+        return [Not("a"), "a"], Optional("b")
+
+    parser=ParserPython(grammar)
+    parser.parse('b')

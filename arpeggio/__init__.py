@@ -416,10 +416,9 @@ class OrderedChoice(Sequence):
             for e in self.nodes:
                 try:
                     result = e.parse(parser)
-                    if result is not None:
-                        match = True
-                        result = [result]
-                        break
+                    match = True
+                    result = [result]
+                    break
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
         finally:

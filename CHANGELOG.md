@@ -21,6 +21,8 @@ please take a look at related PRs and issues and see if the change affects you.
   Now, ordered choice alternatives may succeed even if no input is consumed.
   This means that e.g. `Optional` in an ordered choice will always succeed and
   no further choices will ever be tried.
+  
+  For the rationale for this change see [this discussion](https://github.com/textX/Arpeggio/commit/db503c961bb7b4da2eddaf1615f66a193a6f9737#r107103641).
 
 - fix!: do not use soft failure in zero/one-or-more **(BIC)**. This is related
   to [#96].

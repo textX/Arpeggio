@@ -181,6 +181,8 @@ def test_not_succeed_in_ordered_choice():
 
 
 def test_reporting_newline_symbols_when_not_matched():
+
+    # A case when a string match has newline
     def grammar():
         return "first", "\n"
 
@@ -190,3 +192,26 @@ def test_reporting_newline_symbols_when_not_matched():
         _ = parser.parse('first')
 
     assert "Expected '\\n' at position (1, 6)" in str(e.value)
+
+    # A case when regex match has newline
+    from arpeggio import RegExMatch
+    def grammar():
+        return "first", RegExMatch("\n")
+
+    parser = ParserPython(grammar, skipws=False)
+
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('first')
+
+    assert "Expected '\\n' at position (1, 6)" in str(e.value)
+
+    # A case when the match is the root rule
+    def grammar():
+        return "root\nrule"
+
+    parser = ParserPython(grammar, skipws=False)
+
+    with pytest.raises(NoMatch) as e:
+        _ = parser.parse('something')
+
+    assert "Expected grammar at position (1, 1)" in str(e.value)

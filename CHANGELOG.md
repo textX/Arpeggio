@@ -15,13 +15,17 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- fix: replace `\n` with `\\n` in error reports for matches [#99]. Thanks
+  @mettta and @stanislaw.
 - fix!: non-consuming alternatives in ordered choices **(BIC)** [#96]. Thanks
   @vprat, @mettta and @stanislaw for reporting the issue.
 
   Now, ordered choice alternatives may succeed even if no input is consumed.
-  This means that e.g. `Optional` in an ordered choice will always succeed and
-  no further choices will ever be tried.
-  
+  This means that any infallible expression e.g. `Optional` in an ordered choice
+  will always succeed and no further choices will ever be tried.
+
+  Issue [#101] when implemented will detect and report these invalid grammars.
+
   For the rationale for this change see [this discussion](https://github.com/textX/Arpeggio/commit/db503c961bb7b4da2eddaf1615f66a193a6f9737#r107103641).
 
 - fix!: do not use soft failure in zero/one-or-more **(BIC)**. This is related
@@ -53,10 +57,14 @@ please take a look at related PRs and issues and see if the change affects you.
   matches) inside repetitions or turn on debugging output to see why the parser
   is looping.
 
+  Issue [#101] when implemented will detect and report these invalid grammars.
+
 - fix: #98 suppressed match in zero-or-more [#98]. Thanks @vpavlu for reporting
   the issue.
 
 [Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...HEAD
+[#101]: https://github.com/textX/Arpeggio/issues/101
+[#99]: https://github.com/textX/Arpeggio/pull/99
 [#98]: https://github.com/textX/Arpeggio/issues/98
 [#96]: https://github.com/textX/Arpeggio/issues/96
 

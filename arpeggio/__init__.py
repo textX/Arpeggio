@@ -551,7 +551,7 @@ class OneOrMore(Repetition):
 
 class UnorderedGroup(Repetition):
     """
-    Will try to match all of the parsing expression in any order.
+    Will try to match all the parsing expressions in any order.
     """
     def _parse(self, parser):
         results = []

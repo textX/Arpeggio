@@ -1,7 +1,7 @@
 ![Arpeggio logo](images/arpeggio-logo.svg)
 
 Arpeggio is recursive descent parser with backtracking and memoization (a.k.a.
-pacrat parser).  Arpeggio grammars are based on [PEG
+packrat parser).  Arpeggio grammars are based on [PEG
 formalism](http://en.wikipedia.org/wiki/Parsing_expression_grammar).
 
 Arpeggio's main use is a foundation for a tool-chain for DSL development but it

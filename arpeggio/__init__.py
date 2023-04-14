@@ -12,11 +12,16 @@
 ###############################################################################
 
 from __future__ import print_function, unicode_literals
+
+import collections
 import sys
 from collections import OrderedDict
 import codecs
 import re
 import bisect
+from enum import Enum
+from typing import Tuple, List, Deque
+
 from arpeggio.utils import isstr
 import types
 
@@ -78,6 +83,15 @@ class NoMatch(Exception):
         """
         Call this to evaluate `message`, `context`, `line` and `col`. Called by __str__.
         """
+
+        # We reach this branch if a failed NoMatch exception is created from
+        # an unmatched Not rule.
+        if self.rules is None or len(self.rules) == 0:
+            self.context = self.parser.context(position=self.position)
+            self.line, self.col = self.parser.pos_to_linecol(self.position)
+            self.message = f"Not expected input at position ({self.line}, {self.col})"
+            return
+
         def rule_to_exp_str(rule):
             if hasattr(rule, '_exp_str'):
                 # Rule may override expected report string
@@ -90,24 +104,139 @@ class NoMatch(Exception):
             else:
                 return rule.name
 
-        if not self.rules:
-            self.message = "Not expected input"
+        flattened_pos_rules: List[Tuple] = list(
+            self.parser.weakly_failed_errors
+        )
+        rules_set = set(map(lambda pr: pr[1], flattened_pos_rules))
+
+        def enumerate_child_nodes(node):
+            # FIXME: How do we end up with repeating nodes in the tree?
+            visited = set()
+            queue = list(node.nodes)
+            while len(queue) > 0:
+                current = queue.pop(0)
+                if current in visited:
+                    continue
+                visited.add(current)
+                yield current
+                queue.extend(current.nodes)
+
+        if not self.parser.verbose2:
+            # Mark all nodes as relevant or irrelevant for the printed error message.
+            for _, rule in flattened_pos_rules:
+                # "Not" nodes do not contribute to the reporting of weakly failed
+                # rules.
+                assert not isinstance(rule, Not)
+                if not isinstance(rule, Match):
+                    rule.good_node = NodeMarker.BAD
+                    # We find if all nodes have parents.
+                    for node in enumerate_child_nodes(rule):
+                        if not isinstance(node, Match):
+                            node.good_node = NodeMarker.BAD
+                            continue
+
+                        # Node is part of the final failed expression.
+                        if node in self.rules:
+                            node.good_node = NodeMarker.GOOD
+                        # Node has a failing parent. It is a good node.
+                        elif node in rules_set:
+                            node.good_node = NodeMarker.GOOD
+                        # Node is orphan. **Nothing was unsuccessful** with this node.
+                        else:
+                            node.good_node = NodeMarker.BAD
+                else:
+                    rule.good_node = (
+                        NodeMarker.GOOD if rule in self.rules else NodeMarker.BAD
+                    )
+            flattened_pos_rules = list(
+                filter(
+                    lambda pr: pr[1].good_node == NodeMarker.GOOD, flattened_pos_rules
+                )
+            )
         else:
-            what_is_expected = OrderedDict.fromkeys(
-                ["{}".format(rule_to_exp_str(r)) for r in self.rules])
-            what_str = " or ".join(what_is_expected)
-            self.message = "Expected {}".format(what_str)
+            flattened_pos_rules = list(
+                filter(
+                    lambda pos_and_rule: isinstance(pos_and_rule[1], Match), flattened_pos_rules
+                )
+            )
+
+        positions = {}
+        found_positions = set()
+        for position, rule in flattened_pos_rules:
+            found_positions.add(position)
+            if rule not in positions:
+                positions[rule] = position
+            else:
+                if positions[rule] < position:
+                    positions[rule] = position
+
+        flattened_pos_rules = [(positions[k], k) for k in positions]
+        several_positions = len(found_positions) > 1
+
+        if len(flattened_pos_rules) == 0:
+            flattened_pos_rules = [(self.position, rule) for rule in self.rules]
+        flattened_pos_rules.sort(key=lambda pos_rule_: pos_rule_[0])
 
         self.context = self.parser.context(position=self.position)
         self.line, self.col = self.parser.pos_to_linecol(self.position)
 
+        if not several_positions:
+            what_is_expected = OrderedDict.fromkeys(
+                ["{}".format(rule_to_exp_str(r[1])) for r in flattened_pos_rules])
+            what_str = " or ".join(what_is_expected)
+            what_str += f" at position ({self.line}, {self.col})"
+            self.message = "Expected {}".format(what_str)
+        elif self.parser.verbose2:
+            descriptions = []
+            current_position = flattened_pos_rules[0][0]
+            current_rules = []
+            for pos, rule in flattened_pos_rules:
+                if current_position == pos:
+                    current_rules.append(rule_to_exp_str(rule))
+                else:
+                    joined_rules = " or ".join(current_rules)
+                    line, col = self.parser.pos_to_linecol(current_position)
+                    descriptions.append(
+                        f"{line}:{col}: {joined_rules}"
+                    )
+                    current_position = pos
+                    current_rules = [rule_to_exp_str(rule)]
+            joined_rules = " or ".join(current_rules)
+            line, col = self.parser.pos_to_linecol(current_position)
+            descriptions.append(
+                f"{line}:{col}: {joined_rules}"
+            )
+
+            what_str = "\n".join(descriptions)
+            self.message = "Expected:\n{}\n".format(what_str)
+        else:
+            descriptions = []
+            current_position = flattened_pos_rules[0][0]
+            current_rules = []
+            for pos, rule in flattened_pos_rules:
+                if current_position == pos:
+                    current_rules.append(rule_to_exp_str(rule))
+                else:
+                    joined_rules = " or ".join(current_rules)
+                    descriptions.append(
+                        f"{joined_rules} at position {self.parser.pos_to_linecol(current_position)}"
+                    )
+                    current_position = pos
+                    current_rules = [rule_to_exp_str(rule)]
+            joined_rules = " or ".join(current_rules)
+            descriptions.append(
+                f"{joined_rules} at position {self.parser.pos_to_linecol(current_position)}"
+            )
+
+            what_str = " or ".join(descriptions)
+            self.message = "Expected {}".format(what_str)
+
     def __str__(self):
         self.eval_attrs()
-        return "{} at position {}{} => '{}'."\
-            .format(self.message,
-                    "{}:".format(self.parser.file_name)
+        return "{}{} => '{}'."\
+            .format("{}: ".format(self.parser.file_name)
                     if self.parser.file_name else "",
-                    (self.line, self.col),
+                    self.message,
                     self.context)
 
     def __unicode__(self):
@@ -161,6 +290,11 @@ class DebugPrinter(object):
 # ---------------------------------------------------------
 # Parser Model (PEG Abstract Semantic Graph) elements
 
+class NodeMarker(str, Enum):
+    UNKNOWN = "UNKNOWN"
+    GOOD = "GOOD"
+    BAD = "BAD"
+
 
 class ParsingExpression(object):
     """
@@ -195,7 +329,7 @@ class ParsingExpression(object):
         if not hasattr(nodes, '__iter__'):
             nodes = [nodes]
         self.nodes = nodes
-
+        self.good_node = NodeMarker.UNKNOWN
         if 'suppress' in kwargs:
             self.suppress = kwargs['suppress']
 
@@ -412,12 +546,14 @@ class OrderedChoice(Sequence):
             old_skipws = parser.skipws
             parser.skipws = self.skipws
 
+        successful_node = None
         try:
             for e in self.nodes:
                 try:
                     result = e.parse(parser)
                     match = True
                     result = [result]
+                    successful_node = e
                     break
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
@@ -429,6 +565,11 @@ class OrderedChoice(Sequence):
 
         if not match:
             parser._nm_raise(self, c_pos, parser)
+
+        if parser.verbose2 and not parser.in_not:
+            for node in self.nodes:
+                if isinstance(node, Match) and node != successful_node:
+                    parser.weakly_failed_errors.append((c_pos, node))
 
         return result
 
@@ -1413,7 +1554,7 @@ class Parser(DebugPrinter):
     FIRST_NOT = Not()
 
     def __init__(self, skipws=True, ws=None, reduce_tree=False, autokwd=False,
-                 ignore_case=False, memoization=False, **kwargs):
+                 ignore_case=False, memoization=False, verbose=False, verbose2=False, **kwargs):
         """
         Args:
             skipws (bool): Should the whitespace skipping be done.  Default is
@@ -1473,6 +1614,12 @@ class Parser(DebugPrinter):
         # Last parsing expression traversed
         self.last_pexpression = None
 
+        self.verbose = verbose
+        self.verbose2 = verbose2
+        self.weakly_failed_errors: Deque = (
+            collections.deque() if verbose or verbose2 else collections.deque(maxlen=0)
+        )
+
     @property
     def ws(self):
         return self._ws
@@ -1516,6 +1663,7 @@ class Parser(DebugPrinter):
         self.comment_positions = {}
         self.cache_hits = 0
         self.cache_misses = 0
+        self.weakly_failed_errors.clear()
         try:
             self.parse_tree = self._parse()
         except NoMatch as e:
@@ -1709,6 +1857,10 @@ class Parser(DebugPrinter):
         """
 
         rule, position, parser = args
+
+        if not self.in_not:
+            self.weakly_failed_errors.append((position, rule))
+
         if self.nm is None or not parser.in_parse_comments:
             if self.nm is None or position > self.nm.position:
                 if self.in_not:
@@ -1718,7 +1870,16 @@ class Parser(DebugPrinter):
             elif position == self.nm.position and isinstance(rule, Match) \
                     and not self.in_not:
                 self.nm.rules.append(rule)
-
+            else:
+                # We reach here if the _nm_raise is called on a failed parent
+                # expression which is not Match-based (e.g. OrderedChoice).
+                # Such parent expressions do not contribute to the final error
+                # reporting. Instead, the previously failed Match-based NoMatch
+                # exception is reported. Note that _nm_raise is always called
+                # first on the failed Match expressions and only then the
+                # failure is propagated to the parent _nm_raise invocation that
+                # reaches this branch.
+                pass
         raise self.nm
 
     def _clear_caches(self):

@@ -512,8 +512,12 @@ class Sequence(ParsingExpression):
             for e in self.nodes:
                 result = e.parse(parser)
                 if result is not None:
+                    if parser.verbose2 and isinstance(result, list) and len(result) == 0:
+                        parser.weakly_failed_errors.append((c_pos, e))
                     append(result)
-
+                else:
+                    if parser.verbose2:
+                        parser.weakly_failed_errors.append((c_pos, e))
         except NoMatch:
             parser.position = c_pos     # Backtracking
             raise
@@ -635,6 +639,8 @@ class ZeroOrMore(Repetition):
                 append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
+                if parser.verbose2:
+                    parser.weakly_failed_errors.append((c_pos, self.nodes[0]))
                 break
 
         if self.eolterm:

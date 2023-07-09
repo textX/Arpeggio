@@ -15,8 +15,6 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
-- fix: replace `\n` with `\\n` in error reports for matches [#99]. Thanks
-  @mettta and @stanislaw.
 - fix!: non-consuming alternatives in ordered choices **(BIC)** [#96]. Thanks
   @vprat, @mettta and @stanislaw for reporting the issue.
 
@@ -64,9 +62,17 @@ please take a look at related PRs and issues and see if the change affects you.
 
 [Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...HEAD
 [#101]: https://github.com/textX/Arpeggio/issues/101
-[#99]: https://github.com/textX/Arpeggio/pull/99
 [#98]: https://github.com/textX/Arpeggio/issues/98
 [#96]: https://github.com/textX/Arpeggio/issues/96
+
+
+## [2.0.1] (released: 2023-07-09)
+
+- fix: replace `\n` with `\\n` in error reports for matches [#99]. Thanks
+  @mettta and @stanislaw.
+
+[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...2.0.1
+[#99]: https://github.com/textX/Arpeggio/pull/99
 
 
 ## [2.0.0] (released: 2022-03-20)

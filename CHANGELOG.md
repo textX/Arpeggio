@@ -12,11 +12,19 @@ Backward incompatible changes are marked with **(BIC)**. These changes are the
 reason for the major version increase so when upgrading between major versions
 please take a look at related PRs and issues and see if the change affects you.
 
-
 ## [Unreleased]
 
 
-[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...HEAD
+[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.1...HEAD
+
+
+## [2.0.1] (released: 2023-07-09)
+
+- fix: replace `\n` with `\\n` in error reports for matches [#99]. Thanks
+  @mettta and @stanislaw.
+
+[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...2.0.1
+[#99]: https://github.com/textX/Arpeggio/pull/99
 
 
 ## [2.0.0] (released: 2022-03-20)

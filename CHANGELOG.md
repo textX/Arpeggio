@@ -15,7 +15,6 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
-- fix: drop deprecated `setup_requires` and `tests_require` [#116]. Thanks @kloczek.
 - fix!: non-consuming alternatives in ordered choices **(BIC)** [#96]. Thanks
   @vprat, @mettta and @stanislaw for reporting the issue.
 
@@ -61,11 +60,18 @@ please take a look at related PRs and issues and see if the change affects you.
 - fix: #98 suppressed match in zero-or-more [#98]. Thanks @vpavlu for reporting
   the issue.
 
-[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...HEAD
-[#116]: https://github.com/textX/Arpeggio/issues/116
 [#101]: https://github.com/textX/Arpeggio/issues/101
 [#98]: https://github.com/textX/Arpeggio/issues/98
 [#96]: https://github.com/textX/Arpeggio/issues/96
+[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.2...HEAD
+
+
+## [2.0.2] (released: 2023-07-09)
+
+- fix: drop deprecated `setup_requires` and `tests_require` [#116]. Thanks @kloczek.
+
+[#116]: https://github.com/textX/Arpeggio/issues/116
+[2.0.2]: https://github.com/textX/Arpeggio/compare/2.0.1...2.0.2
 
 
 ## [2.0.1] (released: 2023-07-09)
@@ -73,8 +79,8 @@ please take a look at related PRs and issues and see if the change affects you.
 - fix: replace `\n` with `\\n` in error reports for matches [#99]. Thanks
   @mettta and @stanislaw.
 
-[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...2.0.1
 [#99]: https://github.com/textX/Arpeggio/pull/99
+[2.0.1]: https://github.com/textX/Arpeggio/compare/2.0.0...2.0.1
 
 
 ## [2.0.0] (released: 2022-03-20)

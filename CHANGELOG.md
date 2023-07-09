@@ -15,6 +15,7 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- fix: drop deprecated `setup_requires` and `tests_require` [#116]. Thanks @kloczek.
 - fix!: non-consuming alternatives in ordered choices **(BIC)** [#96]. Thanks
   @vprat, @mettta and @stanislaw for reporting the issue.
 
@@ -61,6 +62,7 @@ please take a look at related PRs and issues and see if the change affects you.
   the issue.
 
 [Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.0...HEAD
+[#116]: https://github.com/textX/Arpeggio/issues/116
 [#101]: https://github.com/textX/Arpeggio/issues/101
 [#98]: https://github.com/textX/Arpeggio/issues/98
 [#96]: https://github.com/textX/Arpeggio/issues/96

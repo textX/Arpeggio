@@ -1,0 +1,79 @@
+[project]
+name = "Arpeggio"
+description = "Packrat parser interpreter"
+version = "2.1.0.dev0"
+authors = [
+    {name = "Igor R. Dejanović", email = "igor.dejanovic@gmail.com"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["parser", "PEG", "packrat", "library", "interpreter"]
+requires-python = ">=3.6, <3.13"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Interpreters",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.urls]
+Homepage = "https://textx.github.io/Arpeggio/"
+Repository = "https://github.com/textX/Arpeggio"
+Changelog = "https://github.com/textX/Arpeggio/blob/master/CHANGELOG.md"
+
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.8.0,<4"]
+
+[tool.flit.module]
+name = "arpeggio"
+
+[tool.flit.sdist]
+exclude = ["**/.*"]
+
+[project.optional-dependencies]
+dev = [
+    "mkdocs",
+    "mike",
+    "flit",
+]
+
+test = [
+    "ruff",
+    "coverage",
+    "coveralls",
+    "pytest",
+]
+
+[tool.ruff]
+line-length = 90
+indent-width = 4
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/linter/#rule-selection
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]

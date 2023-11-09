@@ -20,7 +20,12 @@ import bisect
 from arpeggio.utils import isstr
 import types
 
-__version__ = "2.1.0.dev"
+try:
+    from importlib.metadata import version
+except ModuleNotFoundError:
+    from importlib_metadata import version
+
+__version__ = version("Arpeggio")
 
 if sys.version < '3':
     text = unicode

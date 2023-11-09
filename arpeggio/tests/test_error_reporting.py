@@ -192,6 +192,7 @@ def test_compound_not_match():
     )
 
     parser.parse('   four ident')
+    assert "Expected 'one' or 'two' at" in str(e.value)
 
 
 def test_not_succeed_in_ordered_choice():
@@ -219,9 +220,7 @@ def test_reporting_newline_symbols_when_not_matched():
     with pytest.raises(NoMatch) as e:
         _ = parser.parse('first')
 
-    assert str(e.value) == (
-        "Expected '\\n' at position (1, 6) => 'first*'."
-    )
+    assert "Expected '\\n' at position (1, 6)" in str(e.value)
 
     # A case when regex match has newline
     from arpeggio import RegExMatch

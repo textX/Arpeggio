@@ -5,4 +5,4 @@ coverage run --omit="arpeggio/tests/*" --source arpeggio -m pytest arpeggio/test
 coverage report --fail-under 90 || exit 1
 # Run this to generate html report
 # coverage html --directory=coverage
-#flake8 || exit 1
+ruff check arpeggio || exit 1

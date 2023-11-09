@@ -15,6 +15,12 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- **(BIC)** Removed support for Python 3.6. The minimal supported version is 3.7.
+- Added sypport for Python 3.12.
+- Migrated to pyproject.toml for project configuration.
+- Use [ruff] instead of flake8 for linting. ruff can also be used for code
+  formating.
+- Use [flit] for package building and publishing.
 - fix!: non-consuming alternatives in ordered choices **(BIC)** [#96]. Thanks
   @vprat, @mettta and @stanislaw for reporting the issue.
 
@@ -63,6 +69,8 @@ please take a look at related PRs and issues and see if the change affects you.
 [#101]: https://github.com/textX/Arpeggio/issues/101
 [#98]: https://github.com/textX/Arpeggio/issues/98
 [#96]: https://github.com/textX/Arpeggio/issues/96
+[ruff]: https://github.com/astral-sh/ruff
+[flit]: https://flit.pypa.io/
 [Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.2...HEAD
 
 

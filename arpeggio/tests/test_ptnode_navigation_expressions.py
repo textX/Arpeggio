@@ -65,4 +65,4 @@ def test_lookup_single():
 
     # Test that accessing an invalid rule name raises AttributeError
     with pytest.raises(AttributeError):
-        result.unexisting
+        result.unexisting  # noqa

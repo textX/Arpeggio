@@ -24,7 +24,7 @@ def test_direct_rule_call():
     rule2.sem = DummySemAction()
 
     parser = ParserPython(grammar)
-    parse_tree = parser.parse("aa")
+    parser.parse("aa")
     parser.getASG()
 
     assert call_count[0] == 1, "Semantic action should be called once!"

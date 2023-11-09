@@ -20,7 +20,7 @@ def test_memoization_positive(capsys):
     # Parse input where a rule1 will match but ruleb will fail
     # Second sequence will try rule1 again on the same location
     # and result should be found in the cache.
-    parse_tree = parser.parse("a   b   c")
+    parser.parse("a   b   c")
 
     # Assert that cached result is used
     assert  "Cache hit" in capsys.readouterr()[0]
@@ -40,7 +40,7 @@ def test_memoization_nomatch(capsys):
     def rulec():    return "c"
 
     parser = ParserPython(grammar, memoization=True, debug=True)
-    parse_tree = parser.parse("c")
+    parser.parse("c")
 
     assert  "Cache hit for [rule1=Sequence, 0] = '0'" in capsys.readouterr()[0]
     assert parser.cache_hits == 1

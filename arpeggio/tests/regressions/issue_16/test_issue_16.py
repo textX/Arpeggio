@@ -87,7 +87,7 @@ def test_issue_16():
     parser = ParserPEG(grammar, "calc", skipws=False)
 
     input_expr = """public function __construct( )"""
-    parse_tree = parser.parse(input_expr)
+    parser.parse(input_expr)
 
     # Do semantic analysis. Do not use default actions.
     asg = parser.getASG(sem_actions=sem_actions, defaults=False)

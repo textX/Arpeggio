@@ -4,7 +4,6 @@
 # sequences works as well.
 
 import re
-import sys
 
 import pytest
 
@@ -228,9 +227,8 @@ def test_big_u_unicode_escapes():
 def test_unicode_name_escapes():
     assert check_parser(r"'\N{LATIN SMALL LETTER B}'", 'b')
 
-    if sys.version_info >= (3, 3):
-        # check that Unicode name aliases work as well
-        assert check_parser(r"'\N{LATIN CAPITAL LETTER GHA}'", '\u01a2')
+    # check that Unicode name aliases work as well
+    assert check_parser(r"'\N{LATIN CAPITAL LETTER GHA}'", '\u01a2')
 
     with pytest.raises(arpeggio.GrammarError):
         check_parser(r"'\N{NOT A VALID NAME}'", '\\N{NOT A VALID NAME}')

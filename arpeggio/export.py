@@ -17,7 +17,7 @@ class Exporter:
     """
 
     def __init__(self):
-        super(Exporter, self).__init__()
+        super().__init__()
 
         # Export initialization
         self._render_set = set()        # Used in rendering to prevent
@@ -42,9 +42,10 @@ class Exporter:
         """
         Export of obj to a file.
         """
-        self._outf = open(file_name, "w", encoding="utf-8")
-        self._export(obj)
-        self._outf.close()
+
+        with open(file_name, "w", encoding="utf-8") as f:
+            self._outf = f
+            self._export(obj)
 
     def _export(self, obj):
         self._outf.write(self._start())
@@ -168,16 +169,16 @@ class DOTExporter(Exporter):
     def _render_node(self, node):
         if node not in self._render_set:
             self._render_set.add(node)
-            self._outf.write('\n%s [label="%s"];' %
-                             (node.id, self._dot_label_esc(node.desc)))
+            self._outf.write(f'\n{node.id} [label="{self._dot_label_esc(node.desc)}"];'
+                             )
             #TODO Comment handling
 #            if hasattr(node, "comments") and root.comments:
 #                retval += self.node(root.comments)
 #                retval += '\n%s->%s [label="comment"]' % \
                             #(id(root), id(root.comments))
             for name, n in node.neighbours:
-                self._outf.write('\n%s->%s [label="%s"]' %
-                                 (node.id, n.id, name))
+                self._outf.write(f'\n{node.id}->{n.id} [label="{name}"]'
+                                 )
                 self._outf.write('\n')
                 self._render_node(n)
 
@@ -199,11 +200,11 @@ class PMDOTExporter(DOTExporter):
     A convenience DOTExport extension that uses ParserExpressionDOTExportAdapter
     """
     def export(self, obj):
-        return super(PMDOTExporter, self).\
+        return super().\
             export(PMDOTExportAdapter(obj, self))
 
     def exportFile(self, obj, file_name):
-        return super(PMDOTExporter, self).\
+        return super().\
             exportFile(PMDOTExportAdapter(obj, self), file_name)
 
 
@@ -212,9 +213,9 @@ class PTDOTExporter(DOTExporter):
     A convenience DOTExport extension that uses PTDOTExportAdapter
     """
     def export(self, obj):
-        return super(PTDOTExporter, self).\
+        return super().\
             export(PTDOTExportAdapter(obj, self))
 
     def exportFile(self, obj, file_name):
-        return super(PTDOTExporter, self).\
+        return super().\
             exportFile(PTDOTExportAdapter(obj, self), file_name)

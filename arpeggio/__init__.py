@@ -17,19 +17,12 @@ import sys
 import types
 from collections import OrderedDict
 
-from arpeggio.utils import isstr
-
 try:
     from importlib.metadata import version
 except ModuleNotFoundError:
     from importlib_metadata import version
 
 __version__ = version("Arpeggio")
-
-if sys.version < '3':
-    text = unicode
-else:
-    text = str
 
 DEFAULT_WS = '\t\n\r '
 NOMATCH_MARKER = 0
@@ -122,7 +115,7 @@ def flatten(_iterable):
     '''Flattening of python iterables.'''
     result = []
     for e in _iterable:
-        if hasattr(e, "__iter__") and type(e) not in [text, NonTerminal]:
+        if hasattr(e, "__iter__") and type(e) not in [str, NonTerminal]:
             result.extend(flatten(e))
         else:
             result.append(e)
@@ -144,7 +137,7 @@ class DebugPrinter:
         self.file = kwargs.pop("file", sys.stdout)
         self._current_indent = 0
 
-        super(DebugPrinter, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def dprint(self, message, indent_change=0):
         """
@@ -155,7 +148,7 @@ class DebugPrinter:
         if indent_change < 0:
             self._current_indent += indent_change
 
-        print(("%s%s" % ("   " * self._current_indent, message)),
+        print("{}{}".format("   " * self._current_indent, message),
               file=self.file)
 
         if indent_change > 0:
@@ -214,7 +207,7 @@ class ParsingExpression:
     @property
     def name(self):
         if self.root:
-            return "%s=%s" % (self.rule_name, self.__class__.__name__)
+            return f"{self.rule_name}={self.__class__.__name__}"
         else:
             return self.__class__.__name__
 
@@ -272,7 +265,7 @@ class ParsingExpression:
                 if parser.debug:
                     parser.dprint(
                         "** Cache hit for [{}, {}] = '{}' : new_pos={}"
-                        .format(name, c_pos, text(result), text(new_pos)))
+                        .format(name, c_pos, result, new_pos))
                     parser.dprint(
                         f"<<+ Matched rule {name} at position {new_pos}"
                         , -1)
@@ -302,7 +295,7 @@ class ParsingExpression:
 
         try:
             result = self._parse(parser)
-            if self.suppress or (type(result) is list and
+            if self.suppress or (isinstance(result, list) and
                                  result and result[0] is None):
                 result = None
 
@@ -359,7 +352,7 @@ class Sequence(ParsingExpression):
     """
 
     def __init__(self, *elements, **kwargs):
-        super(Sequence, self).__init__(*elements, **kwargs)
+        super().__init__(*elements, **kwargs)
         self.ws = kwargs.pop('ws', None)
         self.skipws = kwargs.pop('skipws', None)
 
@@ -445,7 +438,7 @@ class Repetition(ParsingExpression):
             terminate repetition match.
     """
     def __init__(self, *elements, **kwargs):
-        super(Repetition, self).__init__(*elements, **kwargs)
+        super().__init__(*elements, **kwargs)
         self.eolterm = kwargs.get('eolterm', False)
         self.sep = kwargs.get('sep', None)
 
@@ -726,15 +719,14 @@ class Match(ParsingExpression):
     Base class for all classes that will try to match something from the input.
     """
     def __init__(self, rule_name, root=False, **kwargs):
-        super(Match, self).__init__(rule_name=rule_name, root=root, **kwargs)
+        super().__init__(rule_name=rule_name, root=root, **kwargs)
 
     @property
     def name(self):
         if self.root:
-            return "%s=%s(%s)" % (self.rule_name, self.__class__.__name__,
-                                  self.to_match)
+            return f"{self.rule_name}={self.__class__.__name__}({self.to_match})"
         else:
-            return "%s(%s)" % (self.__class__.__name__, self.to_match)
+            return f"{self.__class__.__name__}({self.to_match})"
 
     def _parse_comments(self, parser):
         """Parse comments."""
@@ -819,7 +811,7 @@ class RegExMatch(Match):
     def __init__(self, to_match, rule_name='', root=False, ignore_case=None,
                  multiline=None, str_repr=None, re_flags=re.MULTILINE,
                  **kwargs):
-        super(RegExMatch, self).__init__(rule_name, root, **kwargs)
+        super().__init__(rule_name, root, **kwargs)
         self.to_match_regex = to_match
         self.ignore_case = ignore_case
         self.multiline = multiline
@@ -874,7 +866,7 @@ class StrMatch(Match):
     """
     def __init__(self, to_match, rule_name='', root=False, ignore_case=None,
                  **kwargs):
-        super(StrMatch, self).__init__(rule_name, root, **kwargs)
+        super().__init__(rule_name, root, **kwargs)
         self.to_match = to_match
         self.ignore_case = ignore_case
 
@@ -912,7 +904,7 @@ class StrMatch(Match):
         return self.__str__()
 
     def __eq__(self, other):
-        return self.to_match == text(other)
+        return self.to_match == str(other)
 
     def __hash__(self):
         return hash(self.to_match)
@@ -926,7 +918,7 @@ class Kwd(StrMatch):
     A specialization of StrMatch to specify keywords of the language.
     """
     def __init__(self, to_match):
-        super(Kwd, self).__init__(to_match)
+        super().__init__(to_match)
         self.to_match = to_match
         self.root = True
         self.rule_name = 'keyword'
@@ -937,7 +929,7 @@ class EndOfFile(Match):
     The Match class that will succeed in case end of input is reached.
     """
     def __init__(self):
-        super(EndOfFile, self).__init__("EOF")
+        super().__init__("EOF")
 
     @property
     def name(self):
@@ -992,7 +984,7 @@ class ParseTreeNode:
 
     @property
     def name(self):
-        return "%s [%s]" % (self.rule_name, self.position)
+        return f"{self.rule_name} [{self.position}]"
 
     @property
     def position_end(self):
@@ -1007,8 +999,8 @@ class ParseTreeNode:
             visitor(PTNodeVisitor): The visitor object.
         """
         if visitor.debug:
-            visitor.dprint("Visiting {}  type:{} str:{}"
-                           .format(self.name, type(self).__name__, text(self)))
+            visitor.dprint(f"Visiting {self.name}  type:{type(self).__name__} str:{self}"
+                           )
 
         children = SemanticActionResults()
         if isinstance(self, NonTerminal):
@@ -1059,7 +1051,7 @@ class Terminal(ParseTreeNode):
 
     def __init__(self, rule, position, value, error=False, suppress=False,
                  extra_info=None):
-        super(Terminal, self).__init__(rule, position, error)
+        super().__init__(rule, position, error)
         self.value = value
         self.suppress = suppress
         self.extra_info = extra_info
@@ -1067,9 +1059,9 @@ class Terminal(ParseTreeNode):
     @property
     def desc(self):
         if self.value:
-            return "%s '%s' [%s]" % (self.rule_name, self.value, self.position)
+            return f"{self.rule_name} '{self.value}' [{self.position}]"
         else:
-            return "%s [%s]" % (self.rule_name, self.position)
+            return f"{self.rule_name} [{self.position}]"
 
     @property
     def position_end(self):
@@ -1088,10 +1080,10 @@ class Terminal(ParseTreeNode):
         return self.desc
 
     def tree_str(self, indent=0):
-        return f'{super(Terminal, self).tree_str(indent)}: {self.value}'
+        return f'{super().tree_str(indent)}: {self.value}'
 
     def __eq__(self, other):
-        return text(self) == text(other)
+        return str(self) == str(other)
 
 
 class NonTerminal(ParseTreeNode, list):
@@ -1116,7 +1108,7 @@ class NonTerminal(ParseTreeNode, list):
         # Inherit position from the first child node
         position = nodes[0].position if nodes else 0
 
-        super(NonTerminal, self).__init__(rule, position, error)
+        super().__init__(rule, position, error)
 
         self.extend(flatten([nodes]))
         self._filtered = _filtered
@@ -1124,7 +1116,7 @@ class NonTerminal(ParseTreeNode, list):
     @property
     def value(self):
         """Terminal protocol."""
-        return text(self)
+        return str(self)
 
     @property
     def desc(self):
@@ -1141,7 +1133,7 @@ class NonTerminal(ParseTreeNode, list):
         return "".join([x.flat_str() for x in self])
 
     def __str__(self):
-        return " | ".join([text(x) for x in self])
+        return " | ".join([str(x) for x in self])
 
     def __unicode__(self):
         return self.__str__()
@@ -1150,7 +1142,7 @@ class NonTerminal(ParseTreeNode, list):
         return "[ %s ]" % ", ".join([repr(x) for x in self])
 
     def tree_str(self, indent=0):
-        return '{}\n{}'.format(super(NonTerminal, self).tree_str(indent),
+        return '{}\n{}'.format(super().tree_str(indent),
                                '\n'.join([c.tree_str(indent + 1)
                                           for c in self]))
 
@@ -1218,7 +1210,7 @@ class PTNodeVisitor(DebugPrinter):
         self.for_second_pass = []
         self.defaults = defaults
 
-        super(PTNodeVisitor, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def visit__default__(self, node, children):
         """
@@ -1231,7 +1223,7 @@ class PTNodeVisitor(DebugPrinter):
         if isinstance(node, Terminal):
             # Default for Terminal is to convert to string unless suppress flag
             # is set in which case it is suppressed by setting to None.
-            retval = text(node) if not node.suppress else None
+            retval = str(node) if not node.suppress else None
         else:
             retval = node
             # Special case. If only one child exist return it.
@@ -1243,7 +1235,7 @@ class PTNodeVisitor(DebugPrinter):
                 # removals.
                 last_non_str = None
                 for c in children:
-                    if not isstr(c):
+                    if not isinstance(c, str):
                         if last_non_str is None:
                             last_non_str = c
                         else:
@@ -1254,7 +1246,7 @@ class PTNodeVisitor(DebugPrinter):
                                             "non-string objects found in "
                                             "default visit. Converting non-"
                                             "terminal to a string.")
-                            retval = text(node)
+                            retval = str(node)
                             break
                 else:
                     # Return the only non-string child
@@ -1312,7 +1304,7 @@ class SemanticAction:
         if isinstance(node, Terminal):
             # Default for Terminal is to convert to string unless suppress flag
             # is set in which case it is suppressed by setting to None.
-            retval = text(node) if not node.suppress else None
+            retval = str(node) if not node.suppress else None
         else:
             retval = node
             # Special case. If only one child exist return it.
@@ -1324,7 +1316,7 @@ class SemanticAction:
                 # removals.
                 last_non_str = None
                 for c in nodes:
-                    if not isstr(c):
+                    if not isinstance(c, str):
                         if last_non_str is None:
                             last_non_str = c
                         else:
@@ -1336,7 +1328,7 @@ class SemanticAction:
                                     "string objects found in applying "
                                     "default semantic action. Converting "
                                     "non-terminal to string.")
-                            retval = text(node)
+                            retval = str(node)
                             break
                 else:
                     # Return the only non-string child
@@ -1384,7 +1376,7 @@ class SemanticActionBodyWithBraces(SemanticAction):
 
 class SemanticActionToString(SemanticAction):
     def first_pass(self, parser, node, children):
-        return text(node)
+        return str(node)
 
 # ----------------------------------------------------
 # Parsers
@@ -1431,7 +1423,7 @@ class Parser(DebugPrinter):
                 (a.k.a. packrat parsing)
         """
 
-        super(Parser, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         # Used to indicate state in which parser should not
         # treat newlines as whitespaces.
@@ -1575,7 +1567,7 @@ class Parser(DebugPrinter):
             else:
                 sem_actions = self.sem_actions
 
-        if type(sem_actions) is not dict:
+        if not isinstance(sem_actions, dict):
             raise Exception("Semantic actions parameter must be a dictionary.")
 
         for_second_pass = []
@@ -1589,8 +1581,8 @@ class Parser(DebugPrinter):
 
             if self.debug:
                 self.dprint(
-                    "Walking down %s   type: %s  str: %s" %
-                    (node.name, type(node).__name__, text(node)))
+                    f"Walking down {node.name}   "
+                    f"type: {type(node).__name__}  str: {node}")
 
             children = SemanticActionResults()
             if isinstance(node, NonTerminal):
@@ -1600,12 +1592,11 @@ class Parser(DebugPrinter):
                         children.append_result(n.rule_name, child)
 
             if self.debug:
-                self.dprint("Processing %s = '%s'  type:%s len:%d" %
-                            (node.name, text(node), type(node).__name__,
-                             len(node) if isinstance(node, list) else 0))
+                self.dprint("Processing {} = '{}'  type:{} len:{}"
+                            .format(node.name, node, type(node).__name__,
+                                    len(node) if isinstance(node, list) else 0))
                 for i, a in enumerate(children):
-                    self.dprint("  %d:%s type:%s" %
-                                (i+1, text(a), type(a).__name__))
+                    self.dprint(f"  {i+1}:{a} type:{type(a).__name__}")
 
             if node.rule_name in sem_actions:
                 sem_action = sem_actions[node.rule_name]
@@ -1638,8 +1629,8 @@ class Parser(DebugPrinter):
                 if retval is None:
                     self.dprint("  Suppressed.")
                 else:
-                    self.dprint("  Resolved to = %s  type:%s" %
-                                (text(retval), type(retval).__name__))
+                    self.dprint(f"  Resolved to = {retval}  type:{type(retval).__name__}"
+                                )
             return retval
 
         if self.debug:
@@ -1692,13 +1683,13 @@ class Parser(DebugPrinter):
             position = self.position
         if length:
             retval = "{}*{}*{}".format(
-                text(self.input[max(position - 10, 0):position]),
-                text(self.input[position:position + length]),
-                text(self.input[position + length:position + 10]))
+                self.input[max(position - 10, 0):position],
+                self.input[position:position + length],
+                self.input[position + length:position + 10])
         else:
             retval = "{}*{}".format(
-                text(self.input[max(position - 10, 0):position]),
-                text(self.input[position:position + 10]))
+                self.input[max(position - 10, 0):position],
+                self.input[position:position + 10])
 
         return retval.replace('\n', ' ').replace('\r', '')
 
@@ -1758,7 +1749,7 @@ class ParserPython(Parser):
                 expression classes (StrMatch, Sequence, OrderedChoice).
 
         """
-        super(ParserPython, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.syntax_classes = syntax_classes if syntax_classes else {}
 
@@ -1836,8 +1827,8 @@ class ParserPython(Parser):
                     self.dprint(f"New rule: {rule_name} -> {retval.__class__.__name__}"
                                 )
 
-            elif type(expression) is text or isinstance(expression, _StrMatch):
-                if type(expression) is text:
+            elif isinstance(expression, (str, _StrMatch)):
+                if isinstance(expression, str):
                     retval = _StrMatch(expression,
                                        ignore_case=self.ignore_case)
                 else:
@@ -1874,17 +1865,15 @@ class ParserPython(Parser):
                 if any(isinstance(x, CrossRef) for x in retval.nodes):
                     __for_resolving.append(retval)
 
-            elif isinstance(expression, _Sequence) or \
-                    isinstance(expression, Repetition) or \
-                    isinstance(expression, SyntaxPredicate) or \
-                    isinstance(expression, Decorator):
+            elif isinstance(expression, (_Sequence, Repetition,
+                                         SyntaxPredicate, Decorator)):
                 retval = expression
                 retval.nodes.append(inner_from_python(retval.elements))
                 if any(isinstance(x, CrossRef) for x in retval.nodes):
                     __for_resolving.append(retval)
 
-            elif type(expression) in [list, tuple]:
-                if type(expression) is list:
+            elif isinstance(expression, (list, tuple)):
+                if isinstance(expression, list):
                     retval = _OrderedChoice(expression)
                 else:
                     retval = _Sequence(expression)
@@ -1894,8 +1883,7 @@ class ParserPython(Parser):
                     __for_resolving.append(retval)
 
             else:
-                raise GrammarError("Unrecognized grammar element '%s'." %
-                                   text(expression))
+                raise GrammarError("Unrecognized grammar element '%s'." % expression)
 
             # Translate separator expression.
             if isinstance(expression, Repetition) and expression.sep:

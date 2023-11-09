@@ -9,7 +9,6 @@
 import codecs
 import copy
 import re
-import sys
 
 from arpeggio import (
     EOF,
@@ -32,11 +31,6 @@ from arpeggio import (
     visit_parse_tree,
 )
 from arpeggio import RegExMatch as _
-
-if sys.version < '3':
-    text = unicode
-else:
-    text = str
 
 __all__ = ['ParserPEG']
 
@@ -96,7 +90,7 @@ class PEGVisitor(PTNodeVisitor):
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,
                  *args, **kwargs):
-        super(PEGVisitor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name
         self.ignore_case = ignore_case
@@ -119,9 +113,8 @@ class PEGVisitor(PTNodeVisitor):
             def get_rule_by_name(rule_name):
                 try:
                     return self.peg_rules[rule_name]
-                except KeyError:
-                    raise SemanticError(f"Rule \"{rule_name}\" does not exists."
-                                        )
+                except KeyError as e:
+                    raise SemanticError(f"Rule \"{rule_name}\" does not exists.") from e
 
             def resolve_rule_by_name(rule_name):
 
@@ -170,11 +163,7 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_rule(self, node, children):
         rule_name = children[0]
-        if len(children) > 2:
-            retval = Sequence(nodes=children[1:])
-        else:
-            retval = children[1]
-
+        retval = Sequence(nodes=children[1:]) if len(children) > 2 else children[1]
         retval.rule_name = rule_name
         retval.root = True
 
@@ -191,20 +180,13 @@ class PEGVisitor(PTNodeVisitor):
             return children[0]
 
     def visit_ordered_choice(self, node, children):
-        if len(children) > 1:
-            retval = OrderedChoice(nodes=children[:])
-        else:
-            # If only one child rule exists reduce.
-            retval = children[0]
+        retval = OrderedChoice(nodes=children[:]) if len(children) > 1 else children[0]
         return retval
 
     def visit_prefix(self, node, children):
         if len(children) == 2:
-            if children[0] == NOT:
-                retval = Not()
-            else:
-                retval = And()
-            if type(children[1]) is list:
+            retval = Not() if children[0] == NOT else And()
+            if isinstance(children[1], list):
                 retval.nodes = children[1]
             else:
                 retval.nodes = [children[1]]
@@ -216,10 +198,7 @@ class PEGVisitor(PTNodeVisitor):
 
     def visit_sufix(self, node, children):
         if len(children) == 2:
-            if type(children[0]) is list:
-                nodes = children[0]
-            else:
-                nodes = [children[0]]
+            nodes = children[0] if isinstance(children[0], list) else [children[0]]
             if children[1] == ZERO_OR_MORE:
                 retval = ZeroOrMore(nodes=nodes)
             elif children[1] == ONE_OR_MORE:
@@ -250,9 +229,9 @@ class PEGVisitor(PTNodeVisitor):
         def decode_escape(match):
             try:
                 return codecs.decode(match.group(0), "unicode_escape")
-            except UnicodeDecodeError:
+            except UnicodeDecodeError as e:
                 raise GrammarError("Invalid escape sequence '%s'." %
-                                   match.group(0))
+                                   match.group(0)) from e
         match_str = PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, match_str)
 
         return StrMatch(match_str, ignore_case=self.ignore_case)
@@ -271,7 +250,7 @@ class ParserPEG(Parser):
             root_rule_name(str): The name of the root rule.
             comment_rule_name(str): The name of the rule for comments.
         """
-        super(ParserPEG, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name
 

@@ -296,14 +296,16 @@ def test_reporting_rule_names_sequence():
 
 
 def test_reporting_rule_names_ordered_choice():
-    parser = ParserPython(OrderedChoice(["A", "B"], rule_name='ORDERED_CHOICE', root=True))
+    parser = ParserPython(OrderedChoice(["A", "B"],
+                                        rule_name='ORDERED_CHOICE', root=True))
     with pytest.raises(NoMatch) as e:
         _ = parser.parse('...')
     assert str(e.value) == (
         "Expected 'A' or 'B' at position (1, 1) => '*...'."
     )
 
-    parser = ParserPython(OrderedChoice(["A", "B"], rule_name='ORDERED_CHOICE', root=False))
+    parser = ParserPython(OrderedChoice(["A", "B"],
+                                        rule_name='ORDERED_CHOICE', root=False))
     with pytest.raises(NoMatch) as e:
         _ = parser.parse('...')
     assert str(e.value) == (

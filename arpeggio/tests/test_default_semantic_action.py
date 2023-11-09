@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_default_semantic_action
 # Purpose: Default semantic action is applied during semantic analysis
@@ -9,7 +8,6 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 from arpeggio import ParserPython, SemanticAction, ParseTreeNode
 from arpeggio import RegExMatch as _

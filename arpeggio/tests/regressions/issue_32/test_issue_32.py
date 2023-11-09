@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 
 # Test github issue 32: ensure that Python-style escape sequences in peg and
 # cleanpeg grammars are properly converted, and ensure that escaping of those
 # sequences works as well.
 
-from __future__ import print_function
 import re
 import sys
 

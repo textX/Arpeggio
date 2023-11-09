@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: export.py
 # Purpose: Export support for arpeggio
@@ -7,12 +6,12 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import io
+
 from arpeggio import Terminal
 
 
-class Exporter(object):
+class Exporter:
     """
     Base class for all Exporters.
     """
@@ -43,7 +42,7 @@ class Exporter(object):
         """
         Export of obj to a file.
         """
-        self._outf = io.open(file_name, "w", encoding="utf-8")
+        self._outf = open(file_name, "w", encoding="utf-8")
         self._export(obj)
         self._outf.close()
 
@@ -65,7 +64,7 @@ class Exporter(object):
         return ""
 
 
-class ExportAdapter(object):
+class ExportAdapter:
     """
     Base adapter class for the export support.
     Adapter should be defined for every export and graph type.
@@ -167,7 +166,7 @@ class DOTExporter(Exporter):
     Export to DOT language (part of GraphViz, see http://www.graphviz.org/)
     """
     def _render_node(self, node):
-        if not node in self._render_set:
+        if node not in self._render_set:
             self._render_set.add(node)
             self._outf.write('\n%s [label="%s"];' %
                              (node.id, self._dot_label_esc(node.desc)))

@@ -1,7 +1,4 @@
-from __future__ import unicode_literals
-import pytest
-from arpeggio import ParserPython, UnorderedGroup, Optional, \
-    EOF, NoMatch
+from arpeggio import EOF, NoMatch, Optional, ParserPython, UnorderedGroup
 
 
 def test_nondeterministic_unordered_group():

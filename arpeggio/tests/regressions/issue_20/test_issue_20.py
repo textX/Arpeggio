@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_optional_in_choice
 # Purpose: Optional matches always succeeds but should not stop alternative
@@ -8,11 +7,11 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest
 
 # Grammar
-from arpeggio import ParserPython, Optional, NoMatch, EOF
+from arpeggio import EOF, NoMatch, Optional, ParserPython
+
 
 def g():    return [Optional('first'), Optional('second'), Optional('third')], EOF
 

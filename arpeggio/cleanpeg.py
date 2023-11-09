@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: cleanpeg.py
 # Purpose: This module is a variation of the original peg.py.
@@ -9,13 +8,20 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import print_function, unicode_literals
 
-from arpeggio import Optional, ZeroOrMore, Not, OneOrMore, EOF, ParserPython, \
-    visit_parse_tree
+from arpeggio import (
+    EOF,
+    Not,
+    OneOrMore,
+    Optional,
+    ParserPython,
+    ZeroOrMore,
+    visit_parse_tree,
+)
 from arpeggio import RegExMatch as _
-from .peg import PEGVisitor
+
 from .peg import ParserPEG as ParserPEGOrig
+from .peg import PEGVisitor
 
 __all__ = ['ParserPEG']
 

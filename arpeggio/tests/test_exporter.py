@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_python_parser
 # Purpose: Testing the dot exporter.
@@ -7,14 +6,14 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
-import pytest
 import os
-from arpeggio.export import PMDOTExporter, PTDOTExporter
+
+import pytest
 
 # Grammar
-from arpeggio import Optional, ZeroOrMore, OneOrMore, EOF, ParserPython
+from arpeggio import EOF, OneOrMore, Optional, ParserPython, ZeroOrMore
 from arpeggio import RegExMatch as _
+from arpeggio.export import PMDOTExporter, PTDOTExporter
 
 
 def number():     return _(r'\d*\.\d*|\d+')

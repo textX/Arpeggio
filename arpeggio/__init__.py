@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
@@ -11,14 +10,14 @@
 # textual notation.
 ###############################################################################
 
-from __future__ import print_function, unicode_literals
-import sys
-from collections import OrderedDict
+import bisect
 import codecs
 import re
-import bisect
-from arpeggio.utils import isstr
+import sys
 import types
+from collections import OrderedDict
+
+from arpeggio.utils import isstr
 
 try:
     from importlib.metadata import version
@@ -99,9 +98,9 @@ class NoMatch(Exception):
             self.message = "Not expected input"
         else:
             what_is_expected = OrderedDict.fromkeys(
-                ["{}".format(rule_to_exp_str(r)) for r in self.rules])
+                [f"{rule_to_exp_str(r)}" for r in self.rules])
             what_str = " or ".join(what_is_expected)
-            self.message = "Expected {}".format(what_str)
+            self.message = f"Expected {what_str}"
 
         self.context = self.parser.context(position=self.position)
         self.line, self.col = self.parser.pos_to_linecol(self.position)
@@ -110,7 +109,7 @@ class NoMatch(Exception):
         self.eval_attrs()
         return "{} at position {}{} => '{}'."\
             .format(self.message,
-                    "{}:".format(self.parser.file_name)
+                    f"{self.parser.file_name}:"
                     if self.parser.file_name else "",
                     (self.line, self.col),
                     self.context)
@@ -123,14 +122,14 @@ def flatten(_iterable):
     '''Flattening of python iterables.'''
     result = []
     for e in _iterable:
-        if hasattr(e, "__iter__") and not type(e) in [text, NonTerminal]:
+        if hasattr(e, "__iter__") and type(e) not in [text, NonTerminal]:
             result.extend(flatten(e))
         else:
             result.append(e)
     return result
 
 
-class DebugPrinter(object):
+class DebugPrinter:
     """
     Mixin class for adding debug print support.
 
@@ -167,7 +166,7 @@ class DebugPrinter(object):
 # Parser Model (PEG Abstract Semantic Graph) elements
 
 
-class ParsingExpression(object):
+class ParsingExpression:
     """
     An abstract class for all parsing expressions.
     Represents the node of the Parser Model.
@@ -250,10 +249,10 @@ class ParsingExpression(object):
         if parser.debug:
             name = self.name
             if name.startswith('__asgn'):
-                name = "{}[{}]".format(self.name, self._attr_name)
+                name = f"{self.name}[{self._attr_name}]"
             parser.dprint(">> Matching rule {}{} at position {} => {}"
                           .format(name,
-                                  " in {}".format(parser.in_rule)
+                                  f" in {parser.in_rule}"
                                   if parser.in_rule else "",
                                   parser.position,
                                   parser.context()), 1)
@@ -275,8 +274,8 @@ class ParsingExpression(object):
                         "** Cache hit for [{}, {}] = '{}' : new_pos={}"
                         .format(name, c_pos, text(result), text(new_pos)))
                     parser.dprint(
-                        "<<+ Matched rule {} at position {}"
-                        .format(name, new_pos), -1)
+                        f"<<+ Matched rule {name} at position {new_pos}"
+                        , -1)
 
                 # If NoMatch is recorded at this position raise.
                 if result is NOMATCH_MARKER:
@@ -324,7 +323,7 @@ class ParsingExpression(object):
                                       if parser.position is c_pos
                                       else "+ Matched",
                                       name,
-                                      " in {}".format(parser.in_rule)
+                                      f" in {parser.in_rule}"
                                       if parser.in_rule else "",
                                       parser.position,
                                       parser.context()), -1)
@@ -781,7 +780,7 @@ class Match(ParsingExpression):
             parser.dprint(
                 "?? Try match rule {}{} at position {} => {}"
                 .format(self.name,
-                        " in {}".format(parser.in_rule)
+                        f" in {parser.in_rule}"
                         if parser.in_rule else "",
                         parser.position,
                         parser.context()))
@@ -860,7 +859,7 @@ class RegExMatch(Match):
                 return Terminal(self, c_pos, matched, extra_info=m)
         else:
             if parser.debug:
-                parser.dprint("-- NoMatch at {}".format(c_pos))
+                parser.dprint(f"-- NoMatch at {c_pos}")
             parser._nm_raise(self, c_pos, parser)
 
 
@@ -963,7 +962,7 @@ def EOF():
 # ---------------------------------------------------
 # Parse Tree node classes
 
-class ParseTreeNode(object):
+class ParseTreeNode:
     """
     Abstract base class representing node of the Parse Tree.
     The node can be terminal(the leaf of the parse tree) or non-terminal.
@@ -1089,8 +1088,7 @@ class Terminal(ParseTreeNode):
         return self.desc
 
     def tree_str(self, indent=0):
-        return '{}: {}'.format(super(Terminal, self).tree_str(indent),
-                               self.value)
+        return f'{super(Terminal, self).tree_str(indent)}: {self.value}'
 
     def __eq__(self, other):
         return text(self) == text(other)
@@ -1293,7 +1291,7 @@ def visit_parse_tree(parse_tree, visitor):
     return result
 
 
-class SemanticAction(object):
+class SemanticAction:
     """
     Semantic actions are executed during semantic analysis. They are in charge
     of producing Abstract Semantic Graph (ASG) out of the parse tree.
@@ -1542,7 +1540,7 @@ class Parser(DebugPrinter):
             from arpeggio.export import PTDOTExporter
             root_rule_name = self.parse_tree.rule_name
             PTDOTExporter().exportFile(
-                self.parse_tree, "{}_parse_tree.dot".format(root_rule_name))
+                self.parse_tree, f"{root_rule_name}_parse_tree.dot")
         return self.parse_tree
 
     def parse_file(self, file_name):
@@ -1735,7 +1733,7 @@ class Parser(DebugPrinter):
             self.comments_model._clear_cache()
 
 
-class CrossRef(object):
+class CrossRef:
     '''
     Used for rule reference resolving.
     '''
@@ -1779,7 +1777,7 @@ class ParserPython(Parser):
             from arpeggio.export import PMDOTExporter
             root_rule = language_def.__name__
             PMDOTExporter().exportFile(self.parser_model,
-                                       "{}_parser_model.dot".format(root_rule))
+                                       f"{root_rule}_parser_model.dot")
 
     def _parse(self):
         return self.parser_model.parse(self)
@@ -1809,13 +1807,11 @@ class ParserPython(Parser):
                 if rule_name in __rule_cache:
                     c_rule = __rule_cache.get(rule_name)
                     if self.debug:
-                        self.dprint("Rule {} founded in cache."
-                                    .format(rule_name))
+                        self.dprint(f"Rule {rule_name} founded in cache.")
                     if isinstance(c_rule, CrossRef):
                         self.__cross_refs += 1
                         if self.debug:
-                            self.dprint("CrossRef usage: {}"
-                                        .format(c_rule.target_rule_name))
+                            self.dprint(f"CrossRef usage: {c_rule.target_rule_name}")
                     return c_rule
 
                 # Semantic action for the rule
@@ -1837,8 +1833,8 @@ class ParserPython(Parser):
                 # Update cache
                 __rule_cache[rule_name] = retval
                 if self.debug:
-                    self.dprint("New rule: {} -> {}"
-                                .format(rule_name, retval.__class__.__name__))
+                    self.dprint(f"New rule: {rule_name} -> {retval.__class__.__name__}"
+                                )
 
             elif type(expression) is text or isinstance(expression, _StrMatch):
                 if type(expression) is text:
@@ -1853,7 +1849,7 @@ class ParserPython(Parser):
                     to_match = retval.to_match
                     match = self.keyword_regex.match(to_match)
                     if match and match.span() == (0, len(to_match)):
-                        retval = RegExMatch(r'{}\b'.format(to_match),
+                        retval = RegExMatch(rf'{to_match}\b',
                                             ignore_case=self.ignore_case,
                                             str_repr=to_match)
                         retval.compile()
@@ -1875,7 +1871,7 @@ class ParserPython(Parser):
                 retval = expression
                 for n in retval.elements:
                     retval.nodes.append(inner_from_python(n))
-                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                if any(isinstance(x, CrossRef) for x in retval.nodes):
                     __for_resolving.append(retval)
 
             elif isinstance(expression, _Sequence) or \
@@ -1884,7 +1880,7 @@ class ParserPython(Parser):
                     isinstance(expression, Decorator):
                 retval = expression
                 retval.nodes.append(inner_from_python(retval.elements))
-                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                if any(isinstance(x, CrossRef) for x in retval.nodes):
                     __for_resolving.append(retval)
 
             elif type(expression) in [list, tuple]:
@@ -1894,7 +1890,7 @@ class ParserPython(Parser):
                     retval = _Sequence(expression)
 
                 retval.nodes = [inner_from_python(e) for e in expression]
-                if any((isinstance(x, CrossRef) for x in retval.nodes)):
+                if any(isinstance(x, CrossRef) for x in retval.nodes):
                     __for_resolving.append(retval)
 
             else:

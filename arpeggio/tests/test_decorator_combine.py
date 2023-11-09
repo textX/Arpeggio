@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_decorator_combine
 # Purpose: Test for Combine decorator. Combine decorator
@@ -9,10 +8,17 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, ZeroOrMore, OneOrMore, NonTerminal, \
-    Terminal, NoMatch, Combine
+
+from arpeggio import (
+    Combine,
+    NoMatch,
+    NonTerminal,
+    OneOrMore,
+    ParserPython,
+    Terminal,
+    ZeroOrMore,
+)
 
 
 def test_combine_python():

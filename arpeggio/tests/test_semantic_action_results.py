@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_semantic_action_results
 # Purpose: Tests semantic action results passed to first_pass call
@@ -7,7 +6,6 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar

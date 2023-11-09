@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_position
 # Purpose: Test that positions in the input stream are properly calculated.
@@ -6,8 +5,8 @@
 # Copyright: (c) 2015-2017 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from __future__ import unicode_literals
 import pytest
+
 from arpeggio import ParserPython
 
 

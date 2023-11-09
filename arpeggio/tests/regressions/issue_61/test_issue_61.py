@@ -1,7 +1,6 @@
-from __future__ import unicode_literals
 import pytest
-from arpeggio import ParserPython, ZeroOrMore, Sequence, OrderedChoice, \
-    EOF, NoMatch
+
+from arpeggio import EOF, NoMatch, OrderedChoice, ParserPython, Sequence, ZeroOrMore
 
 
 def test_ordered_choice_skipws_ws():

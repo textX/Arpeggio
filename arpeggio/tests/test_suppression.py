@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_suppression
 # Purpose: Test suppresion of parse tree nodes.
@@ -7,7 +6,6 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 from arpeggio import ParserPython, Sequence, StrMatch, RegExMatch
 

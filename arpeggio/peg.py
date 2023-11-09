@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: peg.py
 # Purpose: Implementing PEG language
@@ -7,15 +6,31 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import print_function, unicode_literals
-import sys
 import codecs
 import copy
 import re
-from arpeggio import Sequence, OrderedChoice, Optional, ZeroOrMore, \
-    OneOrMore, UnorderedGroup, EOF, EndOfFile, PTNodeVisitor, \
-    SemanticError, CrossRef, GrammarError, StrMatch, And, Not, Parser, \
-    ParserPython, visit_parse_tree
+import sys
+
+from arpeggio import (
+    EOF,
+    And,
+    CrossRef,
+    EndOfFile,
+    GrammarError,
+    Not,
+    OneOrMore,
+    Optional,
+    OrderedChoice,
+    Parser,
+    ParserPython,
+    PTNodeVisitor,
+    SemanticError,
+    Sequence,
+    StrMatch,
+    UnorderedGroup,
+    ZeroOrMore,
+    visit_parse_tree,
+)
 from arpeggio import RegExMatch as _
 
 if sys.version < '3':
@@ -105,13 +120,13 @@ class PEGVisitor(PTNodeVisitor):
                 try:
                     return self.peg_rules[rule_name]
                 except KeyError:
-                    raise SemanticError("Rule \"{}\" does not exists."
-                                        .format(rule_name))
+                    raise SemanticError(f"Rule \"{rule_name}\" does not exists."
+                                        )
 
             def resolve_rule_by_name(rule_name):
 
                     if self.debug:
-                        self.dprint("Resolving crossref {}".format(rule_name))
+                        self.dprint(f"Resolving crossref {rule_name}")
 
                     resolved_rule = get_rule_by_name(rule_name)
                     while type(resolved_rule) is CrossRef:
@@ -273,7 +288,7 @@ class ParserPEG(Parser):
             from arpeggio.export import PMDOTExporter
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(
-                self.parser_model, "{}_peg_parser_model.dot".format(root_rule))
+                self.parser_model, f"{root_rule}_peg_parser_model.dot")
 
     def _parse(self):
         return self.parser_model.parse(self)

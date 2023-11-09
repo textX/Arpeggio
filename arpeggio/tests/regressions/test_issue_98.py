@@ -1,5 +1,4 @@
-from arpeggio import ZeroOrMore, RegExMatch, StrMatch, EOF
-from arpeggio import ParserPython
+from arpeggio import EOF, ParserPython, RegExMatch, StrMatch, ZeroOrMore
 
 
 def test_suppressed_match_in_zero_or_more():

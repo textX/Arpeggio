@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_peg_parser
 # Purpose: Test for parser constructed using PEG textual grammars.

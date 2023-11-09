@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: test_python_parser
 # Purpose: Test for parser constructed using Python-based grammars.
@@ -7,7 +6,6 @@
 # License: MIT License
 #######################################################################
 
-from __future__ import unicode_literals
 import pytest  # noqa
 
 # Grammar

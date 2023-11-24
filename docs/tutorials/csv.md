@@ -25,7 +25,7 @@ and easy to understand so it it a good starter for learning Arpeggio.
 
 ## The grammar
 
-Let's start first by creating a python module called `csv.py`.
+Let's start first by creating a python module called `csvlang.py`.
 
 Now, let's define CSV grammar. 
 
@@ -63,7 +63,7 @@ Now, let's define CSV grammar.
       be escaped by doubling it (`""`).
 
 
-The whole content of the `csv.py` file until now should be:
+The whole content of the `csvlang.py` file until now should be:
 
     from arpeggio import *
     from arpeggio import RegExMatch as _
@@ -86,7 +86,7 @@ so we will use `ws` parameter in parser construction to redefine what is
 considered as whitespace.  You can find more information
 [here](../configuration.md#white-space-handling).
 
-After the grammar in `csv.py` instantiate the parser:
+After the grammar in `csvlang.py` instantiate the parser:
 
     parser = ParserPython(csvfile, ws='\t ')
 
@@ -108,7 +108,7 @@ Create file `test_data.csv` with the following content:
     Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "34312.7"
     Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343486.12"
 
-In `csv.py` file write:
+In `csvlang.py` file write:
 
 ```python
 test_data = open('test_data.csv', 'r').read()
@@ -119,12 +119,12 @@ parse_tree = parser.parse(test_data)
 `test_data` is Python string containing test CSV data from the file. Calling
 `parser.parse` on the data will produce the [parse tree](../parse_trees.md).
 
-If you run `csv.py` module, and there are no syntax errors in the `test_data.csv`
-file, `parse_tree` will be a reference to [parse tree](../parse_trees.md) of
-the test CSV data.
+If you run `csvlang.py` module, and there are no syntax errors in the
+`test_data.csv` file, `parse_tree` will be a reference to [parse
+tree](../parse_trees.md) of the test CSV data.
 
 ```bash
-$ python csv.py
+$ python csvlang.py
 ```
 
 **Congratulations!! You have successfully parsed CSV file.**
@@ -156,7 +156,7 @@ definition.
 We shall repeat the process above but we shall encode rules in PEG.
 We shall use clean PEG variant (`arpeggio.cleanpeg` module).
 
-First, create textual file `csv.peg` to store the grammar.
+First, create textual file `csvlang.peg` to store the grammar.
 
 - CSV file consists of one or more records or newlines and the End-Of-File at
   the end.
@@ -191,7 +191,7 @@ First, create textual file `csv.peg` to store the grammar.
       be escaped by doubling it (`""`).
 
 
-The whole grammar (i.e. the contents of `csv.peg` file) is:
+The whole grammar (i.e. the contents of `csvlang.peg` file) is:
 
       csvfile = (record / r'\n')+ EOF
       record = field ("," field)*
@@ -201,27 +201,27 @@ The whole grammar (i.e. the contents of `csv.peg` file) is:
       field_content_quoted = r'(("")|([^"]))+'
 
 
-Now, we shall create `csv_peg.py` file in order to instantiate our parser and
+Now, we shall create `csvlang_peg.py` file in order to instantiate our parser and
 parse inputs.  This time we shall instantiate different parser class
-(`ParserPEG`). The whole content of `csv_peg.py` should be:
+(`ParserPEG`). The whole content of `csvlang_peg.py` should be:
 
 ```python
 from arpeggio.cleanpeg import ParserPEG
 
-csv_grammar = open('csv.peg', 'r').read()
+csv_grammar = open('csvlang.peg', 'r').read()
 parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ')
 ```
 
-Here we load the grammar from `csv.peg` file and construct the parser using
+Here we load the grammar from `csvlang.peg` file and construct the parser using
 `ParserPEG` class.
 
-The rest of the code is the same as in `csv.py`. We load `test_data.csv` and
+The rest of the code is the same as in `csvlang.py`. We load `test_data.csv` and
 call `parser.parse` on it to produce parse tree.
 
-To verify that everything works without errors execute `csv_peg.py` module.
+To verify that everything works without errors execute `csvlang_peg.py` module.
 
 ```bash
-$ python csv_peg.py
+$ python csvlang_peg.py
 ```
 
 If we put the parser in debug mode and generate parse tree image we can 

@@ -44,6 +44,7 @@ class CSVVisitor(PTNodeVisitor):
 
 
 def main(debug=False):
+    print('Here')
     # First we will make a parser - an instance of the CVS parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.

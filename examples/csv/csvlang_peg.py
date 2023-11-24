@@ -10,7 +10,7 @@ import os
 import pprint
 from arpeggio import visit_parse_tree
 from arpeggio.cleanpeg import ParserPEG
-from examples.csv.csv import CSVVisitor
+from csvlang import CSVVisitor
 
 def main(debug=False):
     # First we will make a parser - an instance of the CVS parser model.
@@ -20,7 +20,7 @@ def main(debug=False):
     # spaces. Newlines have semantics in csv files. They are used to separate
     # records.
     current_dir = os.path.dirname(__file__)
-    csv_grammar = open(os.path.join(current_dir, 'csv.peg'), 'r').read()
+    csv_grammar = open(os.path.join(current_dir, 'csvlang.peg'), 'r').read()
     parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=debug)
 
     # Creating parse tree out of textual input

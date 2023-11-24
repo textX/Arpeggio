@@ -1,82 +1,75 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <meta name="author" content="Igor Dejanović">
-  
-  <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>CSV - Arpeggio</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Igor Dejanović" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>CSV - Arpeggio</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/version-select.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "CSV";
+        var mkdocs_page_input_path = "tutorials/csv.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-68681917-1"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
-  <link rel="stylesheet" href="../../css/theme.css" />
-  <link rel="stylesheet" href="../../css/theme_extra.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
-  <link href="../../css/version-select.css" rel="stylesheet" />
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "CSV";
-    var mkdocs_page_input_path = "tutorials/csv.md";
-    var mkdocs_page_url = null;
-  </script>
-  
-  <script src="../../js/jquery-2.1.1.min.js" defer></script>
-  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script> 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-68681917-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'UA-68681917-1');
-  </script>
+        gtag('config', "UA-68681917-1");
+      </script>
 </head>
 
 <body class="wy-body-for-nav" role="document">
 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-        <a href="../.." class="icon icon-home"> Arpeggio</a>
-        
+          <a href="../.." class="icon icon-home"> Arpeggio
+        </a>
       </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">User Guide</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../getting_started/">Getting started</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../grammars/">Grammars</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../parse_trees/">Parse tree</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../handling_errors/">Handling errors</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../debugging/">Debugging</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Parser configuration</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../semantics/">Semantic analysis</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/">Troubleshooting</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Tutorials</span></p>
-                <ul class="current">
-                    <li class="toctree-l1 current"><a class="reference internal current" href="./">CSV</a>
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting_started/">Getting started</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../grammars/">Grammars</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../parse_trees/">Parse tree</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../handling_errors/">Handling errors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../debugging/">Debugging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Parser configuration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../semantics/">Semantic analysis</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/">Troubleshooting</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">CSV</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#the-grammar">The grammar</a>
     </li>
@@ -89,60 +82,45 @@
     <li class="toctree-l2"><a class="reference internal" href="#extract-data">Extract data</a>
     </li>
     </ul>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../bibtex/">BibTex</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../calc/">Calc</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">About</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../about/discuss/">Discuss</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../about/contributing/">Contributing</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../about/license/">License</a>
-                    </li>
-                </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bibtex/">BibTex</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../calc/">Calc</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">About</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../about/discuss/">Discuss</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../about/contributing/">Contributing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../about/license/">License</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../..">Arpeggio</a>
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Arpeggio</a>
+        
       </nav>
-
-      
       <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../..">Docs</a> &raquo;</li>
-    
-      
-        
-          <li>Tutorials &raquo;</li>
-        
-      
-    
-    <li>CSV</li>
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorials</li>
+      <li class="breadcrumb-item active">CSV</li>
     <li class="wy-breadcrumbs-aside">
-      
-        <a href="https://github.com/textX/Arpeggio/edit/master/docs/tutorials/csv.md"
-          class="icon icon-github"> Edit on GitHub</a>
-      
+          <a href="https://github.com/textX/Arpeggio/edit/master/docs/tutorials/csv.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
-  
   <hr/>
 </div>
-
-          <div role="main">
-            <div class="section">
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
               
                 <h1 id="comma-separated-values-csv-parser-tutorial">Comma-Separated Values (CSV) parser tutorial<a class="headerlink" href="#comma-separated-values-csv-parser-tutorial" title="Permanent link">&para;</a></h1>
 <p>A tutorial for building parser for well known CSV format.</p>
@@ -161,7 +139,7 @@ CSV file:</p>
 the standard Python library this example has been made as the CSV is ubiquitous
 and easy to understand so it it a good starter for learning Arpeggio.</p>
 <h2 id="the-grammar">The grammar<a class="headerlink" href="#the-grammar" title="Permanent link">&para;</a></h2>
-<p>Let's start first by creating a python module called <code>csv.py</code>.</p>
+<p>Let's start first by creating a python module called <code>csvlang.py</code>.</p>
 <p>Now, let's define CSV grammar. </p>
 <ul>
 <li>
@@ -202,7 +180,7 @@ and easy to understand so it it a good starter for learning Arpeggio.</p>
   be escaped by doubling it (<code>""</code>).</p>
 </li>
 </ul>
-<p>The whole content of the <code>csv.py</code> file until now should be:</p>
+<p>The whole content of the <code>csvlang.py</code> file until now should be:</p>
 <pre><code>from arpeggio import *
 from arpeggio import RegExMatch as _
 
@@ -221,7 +199,7 @@ Thus, we will be able to handle them explicitly as we do in csvfile rule. To do
 so we will use <code>ws</code> parameter in parser construction to redefine what is
 considered as whitespace.  You can find more information
 <a href="../../configuration/#white-space-handling">here</a>.</p>
-<p>After the grammar in <code>csv.py</code> instantiate the parser:</p>
+<p>After the grammar in <code>csvlang.py</code> instantiate the parser:</p>
 <pre><code>parser = ParserPython(csvfile, ws='\t ')
 </code></pre>
 <p>So, whitespace will be a tab char or a space. Newline will be treated as regular
@@ -236,17 +214,17 @@ is <code>csvfile</code> function.</p>
 Unquoted test 2, "Quoted test with ""inner"" quotes", 23234, One Two Three, "34312.7"
 Unquoted test 3, "Quoted test 3", 23234, One Two Three, "343486.12"
 </code></pre>
-<p>In <code>csv.py</code> file write:</p>
+<p>In <code>csvlang.py</code> file write:</p>
 <pre><code class="language-python">test_data = open('test_data.csv', 'r').read()
 parse_tree = parser.parse(test_data)
 
 </code></pre>
 <p><code>test_data</code> is Python string containing test CSV data from the file. Calling
 <code>parser.parse</code> on the data will produce the <a href="../../parse_trees/">parse tree</a>.</p>
-<p>If you run <code>csv.py</code> module, and there are no syntax errors in the <code>test_data.csv</code>
-file, <code>parse_tree</code> will be a reference to <a href="../../parse_trees/">parse tree</a> of
-the test CSV data.</p>
-<pre><code class="language-bash">$ python csv.py
+<p>If you run <code>csvlang.py</code> module, and there are no syntax errors in the
+<code>test_data.csv</code> file, <code>parse_tree</code> will be a reference to <a href="../../parse_trees/">parse
+tree</a> of the test CSV data.</p>
+<pre><code class="language-bash">$ python csvlang.py
 </code></pre>
 <p><strong>Congratulations!! You have successfully parsed CSV file.</strong></p>
 <p>This parse tree is <a href="../../debugging/#visualization">visualized</a> below (Tip: The
@@ -268,7 +246,7 @@ notation</a> for the grammar
 definition.</p>
 <p>We shall repeat the process above but we shall encode rules in PEG.
 We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module).</p>
-<p>First, create textual file <code>csv.peg</code> to store the grammar.</p>
+<p>First, create textual file <code>csvlang.peg</code> to store the grammar.</p>
 <ul>
 <li>
 <p>CSV file consists of one or more records or newlines and the End-Of-File at
@@ -307,7 +285,7 @@ We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module).</p>
   be escaped by doubling it (<code>""</code>).</p>
 </li>
 </ul>
-<p>The whole grammar (i.e. the contents of <code>csv.peg</code> file) is:</p>
+<p>The whole grammar (i.e. the contents of <code>csvlang.peg</code> file) is:</p>
 <pre><code>  csvfile = (record / r'\n')+ EOF
   record = field ("," field)*
   field = quoted_field / field_content
@@ -315,20 +293,20 @@ We shall use clean PEG variant (<code>arpeggio.cleanpeg</code> module).</p>
   quoted_field = '"' field_content_quoted '"'
   field_content_quoted = r'(("")|([^"]))+'
 </code></pre>
-<p>Now, we shall create <code>csv_peg.py</code> file in order to instantiate our parser and
+<p>Now, we shall create <code>csvlang_peg.py</code> file in order to instantiate our parser and
 parse inputs.  This time we shall instantiate different parser class
-(<code>ParserPEG</code>). The whole content of <code>csv_peg.py</code> should be:</p>
+(<code>ParserPEG</code>). The whole content of <code>csvlang_peg.py</code> should be:</p>
 <pre><code class="language-python">from arpeggio.cleanpeg import ParserPEG
 
-csv_grammar = open('csv.peg', 'r').read()
+csv_grammar = open('csvlang.peg', 'r').read()
 parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ')
 </code></pre>
-<p>Here we load the grammar from <code>csv.peg</code> file and construct the parser using
+<p>Here we load the grammar from <code>csvlang.peg</code> file and construct the parser using
 <code>ParserPEG</code> class.</p>
-<p>The rest of the code is the same as in <code>csv.py</code>. We load <code>test_data.csv</code> and
+<p>The rest of the code is the same as in <code>csvlang.py</code>. We load <code>test_data.csv</code> and
 call <code>parser.parse</code> on it to produce parse tree.</p>
-<p>To verify that everything works without errors execute <code>csv_peg.py</code> module.</p>
-<pre><code class="language-bash">$ python csv_peg.py
+<p>To verify that everything works without errors execute <code>csvlang_peg.py</code> module.</p>
+<pre><code class="language-bash">$ python csvlang_peg.py
 </code></pre>
 <p>If we put the parser in debug mode and generate parse tree image we can 
 verify that we are getting the same parse tree regardless of the grammar
@@ -420,31 +398,22 @@ anymore but a proper Python types.</p>
 <p>This example code can be found <a href="https://github.com/textX/Arpeggio/tree/master/examples/csv">here</a>.</p>
               
             </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../troubleshooting/" class="btn btn-neutral float-left" title="Troubleshooting"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../bibtex/" class="btn btn-neutral float-right" title="BibTex">Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-        <a href="../../troubleshooting/" class="btn btn-neutral" title="Troubleshooting"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <!-- Copyright etc -->
-    
       <p>Copyright &copy; <a href="http://www.igordejanovic.net/">Igor Dejanović</a>.</p>
-    
   </div>
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
-      
+          
         </div>
       </div>
 
@@ -452,11 +421,11 @@ anymore but a proper Python types.</p>
 
   </div>
 
-  <div class="rst-versions" role="note" aria-label="versions">
+  <div class="rst-versions" role="note" aria-label="Versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     
         <span>
-          <a href="https://github.com/textX/Arpeggio/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/textX/Arpeggio" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
         </span>
     
     
@@ -467,14 +436,15 @@ anymore but a proper Python types.</p>
     
   </span>
 </div>
-    <script>var base_url = '../..';</script>
-    <script src="../../js/theme_extra.js" defer></script>
-    <script src="../../js/theme.js" defer></script>
-      <script src="../../js/version-select.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/version-select.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

@@ -58,7 +58,7 @@ def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 def rule_crossref():    return rule_name
 def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
                                  r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
-def comment():          return "//", _(".*\n")
+def comment():          return _("//.*\n", multiline=False)
 
 
 class ParserPEG(ParserPEGOrig):

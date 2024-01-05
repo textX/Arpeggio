@@ -62,8 +62,8 @@ def expression():       return [regex, rule_crossref,
                                 str_match]
 
 # PEG Lexical rules
-def regex():            return [("r'", _(r'''[^'\\]*(?:\\.[^'\\]*)*'''), "'"),
-                                ('r"', _(r'''[^"\\]*(?:\\.[^"\\]*)*'''), '"')]
+def regex():            return _(r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
+                                 r'''(r"[^"\\]*(?:\\.[^"\\]*)*")''')
 def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
 def rule_crossref():    return rule_name
 def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
@@ -216,7 +216,7 @@ class PEGVisitor(PTNodeVisitor):
         return CrossRef(node.value)
 
     def visit_regex(self, node, children):
-        match = _(children[0], ignore_case=self.ignore_case)
+        match = _(node.value[2:-1], ignore_case=self.ignore_case)
         match.compile()
         return match
 

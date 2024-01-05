@@ -30,6 +30,7 @@ def test_examples():
     # Filter out __init__.py
     examples = [f for f in glob.glob(examples_pat) if f != '__init__.py']
     for e in examples:
+        print(e)
         example_dir = os.path.dirname(e)
         sys.path.insert(0, example_dir)
         (module_name, _) = os.path.splitext(os.path.basename(e))

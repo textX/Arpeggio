@@ -16,6 +16,7 @@ grammar = r'''
     factor <- ("+" / "-")?
               (number / "(" expression ")");
     // This is another comment
+    //
     term <- factor (( "*" / "/") factor)*;
     expression <- term (("+" / "-") term)*;
     calc <- expression+ EOF;

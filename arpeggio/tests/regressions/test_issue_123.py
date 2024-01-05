@@ -1,6 +1,5 @@
 from arpeggio.cleanpeg import ParserPEG
 
-
 grammar = r'''
 Root = 'a'
 BlockComment = r'/\*.*?\*/'

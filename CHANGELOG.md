@@ -68,9 +68,11 @@ please take a look at related PRs and issues and see if the change affects you.
 - fix: #98 suppressed match in zero-or-more [#98]. Thanks @vpavlu for reporting
   the issue.
 
-- fix: empty comments in .peg files hid the next line, commented or not.
+- fix: empty comments in .peg files hid the next line, commented or not
+  ([#124]). Thanks @smurfix for the fix.
 
 [#125]: https://github.com/textX/Arpeggio/issues/125
+[#124]: https://github.com/textX/Arpeggio/pull/124
 [#123]: https://github.com/textX/Arpeggio/discussions/123
 [#101]: https://github.com/textX/Arpeggio/issues/101
 [#98]: https://github.com/textX/Arpeggio/issues/98

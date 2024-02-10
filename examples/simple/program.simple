@@ -1,3 +1,6 @@
+/* An example
+   of a simple C-like language
+*/
 function fak(n) {
     if (n==0) {
         // For 0! result is 0

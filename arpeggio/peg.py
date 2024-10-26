@@ -133,9 +133,9 @@ class PEGVisitor(PTNodeVisitor):
                         resolved_rule.rule_name = rule_name
                         self.peg_rules[rule_name] = resolved_rule
                         if self.debug:
-                            self.dprint("Resolving: cloned to {} = > {}"
-                                        .format(resolved_rule.rule_name,
-                                                resolved_rule.name))
+                            self.dprint(f"Resolving: cloned to "
+                                        f"{resolved_rule.rule_name} "
+                                        f"=> {resolved_rule.name}")
                     return resolved_rule
 
             if isinstance(node, CrossRef):
@@ -230,8 +230,7 @@ class PEGVisitor(PTNodeVisitor):
             try:
                 return codecs.decode(match.group(0), "unicode_escape")
             except UnicodeDecodeError as e:
-                raise GrammarError("Invalid escape sequence '%s'." %
-                                   match.group(0)) from e
+                raise GrammarError(f"Invalid escape sequence '{match.group(0)}'.") from e
         match_str = PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, match_str)
 
         return StrMatch(match_str, ignore_case=self.ignore_case)

@@ -30,10 +30,7 @@ def check_parser(grammar, text):
 
     # test the cleanpeg parser
     parser = ParserCleanPEG('top = ' + grammar + ' EOF', 'top', skipws=False)
-    if parser.parse(text) is None:
-        return False
-
-    return True
+    return parser.parse(text) is not None
 
 
 def check_regex(grammar, text):

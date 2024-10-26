@@ -264,8 +264,8 @@ class ParsingExpression:
                 parser.cache_hits += 1
                 if parser.debug:
                     parser.dprint(
-                        "** Cache hit for [{}, {}] = '{}' : new_pos={}"
-                        .format(name, c_pos, result, new_pos))
+                        f"** Cache hit for [{name}, {c_pos}] = '{result}' "
+                        f": new_pos={new_pos}")
                     parser.dprint(
                         f"<<+ Matched rule {name} at position {new_pos}"
                         , -1)
@@ -440,7 +440,7 @@ class Repetition(ParsingExpression):
     def __init__(self, *elements, **kwargs):
         super().__init__(*elements, **kwargs)
         self.eolterm = kwargs.get('eolterm', False)
-        self.sep = kwargs.get('sep', None)
+        self.sep = kwargs.get('sep')
 
 
 class Optional(Repetition):
@@ -880,9 +880,8 @@ class StrMatch(Match):
         if match:
             if parser.debug:
                 parser.dprint(
-                    "++ Match '{}' at {} => '{}'"
-                    .format(self.to_match, c_pos,
-                            parser.context(len(self.to_match))))
+                    f"++ Match '{self.to_match}' at {c_pos} => "
+                    f"'{parser.context(len(self.to_match))}'")
             parser.position += len(self.to_match)
 
             # If this match is inside sequence than mark for suppression
@@ -892,9 +891,8 @@ class StrMatch(Match):
         else:
             if parser.debug:
                 parser.dprint(
-                    "-- No match '{}' at {} => '{}'"
-                    .format(self.to_match, c_pos,
-                            parser.context(len(self.to_match))))
+                    f"-- No match '{self.to_match}' at {c_pos} => "
+                    f"'{parser.context(len(self.to_match))}'")
             parser._nm_raise(self, c_pos, parser)
 
     def __str__(self):
@@ -1010,14 +1008,14 @@ class ParseTreeNode:
                 if child is not None:
                     children.append_result(node.rule_name, child)
 
-        visit_name = "visit_%s" % self.rule_name
+        visit_name = f"visit_{self.rule_name}"
         if hasattr(visitor, visit_name):
             # Call visit method.
             result = getattr(visitor, visit_name)(self, children)
 
             # If there is a method with 'second' prefix save
             # the result of visit for post-processing
-            if hasattr(visitor, "second_%s" % self.rule_name):
+            if hasattr(visitor, f"second_{self.rule_name}"):
                 visitor.for_second_pass.append((self.rule_name, result))
 
             return result
@@ -1139,7 +1137,7 @@ class NonTerminal(ParseTreeNode, list):
         return self.__str__()
 
     def __repr__(self):
-        return "[ %s ]" % ", ".join([repr(x) for x in self])
+        return "[ {} ]".format(", ".join([repr(x) for x in self]))
 
     def tree_str(self, indent=0):
         return '{}\n{}'.format(super().tree_str(indent),
@@ -1278,7 +1276,7 @@ def visit_parse_tree(parse_tree, visitor):
     if visitor.debug:
         visitor.dprint("ASG: Second pass")
     for sa_name, asg_node in visitor.for_second_pass:
-        getattr(visitor, "second_%s" % sa_name)(asg_node)
+        getattr(visitor, f"second_{sa_name}")(asg_node)
 
     return result
 
@@ -1592,9 +1590,9 @@ class Parser(DebugPrinter):
                         children.append_result(n.rule_name, child)
 
             if self.debug:
-                self.dprint("Processing {} = '{}'  type:{} len:{}"
-                            .format(node.name, node, type(node).__name__,
-                                    len(node) if isinstance(node, list) else 0))
+                self.dprint(f"Processing {node.name} = '{node}'  "
+                            f"type:{type(node).__name__} "
+                            f"len:{len(node) if isinstance(node, list) else 0}")
                 for i, a in enumerate(children):
                     self.dprint(f"  {i+1}:{a} type:{type(a).__name__}")
 
@@ -1612,7 +1610,7 @@ class Parser(DebugPrinter):
                     action_name = sem_action.__name__ \
                         if hasattr(sem_action, '__name__') \
                         else sem_action.__class__.__name__
-                    self.dprint("  Applying semantic action %s" % action_name)
+                    self.dprint(f"  Applying semantic action {action_name}")
 
             else:
                 if defaults:
@@ -1682,14 +1680,12 @@ class Parser(DebugPrinter):
         if not position:
             position = self.position
         if length:
-            retval = "{}*{}*{}".format(
-                self.input[max(position - 10, 0):position],
-                self.input[position:position + length],
-                self.input[position + length:position + 10])
+            retval = f"{self.input[max(position - 10, 0):position]}"\
+                     f"*{self.input[position:position + length]}*"\
+                     f"{self.input[position + length:position + 10]}"
         else:
-            retval = "{}*{}".format(
-                self.input[max(position - 10, 0):position],
-                self.input[position:position + 10])
+            retval = f"{self.input[max(position - 10, 0):position]}"\
+                     f"*{self.input[position:position + 10]}"
 
         return retval.replace('\n', ' ').replace('\r', '')
 
@@ -1883,7 +1879,7 @@ class ParserPython(Parser):
                     __for_resolving.append(retval)
 
             else:
-                raise GrammarError("Unrecognized grammar element '%s'." % expression)
+                raise GrammarError(f"Unrecognized grammar element '{expression}'.")
 
             # Translate separator expression.
             if isinstance(expression, Repetition) and expression.sep:

@@ -15,6 +15,7 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- Added support for Python 3.13 and relax restriction on upper Python version.
 - Fix parsing of regex rules in peg and cleanpeg syntaxes ([#125]). Thanks
   @smurfix for reporting ([#123]).
 - **(BIC)** Removed support for Python 3.6. The minimal supported version is 3.7.

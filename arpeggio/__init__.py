@@ -1,8 +1,9 @@
 ###############################################################################
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
-# Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009-2019 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
+# Copyright: (c) 2009-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2025 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
 # License: MIT License
 #
 # This is an implementation of packrat parser interpreter based on PEG
@@ -920,6 +921,24 @@ class Kwd(StrMatch):
         self.to_match = to_match
         self.root = True
         self.rule_name = 'keyword'
+
+
+class MatchAction(ParsingExpression):
+    action_name: str
+
+    def __init__(self, rule, action):
+        super().__init__(rule_name='', nodes=[rule])
+        self.action_name = action
+
+    def _parse(self, parser):
+        rule_node = self.nodes[0]
+        action = getattr(parser.actions, self.action_name)
+        retval = action(rule_node)
+        return retval
+
+    def __str__(self):
+        rule_node = self.nodes[0]
+        return str(rule_node)
 
 
 class EndOfFile(Match):

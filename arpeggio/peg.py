@@ -1,8 +1,9 @@
 #######################################################################
 # Name: peg.py
 # Purpose: Implementing PEG language
-# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
 # Copyright: (c) 2009-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2025 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
 # License: MIT License
 #######################################################################
 
@@ -29,6 +30,8 @@ from arpeggio import (
     UnorderedGroup,
     ZeroOrMore,
     visit_parse_tree,
+    Match,
+    MatchAction,
 )
 from arpeggio import RegExMatch as _
 
@@ -45,13 +48,16 @@ AND = "&"
 NOT = "!"
 OPEN = "("
 CLOSE = ")"
+CALL_START = "{"
+CALL_END = "}"
 
 
 # PEG syntax rules
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore(prefix)
+def sequence():         return OneOrMore([operation, prefix])
+def operation():        return rule_crossref, call
 def prefix():           return Optional([AND, NOT]), sufix
 def sufix():            return expression, Optional([OPTIONAL,
                                                      ZERO_OR_MORE,
@@ -69,6 +75,10 @@ def rule_crossref():    return rule_name
 def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
                                      r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 def comment():          return _("//.*\n", multiline=False)
+
+def call():             return CALL_START, call_arguments, CALL_END
+def call_arguments():   return OneOrMore(call_argument)
+def call_argument():    return _(r'[^\} \t]+')
 
 
 # Escape sequences supported in PEG literal string matches
@@ -183,6 +193,9 @@ class PEGVisitor(PTNodeVisitor):
         retval = OrderedChoice(nodes=children[:]) if len(children) > 1 else children[0]
         return retval
 
+    def visit_operation(self, node, children):
+        return MatchAction(children[0], children[1])
+
     def visit_prefix(self, node, children):
         if len(children) == 2:
             retval = Not() if children[0] == NOT else And()
@@ -236,6 +249,52 @@ class PEGVisitor(PTNodeVisitor):
         return StrMatch(match_str, ignore_case=self.ignore_case)
 
 
+class ParserState:
+    def __init__(self, parser):
+        self._parser = parser
+
+
+class ParserPEGState(ParserState):
+    rule_reference_stack: dict
+
+    def __init__(self, parser):
+        super().__init__(parser)
+        self.rule_reference_stack = {}
+
+
+class ParserPEGActions:
+    def __init__(self, parser):
+        self._parser = parser
+
+    def push(self, rule: Match):
+        retval = rule.parse(self._parser)
+        name = str(retval)
+        stack = self._parser.state.rule_reference_stack
+        stack.setdefault(rule.rule_name, [])
+        stack[rule.rule_name].append(name)
+        return retval
+
+    def pop(self, rule: Match):
+        stack = self._parser.state.rule_reference_stack
+        match_against = stack[rule.rule_name][-1]
+        ref_rule = StrMatch(match_against)
+
+        # It might be faster to match a string first
+        c_pos = self._parser.position
+        ref_retval = ref_rule.parse(self._parser)
+        self._parser.position = c_pos
+
+        retval = rule.parse(self._parser)
+        if str(retval) != str(ref_retval):
+            if self._parser.debug:
+                self._parser.dprint(
+                    f"-- No match '{match_against}' at {c_pos} => "
+                    f"'{self._parser.context(len(match_against))}'")
+            self._parser._nm_raise(rule, c_pos, self._parser)
+        stack[rule.rule_name].pop()
+        return retval
+
+
 class ParserPEG(Parser):
 
     def __init__(self, language_def, root_rule_name, comment_rule_name=None,
@@ -250,6 +309,10 @@ class ParserPEG(Parser):
             comment_rule_name(str): The name of the rule for comments.
         """
         super().__init__(*args, **kwargs)
+
+        self.state = ParserPEGState(self)
+        self.actions = ParserPEGActions(self)
+
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name
 

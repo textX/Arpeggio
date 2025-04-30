@@ -3,8 +3,9 @@
 # Purpose: This module is a variation of the original peg.py.
 #   The syntax is slightly changed to be more readable and familiar to
 #   python users. It is based on the Yash's suggestion - issue 11
-# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2014-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
+# Copyright: (c) 2009-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2025 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
 # License: MIT License
 #######################################################################
 
@@ -36,12 +37,15 @@ AND = "&"
 NOT = "!"
 OPEN = "("
 CLOSE = ")"
+CALL_START = "{"
+CALL_END = "}"
 
 # PEG syntax rules
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, ASSIGNMENT, ordered_choice
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore(prefix)
+def sequence():         return OneOrMore([operation, prefix])
+def operation():        return rule_crossref, call
 def prefix():           return Optional([AND, NOT]), sufix
 def sufix():            return expression, Optional([OPTIONAL,
                                                      ZERO_OR_MORE,
@@ -59,6 +63,10 @@ def rule_crossref():    return rule_name
 def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
                                  r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 def comment():          return _("//.*\n", multiline=False)
+
+def call():             return CALL_START, call_arguments, CALL_END
+def call_arguments():   return OneOrMore(call_argument)
+def call_argument():    return _(r'[^\} \t]+')
 
 
 class ParserPEG(ParserPEGOrig):

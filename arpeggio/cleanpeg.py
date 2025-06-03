@@ -39,13 +39,14 @@ OPEN = "("
 CLOSE = ")"
 CALL_START = "{"
 CALL_END = "}"
+CALL_DELIMITER = ','
 
 # PEG syntax rules
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, ASSIGNMENT, ordered_choice
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
 def sequence():         return OneOrMore([operation, prefix])
-def operation():        return rule_crossref, call
+def operation():        return rule_crossref, calls
 def prefix():           return Optional([AND, NOT]), sufix
 def sufix():            return expression, Optional([OPTIONAL,
                                                      ZERO_OR_MORE,
@@ -64,9 +65,9 @@ def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
                                  r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 def comment():          return _("//.*\n", multiline=False)
 
-def call():             return CALL_START, call_arguments, CALL_END
-def call_arguments():   return OneOrMore(call_argument)
-def call_argument():    return _(r'[^\} \t]+')
+def calls():            return CALL_START, call, ZeroOrMore([CALL_DELIMITER, call]), CALL_END
+def call():             return OneOrMore(call_argument)
+def call_argument():    return _(r'[^\} \t,]+')
 
 
 class ParserPEG(ParserPEGOrig):

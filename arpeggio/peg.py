@@ -31,7 +31,7 @@ from arpeggio import (
     ZeroOrMore,
     visit_parse_tree,
     Match,
-    MatchAction,
+    MatchActions,
 )
 from arpeggio import RegExMatch as _
 
@@ -50,6 +50,8 @@ OPEN = "("
 CLOSE = ")"
 CALL_START = "{"
 CALL_END = "}"
+CALL_DELIMITER = ','
+
 
 
 # PEG syntax rules
@@ -57,7 +59,7 @@ def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
 def sequence():         return OneOrMore([operation, prefix])
-def operation():        return rule_crossref, call
+def operation():        return rule_crossref, calls
 def prefix():           return Optional([AND, NOT]), sufix
 def sufix():            return expression, Optional([OPTIONAL,
                                                      ZERO_OR_MORE,
@@ -76,9 +78,9 @@ def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
                                      r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 def comment():          return _("//.*\n", multiline=False)
 
-def call():             return CALL_START, call_arguments, CALL_END
-def call_arguments():   return OneOrMore(call_argument)
-def call_argument():    return _(r'[^\} \t]+')
+def calls():            return CALL_START, call, ZeroOrMore([CALL_DELIMITER, call]), CALL_END
+def call():             return OneOrMore(call_argument)
+def call_argument():    return _(r'[^\} \t,]+')
 
 
 # Escape sequences supported in PEG literal string matches
@@ -194,7 +196,14 @@ class PEGVisitor(PTNodeVisitor):
         return retval
 
     def visit_operation(self, node, children):
-        return MatchAction(children[0], children[1])
+        action_nodes = children[1]
+        actions = []
+        for action_node in action_nodes:
+            action = []
+            for i in range(len(action_node)):
+                action.append(str(action_node[i]))
+            actions.append(action)
+        return MatchActions(children[0], actions)
 
     def visit_prefix(self, node, children):
         if len(children) == 2:
@@ -208,6 +217,10 @@ class PEGVisitor(PTNodeVisitor):
             retval = children[0]
 
         return retval
+
+    def visit_calls(self, node, children):
+        call_arguments = [arg for arg in node if arg.rule_name == 'call']
+        return call_arguments
 
     def visit_sufix(self, node, children):
         if len(children) == 2:
@@ -260,39 +273,63 @@ class ParserPEGState(ParserState):
     def __init__(self, parser):
         super().__init__(parser)
         self.rule_reference_stack = {}
+        self.rule_reference_set = {}
 
 
 class ParserPEGActions:
     def __init__(self, parser):
         self._parser = parser
 
-    def push(self, rule: Match):
-        retval = rule.parse(self._parser)
-        name = str(retval)
+    def push(self, rule: Match, matched_result, c_pos, args=None):
         stack = self._parser.state.rule_reference_stack
         stack.setdefault(rule.rule_name, [])
+        name = str(matched_result)
         stack[rule.rule_name].append(name)
-        return retval
+        return matched_result
 
-    def pop(self, rule: Match):
+    def pop(self, rule: Match, matched_result, c_pos, args=None):
         stack = self._parser.state.rule_reference_stack
         match_against = stack[rule.rule_name][-1]
-        ref_rule = StrMatch(match_against)
 
-        # It might be faster to match a string first
-        c_pos = self._parser.position
-        ref_retval = ref_rule.parse(self._parser)
-        self._parser.position = c_pos
-
-        retval = rule.parse(self._parser)
-        if str(retval) != str(ref_retval):
+        matched_str = str(matched_result)
+        if matched_str != match_against:
             if self._parser.debug:
                 self._parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{self._parser.context(len(match_against))}'")
             self._parser._nm_raise(rule, c_pos, self._parser)
         stack[rule.rule_name].pop()
-        return retval
+        return matched_result
+
+    def add(self, rule: Match, matched_result, c_pos, args=None):
+        reference_set = self._parser.state.rule_reference_set
+        reference_set.setdefault(rule.rule_name, set())
+
+        name = str(matched_result)
+        reference_set[rule.rule_name].add(name)
+
+        return matched_result
+
+    def any(self, rule: Match, matched_result, c_pos, args=None):
+        reference_set = self._parser.state.rule_reference_set
+        if not reference_set.get(rule.rule_name):
+            if self._parser.debug:
+                self._parser.dprint(
+                    f"-- The stack for `{rule.rule_name}` rule is empty at {c_pos} => "
+                    f"'{self._parser.context(len(str(matched_result)))}'")
+            self._parser._nm_raise(rule, c_pos, self._parser)
+
+        rule_set = reference_set[rule.rule_name]
+
+        matched_str = str(matched_result)
+        if matched_str not in rule_set:
+            if self._parser.debug:
+                self._parser.dprint(
+                    f"-- No known match for '{matched_str}' at {c_pos} => "
+                    f"'{self._parser.context(len(matched_str))}'")
+            self._parser._nm_raise(rule, c_pos, self._parser)
+
+        return matched_result
 
 
 class ParserPEG(Parser):

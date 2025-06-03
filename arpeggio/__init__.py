@@ -923,17 +923,21 @@ class Kwd(StrMatch):
         self.rule_name = 'keyword'
 
 
-class MatchAction(ParsingExpression):
-    action_name: str
+class MatchActions(ParsingExpression):
+    actions: list[list[str]]
 
-    def __init__(self, rule, action):
+    def __init__(self, rule, actions):
         super().__init__(rule_name='', nodes=[rule])
-        self.action_name = action
+        self.actions = actions
 
     def _parse(self, parser):
         rule_node = self.nodes[0]
-        action = getattr(parser.actions, self.action_name)
-        retval = action(rule_node)
+        c_pos = parser.position
+        retval = rule_node.parse(parser)
+        for action in self.actions:
+            action_name = action[0]
+            action_method = getattr(parser.actions, action_name)
+            retval = action_method(rule_node, retval, c_pos, args=action[1:])
         return retval
 
     def __str__(self):

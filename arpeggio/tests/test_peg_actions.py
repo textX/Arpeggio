@@ -22,12 +22,12 @@ program_element <-
     / function_call;
 
 function <-
-    FUNCTION_START function_name{push}
+    FUNCTION_START function_name{push, add}
     program_element*
     FUNCTION_END function_name{pop};
 
 function_call <-
-    function_name
+    function_name{any}
     ARGUMENTS_START
     VALID_NAME?
     (
@@ -58,9 +58,25 @@ def function_name1
 end of function_name1
 
 def function_name2
+end of function_name2
+    """
+    result = parser.parse(input)
+
+@pytest.mark.parametrize('parser', [
+    ParserPEGClean(clean_grammar, 'parser_entry'),
+    ParserPEG(grammar, 'parser_entry'),
+])
+def test_backreference_any(parser):
+    input = """
+def function_name1
+end of function_name1
+
+def function_name2
     function_name1(arg1)
 end of function_name2
 
-function_name(1, 2, 3)
-    """
+function_name1(1, 2, 3)
+function_name2(1, 2, 3)
+"""
     result = parser.parse(input)
+

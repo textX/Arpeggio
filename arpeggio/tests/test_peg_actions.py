@@ -18,7 +18,9 @@ grammar = r'''
 parser_entry <- program_element* EOF;
 
 program_element <-
-    function
+    defer_call
+    / defer
+    / function
     / function_call;
 
 function <-
@@ -37,6 +39,14 @@ function_call <-
     ARGUMENTS_DELIMITER?
     ARGUMENTS_END;
 
+defer_call <-
+    DEFER defer_name{push};
+
+defer <-
+    defer_name{pop_front} DEFER_DELIMITER;
+
+defer_name <- VALID_NAME;
+
 FUNCTION_START <- 'def';
 function_name <- VALID_NAME;
 FUNCTION_END <- 'end of';
@@ -44,6 +54,8 @@ ARGUMENTS_START <- '(';
 ARGUMENTS_END <- ')';
 VALID_NAME <- r'[a-zA-Z0-9_]+';
 ARGUMENTS_DELIMITER <- ',';
+DEFER <- 'defer';
+DEFER_DELIMITER <- ':';
 '''
 
 clean_grammar = grammar.replace('<-', '=').replace(';', '')
@@ -77,6 +89,31 @@ end of function_name2
 
 function_name1(1, 2, 3)
 function_name2(1, 2, 3)
+"""
+    result = parser.parse(input)
+
+@pytest.mark.parametrize('parser', [
+    ParserPEGClean(clean_grammar, 'parser_entry'),
+    ParserPEG(grammar, 'parser_entry'),
+])
+def test_backreference_pop_front(parser):
+    input = """
+def function_name1
+end of function_name1
+
+def function_name2
+end of function_name2
+
+def function_name3
+    defer function_name1
+    defer function_name2
+
+    function_name1:
+        function_name1(1, 2, 3)
+    function_name2:
+        function_name2(1, 2, 3)
+end of function_name3
+
 """
     result = parser.parse(input)
 

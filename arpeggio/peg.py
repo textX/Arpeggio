@@ -301,6 +301,27 @@ class ParserPEGActions:
         stack[rule.rule_name].pop()
         return matched_result
 
+    def pop_front(self, rule: Match, matched_result, c_pos, args=None):
+        stack = self._parser.state.rule_reference_stack
+        if not stack.get(rule.rule_name):
+            if self._parser.debug:
+                self._parser.dprint(
+                    f"-- The stack for `{rule.rule_name}` rule is empty at {c_pos} => "
+                    f"'{self._parser.context(len(str(matched_result)))}'")
+            self._parser._nm_raise(rule, c_pos, self._parser)
+
+        match_against = stack[rule.rule_name][0]
+
+        matched_str = str(matched_result)
+        if matched_str != match_against:
+            if self._parser.debug:
+                self._parser.dprint(
+                    f"-- No match '{match_against}' at {c_pos} => "
+                    f"'{self._parser.context(len(match_against))}'")
+            self._parser._nm_raise(rule, c_pos, self._parser)
+        stack[rule.rule_name].pop(0)
+        return matched_result
+
     def add(self, rule: Match, matched_result, c_pos, args=None):
         reference_set = self._parser.state.rule_reference_set
         reference_set.setdefault(rule.rule_name, set())

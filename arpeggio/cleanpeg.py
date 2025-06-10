@@ -40,18 +40,21 @@ CLOSE = ")"
 CALL_START = "{"
 CALL_END = "}"
 CALL_DELIMITER = ','
+STATE_START = '['
+STATE_END = ']'
 
 # PEG syntax rules
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, ASSIGNMENT, ordered_choice
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore([operation, prefix])
+def sequence():         return OneOrMore([operation, full_expression])
 def operation():        return rule_crossref, calls
-def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([OPTIONAL,
-                                                     ZERO_OR_MORE,
-                                                     ONE_OR_MORE,
-                                                     UNORDERED_GROUP])
+def full_expression():  return Optional([AND, NOT]), expression_with_state
+def expression_with_state():    return Optional(state), repeated_expression
+def repeated_expression():      return expression, Optional([OPTIONAL,
+                                                             ZERO_OR_MORE,
+                                                             ONE_OR_MORE,
+                                                             UNORDERED_GROUP])
 def expression():       return [regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match], Not(ASSIGNMENT)
@@ -68,6 +71,9 @@ def comment():          return _("//.*\n", multiline=False)
 def calls():            return CALL_START, call, ZeroOrMore([CALL_DELIMITER, call]), CALL_END
 def call():             return OneOrMore(call_argument)
 def call_argument():    return _(r'[^\} \t,]+')
+
+def state():            return STATE_START, state_name, STATE_END
+def state_name():       return _(r'[a-zA-Z_][a-zA-Z_0-9]*')
 
 
 class ParserPEG(ParserPEGOrig):

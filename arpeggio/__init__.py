@@ -945,6 +945,44 @@ class MatchActions(ParsingExpression):
         return str(rule_node)
 
 
+class MatchState(Match):
+    state_name: str
+
+    def __init__(self, rule, state_name: str):
+        super().__init__(rule_name='', nodes=[rule])
+        self.state_name = state_name
+        self.to_match = f'[{state_name}]{str(rule)}'
+
+    def _parse(self, parser):
+        parser_state = parser.state
+        states_stack = parser_state.states_stack
+
+        c_pos = parser.position
+        if not states_stack:
+            if parser.debug:
+                parser.dprint(
+                    f"-- The states stack is empty while matching `{self.state_name}` state at {c_pos} => "
+                    f"'{parser.context()}'")
+            parser._nm_raise(self, c_pos, parser)
+        curr_state = states_stack[-1]
+
+        if self.state_name != curr_state:
+            if parser.debug:
+                parser.dprint(
+                    f"-- The current state (`{curr_state}`) doesn't match `{self.state_name}` state at {c_pos} => "
+                    f"'{parser.context()}'")
+            parser._nm_raise(self, c_pos, parser)
+
+        rule_node = self.nodes[0]
+        retval = rule_node.parse(parser)
+
+        return retval
+
+    def __str__(self):
+        rule_node = self.nodes[0]
+        return str(rule_node)
+
+
 class EndOfFile(Match):
     """
     The Match class that will succeed in case end of input is reached.

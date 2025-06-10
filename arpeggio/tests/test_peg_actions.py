@@ -18,7 +18,9 @@ grammar = r'''
 parser_entry <- program_element* EOF;
 
 program_element <-
-    defer_call
+    anonymous_defer
+    / anonymous_deferred
+    / defer_call
     / defer
     / function
     / function_call;
@@ -47,6 +49,14 @@ defer <-
 
 defer_name <- VALID_NAME;
 
+anonymous_defer <-
+    ANONYMOUS_DEFER{state push anonymous_defer};
+
+anonymous_deferred <-
+    [anonymous_defer]DEFERRED
+    program_element*
+    END{state pop anonymous_defer};
+
 FUNCTION_START <- 'def';
 function_name <- VALID_NAME;
 FUNCTION_END <- 'end of';
@@ -56,6 +66,9 @@ VALID_NAME <- r'[a-zA-Z0-9_]+';
 ARGUMENTS_DELIMITER <- ',';
 DEFER <- 'defer';
 DEFER_DELIMITER <- ':';
+ANONYMOUS_DEFER <- 'anonymous defer';
+DEFERRED <- 'deferred';
+END <- 'end';
 '''
 
 clean_grammar = grammar.replace('<-', '=').replace(';', '')
@@ -116,4 +129,33 @@ end of function_name3
 
 """
     result = parser.parse(input)
+
+@pytest.mark.parametrize('parser', [
+    ParserPEGClean(clean_grammar, 'parser_entry'),
+    ParserPEG(grammar, 'parser_entry'),
+])
+def test_backreference_with_state(parser):
+    input = """
+def function_name1
+end of function_name1
+
+def function_name2
+end of function_name2
+
+def function_name3
+    anonymous defer
+    anonymous defer
+
+    deferred
+        function_name1(1, 2, 3)
+    end
+
+    deferred
+        function_name2(1, 2, 3)
+    end
+end of function_name3
+
+"""
+    result = parser.parse(input)
+    assert len(parser.state.states_stack) == 0
 

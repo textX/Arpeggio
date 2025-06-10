@@ -32,6 +32,7 @@ from arpeggio import (
     visit_parse_tree,
     Match,
     MatchActions,
+    MatchState,
 )
 from arpeggio import RegExMatch as _
 
@@ -51,6 +52,8 @@ CLOSE = ")"
 CALL_START = "{"
 CALL_END = "}"
 CALL_DELIMITER = ','
+STATE_START = '['
+STATE_END = ']'
 
 
 
@@ -58,13 +61,14 @@ CALL_DELIMITER = ','
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore([operation, prefix])
+def sequence():         return OneOrMore([operation, full_expression])
 def operation():        return rule_crossref, calls
-def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([OPTIONAL,
-                                                     ZERO_OR_MORE,
-                                                     ONE_OR_MORE,
-                                                     UNORDERED_GROUP])
+def full_expression():  return Optional([AND, NOT]), expression_with_state
+def expression_with_state():    return Optional(state), repeated_expression
+def repeated_expression():      return expression, Optional([OPTIONAL,
+                                                             ZERO_OR_MORE,
+                                                             ONE_OR_MORE,
+                                                             UNORDERED_GROUP])
 def expression():       return [regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match]
@@ -81,6 +85,9 @@ def comment():          return _("//.*\n", multiline=False)
 def calls():            return CALL_START, call, ZeroOrMore([CALL_DELIMITER, call]), CALL_END
 def call():             return OneOrMore(call_argument)
 def call_argument():    return _(r'[^\} \t,]+')
+
+def state():            return STATE_START, state_name, STATE_END
+def state_name():       return _(r'[a-zA-Z_][a-zA-Z_0-9]*')
 
 
 # Escape sequences supported in PEG literal string matches
@@ -205,7 +212,11 @@ class PEGVisitor(PTNodeVisitor):
             actions.append(action)
         return MatchActions(children[0], actions)
 
-    def visit_prefix(self, node, children):
+    def visit_state(self, node, children):
+        # Just ignoring the syntax nodes
+        return node[1]
+
+    def visit_full_expression(self, node, children):
         if len(children) == 2:
             retval = Not() if children[0] == NOT else And()
             if isinstance(children[1], list):
@@ -222,19 +233,29 @@ class PEGVisitor(PTNodeVisitor):
         call_arguments = [arg for arg in node if arg.rule_name == 'call']
         return call_arguments
 
-    def visit_sufix(self, node, children):
-        if len(children) == 2:
-            nodes = children[0] if isinstance(children[0], list) else [children[0]]
-            if children[1] == ZERO_OR_MORE:
-                retval = ZeroOrMore(nodes=nodes)
-            elif children[1] == ONE_OR_MORE:
-                retval = OneOrMore(nodes=nodes)
-            elif children[1] == OPTIONAL:
-                retval = Optional(nodes=nodes)
-            else:
-                retval = UnorderedGroup(nodes=nodes[0].nodes)
+    def visit_expression_with_state(self, node, children):
+        if len(children) == 1:
+            return children[0]
+
+        state_name = str(children[0])
+        rule_node = children[1]
+        retval = MatchState(rule_node, state_name)
+        return retval
+
+
+    def visit_repeated_expression(self, node, children):
+        if len(children) == 1:
+            return children[0]
+
+        nodes = children[0] if isinstance(children[0], list) else [children[0]]
+        if children[1] == ZERO_OR_MORE:
+            retval = ZeroOrMore(nodes=nodes)
+        elif children[1] == ONE_OR_MORE:
+            retval = OneOrMore(nodes=nodes)
+        elif children[1] == OPTIONAL:
+            retval = Optional(nodes=nodes)
         else:
-            retval = children[0]
+            retval = UnorderedGroup(nodes=nodes[0].nodes)
 
         return retval
 
@@ -269,11 +290,14 @@ class ParserState:
 
 class ParserPEGState(ParserState):
     rule_reference_stack: dict
+    rule_reference_set: dict
+    states_stack: list
 
     def __init__(self, parser):
         super().__init__(parser)
         self.rule_reference_stack = {}
         self.rule_reference_set = {}
+        self.states_stack = []
 
 
 class ParserPEGActions:
@@ -356,6 +380,47 @@ class ParserPEGActions:
                     f"-- No known match for '{matched_str}' at {c_pos} => "
                     f"'{self._parser.context(len(matched_str))}'")
             self._parser._nm_raise(rule, c_pos, self._parser)
+
+        return matched_result
+
+    def state(self, rule: Match, matched_result, c_pos, args=None):
+        if not args:
+            if self._parser.debug:
+                self._parser.dprint(
+                    f"-- Not enough arguments for state action at {c_pos} => "
+                    f"'{self._parser.context()}'")
+            self._parser._nm_raise(rule, c_pos, self._parser)
+
+        states_stack = self._parser.state.states_stack
+        state_method = getattr(self, args[0] + '_state')
+        return state_method(rule, matched_result, c_pos, args=args[1:] or None)
+
+    def push_state(self, rule: Match, matched_result, c_pos, args=None):
+        if not args:
+            if self._parser.debug:
+                self._parser.dprint(
+                    f"-- Not enough arguments for state action at {c_pos} => "
+                    f"'{self._parser.context()}'")
+            self._parser._nm_raise(rule, c_pos, self._parser)
+
+        states_stack = self._parser.state.states_stack
+        state_name = args[0]
+        states_stack.append(state_name)
+
+        return matched_result
+
+    def pop_state(self, rule: Match, matched_result, c_pos, args=None):
+        states_stack = self._parser.state.states_stack
+        state_name = args[0] if args else None
+        if state_name:
+            if state_name != states_stack[-1]:
+                if self._parser.debug:
+                    self._parser.dprint(
+                        f"-- State `{states_stack[-1]}` doesn't match `{state_name}` state {c_pos} => "
+                        f"'{self._parser.context()}'")
+                self._parser._nm_raise(rule, c_pos, self._parser)
+
+        states_stack.pop()
 
         return matched_result
 

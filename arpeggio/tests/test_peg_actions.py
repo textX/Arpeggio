@@ -13,8 +13,12 @@
 import pytest
 from arpeggio.peg import ParserPEG
 from arpeggio.cleanpeg import ParserPEG as ParserPEGClean
+import enum
 
-grammar = r'''
+
+# Functions are used instead of variables to store grammar only to make parametrized test results readable
+def get_grammar():
+    return r'''
 parser_entry <- program_element* EOF;
 
 program_element <-
@@ -71,13 +75,21 @@ DEFERRED <- 'deferred';
 END <- 'end';
 '''
 
-clean_grammar = grammar.replace('<-', '=').replace(';', '')
+def get_clean_grammar():
+    return get_grammar().replace('<-', '=').replace(';', '')
 
-@pytest.mark.parametrize('parser', [
-    ParserPEGClean(clean_grammar, 'parser_entry'),
-    ParserPEG(grammar, 'parser_entry'),
+
+class Debugging(enum.Flag):
+    ENABLED = True
+    DISABLED = False
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
-def test_backreference(parser):
+def test_backreference(klass, grammar_cb, debug, capsys):
     input = """
 def function_name1
 end of function_name1
@@ -85,13 +97,18 @@ end of function_name1
 def function_name2
 end of function_name2
     """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out
 
-@pytest.mark.parametrize('parser', [
-    ParserPEGClean(clean_grammar, 'parser_entry'),
-    ParserPEG(grammar, 'parser_entry'),
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, True),
 ])
-def test_backreference_any(parser):
+def test_backreference_any(klass, grammar_cb, debug, capsys):
     input = """
 def function_name1
 end of function_name1
@@ -103,13 +120,18 @@ end of function_name2
 function_name1(1, 2, 3)
 function_name2(1, 2, 3)
 """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out
 
-@pytest.mark.parametrize('parser', [
-    ParserPEGClean(clean_grammar, 'parser_entry'),
-    ParserPEG(grammar, 'parser_entry'),
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
-def test_backreference_pop_front(parser):
+def test_backreference_pop_front(klass, grammar_cb, debug, capsys):
     input = """
 def function_name1
 end of function_name1
@@ -128,13 +150,18 @@ def function_name3
 end of function_name3
 
 """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out
 
-@pytest.mark.parametrize('parser', [
-    ParserPEGClean(clean_grammar, 'parser_entry'),
-    ParserPEG(grammar, 'parser_entry'),
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
-def test_backreference_with_state(parser):
+def test_backreference_with_state(klass, grammar_cb, debug, capsys):
     input = """
 def function_name1
 end of function_name1
@@ -156,6 +183,9 @@ def function_name3
 end of function_name3
 
 """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
     assert len(parser.state.states_stack) == 0
-
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out

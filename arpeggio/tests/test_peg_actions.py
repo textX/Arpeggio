@@ -27,12 +27,18 @@ program_element <-
     / defer_call
     / defer
     / function
+    / alternative_function
     / function_call;
 
 function <-
     FUNCTION_START function_name{push, add}
     program_element*
     FUNCTION_END function_name{pop};
+
+alternative_function <-
+    FUNCTION_START function_name{push, add}
+    program_element*
+    '/' function_name{pop};
 
 function_call <-
     function_name{any}
@@ -235,4 +241,24 @@ end of function_name3
         output = capsys.readouterr()
         assert 'states stack' in output.out
 
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_with_lookahead(klass, grammar_cb, debug, capsys):
+    input = """
+def function_name1
+/function_name1
 
+def function_name2
+end of function_name2
+    """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
+    result = parser.parse(input)
+    assert len(parser.state.rule_reference_stack['function_name']) == 0
+    assert len(parser.state.rule_reference_set['function_name']) == 2
+
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out

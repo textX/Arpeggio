@@ -373,6 +373,9 @@ class Sequence(ParsingExpression):
         # Prefetching
         append = results.append
 
+        memo = {}
+        saved_state = copy.deepcopy(parser.state, memo)
+
         try:
             for e in self.nodes:
                 result = e.parse(parser)
@@ -381,6 +384,7 @@ class Sequence(ParsingExpression):
 
         except NoMatch:
             parser.position = c_pos     # Backtracking
+            parser.state = saved_state
             raise
 
         finally:
@@ -413,6 +417,9 @@ class OrderedChoice(Sequence):
 
         try:
             for e in self.nodes:
+                memo = {}
+                saved_state = copy.deepcopy(parser.state, memo)
+
                 try:
                     result = e.parse(parser)
                     match = True
@@ -420,6 +427,8 @@ class OrderedChoice(Sequence):
                     break
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
+                    parser.state = saved_state
+
         finally:
             if self.ws is not None:
                 parser.ws = old_ws
@@ -483,6 +492,9 @@ class ZeroOrMore(Repetition):
         result = None
 
         while True:
+            memo = {}
+            saved_state = copy.deepcopy(parser.state, memo)
+
             try:
                 c_pos = parser.position
                 if sep and result:
@@ -493,6 +505,7 @@ class ZeroOrMore(Repetition):
                 append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
+                parser.state = saved_state
                 break
 
         if self.eolterm:
@@ -524,6 +537,9 @@ class OneOrMore(Repetition):
 
         try:
             while True:
+                memo = {}
+                saved_state = copy.deepcopy(parser.state, memo)
+
                 try:
                     c_pos = parser.position
                     if sep and result:
@@ -535,6 +551,7 @@ class OneOrMore(Repetition):
                     first = False
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
+                    parser.state = saved_state
 
                     if first:
                         raise
@@ -570,6 +587,9 @@ class UnorderedGroup(Repetition):
         sep_result = None
         first = True
 
+        memo = {}
+        saved_state = copy.deepcopy(parser.state, memo)
+
         while nodes_to_try:
             sep_exc = None
 
@@ -589,6 +609,9 @@ class UnorderedGroup(Repetition):
             match = True
             all_optionals_fail = True
             for e in list(nodes_to_try):
+                memo = {}
+                curr_saved_state = copy.deepcopy(parser.state, memo)
+
                 try:
                     result = e.parse(parser)
                     if result:
@@ -606,6 +629,7 @@ class UnorderedGroup(Repetition):
                 except NoMatch:
                     match = False
                     parser.position = c_loc_pos     # local backtracking
+                    parser.state = curr_saved_state
 
             if not match or all_optionals_fail:
                 # If sep is matched backtrack it
@@ -619,6 +643,7 @@ class UnorderedGroup(Repetition):
         if not match:
             # Unsuccessful match of the whole PE - full backtracking
             parser.position = c_pos
+            parser.state = saved_state
             parser._nm_raise(self, c_pos, parser)
 
         if results:

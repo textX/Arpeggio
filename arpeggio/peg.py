@@ -61,7 +61,7 @@ STATE_END = ']'
 def peggrammar():       return OneOrMore(rule), EOF
 def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore([operation, full_expression])
+def sequence():         return OneOrMore(full_expression)
 def operation():        return rule_crossref, calls
 def full_expression():  return Optional([AND, NOT]), expression_with_state
 def expression_with_state():    return Optional(state), repeated_expression
@@ -69,7 +69,7 @@ def repeated_expression():      return expression, Optional([OPTIONAL,
                                                              ZERO_OR_MORE,
                                                              ONE_OR_MORE,
                                                              UNORDERED_GROUP])
-def expression():       return [regex, rule_crossref,
+def expression():       return [operation, regex, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match]
 

@@ -21,6 +21,7 @@ from arpeggio import (
     OneOrMore,
     Optional,
     OrderedChoice,
+    ParserState,
     Parser,
     ParserPython,
     PTNodeVisitor,
@@ -283,11 +284,6 @@ class PEGVisitor(PTNodeVisitor):
         return StrMatch(match_str, ignore_case=self.ignore_case)
 
 
-class ParserState:
-    def __init__(self, parser):
-        self._parser = parser
-
-
 class ParserPEGState(ParserState):
     rule_reference_stack: dict
     rule_reference_set: dict
@@ -298,6 +294,13 @@ class ParserPEGState(ParserState):
         self.rule_reference_stack = {}
         self.rule_reference_set = {}
         self.states_stack = []
+
+    def __deepcopy__(self, memo):
+        copied = self.__class__(self._parser)
+        copied.rule_reference_stack = copy.deepcopy(self.rule_reference_stack, memo)
+        copied.rule_reference_set = copy.deepcopy(self.rule_reference_set, memo)
+        copied.states_stack = copy.deepcopy(self.states_stack, memo)
+        return copied
 
 
 class ParserPEGActions:
@@ -426,6 +429,7 @@ class ParserPEGActions:
 
 
 class ParserPEG(Parser):
+    state_class: type[ParserState] = ParserPEGState
 
     def __init__(self, language_def, root_rule_name, comment_rule_name=None,
                  *args, **kwargs):
@@ -440,7 +444,6 @@ class ParserPEG(Parser):
         """
         super().__init__(*args, **kwargs)
 
-        self.state = ParserPEGState(self)
         self.actions = ParserPEGActions(self)
 
         self.root_rule_name = root_rule_name

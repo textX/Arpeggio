@@ -17,6 +17,7 @@ import re
 import sys
 import types
 from collections import OrderedDict
+import copy
 
 try:
     from importlib.metadata import version
@@ -1437,6 +1438,15 @@ class SemanticActionToString(SemanticAction):
     def first_pass(self, parser, node, children):
         return str(node)
 
+
+class ParserState:
+    def __init__(self, parser):
+        self._parser = parser
+
+    def __deepcopy__(self, memo):
+        return self.__class__(self._parser)
+
+
 # ----------------------------------------------------
 # Parsers
 
@@ -1464,6 +1474,8 @@ class Parser(DebugPrinter):
 
     # Not marker for NoMatch rules list. Used if the first unsuccessful rule
     # match is Not.
+    state_class: type[ParserState] = ParserState
+
     FIRST_NOT = Not()
 
     def __init__(self, skipws=True, ws=None, reduce_tree=False, autokwd=False,
@@ -1510,6 +1522,8 @@ class Parser(DebugPrinter):
         if ignore_case:
             flags = re.IGNORECASE
         self.keyword_regex = re.compile(r'[^\d\W]\w*', flags)
+
+        self.state = self.state_class(self)
 
         # Keep track of root rule we are currently in.
         # Used for debugging purposes

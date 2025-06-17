@@ -970,14 +970,21 @@ class MatchActions(ParsingExpression):
         rule_node = self.nodes[0]
         return str(rule_node)
 
+    @property
+    def desc(self):
+        return "{}{{{}}}{}".format(
+            self.name,
+            ', '.join(map(lambda x: ' '.join(x), self.actions)),
+            "-" if self.suppress else "",
+        )
 
-class MatchState(Match):
+
+class MatchState(ParsingExpression):
     state_name: str
 
     def __init__(self, rule, state_name: str):
         super().__init__(rule_name='', nodes=[rule])
         self.state_name = state_name
-        self.to_match = f'[{state_name}]{str(rule)}'
 
     def _parse(self, parser):
         parser_state = parser.state
@@ -1007,6 +1014,14 @@ class MatchState(Match):
     def __str__(self):
         rule_node = self.nodes[0]
         return str(rule_node)
+
+    @property
+    def desc(self):
+        return "{}({}){}".format(
+            self.name,
+            self.state_name,
+            "-" if self.suppress else "",
+        )
 
 
 class EndOfFile(Match):

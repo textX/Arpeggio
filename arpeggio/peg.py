@@ -70,7 +70,7 @@ def repeated_expression():      return expression, Optional([OPTIONAL,
                                                              ZERO_OR_MORE,
                                                              ONE_OR_MORE,
                                                              UNORDERED_GROUP])
-def expression():       return [operation, regex, rule_crossref,
+def expression():       return [regex, operation, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match]
 

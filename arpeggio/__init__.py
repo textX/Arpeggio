@@ -952,11 +952,11 @@ class Kwd(StrMatch):
 class MatchActions(ParsingExpression):
     actions: list[list[str]]
 
-    def __init__(self, rule, actions):
+    def __init__(self, rule: ParsingExpression, actions: list[list[str]]):
         super().__init__(rule_name='', nodes=[rule])
         self.actions = actions
 
-    def _parse(self, parser):
+    def _parse(self, parser: 'Parser'):
         rule_node = self.nodes[0]
         c_pos = parser.position
         retval = rule_node.parse(parser)
@@ -982,11 +982,15 @@ class MatchActions(ParsingExpression):
 class MatchState(ParsingExpression):
     state_name: str
 
-    def __init__(self, rule, state_name: str):
+    def __init__(
+        self,
+        rule: ParsingExpression,
+        state_name: str,
+    ):
         super().__init__(rule_name='', nodes=[rule])
         self.state_name = state_name
 
-    def _parse(self, parser):
+    def _parse(self, parser: 'Parser'):
         parser_state = parser.state
         states_stack = parser_state.states_stack
 
@@ -1480,10 +1484,12 @@ class SemanticActionToString(SemanticAction):
 
 
 class ParserState:
+    _parser: 'Parser'
+
     def __init__(self, parser):
         self._parser = parser
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: dict = None):
         return self.__class__(self._parser)
 
 

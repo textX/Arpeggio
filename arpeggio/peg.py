@@ -31,7 +31,7 @@ from arpeggio import (
     UnorderedGroup,
     ZeroOrMore,
     visit_parse_tree,
-    Match,
+    ParsingExpression,
     MatchActions,
     MatchState,
 )
@@ -285,17 +285,17 @@ class PEGVisitor(PTNodeVisitor):
 
 
 class ParserPEGState(ParserState):
-    rule_reference_stack: dict
-    rule_reference_set: dict
-    states_stack: list
+    rule_reference_stack: dict[str, str]
+    rule_reference_set: dict[str, str]
+    states_stack: list[str]
 
-    def __init__(self, parser):
+    def __init__(self, parser: Parser):
         super().__init__(parser)
         self.rule_reference_stack = {}
         self.rule_reference_set = {}
         self.states_stack = []
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: dict = None):
         copied = self.__class__(self._parser)
         copied.rule_reference_stack = copy.deepcopy(self.rule_reference_stack, memo)
         copied.rule_reference_set = copy.deepcopy(self.rule_reference_set, memo)
@@ -304,17 +304,31 @@ class ParserPEGState(ParserState):
 
 
 class ParserPEGActions:
-    def __init__(self, parser):
+    _parser: Parser
+
+    def __init__(self, parser: Parser):
         self._parser = parser
 
-    def push(self, rule: Match, matched_result, c_pos, args=None):
+    def push(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         stack = self._parser.state.rule_reference_stack
         stack.setdefault(rule.rule_name, [])
         name = str(matched_result)
         stack[rule.rule_name].append(name)
         return matched_result
 
-    def pop(self, rule: Match, matched_result, c_pos, args=None):
+    def pop(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         stack = self._parser.state.rule_reference_stack
         if not stack.get(rule.rule_name):
             if self._parser.debug:
@@ -335,7 +349,13 @@ class ParserPEGActions:
         stack[rule.rule_name].pop()
         return matched_result
 
-    def pop_front(self, rule: Match, matched_result, c_pos, args=None):
+    def pop_front(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         stack = self._parser.state.rule_reference_stack
         if not stack.get(rule.rule_name):
             if self._parser.debug:
@@ -356,7 +376,13 @@ class ParserPEGActions:
         stack[rule.rule_name].pop(0)
         return matched_result
 
-    def add(self, rule: Match, matched_result, c_pos, args=None):
+    def add(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         reference_set = self._parser.state.rule_reference_set
         reference_set.setdefault(rule.rule_name, set())
 
@@ -365,7 +391,13 @@ class ParserPEGActions:
 
         return matched_result
 
-    def any(self, rule: Match, matched_result, c_pos, args=None):
+    def any(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         reference_set = self._parser.state.rule_reference_set
         if not reference_set.get(rule.rule_name):
             if self._parser.debug:
@@ -386,7 +418,13 @@ class ParserPEGActions:
 
         return matched_result
 
-    def state(self, rule: Match, matched_result, c_pos, args=None):
+    def state(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         if not args:
             if self._parser.debug:
                 self._parser.dprint(
@@ -398,7 +436,13 @@ class ParserPEGActions:
         state_method = getattr(self, args[0] + '_state')
         return state_method(rule, matched_result, c_pos, args=args[1:] or None)
 
-    def push_state(self, rule: Match, matched_result, c_pos, args=None):
+    def push_state(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         if not args:
             if self._parser.debug:
                 self._parser.dprint(
@@ -412,7 +456,13 @@ class ParserPEGActions:
 
         return matched_result
 
-    def pop_state(self, rule: Match, matched_result, c_pos, args=None):
+    def pop_state(
+        self,
+        rule: ParsingExpression,
+        matched_result: ParsingExpression,
+        c_pos: int,
+        args = None,
+    ):
         states_stack = self._parser.state.states_stack
         state_name = args[0] if args else None
         if state_name:

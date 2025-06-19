@@ -32,7 +32,6 @@ from arpeggio import (
     ZeroOrMore,
     visit_parse_tree,
     ParsingExpression,
-    MatchActions,
     MatchState,
 )
 from arpeggio import RegExMatch as _
@@ -101,6 +100,36 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
          N\{[- 0-9A-Z]+\}    # \\N{name} Unicode name or alias
        )
     """, re.VERBOSE | re.UNICODE)
+
+
+class MatchActions(ParsingExpression):
+    actions: list[list[str]]
+
+    def __init__(self, rule: ParsingExpression, actions: list[list[str]]):
+        super().__init__(rule_name='', nodes=[rule])
+        self.actions = actions
+
+    def _parse(self, parser: 'Parser'):
+        rule_node = self.nodes[0]
+        c_pos = parser.position
+        retval = rule_node.parse(parser)
+        for action in self.actions:
+            action_name = action[0]
+            action_method = getattr(parser.actions, action_name)
+            retval = action_method(rule_node, retval, c_pos, args=action[1:])
+        return retval
+
+    def __str__(self):
+        rule_node = self.nodes[0]
+        return str(rule_node)
+
+    @property
+    def desc(self):
+        return "{}{{{}}}{}".format(
+            self.name,
+            ', '.join(map(lambda x: ' '.join(x), self.actions)),
+            "-" if self.suppress else "",
+        )
 
 
 class PEGVisitor(PTNodeVisitor):

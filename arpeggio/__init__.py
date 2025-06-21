@@ -949,16 +949,28 @@ class Kwd(StrMatch):
         self.rule_name = 'keyword'
 
 
+class ParsingState:
+    name: str
+    value: int
+
+    def __init__(self, name: str, value: int):
+        self.name = name
+        self.value = value
+
+    def __str__(self):
+        return f'{self.name} ({self.value})'
+
+
 class MatchState(ParsingExpression):
-    state_name: str
+    _parsing_state: ParsingState
 
     def __init__(
         self,
         rule: ParsingExpression,
-        state_name: str,
+        parsing_state: ParsingState,
     ):
         super().__init__(rule_name='', nodes=[rule])
-        self.state_name = state_name
+        self._parsing_state = parsing_state
 
     def _parse(self, parser: 'Parser'):
         parser_state = parser.state
@@ -973,10 +985,10 @@ class MatchState(ParsingExpression):
             parser._nm_raise(self, c_pos, parser)
         curr_state = states_stack[-1]
 
-        if self.state_name != curr_state:
+        if curr_state.value != self._parsing_state.value:
             if parser.debug:
                 parser.dprint(
-                    f"-- The current state (`{curr_state}`) doesn't match `{self.state_name}` state at {c_pos} => "
+                    f"-- The current state (`{curr_state.name}`) doesn't match `{self.state_name}` state at {c_pos} => "
                     f"'{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
 
@@ -996,6 +1008,10 @@ class MatchState(ParsingExpression):
             self.state_name,
             "-" if self.suppress else "",
         )
+
+    @property
+    def state_name(self):
+        return self._parsing_state.name
 
 
 class EndOfFile(Match):
@@ -1455,12 +1471,16 @@ class SemanticActionToString(SemanticAction):
 
 class ParserState:
     _parser: 'Parser'
+    states_stack: list[ParsingState]
 
     def __init__(self, parser):
         self._parser = parser
+        self.states_stack = []
 
     def __deepcopy__(self, memo: dict = None):
-        return self.__class__(self._parser)
+        copied = self.__class__(self._parser)
+        copied.states_stack = copy.deepcopy(self.states_stack, memo)
+        return copied
 
 
 # ----------------------------------------------------

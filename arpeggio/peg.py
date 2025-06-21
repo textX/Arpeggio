@@ -33,6 +33,7 @@ from arpeggio import (
     visit_parse_tree,
     ParsingExpression,
     MatchState,
+    ParsingState,
 )
 from arpeggio import RegExMatch as _
 
@@ -127,7 +128,7 @@ class MatchActions(ParsingExpression):
     def desc(self):
         return "{}{{{}}}{}".format(
             self.name,
-            ', '.join(map(lambda x: ' '.join(x), self.actions)),
+            ', '.join(map(lambda x: ' '.join(str(x)), self.actions)),
             "-" if self.suppress else "",
         )
 
@@ -136,6 +137,8 @@ class PEGVisitor(PTNodeVisitor):
     """
     Visitor that transforms parse tree to a PEG parser for the given language.
     """
+    _parsing_state_by_name: dict[str, ParsingState]
+    _last_parsing_state_id: int
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,
                  *args, **kwargs):
@@ -147,6 +150,16 @@ class PEGVisitor(PTNodeVisitor):
         self.peg_rules = {
             "EOF": EndOfFile()
         }
+
+        self._last_parsing_state_id = 0
+        self._parsing_state_by_name = {}
+
+    def register_parsing_state(self, state_name):
+        self._last_parsing_state_id += 1
+        parsing_state_id = self._last_parsing_state_id
+        parsing_state = ParsingState(state_name, parsing_state_id)
+        self._parsing_state_by_name[state_name] = parsing_state
+        return parsing_state
 
     def visit_peggrammar(self, node, children):
 
@@ -232,6 +245,16 @@ class PEGVisitor(PTNodeVisitor):
         retval = OrderedChoice(nodes=children[:]) if len(children) > 1 else children[0]
         return retval
 
+    def postprocess_action_arguments(self, action):
+        command = action[0]
+        if command == 'state':
+            if action[1] in {'push', 'pop'}:
+                state_name = action[2]
+                parsing_state = self._parsing_state_by_name.get(state_name)
+                if not parsing_state:
+                    parsing_state = self.register_parsing_state(state_name)
+                action[2] = parsing_state
+
     def visit_operation(self, node, children):
         action_nodes = children[1]
         actions = []
@@ -239,6 +262,7 @@ class PEGVisitor(PTNodeVisitor):
             action = []
             for i in range(len(action_node)):
                 action.append(str(action_node[i]))
+            self.postprocess_action_arguments(action)
             actions.append(action)
         return MatchActions(children[0], actions)
 
@@ -269,7 +293,11 @@ class PEGVisitor(PTNodeVisitor):
 
         state_name = str(children[0])
         rule_node = children[1]
-        retval = MatchState(rule_node, state_name)
+        parsing_state = self._parsing_state_by_name.get(state_name)
+        if not parsing_state:
+            parsing_state = self.register_parsing_state(state_name)
+
+        retval = MatchState(rule_node, parsing_state)
         return retval
 
 
@@ -316,19 +344,16 @@ class PEGVisitor(PTNodeVisitor):
 class ParserPEGState(ParserState):
     rule_reference_stack: dict[str, str]
     rule_reference_set: dict[str, str]
-    states_stack: list[str]
 
     def __init__(self, parser: Parser):
         super().__init__(parser)
         self.rule_reference_stack = {}
         self.rule_reference_set = {}
-        self.states_stack = []
 
     def __deepcopy__(self, memo: dict = None):
-        copied = self.__class__(self._parser)
+        copied = super().__deepcopy__(memo)
         copied.rule_reference_stack = copy.deepcopy(self.rule_reference_stack, memo)
         copied.rule_reference_set = copy.deepcopy(self.rule_reference_set, memo)
-        copied.states_stack = copy.deepcopy(self.states_stack, memo)
         return copied
 
 
@@ -480,8 +505,9 @@ class ParserPEGActions:
             self._parser._nm_raise(rule, c_pos, self._parser)
 
         states_stack = self._parser.state.states_stack
-        state_name = args[0]
-        states_stack.append(state_name)
+        parsing_state = args[0]
+
+        states_stack.append(parsing_state)
 
         return matched_result
 
@@ -493,12 +519,12 @@ class ParserPEGActions:
         args = None,
     ):
         states_stack = self._parser.state.states_stack
-        state_name = args[0] if args else None
-        if state_name:
-            if state_name != states_stack[-1]:
+        parsing_state = args[0] if args else None
+        if parsing_state:
+            if parsing_state.value != states_stack[-1].value:
                 if self._parser.debug:
                     self._parser.dprint(
-                        f"-- State `{states_stack[-1]}` doesn't match `{state_name}` state {c_pos} => "
+                        f"-- State `{states_stack[-1]}` doesn't match `{parsing_state.name}` state {c_pos} => "
                         f"'{self._parser.context()}'")
                 self._parser._nm_raise(rule, c_pos, self._parser)
 

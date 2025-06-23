@@ -33,7 +33,7 @@ program_element <-
 function <-
     FUNCTION_START function_name{push, add}
     program_element*
-    FUNCTION_END function_name{pop};
+    FUNCTION_END &function_name{pop} function_name{pop};
 
 alternative_function <-
     FUNCTION_START function_name{push, add}

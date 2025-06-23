@@ -665,13 +665,20 @@ class And(SyntaxPredicate):
     """
     def _parse(self, parser):
         c_pos = parser.position
-        for e in self.nodes:
-            try:
-                e.parse(parser)
-            except NoMatch:
-                parser.position = c_pos
-                raise
-        parser.position = c_pos
+        memo = {}
+        saved_state = copy.deepcopy(parser.state, memo)
+
+        try:
+            for e in self.nodes:
+                try:
+                    e.parse(parser)
+                except NoMatch:
+                    parser.position = c_pos
+                    raise
+            parser.position = c_pos
+        finally:
+            parser.state = saved_state
+
 
 
 class Not(SyntaxPredicate):
@@ -682,6 +689,7 @@ class Not(SyntaxPredicate):
     def _parse(self, parser):
         c_pos = parser.position
         old_in_not = parser.in_not
+
         parser.in_not = True
         try:
             for e in self.nodes:

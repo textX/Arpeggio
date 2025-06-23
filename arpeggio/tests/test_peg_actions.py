@@ -33,9 +33,11 @@ program_element <-
 function <-
     FUNCTION_START function_name{push, add}
     program_element*
+    // Test And expression not changing the state of the parser
     FUNCTION_END &function_name{pop} function_name{pop};
 
 alternative_function <-
+    // Test branching with push action
     FUNCTION_START function_name{push, add}
     program_element*
     '/' function_name{pop};

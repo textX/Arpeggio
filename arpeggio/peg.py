@@ -535,6 +535,7 @@ class ParserPEGActions:
 
 class ParserPEG(Parser):
     state_class: type[ParserState] = ParserPEGState
+    actions_class: type[ParserPEGActions] = ParserPEGActions
 
     def __init__(self, language_def, root_rule_name, comment_rule_name=None,
                  *args, **kwargs):
@@ -549,7 +550,7 @@ class ParserPEG(Parser):
         """
         super().__init__(*args, **kwargs)
 
-        self.actions = ParserPEGActions(self)
+        self.actions = self.actions_class(self)
 
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name

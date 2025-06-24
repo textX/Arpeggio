@@ -35,7 +35,7 @@ by end of input (`EOF`). `second` rule is ordered choice and will match either
     parse as far as it can, leaving the rest of the input unprocessed, and return
     without an error. So, be sure to always end your root rule sequence with
     `EOF` if you want a complete parse.
-    
+
 
 During parsing each successfully matched rule will create a parse tree node. At
 the end of parsing a complete [parse tree](parse_trees.md) of the input will be
@@ -238,7 +238,42 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
   used in the grammar above).
 - **Not predicate** is specified by `!` operator (e.g. `!expression` - not
   used in the grammar above).
+- **Match actions** are special commands written within `{` and `}` braces
+  after a rule (e.g. `some_rule{push, add}`). These commands will be executed
+  after the rule has been matched. Each command can have arguments separated
+  with the whitespace. If more than one command is specified, the commands
+  must be separated by comma `,` delimiter. See below for the list
+  of the provided actions.
+- **State match** expression is an expression preceded by an expected state
+  specified within `[` and `]` braces (e.g. `[some_state]some_rule`).
+  These expressions can be matched only if the current state's name is the same
+  as the specified in the match state expression. The current state can be
+  changed with the match actions.
 - A special rule `EOF` will match end of input string.
+
+A set of basic **match actions** if provided:
+- **push** to push a matched token onto the stack. This action always succeeds.
+- **pop** to match against the token at the top of the stack corresponding
+  to the rule and pop that token from the stack. If the matched token and
+  the token at the top of the stack aren't the same, then the match will fail.
+- **pop_front** to match against the token at the bottom of the stack
+  corresponding to the rule and remove that token from the stack.
+  If the matched token and the token at the bottom of the stack aren't
+  the same, then the match will fail. This action can be used to implement
+  FIFO (First In, First Out) rules.
+- **add** to add a matched token to the list of matched tokens corresponding
+  to the rule. This action always succeeds and can be used, for example,
+  to determine local variables.
+- **any** to match any token corresponding to the rule that were previously
+  added to the list of matched tokens (by **add** action). If no token found,
+  then the rule will fail to match.
+- **state push** to push a state onto the states stack
+  (e.g. `state push my_state`). The name of the state if specified as
+  an argument of the action.
+- **state pop** to pop the specified state (e.g. `state pop my_state`) or
+  the last state (e.g. `state pop`) from the top of the states stack.
+  If the state is specified, and it doesn't match the state from the top of
+  the states stack, then the match will fail.
 
 In the RHS a rule reference is a name of another rule. Parser will try to match
 another rule at that location.

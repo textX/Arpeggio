@@ -360,6 +360,10 @@ class ParsingExpression(ParserModelItem):
             self.nodes[i] = resolve_cb(node)
         return super().resolve(resolve_cb)
 
+    @abc.abstractmethod
+    def _parse(self, parser: 'Parser'):
+        pass
+
 
 class Sequence(ParsingExpression):
     """
@@ -371,6 +375,7 @@ class Sequence(ParsingExpression):
         self.ws = kwargs.pop('ws', None)
         self.skipws = kwargs.pop('skipws', None)
 
+    @typing.override
     def _parse(self, parser):
         results = []
         c_pos = parser.position
@@ -415,6 +420,7 @@ class OrderedChoice(Sequence):
     Will match one of the parser expressions specified. Parser will try to
     match expressions in the order they are defined.
     """
+    @typing.override
     def _parse(self, parser):
         result = None
         match = False
@@ -472,6 +478,7 @@ class Optional(Repetition):
     Optional will try to match parser expression specified and will not fail
     in case match is not successful.
     """
+    @typing.override
     def _parse(self, parser):
         result = None
         c_pos = parser.position
@@ -489,6 +496,7 @@ class ZeroOrMore(Repetition):
     ZeroOrMore will try to match parser expression specified zero or more
     times. It will never fail.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
 
@@ -532,6 +540,7 @@ class OneOrMore(Repetition):
     """
     OneOrMore will try to match parser expression specified one or more times.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
         first = True
@@ -582,6 +591,7 @@ class UnorderedGroup(Repetition):
     """
     Will try to match all the parsing expressions in any order.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
         c_pos = parser.position
@@ -676,6 +686,7 @@ class And(SyntaxPredicate):
     This predicate will succeed if the specified expression matches current
     input.
     """
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         memo = {}
@@ -699,6 +710,7 @@ class Not(SyntaxPredicate):
     This predicate will succeed if the specified expression doesn't match
     current input.
     """
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         old_in_not = parser.in_not
@@ -721,6 +733,7 @@ class Empty(SyntaxPredicate):
     """
     This predicate will always succeed without consuming input.
     """
+    @typing.override
     def _parse(self, parser):
         pass
 
@@ -740,6 +753,7 @@ class Combine(Decorator):
     This rules will always return a Terminal parse tree node.
     Whitespaces will be preserved. Comments will not be matched.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
 
@@ -885,6 +899,7 @@ class RegExMatch(Match):
     def __unicode__(self):
         return self.__str__()
 
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         m = self.regex.match(parser.input, c_pos)
@@ -918,6 +933,7 @@ class StrMatch(Match):
         self.to_match = to_match
         self.ignore_case = ignore_case
 
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
@@ -993,6 +1009,7 @@ class MatchState(ParsingExpression):
         super().__init__(rule_name='', nodes=[rule])
         self._parsing_state = parsing_state
 
+    @typing.override
     def _parse(self, parser: 'Parser'):
         parser_state = parser.state
         states_stack = parser_state.states_stack
@@ -1046,6 +1063,7 @@ class EndOfFile(Match):
     def name(self):
         return "EOF"
 
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         if len(parser.input) == c_pos:

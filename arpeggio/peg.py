@@ -6,10 +6,11 @@
 # Copyright: (c) 2025 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
 # License: MIT License
 #######################################################################
-
+import abc
 import codecs
 import copy
 import re
+import typing
 
 from arpeggio import (
     EOF,
@@ -33,7 +34,7 @@ from arpeggio import (
     visit_parse_tree,
     ParsingExpression,
     MatchState,
-    ParsingState,
+    ParsingState, ParseTreeNode,
 )
 from arpeggio import RegExMatch as _
 
@@ -103,10 +104,208 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
     """, re.VERBOSE | re.UNICODE)
 
 
-class MatchActions(ParsingExpression):
-    actions: list[list[str]]
+class MatchedAction:
+    _rule: ParsingExpression
+    _args: list[typing.Any] | None
 
-    def __init__(self, rule: ParsingExpression, actions: list[list[str]]):
+    def __init__(
+        self,
+        rule: ParsingExpression,
+        args: list[typing.Any] = None,
+    ):
+        self._rule = rule
+        self._args = args
+
+    @abc.abstractmethod
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        pass
+
+    def __str__(self):
+        return f'{str(self._rule)}{{{' '.join(map(str, self._args))}}}'
+
+
+class ActionPush(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        stack = parser.state.rule_reference_stack
+        stack.setdefault(self._rule.rule_name, [])
+        name = str(matched_result)
+        stack[self._rule.rule_name].append(name)
+        return matched_result
+
+
+class ActionPop(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        stack = parser.state.rule_reference_stack
+        if not stack.get(self._rule.rule_name):
+            if parser.debug:
+                parser.dprint(
+                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"'{parser.context(len(str(matched_result)))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        match_against = stack[self._rule.rule_name][-1]
+
+        matched_str = str(matched_result)
+        if matched_str != match_against:
+            if parser.debug:
+                parser.dprint(
+                    f"-- No match '{match_against}' at {c_pos} => "
+                    f"'{parser.context(len(match_against))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+        stack[self._rule.rule_name].pop()
+        return matched_result
+
+
+class ActionPopFront(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        stack = parser.state.rule_reference_stack
+        if not stack.get(self._rule.rule_name):
+            if parser.debug:
+                parser.dprint(
+                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"'{parser.context(len(str(matched_result)))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        match_against = stack[self._rule.rule_name][0]
+
+        matched_str = str(matched_result)
+        if matched_str != match_against:
+            if parser.debug:
+                parser.dprint(
+                    f"-- No match '{match_against}' at {c_pos} => "
+                    f"'{parser.context(len(match_against))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+        stack[self._rule.rule_name].pop(0)
+        return matched_result
+
+
+class ActionAdd(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        reference_set = parser.state.rule_reference_set
+        reference_set.setdefault(self._rule.rule_name, set())
+
+        name = str(matched_result)
+        reference_set[self._rule.rule_name].add(name)
+
+        return matched_result
+
+
+class ActionAny(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        reference_set = parser.state.rule_reference_set
+        if not reference_set.get(self._rule.rule_name):
+            if parser.debug:
+                parser.dprint(
+                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"'{parser.context(len(str(matched_result)))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        rule_set = reference_set[self._rule.rule_name]
+
+        matched_str = str(matched_result)
+        if matched_str not in rule_set:
+            if parser.debug:
+                parser.dprint(
+                    f"-- No known match for '{matched_str}' at {c_pos} => "
+                    f"'{parser.context(len(matched_str))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        return matched_result
+
+
+class ActionPushState(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        if not self._args:
+            if parser.debug:
+                parser.dprint(
+                    f"-- Not enough arguments for state action at {c_pos} => "
+                    f"'{parser.context()}'")
+            parser._nm_raise(rule, c_pos, parser)
+
+        states_stack = parser.state.states_stack
+        parsing_state = self._args[0]
+
+        states_stack.append(parsing_state)
+
+        return matched_result
+
+
+class ActionPopState(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        states_stack = parser.state.states_stack
+        parsing_state = self._args[0] if self._args else None
+        if parsing_state:
+            if parsing_state.value != states_stack[-1].value:
+                if parser.debug:
+                    parser.dprint(
+                        f"-- State `{states_stack[-1]}` doesn't match `{parsing_state.name}` state {c_pos} => "
+                        f"'{parser.context()}'")
+                parser._nm_raise(rule, c_pos, parser)
+
+        states_stack.pop()
+
+        return matched_result
+
+
+class MatchActions(ParsingExpression):
+    actions: list[MatchedAction]
+
+    def __init__(self, rule: ParsingExpression, actions: list[MatchedAction]):
         super().__init__(rule_name='', nodes=[rule])
         self.actions = actions
 
@@ -115,9 +314,7 @@ class MatchActions(ParsingExpression):
         c_pos = parser.position
         retval = rule_node.parse(parser)
         for action in self.actions:
-            action_name = action[0]
-            action_method = getattr(parser.actions, action_name)
-            retval = action_method(rule_node, retval, c_pos, args=action[1:])
+            retval = action.run(parser, retval, c_pos)
         return retval
 
     def __str__(self):
@@ -132,6 +329,13 @@ class MatchActions(ParsingExpression):
             "-" if self.suppress else "",
         )
 
+    @typing.override
+    def resolve(self, resolve_cb: typing.Callable[[ParsingExpression], ParsingExpression]):
+        node = super().resolve(resolve_cb)
+        for action in node.actions:
+            action._rule = node.nodes[0]
+        return node
+
 
 class PEGVisitor(PTNodeVisitor):
     """
@@ -139,6 +343,22 @@ class PEGVisitor(PTNodeVisitor):
     """
     _parsing_state_by_name: dict[str, ParsingState]
     _last_parsing_state_id: int
+
+    matched_actions: dict[str, type[MatchedAction]] = {
+        'push': ActionPush,
+        'pop': ActionPop,
+        'pop_front': ActionPopFront,
+        'add': ActionAdd,
+        'any': ActionAny,
+        'push_state': ActionPushState,
+        'pop_state': ActionPopState,
+    }
+    matched_actions_aliases: dict[str, dict[str, str]] = {
+        'state': {
+            'push': 'push_state',
+            'pop': 'pop_state',
+        }
+    }
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,
                  *args, **kwargs):
@@ -203,11 +423,9 @@ class PEGVisitor(PTNodeVisitor):
             if isinstance(node, CrossRef):
                 # The root rule is a cross-ref
                 resolved_rule = resolve_rule_by_name(node.target_rule_name)
-                return _resolve(resolved_rule)
+                return resolved_rule.resolve(_resolve)
             else:
-                # Resolve children nodes
-                for i, n in enumerate(node.nodes):
-                    node.nodes[i] = _resolve(n)
+                node.resolve(_resolve)
                 self.resolved.add(node)
                 return node
 
@@ -216,9 +434,9 @@ class PEGVisitor(PTNodeVisitor):
         comment_rule = None
         for rule in children:
             if rule.rule_name == self.root_rule_name:
-                root_rule = _resolve(rule)
+                root_rule = rule.resolve(_resolve)
             if rule.rule_name == self.comment_rule_name:
-                comment_rule = _resolve(rule)
+                comment_rule = rule.resolve(_resolve)
 
         assert root_rule, "Root rule not found!"
         return root_rule, comment_rule
@@ -245,24 +463,41 @@ class PEGVisitor(PTNodeVisitor):
         retval = OrderedChoice(nodes=children[:]) if len(children) > 1 else children[0]
         return retval
 
-    def postprocess_action_arguments(self, action):
-        command = action[0]
-        if command == 'state':
-            if action[1] in {'push', 'pop'}:
-                state_name = action[2]
-                parsing_state = self._parsing_state_by_name.get(state_name)
-                if not parsing_state:
-                    parsing_state = self.register_parsing_state(state_name)
-                action[2] = parsing_state
+    def postprocess_action_args(self, args):
+        action_name = args[0]
+
+        if action_name in {'push_state', 'pop_state'}:
+            state_name = args[1]
+            parsing_state = self._parsing_state_by_name.get(state_name)
+            if not parsing_state:
+                parsing_state = self.register_parsing_state(state_name)
+            args[1] = parsing_state
+
+        return args
+
+    def preprocess_action_args(self, args):
+        if len(args) == 1:
+            return args
+
+        action_aliases = self.matched_actions_aliases.get(args[0])
+        if action_aliases:
+            alias = action_aliases.get(args[1])
+            if alias:
+                del args[0]
+                args[0] = alias
+
+        return args
 
     def visit_operation(self, node, children):
         action_nodes = children[1]
         actions = []
+        rule_node = children[0]
         for action_node in action_nodes:
-            action = []
-            for i in range(len(action_node)):
-                action.append(str(action_node[i]))
-            self.postprocess_action_arguments(action)
+            action_args = [str(action_node[i]) for i in range(len(action_node))]
+            action_args = self.preprocess_action_args(action_args)
+            action_args = self.postprocess_action_args(action_args)
+            action_name = action_args[0]
+            action = self.matched_actions[action_name](rule_node, action_args[1:])
             actions.append(action)
         return MatchActions(children[0], actions)
 
@@ -357,185 +592,8 @@ class ParserPEGState(ParserState):
         return copied
 
 
-class ParserPEGActions:
-    _parser: Parser
-
-    def __init__(self, parser: Parser):
-        self._parser = parser
-
-    def push(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        stack = self._parser.state.rule_reference_stack
-        stack.setdefault(rule.rule_name, [])
-        name = str(matched_result)
-        stack[rule.rule_name].append(name)
-        return matched_result
-
-    def pop(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        stack = self._parser.state.rule_reference_stack
-        if not stack.get(rule.rule_name):
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- The stack for `{rule.rule_name}` rule is empty at {c_pos} => "
-                    f"'{self._parser.context(len(str(matched_result)))}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-
-        match_against = stack[rule.rule_name][-1]
-
-        matched_str = str(matched_result)
-        if matched_str != match_against:
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- No match '{match_against}' at {c_pos} => "
-                    f"'{self._parser.context(len(match_against))}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-        stack[rule.rule_name].pop()
-        return matched_result
-
-    def pop_front(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        stack = self._parser.state.rule_reference_stack
-        if not stack.get(rule.rule_name):
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- The stack for `{rule.rule_name}` rule is empty at {c_pos} => "
-                    f"'{self._parser.context(len(str(matched_result)))}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-
-        match_against = stack[rule.rule_name][0]
-
-        matched_str = str(matched_result)
-        if matched_str != match_against:
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- No match '{match_against}' at {c_pos} => "
-                    f"'{self._parser.context(len(match_against))}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-        stack[rule.rule_name].pop(0)
-        return matched_result
-
-    def add(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        reference_set = self._parser.state.rule_reference_set
-        reference_set.setdefault(rule.rule_name, set())
-
-        name = str(matched_result)
-        reference_set[rule.rule_name].add(name)
-
-        return matched_result
-
-    def any(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        reference_set = self._parser.state.rule_reference_set
-        if not reference_set.get(rule.rule_name):
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- The stack for `{rule.rule_name}` rule is empty at {c_pos} => "
-                    f"'{self._parser.context(len(str(matched_result)))}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-
-        rule_set = reference_set[rule.rule_name]
-
-        matched_str = str(matched_result)
-        if matched_str not in rule_set:
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- No known match for '{matched_str}' at {c_pos} => "
-                    f"'{self._parser.context(len(matched_str))}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-
-        return matched_result
-
-    def state(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        if not args:
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- Not enough arguments for state action at {c_pos} => "
-                    f"'{self._parser.context()}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-
-        states_stack = self._parser.state.states_stack
-        state_method = getattr(self, args[0] + '_state')
-        return state_method(rule, matched_result, c_pos, args=args[1:] or None)
-
-    def push_state(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        if not args:
-            if self._parser.debug:
-                self._parser.dprint(
-                    f"-- Not enough arguments for state action at {c_pos} => "
-                    f"'{self._parser.context()}'")
-            self._parser._nm_raise(rule, c_pos, self._parser)
-
-        states_stack = self._parser.state.states_stack
-        parsing_state = args[0]
-
-        states_stack.append(parsing_state)
-
-        return matched_result
-
-    def pop_state(
-        self,
-        rule: ParsingExpression,
-        matched_result: ParsingExpression,
-        c_pos: int,
-        args = None,
-    ):
-        states_stack = self._parser.state.states_stack
-        parsing_state = args[0] if args else None
-        if parsing_state:
-            if parsing_state.value != states_stack[-1].value:
-                if self._parser.debug:
-                    self._parser.dprint(
-                        f"-- State `{states_stack[-1]}` doesn't match `{parsing_state.name}` state {c_pos} => "
-                        f"'{self._parser.context()}'")
-                self._parser._nm_raise(rule, c_pos, self._parser)
-
-        states_stack.pop()
-
-        return matched_result
-
-
 class ParserPEG(Parser):
     state_class: type[ParserState] = ParserPEGState
-    actions_class: type[ParserPEGActions] = ParserPEGActions
 
     def __init__(self, language_def, root_rule_name, comment_rule_name=None,
                  *args, **kwargs):
@@ -549,8 +607,6 @@ class ParserPEG(Parser):
             comment_rule_name(str): The name of the rule for comments.
         """
         super().__init__(*args, **kwargs)
-
-        self.actions = self.actions_class(self)
 
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name

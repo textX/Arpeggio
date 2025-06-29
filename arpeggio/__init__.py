@@ -11,11 +11,13 @@
 # textual notation.
 ###############################################################################
 
+import abc
 import bisect
 import codecs
 import re
 import sys
 import types
+import typing
 from collections import OrderedDict
 import copy
 
@@ -161,7 +163,13 @@ class DebugPrinter:
 # Parser Model (PEG Abstract Semantic Graph) elements
 
 
-class ParsingExpression:
+class ParserModelItem(abc.ABC):
+    def resolve(self, resolve_cb: typing.Callable[['ParserModelItem'], 'ParserModelItem']):
+        resolved_node = resolve_cb(self)
+        return resolved_node
+
+
+class ParsingExpression(ParserModelItem):
     """
     An abstract class for all parsing expressions.
     Represents the node of the Parser Model.
@@ -346,6 +354,11 @@ class ParsingExpression:
             self._result_cache[c_pos] = (result, parser.position)
 
         return result
+
+    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]):
+        for i, node in enumerate(self.nodes):
+            self.nodes[i] = resolve_cb(node)
+        return super().resolve(resolve_cb)
 
 
 class Sequence(ParsingExpression):
@@ -1839,7 +1852,7 @@ class Parser(DebugPrinter):
             self.comments_model._clear_cache()
 
 
-class CrossRef:
+class CrossRef(ParserModelItem):
     '''
     Used for rule reference resolving.
     '''

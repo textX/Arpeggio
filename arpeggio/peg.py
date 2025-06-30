@@ -593,7 +593,7 @@ class ParserPEGState(ParserState):
 
 
 class ParserPEG(Parser):
-    state_class: type[ParserState] = ParserPEGState
+    _state_class: type[ParserState] = ParserPEGState
 
     def __init__(self, language_def, root_rule_name, comment_rule_name=None,
                  *args, **kwargs):

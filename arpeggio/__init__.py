@@ -391,8 +391,7 @@ class Sequence(ParsingExpression):
         # Prefetching
         append = results.append
 
-        memo = {}
-        saved_state = copy.deepcopy(parser.state, memo)
+        saved_state = parser.save_state()
 
         try:
             for e in self.nodes:
@@ -402,7 +401,7 @@ class Sequence(ParsingExpression):
 
         except NoMatch:
             parser.position = c_pos     # Backtracking
-            parser.state = saved_state
+            parser.load_state(saved_state)
             raise
 
         finally:
@@ -436,8 +435,7 @@ class OrderedChoice(Sequence):
 
         try:
             for e in self.nodes:
-                memo = {}
-                saved_state = copy.deepcopy(parser.state, memo)
+                saved_state = parser.save_state()
 
                 try:
                     result = e.parse(parser)
@@ -446,7 +444,7 @@ class OrderedChoice(Sequence):
                     break
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
-                    parser.state = saved_state
+                    parser.load_state(saved_state)
 
         finally:
             if self.ws is not None:
@@ -513,8 +511,7 @@ class ZeroOrMore(Repetition):
         result = None
 
         while True:
-            memo = {}
-            saved_state = copy.deepcopy(parser.state, memo)
+            saved_state = parser.save_state()
 
             try:
                 c_pos = parser.position
@@ -526,7 +523,7 @@ class ZeroOrMore(Repetition):
                 append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
-                parser.state = saved_state
+                parser.load_state(saved_state)
                 break
 
         if self.eolterm:
@@ -559,8 +556,7 @@ class OneOrMore(Repetition):
 
         try:
             while True:
-                memo = {}
-                saved_state = copy.deepcopy(parser.state, memo)
+                saved_state = parser.save_state()
 
                 try:
                     c_pos = parser.position
@@ -573,7 +569,7 @@ class OneOrMore(Repetition):
                     first = False
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
-                    parser.state = saved_state
+                    parser.load_state(saved_state)
 
                     if first:
                         raise
@@ -610,8 +606,7 @@ class UnorderedGroup(Repetition):
         sep_result = None
         first = True
 
-        memo = {}
-        saved_state = copy.deepcopy(parser.state, memo)
+        saved_state = parser.save_state()
 
         while nodes_to_try:
             sep_exc = None
@@ -632,8 +627,7 @@ class UnorderedGroup(Repetition):
             match = True
             all_optionals_fail = True
             for e in list(nodes_to_try):
-                memo = {}
-                curr_saved_state = copy.deepcopy(parser.state, memo)
+                curr_saved_state = parser.save_state()
 
                 try:
                     result = e.parse(parser)
@@ -652,7 +646,7 @@ class UnorderedGroup(Repetition):
                 except NoMatch:
                     match = False
                     parser.position = c_loc_pos     # local backtracking
-                    parser.state = curr_saved_state
+                    parser.load_state(curr_saved_state)
 
             if not match or all_optionals_fail:
                 # If sep is matched backtrack it
@@ -666,7 +660,7 @@ class UnorderedGroup(Repetition):
         if not match:
             # Unsuccessful match of the whole PE - full backtracking
             parser.position = c_pos
-            parser.state = saved_state
+            parser.load_state(saved_state)
             parser._nm_raise(self, c_pos, parser)
 
         if results:
@@ -689,8 +683,7 @@ class And(SyntaxPredicate):
     @typing.override
     def _parse(self, parser):
         c_pos = parser.position
-        memo = {}
-        saved_state = copy.deepcopy(parser.state, memo)
+        saved_state = parser.save_state()
 
         try:
             for e in self.nodes:
@@ -701,7 +694,7 @@ class And(SyntaxPredicate):
                     raise
             parser.position = c_pos
         finally:
-            parser.state = saved_state
+            parser.load_state(saved_state)
 
 
 
@@ -1549,7 +1542,8 @@ class Parser(DebugPrinter):
 
     # Not marker for NoMatch rules list. Used if the first unsuccessful rule
     # match is Not.
-    state_class: type[ParserState] = ParserState
+    _state_class: type[ParserState] = ParserState
+    _state: _state_class
 
     FIRST_NOT = Not()
 
@@ -1598,7 +1592,7 @@ class Parser(DebugPrinter):
             flags = re.IGNORECASE
         self.keyword_regex = re.compile(r'[^\d\W]\w*', flags)
 
-        self.state = self.state_class(self)
+        self._state = self._state_class(self)
 
         # Keep track of root rule we are currently in.
         # Used for debugging purposes
@@ -1868,6 +1862,16 @@ class Parser(DebugPrinter):
         self.parser_model._clear_cache()
         if self.comments_model:
             self.comments_model._clear_cache()
+
+    @property
+    def state(self) -> ParserState:
+        return self._state
+
+    def save_state(self) -> ParserState:
+        return copy.deepcopy(self._state)
+
+    def load_state(self, new_state: ParserState):
+        self._state = new_state
 
 
 class CrossRef(ParserModelItem):

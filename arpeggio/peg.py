@@ -23,6 +23,7 @@ from arpeggio import (
     Optional,
     OrderedChoice,
     ParserState,
+    ParserStateLayer,
     Parser,
     ParserPython,
     PTNodeVisitor,
@@ -139,10 +140,8 @@ class ActionPush(MatchedAction):
         c_pos: int,
         args = None,
     ):
-        stack = parser.state.rule_reference_stack
-        stack.setdefault(self._rule.rule_name, [])
-        name = str(matched_result)
-        stack[self._rule.rule_name].append(name)
+        parser_state = parser.state
+        parser_state.push_rule_reference(self._rule.rule_name, str(matched_result))
         return matched_result
 
 
@@ -155,24 +154,24 @@ class ActionPop(MatchedAction):
         c_pos: int,
         args = None,
     ):
-        stack = parser.state.rule_reference_stack
-        if not stack.get(self._rule.rule_name):
+        parser_state = parser.state
+        matched_str = str(matched_result)
+        try:
+            removed = parser_state.pop_rule_reference(self._rule.rule_name, matched_str)
+        except:
             if parser.debug:
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
             parser._nm_raise(self._rule, c_pos, parser)
 
-        match_against = stack[self._rule.rule_name][-1]
-
-        matched_str = str(matched_result)
-        if matched_str != match_against:
+        if not removed:
             if parser.debug:
+                match_against = parser_state.last_rule_reference(self._rule.rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
             parser._nm_raise(self._rule, c_pos, parser)
-        stack[self._rule.rule_name].pop()
         return matched_result
 
 
@@ -185,24 +184,25 @@ class ActionPopFront(MatchedAction):
         c_pos: int,
         args = None,
     ):
-        stack = parser.state.rule_reference_stack
-        if not stack.get(self._rule.rule_name):
+        parser_state = parser.state
+        matched_str = str(matched_result)
+        try:
+            removed = parser_state.pop_front_rule_reference(self._rule.rule_name, matched_str)
+        except:
             if parser.debug:
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
             parser._nm_raise(self._rule, c_pos, parser)
 
-        match_against = stack[self._rule.rule_name][0]
-
-        matched_str = str(matched_result)
-        if matched_str != match_against:
+        if not removed:
             if parser.debug:
+                match_against = parser_state.first_rule_reference(self._rule.rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
             parser._nm_raise(self._rule, c_pos, parser)
-        stack[self._rule.rule_name].pop(0)
+
         return matched_result
 
 
@@ -215,12 +215,9 @@ class ActionAdd(MatchedAction):
         c_pos: int,
         args = None,
     ):
-        reference_set = parser.state.rule_reference_set
-        reference_set.setdefault(self._rule.rule_name, set())
-
-        name = str(matched_result)
-        reference_set[self._rule.rule_name].add(name)
-
+        parser_state = parser.state
+        matched_str = str(matched_result)
+        parser_state.remember_rule_reference(self._rule.rule_name, matched_str)
         return matched_result
 
 
@@ -233,18 +230,18 @@ class ActionAny(MatchedAction):
         c_pos: int,
         args = None,
     ):
-        reference_set = parser.state.rule_reference_set
-        if not reference_set.get(self._rule.rule_name):
+        parser_state = parser.state
+        matched_str = str(matched_result)
+        try:
+            is_known = parser_state.rule_reference_is_known(self._rule.rule_name, matched_str)
+        except:
             if parser.debug:
                 parser.dprint(
-                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"-- No pushes were performed for `{self._rule.rule_name}` rule at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
             parser._nm_raise(self._rule, c_pos, parser)
 
-        rule_set = reference_set[self._rule.rule_name]
-
-        matched_str = str(matched_result)
-        if matched_str not in rule_set:
+        if not is_known:
             if parser.debug:
                 parser.dprint(
                     f"-- No known match for '{matched_str}' at {c_pos} => "
@@ -576,12 +573,12 @@ class PEGVisitor(PTNodeVisitor):
         return StrMatch(match_str, ignore_case=self.ignore_case)
 
 
-class ParserPEGState(ParserState):
+class ParserPEGStateLayer(ParserStateLayer):
     rule_reference_stack: dict[str, str]
     rule_reference_set: dict[str, str]
 
-    def __init__(self, parser: Parser):
-        super().__init__(parser)
+    def __init__(self):
+        super().__init__()
         self.rule_reference_stack = {}
         self.rule_reference_set = {}
 
@@ -590,6 +587,53 @@ class ParserPEGState(ParserState):
         copied.rule_reference_stack = copy.deepcopy(self.rule_reference_stack, memo)
         copied.rule_reference_set = copy.deepcopy(self.rule_reference_set, memo)
         return copied
+
+
+class ParserPEGState(ParserState):
+    _state_layer_class: ParserStateLayer = ParserPEGStateLayer
+
+    def __init__(self):
+        super().__init__()
+
+    def push_rule_reference(self, rule_name: str, reference_name: str):
+        stack = self.state_layers[-1].rule_reference_stack.setdefault(rule_name, [])
+        stack.append(reference_name)
+
+    def pop_rule_reference(self, rule_name: str, expected_reference_name: str = None):
+        stack = self.state_layers[-1].rule_reference_stack[rule_name]
+        if expected_reference_name is not None and stack[-1] != expected_reference_name:
+            return None
+        return stack.pop()
+
+    def pop_front_rule_reference(self, rule_name: str, expected_reference_name: str = None):
+        stack = self.state_layers[-1].rule_reference_stack[rule_name]
+        if expected_reference_name is not None and stack[0] != expected_reference_name:
+            return None
+        return stack.pop(0)
+
+    def first_rule_reference(self, rule_name: str):
+        stack = self.state_layers[-1].rule_reference_stack[rule_name]
+        return stack[0]
+
+    def last_rule_reference(self, rule_name: str):
+        stack = self.state_layers[-1].rule_reference_stack[rule_name]
+        return stack[-1]
+
+    def remember_rule_reference(self, rule_name: str, reference_name: str):
+        reference_set = self.state_layers[-1].rule_reference_set.setdefault(rule_name, set())
+        reference_set.add(reference_name)
+
+    def known_rule_references(self, rule_name: str):
+        reference_set = self.state_layers[-1].rule_reference_set.get(rule_name)
+        return reference_set
+
+    def rule_reference_is_known(self, rule_name: str, reference_name: str):
+        reference_set = self.state_layers[-1].rule_reference_set.get(rule_name)
+        if reference_set is None:
+            return False
+        if reference_name in reference_set:
+            return True
+        return False
 
 
 class ParserPEG(Parser):

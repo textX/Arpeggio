@@ -1501,17 +1501,32 @@ class SemanticActionToString(SemanticAction):
         return str(node)
 
 
-class ParserState:
-    _parser: 'Parser'
-    states_stack: list[ParsingState]
+class ParserStateLayer:
+    """
+    A basic class for additional state parameters.
 
-    def __init__(self, parser):
-        self._parser = parser
-        self.states_stack = []
+    Inherit from this class to add level-specific state parameters.
+    """
 
     def __deepcopy__(self, memo: dict = None):
-        copied = self.__class__(self._parser)
+        copied = self.__class__()
+        return copied
+
+
+
+class ParserState:
+    _state_layer_class: ParserStateLayer = ParserStateLayer
+    states_stack: list[ParsingState]
+    state_layers: list[_state_layer_class]
+
+    def __init__(self):
+        self.states_stack = []
+        self.state_layers = [self._state_layer_class()]
+
+    def __deepcopy__(self, memo: dict = None):
+        copied = self.__class__()
         copied.states_stack = copy.deepcopy(self.states_stack, memo)
+        copied.state_layers = copy.deepcopy(self.state_layers, memo)
         return copied
 
 
@@ -1592,7 +1607,7 @@ class Parser(DebugPrinter):
             flags = re.IGNORECASE
         self.keyword_regex = re.compile(r'[^\d\W]\w*', flags)
 
-        self._state = self._state_class(self)
+        self._state = self._state_class()
 
         # Keep track of root rule we are currently in.
         # Used for debugging purposes

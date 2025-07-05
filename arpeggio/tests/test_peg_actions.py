@@ -107,8 +107,14 @@ end of function_name2
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
-    assert len(parser.state.rule_reference_stack['function_name']) == 0
-    assert len(parser.state.rule_reference_set['function_name']) == 2
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
+
+    function_names = parser.state.known_rule_references('function_name')
+    assert isinstance(function_names, set)
+    assert len(function_names) == 2
 
     if parser.debug:
         output = capsys.readouterr()
@@ -133,7 +139,10 @@ function_name2(1, 2, 3)
 """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
-    assert len(parser.state.rule_reference_stack['function_name']) == 0
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
 
     if parser.debug:
         output = capsys.readouterr()
@@ -165,7 +174,10 @@ end of function_name3
 """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
-    assert len(parser.state.rule_reference_stack['function_name']) == 0
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
 
     if parser.debug:
         output = capsys.readouterr()
@@ -200,7 +212,10 @@ end of function_name3
 """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
-    assert len(parser.state.rule_reference_stack['function_name']) == 0
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
     assert len(parser.state.states_stack) == 0
 
     if parser.debug:
@@ -236,7 +251,10 @@ end of function_name3
 """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
-    assert len(parser.state.rule_reference_stack['function_name']) == 0
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
     assert len(parser.state.states_stack) == 0
 
     if parser.debug:
@@ -258,8 +276,14 @@ end of function_name2
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     result = parser.parse(input)
-    assert len(parser.state.rule_reference_stack['function_name']) == 0
-    assert len(parser.state.rule_reference_set['function_name']) == 2
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
+
+    function_names = parser.state.known_rule_references('function_name')
+    assert isinstance(function_names, set)
+    assert len(function_names) == 2
 
     if parser.debug:
         output = capsys.readouterr()

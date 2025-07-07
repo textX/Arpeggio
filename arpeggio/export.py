@@ -8,7 +8,10 @@
 
 import io
 
-from arpeggio import Terminal
+from arpeggio import (
+    Terminal,
+    ParsingExpression,
+)
 
 
 class Exporter:
@@ -124,6 +127,9 @@ class PMDOTExportAdapter(DOTExportAdapter):
     @property
     def neighbours(self):
         if not hasattr(self, "_neighbours"):
+            if not isinstance(self, ParsingExpression):
+                return []
+
             self._neighbours= []
 
             # Registry of adapters used in this export

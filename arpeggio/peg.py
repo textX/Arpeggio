@@ -9,6 +9,7 @@
 import abc
 import codecs
 import copy
+import enum
 import re
 import typing
 
@@ -26,6 +27,7 @@ from arpeggio import (
     ParserStateLayer,
     Parser,
     ParserPython,
+    ParseTreeNode,
     PTNodeVisitor,
     SemanticError,
     Sequence,
@@ -34,8 +36,12 @@ from arpeggio import (
     ZeroOrMore,
     visit_parse_tree,
     ParsingExpression,
+    ParsingStatement,
     MatchState,
-    ParsingState, ParseTreeNode,
+    PushState,
+    PopState,
+    WrappedWithStateLayer,
+    ParsingState,
 )
 from arpeggio import RegExMatch as _
 
@@ -45,7 +51,8 @@ __all__ = ['ParserPEG']
 LEFT_ARROW = "<-"
 ORDERED_CHOICE = "/"
 ZERO_OR_MORE = "*"
-ONE_OR_MORE = "+"
+ONE_OR_MORE_SYMBOL = '+'
+ONE_OR_MORE = _('(?<!\s)\\' + ONE_OR_MORE_SYMBOL)
 OPTIONAL = "?"
 UNORDERED_GROUP = "#"
 AND = "&"
@@ -57,6 +64,11 @@ CALL_END = "}"
 CALL_DELIMITER = ','
 STATE_START = '['
 STATE_END = ']'
+STATE = '@'
+PUSH_STATE = '+@'
+POP_STATE = '-@'
+STATE_LAYER_START = '@('
+STATE_LAYER_END = ')'
 
 
 
@@ -66,15 +78,23 @@ def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
 def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
 def sequence():         return OneOrMore(full_expression)
 def operation():        return rule_crossref, calls
-def full_expression():  return Optional([AND, NOT]), expression_with_state
-def expression_with_state():    return Optional(state), repeated_expression
+def full_expression():  return Optional([AND, NOT]), repeated_expression
 def repeated_expression():      return expression, Optional([OPTIONAL,
                                                              ZERO_OR_MORE,
                                                              ONE_OR_MORE,
                                                              UNORDERED_GROUP])
-def expression():       return [regex, operation, rule_crossref,
+def expression():       return [regex,
+                                push_state, pop_state, wrapped_with_state_layer, state,
+                                operation, rule_crossref,
                                 (OPEN, ordered_choice, CLOSE),
                                 str_match]
+
+def state():            return STATE, state_name
+def push_state():       return PUSH_STATE, state_name
+def pop_state():        return POP_STATE, state_name
+def wrapped_with_state_layer(): return (STATE_LAYER_START,
+                                        ordered_choice,
+                                        STATE_LAYER_END)
 
 # PEG Lexical rules
 def regex():            return _(r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
@@ -89,7 +109,6 @@ def calls():            return CALL_START, call, ZeroOrMore([CALL_DELIMITER, cal
 def call():             return OneOrMore(call_argument)
 def call_argument():    return _(r'[^\} \t,]+')
 
-def state():            return STATE_START, state_name, STATE_END
 def state_name():       return _(r'[a-zA-Z_][a-zA-Z_0-9]*')
 
 
@@ -106,12 +125,12 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
 
 
 class MatchedAction:
-    _rule: ParsingExpression
+    _rule: ParsingStatement
     _args: list[typing.Any] | None
 
     def __init__(
         self,
-        rule: ParsingExpression,
+        rule: ParsingStatement,
         args: list[typing.Any] = None,
     ):
         self._rule = rule
@@ -221,6 +240,21 @@ class ActionAdd(MatchedAction):
         return matched_result
 
 
+class ActionParentAdd(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        parser_state = parser.state
+        matched_str = str(matched_result)
+        parser_state.remember_rule_reference(self._rule.rule_name, matched_str, state_layer_scope=StateLayerScope.PARENT)
+        return matched_result
+
+
 class ActionAny(MatchedAction):
     @typing.override
     def run(
@@ -251,58 +285,10 @@ class ActionAny(MatchedAction):
         return matched_result
 
 
-class ActionPushState(MatchedAction):
-    @typing.override
-    def run(
-        self,
-        parser: Parser,
-        matched_result: ParseTreeNode,
-        c_pos: int,
-        args = None,
-    ):
-        if not self._args:
-            if parser.debug:
-                parser.dprint(
-                    f"-- Not enough arguments for state action at {c_pos} => "
-                    f"'{parser.context()}'")
-            parser._nm_raise(rule, c_pos, parser)
-
-        states_stack = parser.state.states_stack
-        parsing_state = self._args[0]
-
-        states_stack.append(parsing_state)
-
-        return matched_result
-
-
-class ActionPopState(MatchedAction):
-    @typing.override
-    def run(
-        self,
-        parser: Parser,
-        matched_result: ParseTreeNode,
-        c_pos: int,
-        args = None,
-    ):
-        states_stack = parser.state.states_stack
-        parsing_state = self._args[0] if self._args else None
-        if parsing_state:
-            if parsing_state.value != states_stack[-1].value:
-                if parser.debug:
-                    parser.dprint(
-                        f"-- State `{states_stack[-1]}` doesn't match `{parsing_state.name}` state {c_pos} => "
-                        f"'{parser.context()}'")
-                parser._nm_raise(rule, c_pos, parser)
-
-        states_stack.pop()
-
-        return matched_result
-
-
 class MatchActions(ParsingExpression):
     actions: list[MatchedAction]
 
-    def __init__(self, rule: ParsingExpression, actions: list[MatchedAction]):
+    def __init__(self, rule: ParsingStatement, actions: list[MatchedAction]):
         super().__init__(rule_name='', nodes=[rule])
         self.actions = actions
 
@@ -347,14 +333,16 @@ class PEGVisitor(PTNodeVisitor):
         'pop_front': ActionPopFront,
         'add': ActionAdd,
         'any': ActionAny,
-        'push_state': ActionPushState,
-        'pop_state': ActionPopState,
+        'parent_add': ActionParentAdd,
     }
     matched_actions_aliases: dict[str, dict[str, str]] = {
         'state': {
             'push': 'push_state',
             'pop': 'pop_state',
-        }
+        },
+        'parent': {
+            'add': 'parent_add',
+        },
     }
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,
@@ -371,11 +359,17 @@ class PEGVisitor(PTNodeVisitor):
         self._last_parsing_state_id = 0
         self._parsing_state_by_name = {}
 
-    def register_parsing_state(self, state_name):
+    def register_parsing_state(self, state_name: str):
         self._last_parsing_state_id += 1
         parsing_state_id = self._last_parsing_state_id
         parsing_state = ParsingState(state_name, parsing_state_id)
         self._parsing_state_by_name[state_name] = parsing_state
+        return parsing_state
+
+    def get_state_by_name(self, state_name: str):
+        parsing_state = self._parsing_state_by_name.get(state_name)
+        if not parsing_state:
+            parsing_state = self.register_parsing_state(state_name)
         return parsing_state
 
     def visit_peggrammar(self, node, children):
@@ -498,10 +492,6 @@ class PEGVisitor(PTNodeVisitor):
             actions.append(action)
         return MatchActions(children[0], actions)
 
-    def visit_state(self, node, children):
-        # Just ignoring the syntax nodes
-        return node[1]
-
     def visit_full_expression(self, node, children):
         if len(children) == 2:
             retval = Not() if children[0] == NOT else And()
@@ -519,19 +509,23 @@ class PEGVisitor(PTNodeVisitor):
         call_arguments = [arg for arg in node if arg.rule_name == 'call']
         return call_arguments
 
-    def visit_expression_with_state(self, node, children):
-        if len(children) == 1:
-            return children[0]
+    def visit_state(self, node, children):
+        state_name = str(node[1])
+        parsing_state = self.get_state_by_name(state_name)
+        return MatchState(parsing_state)
 
-        state_name = str(children[0])
-        rule_node = children[1]
-        parsing_state = self._parsing_state_by_name.get(state_name)
-        if not parsing_state:
-            parsing_state = self.register_parsing_state(state_name)
+    def visit_push_state(self, node, children):
+        state_name = str(node[1])
+        parsing_state = self.get_state_by_name(state_name)
+        return PushState(parsing_state)
 
-        retval = MatchState(rule_node, parsing_state)
-        return retval
+    def visit_pop_state(self, node, children):
+        state_name = str(node[1])
+        parsing_state = self.get_state_by_name(state_name)
+        return PopState(parsing_state)
 
+    def visit_wrapped_with_state_layer(self, node, children):
+        return WrappedWithStateLayer(children[0])
 
     def visit_repeated_expression(self, node, children):
         if len(children) == 1:
@@ -540,7 +534,7 @@ class PEGVisitor(PTNodeVisitor):
         nodes = children[0] if isinstance(children[0], list) else [children[0]]
         if children[1] == ZERO_OR_MORE:
             retval = ZeroOrMore(nodes=nodes)
-        elif children[1] == ONE_OR_MORE:
+        elif children[1] == ONE_OR_MORE_SYMBOL:
             retval = OneOrMore(nodes=nodes)
         elif children[1] == OPTIONAL:
             retval = Optional(nodes=nodes)
@@ -589,6 +583,12 @@ class ParserPEGStateLayer(ParserStateLayer):
         return copied
 
 
+class StateLayerScope(enum.Enum):
+    GLOBAL = 0
+    PARENT = -2
+    CURRENT = -1
+
+
 class ParserPEGState(ParserState):
     _state_layer_class: ParserStateLayer = ParserPEGStateLayer
 
@@ -619,8 +619,14 @@ class ParserPEGState(ParserState):
         stack = self.state_layers[-1].rule_reference_stack[rule_name]
         return stack[-1]
 
-    def remember_rule_reference(self, rule_name: str, reference_name: str):
-        reference_set = self.state_layers[-1].rule_reference_set.setdefault(rule_name, set())
+    def remember_rule_reference(
+        self,
+        rule_name: str,
+        reference_name: str,
+        state_layer_scope: StateLayerScope = StateLayerScope.CURRENT
+    ):
+        layer_num = state_layer_scope.value
+        reference_set = self.state_layers[layer_num].rule_reference_set.setdefault(rule_name, set())
         reference_set.add(reference_name)
 
     def known_rule_references(self, rule_name: str):
@@ -628,11 +634,12 @@ class ParserPEGState(ParserState):
         return reference_set
 
     def rule_reference_is_known(self, rule_name: str, reference_name: str):
-        reference_set = self.state_layers[-1].rule_reference_set.get(rule_name)
-        if reference_set is None:
-            return False
-        if reference_name in reference_set:
-            return True
+        for state_layer in reversed(self.state_layers):
+            reference_set = state_layer.rule_reference_set.get(rule_name)
+            if reference_set is None:
+                continue
+            if reference_name in reference_set:
+                return True
         return False
 
 

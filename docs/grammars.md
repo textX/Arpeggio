@@ -244,11 +244,6 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
   with the whitespace. If more than one command is specified, the commands
   must be separated by comma `,` delimiter. See below for the list
   of the provided actions.
-- **State match** expression is an expression preceded by an expected state
-  specified within `[` and `]` braces (e.g. `[some_state]some_rule`).
-  These expressions can be matched only if the current state's name is the same
-  as the specified in the match state expression. The current state can be
-  changed with the match actions.
 - A special rule `EOF` will match end of input string.
 
 A set of basic **match actions** if provided:
@@ -267,13 +262,6 @@ A set of basic **match actions** if provided:
 - **any** to match any token corresponding to the rule that were previously
   added to the list of matched tokens (by **add** action). If no token found,
   then the rule will fail to match.
-- **state push** to push a state onto the states stack
-  (e.g. `state push my_state`). The name of the state if specified as
-  an argument of the action.
-- **state pop** to pop the specified state (e.g. `state pop my_state`) or
-  the last state (e.g. `state pop`) from the top of the states stack.
-  If the state is specified, and it doesn't match the state from the top of
-  the states stack, then the match will fail.
 
 In the RHS a rule reference is a name of another rule. Parser will try to match
 another rule at that location.

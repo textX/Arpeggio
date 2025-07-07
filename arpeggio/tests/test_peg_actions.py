@@ -31,16 +31,20 @@ program_element <-
     / function_call;
 
 function <-
-    FUNCTION_START function_name{push, add}
-    program_element*
-    // Test And expression not changing the state of the parser
-    FUNCTION_END &function_name{pop} function_name{pop};
+    @(
+        FUNCTION_START function_name{push, parent add}
+            program_element*
+        // Test And expression not changing the state of the parser
+        FUNCTION_END &function_name{pop} function_name{pop}
+    );
 
 alternative_function <-
-    // Test branching with push action
-    FUNCTION_START function_name{push, add}
-    program_element*
-    '/' function_name{pop};
+    @(
+        // Test branching with push action
+        FUNCTION_START function_name{push, parent add}
+        program_element*
+        '/' function_name{pop}
+    );
 
 function_call <-
     function_name{any}
@@ -62,12 +66,12 @@ defer <-
 defer_name <- VALID_NAME;
 
 anonymous_defer <-
-    ANONYMOUS_DEFER{state push anonymous_defer};
+    ANONYMOUS_DEFER +@anonymous_defer;
 
 anonymous_deferred <-
-    [anonymous_defer]DEFERRED
+    @anonymous_defer DEFERRED
     program_element*
-    END{state pop anonymous_defer};
+    END -@anonymous_defer;
 
 FUNCTION_START <- 'def';
 function_name <- VALID_NAME;

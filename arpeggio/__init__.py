@@ -169,7 +169,13 @@ class ParserModelItem(abc.ABC):
         return resolved_node
 
 
-class ParsingExpression(ParserModelItem):
+class ParsingStatement(ParserModelItem):
+    @abc.abstractmethod
+    def parse(self, parser: 'Parser'):
+        pass
+
+
+class ParsingExpression(ParsingStatement):
     """
     An abstract class for all parsing expressions.
     Represents the node of the Parser Model.
@@ -247,6 +253,7 @@ class ParsingExpression(ParserModelItem):
                 processed.add(node)
                 node._clear_cache(processed)
 
+    @typing.override
     def parse(self, parser):
 
         if parser.debug:
@@ -991,19 +998,17 @@ class ParsingState:
         return f'{self.name} ({self.value})'
 
 
-class MatchState(ParsingExpression):
+class MatchState(ParsingStatement):
     _parsing_state: ParsingState
 
     def __init__(
         self,
-        rule: ParsingExpression,
         parsing_state: ParsingState,
     ):
-        super().__init__(rule_name='', nodes=[rule])
+        super().__init__()
         self._parsing_state = parsing_state
 
-    @typing.override
-    def _parse(self, parser: 'Parser'):
+    def parse(self, parser: 'Parser'):
         parser_state = parser.state
         states_stack = parser_state.states_stack
 
@@ -1023,26 +1028,109 @@ class MatchState(ParsingExpression):
                     f"'{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
 
-        rule_node = self.nodes[0]
-        retval = rule_node.parse(parser)
-
-        return retval
+        return None
 
     def __str__(self):
-        rule_node = self.nodes[0]
-        return str(rule_node)
+        return '@' + self.state_name
 
     @property
     def desc(self):
-        return "{}({}){}".format(
-            self.name,
+        return "@{}".format(
             self.state_name,
-            "-" if self.suppress else "",
         )
 
     @property
     def state_name(self):
         return self._parsing_state.name
+
+
+class PushState(ParsingStatement):
+    _parsing_state: ParsingState
+
+    def __init__(
+        self,
+        parsing_state: ParsingState,
+    ):
+        super().__init__()
+        self._parsing_state = parsing_state
+
+    def parse(self, parser: 'Parser'):
+        parser_state = parser.state
+        states_stack = parser_state.states_stack
+        states_stack.append(self._parsing_state)
+        return None
+
+    def __str__(self):
+        return '+@' + self.state_name
+
+    @property
+    def desc(self):
+        return "+@{}".format(
+            self.state_name,
+        )
+
+    @property
+    def state_name(self):
+        return self._parsing_state.name
+
+
+class PopState(ParsingStatement):
+    _parsing_state: ParsingState
+
+    def __init__(
+        self,
+        parsing_state: ParsingState,
+    ):
+        super().__init__()
+        self._parsing_state = parsing_state
+
+    def parse(self, parser: 'Parser'):
+        parser_state = parser.state
+        states_stack = parser_state.states_stack
+        curr_state = states_stack[-1]
+        if curr_state.value != self._parsing_state.value:
+            c_pos = parser.position
+            if parser.debug:
+                parser.dprint(
+                    f"-- The current state (`{curr_state.name}`) doesn't match `{self.state_name}` state at {c_pos} => "
+                    f"'{parser.context()}'")
+            parser._nm_raise(self, c_pos, parser)
+
+        states_stack.pop()
+        return None
+
+    def __str__(self):
+        return '-@' + self.state_name
+
+    @property
+    def desc(self):
+        return "-@{}".format(
+            self.state_name,
+        )
+
+    @property
+    def state_name(self):
+        return self._parsing_state.name
+
+
+class WrappedWithStateLayer(ParsingExpression):
+    def __init__(self, node):
+        super().__init__(nodes=[node])
+
+    @typing.override
+    def _parse(self, parser: 'Parser'):
+        saved_state = parser.save_state()
+
+        parser.state.push_state_layer()
+
+        try:
+            retval = self.nodes[0].parse(parser)
+            parser.state.pop_state_layer()
+        except:
+            parser.load_state(saved_state)
+            raise
+
+        return retval
 
 
 class EndOfFile(Match):
@@ -1528,6 +1616,12 @@ class ParserState:
         copied.states_stack = copy.deepcopy(self.states_stack, memo)
         copied.state_layers = copy.deepcopy(self.state_layers, memo)
         return copied
+
+    def push_state_layer(self):
+        self.state_layers.append(self._state_layer_class())
+
+    def pop_state_layer(self):
+        return self.state_layers.pop()
 
 
 # ----------------------------------------------------

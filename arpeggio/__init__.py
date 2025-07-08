@@ -74,7 +74,6 @@ class NoMatch(Exception):
         self.position = position
         self.parser = parser
 
-
     def eval_attrs(self):
         """
         Call this to evaluate `message`, `context`, `line` and `col`. Called by __str__.
@@ -704,7 +703,6 @@ class And(SyntaxPredicate):
             parser.load_state(saved_state)
 
 
-
 class Not(SyntaxPredicate):
     """
     This predicate will succeed if the specified expression doesn't match
@@ -972,7 +970,6 @@ class StrMatch(Match):
         return hash(self.to_match)
 
 
-
 # HACK: Kwd class is a bit hackish. Need to find a better way to
 #       introduce different classes of string tokens.
 class Kwd(StrMatch):
@@ -1126,7 +1123,7 @@ class WrappedWithStateLayer(ParsingExpression):
         try:
             retval = self.nodes[0].parse(parser)
             parser.state.pop_state_layer()
-        except:
+        except Exception:
             parser.load_state(saved_state)
             raise
 
@@ -1599,7 +1596,6 @@ class ParserStateLayer:
     def __deepcopy__(self, memo: dict = None):
         copied = self.__class__()
         return copied
-
 
 
 class ParserState:

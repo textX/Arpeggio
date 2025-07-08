@@ -100,6 +100,7 @@ END <- 'end';
 GLOBAL <- r'global(?=\s)';
 '''
 
+
 def get_clean_grammar():
     return get_grammar().replace('<-', '=').replace(';', '')
 
@@ -123,7 +124,7 @@ def function_name2
 end of function_name2
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    result = parser.parse(input)
+    parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -136,6 +137,7 @@ end of function_name2
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
@@ -155,7 +157,7 @@ function_name1(1, 2, 3)
 function_name2(1, 2, 3)
 """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    result = parser.parse(input)
+    parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -164,6 +166,7 @@ function_name2(1, 2, 3)
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
@@ -190,7 +193,7 @@ end of function_name3
 
 """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    result = parser.parse(input)
+    parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -199,6 +202,7 @@ end of function_name3
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
@@ -228,7 +232,7 @@ end of function_name3
 
 """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    result = parser.parse(input)
+    parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -239,44 +243,6 @@ end of function_name3
         output = capsys.readouterr()
         assert 'states stack' in output.out
 
-@pytest.mark.parametrize('klass, grammar_cb, debug', [
-    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, Debugging.ENABLED),
-])
-def test_backreference_with_state(klass, grammar_cb, debug, capsys):
-    input = """
-def function_name1
-end of function_name1
-
-def function_name2
-end of function_name2
-
-def function_name3
-    anonymous defer
-    anonymous defer
-
-    deferred
-        function_name1(1, 2, 3)
-    end
-
-    deferred
-        function_name2(1, 2, 3)
-    end
-end of function_name3
-
-"""
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    result = parser.parse(input)
-
-    with pytest.raises(Exception) as e:
-        parser.state.pop_rule_reference('function_name')
-    assert e is not None
-    assert len(parser.state.states_stack) == 0
-
-    if parser.debug:
-        output = capsys.readouterr()
-        assert 'states stack' in output.out
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
@@ -292,7 +258,7 @@ def function_name2
 end of function_name2
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    result = parser.parse(input)
+    parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -306,6 +272,7 @@ end of function_name2
         output = capsys.readouterr()
         assert 'states stack' in output.out
 
+
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
@@ -318,7 +285,7 @@ end of function_name2
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     with pytest.raises(arpeggio.NoMatch) as e:
-        result = parser.parse(input)
+        parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -327,6 +294,7 @@ end of function_name2
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
@@ -341,7 +309,7 @@ end of function_name1
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     with pytest.raises(arpeggio.NoMatch) as e:
-        result = parser.parse(input)
+        parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -350,6 +318,7 @@ end of function_name1
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
@@ -366,7 +335,7 @@ end of function_name1
 global_function_name(1, 2, 3)
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    result = parser.parse(input)
+    parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -375,6 +344,7 @@ global_function_name(1, 2, 3)
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
@@ -392,7 +362,7 @@ local_function_name(1, 2, 3)
     """
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     with pytest.raises(arpeggio.NoMatch) as e:
-        result = parser.parse(input)
+        parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')

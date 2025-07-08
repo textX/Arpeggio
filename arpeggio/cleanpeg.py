@@ -31,7 +31,7 @@ ASSIGNMENT = "="
 ORDERED_CHOICE = "/"
 ZERO_OR_MORE = "*"
 ONE_OR_MORE_SYMBOL = '+'
-ONE_OR_MORE = _('(?<!\s)\\' + ONE_OR_MORE_SYMBOL)
+ONE_OR_MORE = _('(?<!\\s)\\' + ONE_OR_MORE_SYMBOL)
 OPTIONAL = "?"
 UNORDERED_GROUP = "#"
 AND = "&"
@@ -49,42 +49,104 @@ POP_STATE = '-@'
 STATE_LAYER_START = '@('
 STATE_LAYER_END = ')'
 
-# PEG syntax rules
-def peggrammar():       return OneOrMore(rule), EOF
-def rule():             return rule_name, ASSIGNMENT, ordered_choice
-def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore(full_expression)
-def operation():        return rule_crossref, calls
-def full_expression():  return Optional([AND, NOT]), repeated_expression
-def repeated_expression():      return expression, Optional([OPTIONAL,
-                                                             ZERO_OR_MORE,
-                                                             ONE_OR_MORE,
-                                                             UNORDERED_GROUP])
-def expression():       return [regex,
-                                push_state, pop_state, wrapped_with_state_layer, state,
-                                operation, rule_crossref,
-                                (OPEN, ordered_choice, CLOSE),
-                                str_match], Not(ASSIGNMENT)
 
-def state():            return STATE, state_name
-def push_state():       return PUSH_STATE, state_name
-def pop_state():        return POP_STATE, state_name
-def wrapped_with_state_layer(): return STATE_LAYER_START, ordered_choice, STATE_LAYER_END
+# PEG syntax rules
+def peggrammar():
+    return OneOrMore(rule), EOF
+
+
+def rule():
+    return rule_name, ASSIGNMENT, ordered_choice
+
+
+def ordered_choice():
+    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
+
+
+def sequence():
+    return OneOrMore(full_expression)
+
+
+def operation():
+    return rule_crossref, calls
+
+
+def full_expression():
+    return Optional([AND, NOT]), repeated_expression
+
+
+def repeated_expression():
+    return expression, Optional([
+        OPTIONAL,
+        ZERO_OR_MORE,
+        ONE_OR_MORE,
+        UNORDERED_GROUP
+    ])
+
+
+def expression():
+    return [
+        regex,
+        push_state, pop_state, wrapped_with_state_layer, state,
+        operation, rule_crossref,
+        (OPEN, ordered_choice, CLOSE),
+        str_match
+    ], Not(ASSIGNMENT)
+
+
+def state():
+    return STATE, state_name
+
+
+def push_state():
+    return PUSH_STATE, state_name
+
+
+def pop_state():
+    return POP_STATE, state_name
+
+
+def wrapped_with_state_layer():
+    return STATE_LAYER_START, ordered_choice, STATE_LAYER_END
+
 
 # PEG Lexical rules
-def regex():            return _(r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
-                                 r'''(r"[^"\\]*(?:\\.[^"\\]*)*")''')
-def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
-def rule_crossref():    return rule_name
-def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-                                 r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
-def comment():          return _("//.*\n", multiline=False)
+def regex():
+    return _(r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
+             r'''(r"[^"\\]*(?:\\.[^"\\]*)*")''')
 
-def calls():            return CALL_START, call, ZeroOrMore([CALL_DELIMITER, call]), CALL_END
-def call():             return OneOrMore(call_argument)
-def call_argument():    return _(r'[^\} \t,]+')
 
-def state_name():       return _(r'[a-zA-Z_][a-zA-Z_0-9]*')
+def rule_name():
+    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
+
+
+def rule_crossref():
+    return rule_name
+
+
+def str_match():
+    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+
+
+def comment():
+    return _("//.*\n", multiline=False)
+
+
+def calls():
+    return CALL_START, call, ZeroOrMore([CALL_DELIMITER, call]), CALL_END
+
+
+def call():
+    return OneOrMore(call_argument)
+
+
+def call_argument():
+    return _(r'[^\} \t,]+')
+
+
+def state_name():
+    return _(r'[a-zA-Z_][a-zA-Z_0-9]*')
 
 
 class ParserPEG(ParserPEGOrig):

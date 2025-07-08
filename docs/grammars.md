@@ -244,6 +244,22 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
   with the whitespace. If more than one command is specified, the commands
   must be separated by comma `,` delimiter. See below for the list
   of the provided actions.
+- **State matches** are given as state names preceded by `@` operator
+  (e.g. `@some_state`). A match will succeed only if the current state is
+  the same as the provided by the operator state.
+- **Push state** is used to push a state onto the stack of the states and
+  make it the current. It is specified using `+@` operator with a state name
+  after it (e.g. `+@some_state`). Later this state can be matched using
+  the `@` operator. This rule always succeeds.
+- **Pop state** is used to pop a state form the top of the state stack.
+  It is specified using `-@` operator followed by the state name that should
+  be removed (e.g. `-@some_state`). If the current state doesn't match
+  the specified state then the match fails.
+- **Wrapping with a state layer** is specified using `@(` and `)` operator and
+  allows one or more rules to be wrapped with a separate state layer
+  (e.g. `@( ((LOCAL variable_name{add}) / (variable_name{any} ASSIGN value))* )`).
+  It allows to store added by actions data in separate layers (for example,
+  to handle local variables).
 - A special rule `EOF` will match end of input string.
 
 A set of basic **match actions** if provided:
@@ -256,12 +272,15 @@ A set of basic **match actions** if provided:
   If the matched token and the token at the bottom of the stack aren't
   the same, then the match will fail. This action can be used to implement
   FIFO (First In, First Out) rules.
-- **add** to add a matched token to the list of matched tokens corresponding
-  to the rule. This action always succeeds and can be used, for example,
-  to determine local variables.
+- **add** to add a matched token to the list of the matched tokens
+  corresponding to the rule. This action always succeeds and can be used,
+  for example, to determine local variables.
+- **parent add** to add a matched token to the list of the matched tokens of
+  the parent state layer corresponding to the rule. This action always succeeds
+  and can be used, for example, to determine local variables.
 - **any** to match any token corresponding to the rule that were previously
-  added to the list of matched tokens (by **add** action). If no token found,
-  then the rule will fail to match.
+  added to the list of matched tokens (by **add** action) across all the state
+  layers. If no token found, then the rule will fail to match.
 
 In the RHS a rule reference is a name of another rule. Parser will try to match
 another rule at that location.

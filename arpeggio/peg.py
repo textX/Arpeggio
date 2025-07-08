@@ -177,7 +177,7 @@ class ActionPop(MatchedAction):
         matched_str = str(matched_result)
         try:
             removed = parser_state.pop_rule_reference(self._rule.rule_name, matched_str)
-        except:
+        except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
@@ -207,7 +207,7 @@ class ActionPopFront(MatchedAction):
         matched_str = str(matched_result)
         try:
             removed = parser_state.pop_front_rule_reference(self._rule.rule_name, matched_str)
-        except:
+        except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
@@ -281,15 +281,8 @@ class ActionAny(MatchedAction):
     ):
         parser_state = parser.state
         matched_str = str(matched_result)
-        try:
-            is_known = parser_state.rule_reference_is_known(self._rule.rule_name, matched_str)
-        except:
-            if parser.debug:
-                parser.dprint(
-                    f"-- No pushes were performed for `{self._rule.rule_name}` rule at {c_pos} => "
-                    f"'{parser.context(len(str(matched_result)))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
 
+        is_known = parser_state.rule_reference_is_known(self._rule.rule_name, matched_str)
         if not is_known:
             if parser.debug:
                 parser.dprint(
@@ -631,11 +624,15 @@ class ParserPEGState(ParserState):
         return stack.pop(0)
 
     def first_rule_reference(self, rule_name: str):
-        stack = self.state_layers[-1].rule_reference_stack[rule_name]
+        stack = self.state_layers[-1].rule_reference_stack.get(rule_name)
+        if not stack:
+            return None
         return stack[0]
 
     def last_rule_reference(self, rule_name: str):
-        stack = self.state_layers[-1].rule_reference_stack[rule_name]
+        stack = self.state_layers[-1].rule_reference_stack.get(rule_name)
+        if not stack:
+            return None
         return stack[-1]
 
     def remember_rule_reference(

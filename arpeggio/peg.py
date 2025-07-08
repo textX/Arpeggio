@@ -255,6 +255,21 @@ class ActionParentAdd(MatchedAction):
         return matched_result
 
 
+class ActionGlobalAdd(MatchedAction):
+    @typing.override
+    def run(
+        self,
+        parser: Parser,
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args = None,
+    ):
+        parser_state = parser.state
+        matched_str = str(matched_result)
+        parser_state.remember_rule_reference(self._rule.rule_name, matched_str, state_layer_scope=StateLayerScope.GLOBAL)
+        return matched_result
+
+
 class ActionAny(MatchedAction):
     @typing.override
     def run(
@@ -334,6 +349,7 @@ class PEGVisitor(PTNodeVisitor):
         'add': ActionAdd,
         'any': ActionAny,
         'parent_add': ActionParentAdd,
+        'global_add': ActionGlobalAdd,
     }
     matched_actions_aliases: dict[str, dict[str, str]] = {
         'state': {
@@ -342,6 +358,9 @@ class PEGVisitor(PTNodeVisitor):
         },
         'parent': {
             'add': 'parent_add',
+        },
+        'global': {
+            'add': 'global_add',
         },
     }
 

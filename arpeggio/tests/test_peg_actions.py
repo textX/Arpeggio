@@ -30,11 +30,21 @@ program_element <-
     / defer
     / function
     / alternative_function
+    / global_function
     / function_call;
 
 function <-
     @(
         FUNCTION_START function_name{push, parent add}
+            program_element*
+        // Test And expression not changing the state of the parser
+        FUNCTION_END &function_name{pop} function_name{pop}
+    );
+
+global_function <-
+    GLOBAL
+    @(
+        FUNCTION_START function_name{push, global add}
             program_element*
         // Test And expression not changing the state of the parser
         FUNCTION_END &function_name{pop} function_name{pop}
@@ -87,6 +97,7 @@ DEFER_DELIMITER <- ':';
 ANONYMOUS_DEFER <- 'anonymous defer';
 DEFERRED <- 'deferred';
 END <- 'end';
+GLOBAL <- r'global(?=\s)';
 '''
 
 def get_clean_grammar():
@@ -331,6 +342,31 @@ end of function_name1
     parser = klass(grammar_cb(), 'parser_entry', debug=debug)
     with pytest.raises(arpeggio.NoMatch) as e:
         result = parser.parse(input)
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
+
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_global_add(klass, grammar_cb, debug, capsys):
+    input = """
+def function_name1
+    global def global_function_name
+    end of global_function_name
+end of function_name1
+
+global_function_name(1, 2, 3)
+    """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
+    result = parser.parse(input)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')

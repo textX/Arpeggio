@@ -11,6 +11,8 @@
 #######################################################################
 
 import pytest
+
+import arpeggio
 from arpeggio.peg import ParserPEG
 from arpeggio.cleanpeg import ParserPEG as ParserPEGClean
 import enum
@@ -288,6 +290,77 @@ end of function_name2
     function_names = parser.state.known_rule_references('function_name')
     assert isinstance(function_names, set)
     assert len(function_names) == 2
+
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_not_found(klass, grammar_cb, debug, capsys):
+    input = """
+def function_name1
+end of function_name2
+    """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch) as e:
+        result = parser.parse(input)
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
+
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_any_not_found(klass, grammar_cb, debug, capsys):
+    input = """
+def function_name1
+    not_found(1, 2, 3)
+end of function_name1
+    """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch) as e:
+        result = parser.parse(input)
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
+
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_wrapping_with_state_layer(klass, grammar_cb, debug, capsys):
+    input = """
+def function_name1
+    def local_function_name
+    end of local_function_name
+end of function_name1
+
+local_function_name(1, 2, 3)
+    """
+    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch) as e:
+        result = parser.parse(input)
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
 
     if parser.debug:
         output = capsys.readouterr()

@@ -104,9 +104,9 @@ def repeated_expression():
 def expression():
     return [
         regex,
-        state,
-        push_state,
-        pop_state,
+        parsing_state,
+        push_parsing_state,
+        pop_parsing_state,
         wrapped_with_state_layer,
         operation,
         rule_crossref,
@@ -115,19 +115,19 @@ def expression():
     ]
 
 
-def state():
-    return STATE, state_name
+def parsing_state():
+    return STATE, parsing_state_name
 
 
-def push_state():
-    return PUSH_STATE, state_name
+def push_parsing_state():
+    return PUSH_STATE, parsing_state_name
 
 
-def pop_state():
-    return POP_STATE, state_name
+def pop_parsing_state():
+    return POP_STATE, parsing_state_name
 
 
-def state_name():
+def parsing_state_name():
     return _(r'[a-zA-Z_][a-zA-Z_0-9]*')
 
 
@@ -140,18 +140,18 @@ def wrapped_with_state_layer():
 
 
 def operation():
-    return rule_crossref, calls
+    return rule_crossref, action_calls
 
 
-def calls():
-    return CALL_START, call, ZeroOrMore([CALL_DELIMITER, call]), CALL_END
+def action_calls():
+    return CALL_START, action_call, ZeroOrMore([CALL_DELIMITER, action_call]), CALL_END
 
 
-def call():
-    return OneOrMore(call_argument)
+def action_call():
+    return OneOrMore(action_call_argument)
 
 
-def call_argument():
+def action_call_argument():
     return _(r'[^\} \t,]+')
 
 
@@ -591,21 +591,21 @@ class PEGVisitor(PTNodeVisitor):
 
         return retval
 
-    def visit_calls(self, node, children):
-        call_arguments = [arg for arg in node if arg.rule_name == 'call']
+    def visit_action_calls(self, node, children):
+        call_arguments = [arg for arg in node if arg.rule_name == 'action_call']
         return call_arguments
 
-    def visit_state(self, node, children):
+    def visit_parsing_state(self, node, children):
         state_name = str(node[1])
         parsing_state = self.get_state_by_name(state_name)
         return MatchState(parsing_state)
 
-    def visit_push_state(self, node, children):
+    def visit_push_parsing_state(self, node, children):
         state_name = str(node[1])
         parsing_state = self.get_state_by_name(state_name)
         return PushState(parsing_state)
 
-    def visit_pop_state(self, node, children):
+    def visit_pop_parsing_state(self, node, children):
         state_name = str(node[1])
         parsing_state = self.get_state_by_name(state_name)
         return PopState(parsing_state)

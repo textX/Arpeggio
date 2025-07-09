@@ -191,6 +191,9 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
 
 
 class MatchedAction:
+    """
+    An abstract class for all action classes used in MatchActions parsing rules.
+    """
     _rule: ParsingStatement
     _args: list[typing.Any] | None
 
@@ -210,6 +213,22 @@ class MatchedAction:
         c_pos: int,
         args = None,
     ):
+        """
+        This method must be implemented to run an action over the match result.
+
+        Parameters:
+        parser
+            A parser used to parse the source code.
+        matched_result
+            The match result that need to be processed by the action.
+        c_pos
+            The parser position before the corresponding (the MatchActions child rule) rule was matched.
+        args
+            Additional arguments that were passed to the action.
+
+        Returns:
+            A match result (usually the same as matched_result).
+        """
         pass
 
     def __str__(self):
@@ -217,6 +236,9 @@ class MatchedAction:
 
 
 class ActionPush(MatchedAction):
+    """
+    An action that is used to push a matched token onto the stack according to the rule name.
+    """
     @typing.override
     def run(
         self,
@@ -231,6 +253,9 @@ class ActionPush(MatchedAction):
 
 
 class ActionPop(MatchedAction):
+    """
+    An action that is used to remove a matched token from the top of the matches list according to the rule name.
+    """
     @typing.override
     def run(
         self,
@@ -261,6 +286,9 @@ class ActionPop(MatchedAction):
 
 
 class ActionPopFront(MatchedAction):
+    """
+    An action that is used to remove a matched token from the bottom of the matches list according to the rule name.
+    """
     @typing.override
     def run(
         self,
@@ -292,6 +320,9 @@ class ActionPopFront(MatchedAction):
 
 
 class ActionAdd(MatchedAction):
+    """
+    An action that is used to add a matched token to the set of matched tokens.
+    """
     @typing.override
     def run(
         self,
@@ -307,6 +338,9 @@ class ActionAdd(MatchedAction):
 
 
 class ActionParentAdd(MatchedAction):
+    """
+    An action that is used to add a matched token to the set of matched tokens of the parent state layer.
+    """
     @typing.override
     def run(
         self,
@@ -326,6 +360,9 @@ class ActionParentAdd(MatchedAction):
 
 
 class ActionGlobalAdd(MatchedAction):
+    """
+    An action that is used to add a matched token to the set of matched tokens of the global state layer.
+    """
     @typing.override
     def run(
         self,
@@ -345,6 +382,9 @@ class ActionGlobalAdd(MatchedAction):
 
 
 class ActionAny(MatchedAction):
+    """
+    An action that is used to check if the matched token was previously added to the set of the matched tokens.
+    """
     @typing.override
     def run(
         self,
@@ -368,6 +408,12 @@ class ActionAny(MatchedAction):
 
 
 class MatchActions(ParsingExpression):
+    """
+    Apply some actions to a matched rule.
+
+    This rule parses his child rule and then runs stored actions over the result. Each action except the first one
+    receives the previous action result and returns its own result (usually the same).
+    """
     actions: list[MatchedAction]
 
     def __init__(self, rule: ParsingStatement, actions: list[MatchedAction]):
@@ -654,6 +700,9 @@ class PEGVisitor(PTNodeVisitor):
 
 
 class ParserPEGStateLayer(ParserStateLayer):
+    """
+    A class that holds additional data used in PEG expressions.
+    """
     rule_reference_stack: dict[str, str]
     rule_reference_set: dict[str, str]
 
@@ -670,12 +719,18 @@ class ParserPEGStateLayer(ParserStateLayer):
 
 
 class StateLayerScope(enum.Enum):
+    """
+    An enumeration used to identify the stack layer that should be used in an expression.
+    """
     GLOBAL = 0
     PARENT = -2
     CURRENT = -1
 
 
 class ParserPEGState(ParserState):
+    """
+    A class that manages additional data used in PEG expressions.
+    """
     _state_layer_class: ParserStateLayer = ParserPEGStateLayer
 
     def __init__(self):

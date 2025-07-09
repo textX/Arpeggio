@@ -163,12 +163,28 @@ class DebugPrinter:
 
 
 class ParserModelItem(abc.ABC):
+    """
+    A basic class for all parser model classes.
+
+    Represents the node of the parser model. All parser model classes should be descendants of this basic class
+    including any helper classes.
+    """
+
     def resolve(self, resolve_cb: typing.Callable[['ParserModelItem'], 'ParserModelItem']):
         resolved_node = resolve_cb(self)
         return resolved_node
 
 
 class ParsingStatement(ParserModelItem):
+    """
+    A basic class for all parser model statement classes.
+
+    Statements can parse text or do something else like manipulating the parser state system.
+
+    All parser model statement classes (i.e. classes that participate in the parsing process) must be
+    descendants of this basic class.
+    """
+
     @abc.abstractmethod
     def parse(self, parser: 'Parser'):
         pass
@@ -177,7 +193,9 @@ class ParsingStatement(ParserModelItem):
 class ParsingExpression(ParsingStatement):
     """
     An abstract class for all parsing expressions.
-    Represents the node of the Parser Model.
+
+    The parsing expression differs from the parsing statement in such a way that it always involves
+    text parsing process.
 
     Attributes:
         elements: A list (or other python object) used as a staging structure
@@ -984,6 +1002,13 @@ class Kwd(StrMatch):
 
 
 class ParsingState:
+    """
+    A state that the parser could be in during the parsing process.
+
+    Stores a name and an integer identifier of the state. Each state must have its own unique state identifier
+    across all the states of the parse model that the state is used in. Each state must also have its own unique name.
+    There must not be two or more states with the same name in the parse model.
+    """
     name: str
     value: int
 
@@ -999,6 +1024,11 @@ class ParsingState:
 
 
 class ParsingStateStatement(ParsingStatement, abc.ABC):
+    """
+    An abstract class for parsing state statements.
+
+    Stores the parsing state and provides a property to get it.
+    """
     _parsing_state: ParsingState
 
     def __init__(
@@ -1018,6 +1048,11 @@ class ParsingStateStatement(ParsingStatement, abc.ABC):
 
 
 class MatchState(ParsingStateStatement):
+    """
+    A statement to match the expected parsing state at the position the parser currently is in.
+
+    If the current state doesn't match the expected state then the parsing process will fail.
+    """
     def parse(self, parser: 'Parser'):
         c_pos = parser.position
         curr_parsing_state = parser.state.parsing_state
@@ -1048,6 +1083,11 @@ class MatchState(ParsingStateStatement):
 
 
 class PushState(ParsingStateStatement):
+    """
+    A statement to push a new parsing state at the position the parser currently is in.
+
+    This statement always passes.
+    """
     def parse(self, parser: 'Parser'):
         parser.state.push_parsing_state(self._parsing_state)
         return None
@@ -1063,6 +1103,12 @@ class PushState(ParsingStateStatement):
 
 
 class PopState(ParsingStateStatement):
+    """
+    A statement to match and remove the expected parsing state at the position the parser currently is in.
+
+    If the current statement doesn't match the expected statement, then the parsing process will fail. Otherwise,
+    the current parsing state will be removed from the top of the parsing states stack.
+    """
     def parse(self, parser: 'Parser'):
         curr_parsing_state = parser.state.parsing_state
         if curr_parsing_state != self._parsing_state:
@@ -1087,6 +1133,12 @@ class PopState(ParsingStateStatement):
 
 
 class WrappedWithStateLayer(ParsingExpression):
+    """
+    An expression wrapper that wraps an expression with a separate state layer.
+
+    The expression will be parsed after a new parse state layer is pushed onto the top of the parse layers stack.
+    Finally, the parse state layer will be removed from the top of the stack.
+    """
     def __init__(self, node):
         super().__init__(nodes=[node])
 
@@ -1580,6 +1632,12 @@ class ParserStateLayer:
 
 
 class ParserState:
+    """
+    A basic class for the parser state system.
+
+    The class instance should store all the data that is used between rules during the parsing process.
+    Inherit from this class to manage additional state functionality.
+    """
     _state_layer_class: ParserStateLayer = ParserStateLayer
     state_layers: list[_state_layer_class]
 

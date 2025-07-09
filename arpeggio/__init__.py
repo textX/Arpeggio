@@ -1591,6 +1591,11 @@ class ParserState:
         copied.state_layers = copy.deepcopy(self.state_layers, memo)
         return copied
 
+    def load_from(self, other_state: 'ParserState'):
+        self.state_layers = other_state.state_layers
+        # Make the other state invalid to prevent possible errors:
+        other_state.state_layers = []
+
     def push_parsing_state(self, parsing_state: ParsingState):
         self.state_layers[-1].states_stack.append(parsing_state)
 
@@ -1969,7 +1974,7 @@ class Parser(DebugPrinter):
         return copy.deepcopy(self._state)
 
     def load_state(self, new_state: ParserState):
-        self._state = new_state
+        self._state.load_from(new_state)
 
 
 class CrossRef(ParserModelItem):

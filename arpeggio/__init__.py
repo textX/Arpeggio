@@ -994,8 +994,11 @@ class ParsingState:
     def __str__(self):
         return f'{self.name} ({self.value})'
 
+    def __eq__(self, other: 'ParsingState'):
+        return self.value == other.value
 
-class MatchState(ParsingStatement):
+
+class ParsingStateStatement(ParsingStatement, abc.ABC):
     _parsing_state: ParsingState
 
     def __init__(
@@ -1005,23 +1008,30 @@ class MatchState(ParsingStatement):
         super().__init__()
         self._parsing_state = parsing_state
 
-    def parse(self, parser: 'Parser'):
-        parser_state = parser.state
-        states_stack = parser_state.states_stack
+    @property
+    def state_name(self):
+        return self._parsing_state.name
 
+    @property
+    def parsing_state(self):
+        return self._parsing_state
+
+
+class MatchState(ParsingStateStatement):
+    def parse(self, parser: 'Parser'):
         c_pos = parser.position
-        if not states_stack:
+        curr_parsing_state = parser.state.parsing_state
+        if not curr_parsing_state:
             if parser.debug:
                 parser.dprint(
                     f"-- The states stack is empty while matching `{self.state_name}` state at {c_pos} => "
                     f"'{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
-        curr_state = states_stack[-1]
 
-        if curr_state.value != self._parsing_state.value:
+        if curr_parsing_state != self._parsing_state:
             if parser.debug:
                 parser.dprint(
-                    f"-- The current state (`{curr_state.name}`) doesn't match `{self.state_name}` state at {c_pos} => "
+                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state at {c_pos} => "
                     f"'{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
 
@@ -1036,25 +1046,10 @@ class MatchState(ParsingStatement):
             self.state_name,
         )
 
-    @property
-    def state_name(self):
-        return self._parsing_state.name
 
-
-class PushState(ParsingStatement):
-    _parsing_state: ParsingState
-
-    def __init__(
-        self,
-        parsing_state: ParsingState,
-    ):
-        super().__init__()
-        self._parsing_state = parsing_state
-
+class PushState(ParsingStateStatement):
     def parse(self, parser: 'Parser'):
-        parser_state = parser.state
-        states_stack = parser_state.states_stack
-        states_stack.append(self._parsing_state)
+        parser.state.push_parsing_state(self._parsing_state)
         return None
 
     def __str__(self):
@@ -1066,34 +1061,19 @@ class PushState(ParsingStatement):
             self.state_name,
         )
 
-    @property
-    def state_name(self):
-        return self._parsing_state.name
 
-
-class PopState(ParsingStatement):
-    _parsing_state: ParsingState
-
-    def __init__(
-        self,
-        parsing_state: ParsingState,
-    ):
-        super().__init__()
-        self._parsing_state = parsing_state
-
+class PopState(ParsingStateStatement):
     def parse(self, parser: 'Parser'):
-        parser_state = parser.state
-        states_stack = parser_state.states_stack
-        curr_state = states_stack[-1]
-        if curr_state.value != self._parsing_state.value:
+        curr_parsing_state = parser.state.parsing_state
+        if curr_parsing_state != self._parsing_state:
             c_pos = parser.position
             if parser.debug:
                 parser.dprint(
-                    f"-- The current state (`{curr_state.name}`) doesn't match `{self.state_name}` state at {c_pos} => "
+                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state at {c_pos} => "
                     f"'{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
 
-        states_stack.pop()
+        parser.state.pop_parsing_state()
         return None
 
     def __str__(self):
@@ -1104,10 +1084,6 @@ class PopState(ParsingStatement):
         return "-@{}".format(
             self.state_name,
         )
-
-    @property
-    def state_name(self):
-        return self._parsing_state.name
 
 
 class WrappedWithStateLayer(ParsingExpression):
@@ -1592,26 +1568,43 @@ class ParserStateLayer:
 
     Inherit from this class to add level-specific state parameters.
     """
+    states_stack: list[ParsingState]
+
+    def __init__(self):
+        self.states_stack = []
 
     def __deepcopy__(self, memo: dict = None):
         copied = self.__class__()
+        copied.states_stack = copy.deepcopy(self.states_stack, memo)
         return copied
 
 
 class ParserState:
     _state_layer_class: ParserStateLayer = ParserStateLayer
-    states_stack: list[ParsingState]
     state_layers: list[_state_layer_class]
 
     def __init__(self):
-        self.states_stack = []
         self.state_layers = [self._state_layer_class()]
 
     def __deepcopy__(self, memo: dict = None):
         copied = self.__class__()
-        copied.states_stack = copy.deepcopy(self.states_stack, memo)
         copied.state_layers = copy.deepcopy(self.state_layers, memo)
         return copied
+
+    def push_parsing_state(self, parsing_state: ParsingState):
+        self.state_layers[-1].states_stack.append(parsing_state)
+
+    def pop_parsing_state(self):
+        return self.state_layers[-1].states_stack.pop()
+
+    @property
+    def parsing_state(self):
+        parsing_state = None
+        for state_layer in reversed(self.state_layers):
+            if state_layer.states_stack:
+                parsing_state = state_layer.states_stack[-1]
+                break
+        return parsing_state
 
     def push_state_layer(self):
         self.state_layers.append(self._state_layer_class())

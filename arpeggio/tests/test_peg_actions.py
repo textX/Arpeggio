@@ -237,7 +237,7 @@ end of function_name3
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
     assert e is not None
-    assert len(parser.state.states_stack) == 0
+    assert parser.state.parsing_state is None
 
     if parser.debug:
         output = capsys.readouterr()

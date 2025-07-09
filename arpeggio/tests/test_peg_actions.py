@@ -51,12 +51,13 @@ global_function <-
     );
 
 alternative_function <-
+    // Test branching with push action
+    FUNCTION_START function_name{push, add}
     @(
-        // Test branching with push action
-        FUNCTION_START function_name{push, parent add}
         program_element*
-        '/' function_name{pop}
-    );
+        // `*` operator is greedy so the closing `)` won't be matched until all the program_element statements are found
+    )
+    '/' function_name{pop};
 
 function_call <-
     function_name{any}

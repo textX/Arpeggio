@@ -13,6 +13,7 @@ import enum
 import re
 import typing
 
+
 from arpeggio import (
     EOF,
     And,
@@ -194,12 +195,12 @@ class MatchedAction:
     """
     An abstract class for all action classes used in MatchActions parsing rules.
     """
-    _rule: ParsingStatement
+    _rule: ParsingExpression  # bounding to this type for the rule_name attribute
     _args: list[typing.Any] | None
 
     def __init__(
         self,
-        rule: ParsingStatement,
+        rule: ParsingExpression,
         args: list[typing.Any] = None,
     ):
         self._rule = rule
@@ -208,7 +209,7 @@ class MatchedAction:
     @abc.abstractmethod
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
@@ -242,13 +243,12 @@ class ActionPush(MatchedAction):
     @typing.override
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
     ):
-        parser_state = parser.state
-        parser_state.push_rule_reference(self._rule.rule_name, str(matched_result))
+        parser.state.push_rule_reference(self._rule.rule_name, str(matched_result))
         return matched_result
 
 
@@ -259,15 +259,14 @@ class ActionPop(MatchedAction):
     @typing.override
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
     ):
-        parser_state = parser.state
         matched_str = str(matched_result)
         try:
-            removed = parser_state.pop_rule_reference(self._rule.rule_name, matched_str)
+            removed = parser.state.pop_rule_reference(self._rule.rule_name, matched_str)
         except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
@@ -277,7 +276,7 @@ class ActionPop(MatchedAction):
 
         if not removed:
             if parser.debug:
-                match_against = parser_state.last_rule_reference(self._rule.rule_name)
+                match_against = parser.state.last_rule_reference(self._rule.rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
@@ -292,15 +291,14 @@ class ActionPopFront(MatchedAction):
     @typing.override
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
     ):
-        parser_state = parser.state
         matched_str = str(matched_result)
         try:
-            removed = parser_state.pop_front_rule_reference(self._rule.rule_name, matched_str)
+            removed = parser.state.pop_front_rule_reference(self._rule.rule_name, matched_str)
         except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
@@ -310,7 +308,7 @@ class ActionPopFront(MatchedAction):
 
         if not removed:
             if parser.debug:
-                match_against = parser_state.first_rule_reference(self._rule.rule_name)
+                match_against = parser.state.first_rule_reference(self._rule.rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
@@ -326,14 +324,13 @@ class ActionAdd(MatchedAction):
     @typing.override
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
     ):
-        parser_state = parser.state
         matched_str = str(matched_result)
-        parser_state.remember_rule_reference(self._rule.rule_name, matched_str)
+        parser.state.remember_rule_reference(self._rule.rule_name, matched_str)
         return matched_result
 
 
@@ -344,14 +341,13 @@ class ActionParentAdd(MatchedAction):
     @typing.override
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
     ):
-        parser_state = parser.state
         matched_str = str(matched_result)
-        parser_state.remember_rule_reference(
+        parser.state.remember_rule_reference(
             self._rule.rule_name,
             matched_str,
             state_layer_scope = StateLayerScope.PARENT
@@ -366,14 +362,13 @@ class ActionGlobalAdd(MatchedAction):
     @typing.override
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
     ):
-        parser_state = parser.state
         matched_str = str(matched_result)
-        parser_state.remember_rule_reference(
+        parser.state.remember_rule_reference(
             self._rule.rule_name,
             matched_str,
             state_layer_scope = StateLayerScope.GLOBAL
@@ -388,15 +383,14 @@ class ActionAny(MatchedAction):
     @typing.override
     def run(
         self,
-        parser: Parser,
+        parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
         args = None,
     ):
-        parser_state = parser.state
         matched_str = str(matched_result)
 
-        is_known = parser_state.rule_reference_is_known(self._rule.rule_name, matched_str)
+        is_known = parser.state.rule_reference_is_known(self._rule.rule_name, matched_str)
         if not is_known:
             if parser.debug:
                 parser.dprint(
@@ -420,7 +414,7 @@ class MatchActions(ParsingExpression):
         super().__init__(rule_name='', nodes=[rule])
         self.actions = actions
 
-    def _parse(self, parser: 'Parser'):
+    def _parse(self, parser: 'ParserPEG'):
         rule_node = self.nodes[0]
         c_pos = parser.position
         retval = rule_node.parse(parser)
@@ -824,6 +818,11 @@ class ParserPEG(Parser):
 
     def _parse(self):
         return self.parser_model.parse(self)
+
+    # Override just to fix the hinting issue because it's not possible to override a field:
+    @Parser.state.getter
+    def state(self) -> _state_class:
+        return self._state
 
     def _from_peg(self, language_def):
         parser = ParserPython(peggrammar, comment, reduce_tree=False,

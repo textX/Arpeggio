@@ -2025,7 +2025,7 @@ class Parser(DebugPrinter):
             self.comments_model._clear_cache()
 
     @property
-    def state(self) -> ParserState:
+    def state(self) -> _state_class:
         return self._state
 
     def save_state(self) -> ParserState:

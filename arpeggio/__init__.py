@@ -1062,15 +1062,15 @@ class MatchState(ParsingStateStatement):
         if not curr_parsing_state:
             if parser.debug:
                 parser.dprint(
-                    f"-- The states stack is empty while matching `{self.state_name}` state at {c_pos} => "
+                    f"-- The states stack is empty while matching `{self.parsing_state}` state at {c_pos} => "
                     f"'{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
 
         if curr_parsing_state != self._parsing_state:
             if parser.debug:
                 parser.dprint(
-                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state at {c_pos} => "
-                    f"'{parser.context()}'")
+                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state"
+                    f" at {c_pos} => '{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
 
         return None
@@ -1118,8 +1118,8 @@ class PopState(ParsingStateStatement):
             c_pos = parser.position
             if parser.debug:
                 parser.dprint(
-                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state at {c_pos} => "
-                    f"'{parser.context()}'")
+                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state"
+                    f" at {c_pos} => '{parser.context()}'")
             parser._nm_raise(self, c_pos, parser)
 
         parser.state.pop_parsing_state()

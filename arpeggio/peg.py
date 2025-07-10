@@ -351,7 +351,7 @@ class ActionParentAdd(MatchedAction):
         parser.state.remember_rule_reference(
             self._rule.rule_name,
             matched_str,
-            state_layer_scope = StateLayerScope.PARENT
+            state_layer_scope = StateLayerScope.PARENT  # noqa: E251
         )
         return matched_result
 
@@ -372,7 +372,7 @@ class ActionGlobalAdd(MatchedAction):
         parser.state.remember_rule_reference(
             self._rule.rule_name,
             matched_str,
-            state_layer_scope = StateLayerScope.GLOBAL
+            state_layer_scope = StateLayerScope.GLOBAL  # noqa: E251
         )
         return matched_result
 

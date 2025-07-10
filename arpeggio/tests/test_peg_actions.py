@@ -117,15 +117,15 @@ class Debugging(enum.Flag):
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
 end of function_name1
 
 def function_name2
 end of function_name2
     """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -146,7 +146,7 @@ end of function_name2
     (ParserPEG, get_grammar, True),
 ])
 def test_backreference_any(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
 end of function_name1
 
@@ -157,8 +157,8 @@ end of function_name2
 function_name1(1, 2, 3)
 function_name2(1, 2, 3)
 """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -175,7 +175,7 @@ function_name2(1, 2, 3)
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_pop_front(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
 end of function_name1
 
@@ -193,8 +193,8 @@ def function_name3
 end of function_name3
 
 """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -211,7 +211,7 @@ end of function_name3
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_with_state(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
 end of function_name1
 
@@ -232,8 +232,8 @@ def function_name3
 end of function_name3
 
 """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -251,15 +251,15 @@ end of function_name3
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_with_lookahead(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
 /function_name1
 
 def function_name2
 end of function_name2
     """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -280,13 +280,13 @@ end of function_name2
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_not_found(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
 end of function_name2
     """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    with pytest.raises(arpeggio.NoMatch) as e:
-        parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch):
+        parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -303,14 +303,14 @@ end of function_name2
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_any_not_found(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
     not_found(1, 2, 3)
 end of function_name1
     """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    with pytest.raises(arpeggio.NoMatch) as e:
-        parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch):
+        parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -327,7 +327,7 @@ end of function_name1
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_global_add(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
     global def global_function_name
     end of global_function_name
@@ -335,8 +335,8 @@ end of function_name1
 
 global_function_name(1, 2, 3)
     """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -353,7 +353,7 @@ global_function_name(1, 2, 3)
     (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_wrapping_with_state_layer(klass, grammar_cb, debug, capsys):
-    input = """
+    input_text = """
 def function_name1
     def local_function_name
     end of local_function_name
@@ -361,9 +361,9 @@ end of function_name1
 
 local_function_name(1, 2, 3)
     """
-    parser = klass(grammar_cb(), 'parser_entry', debug=debug)
-    with pytest.raises(arpeggio.NoMatch) as e:
-        parser.parse(input)
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch):
+        parser.parse(input_text)
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')

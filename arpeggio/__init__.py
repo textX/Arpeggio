@@ -1135,7 +1135,7 @@ class PopState(ParsingStateStatement):
         )
 
 
-class WrappedWithStateLayer(ParsingExpression):
+class StateWrapper(ParsingExpression):
     """
     An expression wrapper that wraps an expression with a separate state layer.
 

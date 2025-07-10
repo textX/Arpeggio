@@ -42,7 +42,7 @@ from arpeggio import (
     MatchState,
     PushState,
     PopState,
-    WrappedWithStateLayer,
+    StateWrapper,
     ParsingState, ParserModelItem,
 )
 from arpeggio import RegExMatch as _
@@ -656,7 +656,7 @@ class PEGVisitor(PTNodeVisitor):
         return PopState(parsing_state)
 
     def visit_wrapped_with_state_layer(self, node, children):
-        return WrappedWithStateLayer(children[0])
+        return StateWrapper(children[0])
 
     def visit_repeated_expression(self, node, children):
         if len(children) == 1:

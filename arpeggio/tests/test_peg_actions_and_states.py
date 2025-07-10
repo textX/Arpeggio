@@ -1,6 +1,6 @@
 #######################################################################
-# Name: test_peg_parser
-# Purpose: Test for parser constructed using PEG textual grammars.
+# Name: test_peg_actions_and_states
+# Purpose: Test for parser constructed using PEG textual grammars using the actions and states system.
 # Authors: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@yandex.ru>
 # Copyright: (c) 2025
 #           Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>,

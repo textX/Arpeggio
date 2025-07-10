@@ -31,7 +31,9 @@ program_element <-
     / function
     / alternative_function
     / global_function
-    / function_call;
+    / function_call
+    / erroneous_non_closed_start
+    / erroneous_non_closed_end;
 
 function <-
     @(
@@ -86,6 +88,12 @@ anonymous_deferred <-
     program_element*
     END -@anonymous_defer;
 
+erroneous_non_closed_start <-
+    ERRONEOUS FUNCTION_START function_name{push, add};
+
+erroneous_non_closed_end <-
+    ERRONEOUS FUNCTION_END function_name{pop};
+
 FUNCTION_START <- 'def';
 function_name <- VALID_NAME;
 FUNCTION_END <- 'end of';
@@ -99,6 +107,7 @@ ANONYMOUS_DEFER <- 'anonymous defer';
 DEFERRED <- 'deferred';
 END <- 'end';
 GLOBAL <- r'global(?=\s)';
+ERRONEOUS <- 'erroneous';
 '''
 
 
@@ -143,6 +152,51 @@ end of function_name2
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_non_popped(klass, grammar_cb, debug, capsys):
+    input_text = """
+erroneous def function_name1
+    """
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.GrammarError):
+        parser.parse(input_text)
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_non_popped_in_state_layer(klass, grammar_cb, debug, capsys):
+    input_text = """
+def function_name0
+    erroneous def function_name1
+end of function_name0
+    """
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.GrammarError) as e:
+        parser.parse(input_text)
+    assert 'in the state layer' in e.value.message
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_non_pushed(klass, grammar_cb, debug, capsys):
+    input_text = """
+erroneous end of function_name1
+    """
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch):
+        parser.parse(input_text)
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, True),
 ])
 def test_backreference_any(klass, grammar_cb, debug, capsys):
@@ -167,6 +221,20 @@ function_name2(1, 2, 3)
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, True),
+])
+def test_backreference_any_not_met(klass, grammar_cb, debug, capsys):
+    input_text = """
+function_name1(arg1)
+"""
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch):
+        parser.parse(input_text)
 
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
@@ -243,6 +311,55 @@ end of function_name3
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_with_wrong_state(klass, grammar_cb, debug, capsys):
+    input_text = """
+def function_name1
+end of function_name1
+
+deferred
+    function_name1(1, 2, 3)
+end
+"""
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch):
+        parser.parse(input_text)
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_with_not_popped_state_within_state_layer(klass, grammar_cb, debug, capsys):
+    input_text = """
+def function_name1
+    anonymous defer
+end of function_name1
+"""
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.GrammarError):
+        parser.parse(input_text)
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_with_not_popped_state_within_global_state_layer(klass, grammar_cb, debug, capsys):
+    input_text = """
+anonymous defer
+"""
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.GrammarError):
+        parser.parse(input_text)
 
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
@@ -372,3 +489,25 @@ local_function_name(1, 2, 3)
     if parser.debug:
         output = capsys.readouterr()
         assert 'states stack' in output.out
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_state_reentrance(klass, grammar_cb, debug, capsys):
+    input_text1 = """
+erroneous def function_name1
+    """
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+
+    with pytest.raises(arpeggio.GrammarError):
+        parser.parse(input_text1)
+
+    input_text2 = """
+erroneous end of function_name1
+    """
+    with pytest.raises(arpeggio.NoMatch):
+        # If parser.state is not cleared then this rule will pass, but the state should be cleared on every parse.
+        parser.parse(input_text2)

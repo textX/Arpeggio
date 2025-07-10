@@ -716,6 +716,46 @@ class ParserPEGStateLayer(ParserStateLayer):
         copied.rule_reference_set = copy.deepcopy(self.rule_reference_set, memo)
         return copied
 
+    def __bool__(self):
+        if super().__bool__():
+            return True
+
+        rule_reference_stack_is_empty = True
+        for key, value in self.rule_reference_stack.items():
+            if value:
+                rule_reference_stack_is_empty = False
+
+        rule_reference_set_is_empty = True
+        for key, value in self.rule_reference_set.items():
+            if value:
+                rule_reference_set_is_empty = False
+
+        if rule_reference_stack_is_empty and rule_reference_set_is_empty:
+            return False
+
+        return True
+
+
+    @typing.override
+    def queues_are_empty(self) -> bool:
+        if not super().queues_are_empty():
+            return False
+
+        rule_reference_stack_is_empty = True
+        for key, value in self.rule_reference_stack.items():
+            if value:
+                rule_reference_stack_is_empty = False
+
+        return rule_reference_stack_is_empty
+
+    def __str__(self):
+        return f"""{super().__str__()}
+Rule references queue:
+{str(self.rule_reference_stack)}
+Known rule references:
+{str(self.rule_reference_set)}
+"""
+
 
 class StateLayerScope(enum.Enum):
     """

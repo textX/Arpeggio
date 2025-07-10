@@ -1153,11 +1153,11 @@ class StateWrapper(ParsingExpression):
 
         try:
             retval = self.nodes[0].parse(parser)
-            parser.state.pop_state_layer()
         except Exception:
             parser.load_state(saved_state)
             raise
 
+        parser.state.pop_state_layer()
         return retval
 
 
@@ -1633,6 +1633,21 @@ class ParserStateLayer:
         copied.states_stack = copy.deepcopy(self.states_stack, memo)
         return copied
 
+    def queues_are_empty(self) -> bool:
+        return not self.states_stack
+
+    def __str__(self):
+        return f"""States stack:
+{str(self.states_stack)}
+"""
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__}, id={id(self)}>{str(self)}'
+
+    def __bool__(self):
+        return not self.states_stack
+
+
 
 class ParserState:
     """
@@ -1651,6 +1666,10 @@ class ParserState:
         copied = self.__class__()
         copied.state_layers = copy.deepcopy(self.state_layers, memo)
         return copied
+
+    def clear(self):
+        if len(self.state_layers) > 1 or self.state_layers[0]:
+            self.state_layers = [self._state_layer_class()]
 
     def load_from(self, other_state: 'ParserState'):
         self.state_layers = other_state.state_layers
@@ -1676,7 +1695,21 @@ class ParserState:
         self.state_layers.append(self._state_layer_class())
 
     def pop_state_layer(self) -> ParserStateLayer:
+        if not self.state_layers[-1].queues_are_empty():
+            raise GrammarError('One or more queues are not empty in the state layer that is being popped. '
+                               'Probably, some grammar rules were not called to remove the items from the queues. '
+                               'The parser state: ' + str(self))
         return self.state_layers.pop()
+
+    def queues_are_empty(self) -> bool:
+        if len(self.state_layers) > 1:
+            return False
+        return self.state_layers[0].queues_are_empty()
+
+    def __str__(self) -> str:
+        return f"""State layers:
+{self.state_layers}
+"""
 
 
 # ----------------------------------------------------
@@ -1709,10 +1742,12 @@ class Parser(DebugPrinter):
     _state_class: type[ParserState] = ParserState
     _state: _state_class
 
+    check_state_integrity: bool
+
     FIRST_NOT = Not()
 
     def __init__(self, skipws=True, ws=None, reduce_tree=False, autokwd=False,
-                 ignore_case=False, memoization=False, **kwargs):
+                 ignore_case=False, memoization=False, check_state_integrity=True, **kwargs):
         """
         Args:
             skipws (bool): Should the whitespace skipping be done.  Default is
@@ -1725,6 +1760,8 @@ class Parser(DebugPrinter):
             ignore_case(bool): If case is ignored (default=False)
             memoization(bool): If memoization should be used
                 (a.k.a. packrat parsing)
+            check_state_integrity: Raises an error if count of pushes isn't equal
+                the count of pops in the global state layer.
         """
 
         super().__init__(**kwargs)
@@ -1743,6 +1780,8 @@ class Parser(DebugPrinter):
         self.autokwd = autokwd
         self.ignore_case = ignore_case
         self.memoization = memoization
+        self.check_state_integrity = check_state_integrity
+
         self.comments_model = None
         self.comments = []
         self.comment_positions = {}
@@ -1809,6 +1848,7 @@ class Parser(DebugPrinter):
             file_name(str): If input is loaded from file this can be
                 set to file name. It is used in error messages.
         """
+        self.state.clear()
         self.position = 0  # Input position
         self.nm = None  # Last NoMatch exception
         self.line_ends = []
@@ -1831,6 +1871,13 @@ class Parser(DebugPrinter):
             # Do this here to free memory.
             if self.memoization:
                 self._clear_caches()
+
+        if self.check_state_integrity:
+            queues_are_empty = self.state.queues_are_empty()
+            if not queues_are_empty:
+                raise GrammarError('One or more queues are not empty. '
+                                   'Probably, some grammar rules were not called to remove the items from the queues. '
+                                   'The parser state: ' + str(self.state))
 
         # In debug mode export parse tree to dot file for
         # visualization

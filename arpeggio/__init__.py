@@ -170,7 +170,10 @@ class ParserModelItem(abc.ABC):
     including any helper classes.
     """
 
-    def resolve(self, resolve_cb: typing.Callable[['ParserModelItem'], 'ParserModelItem']):
+    def resolve(
+        self,
+        resolve_cb: typing.Callable[['ParserModelItem'], 'ParserModelItem']
+    ) -> 'ParserModelItem':
         resolved_node = resolve_cb(self)
         return resolved_node
 
@@ -186,7 +189,7 @@ class ParsingStatement(ParserModelItem):
     """
 
     @abc.abstractmethod
-    def parse(self, parser: 'Parser'):
+    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
         pass
 
 
@@ -379,13 +382,13 @@ class ParsingExpression(ParsingStatement):
 
         return result
 
-    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]):
+    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]) -> ParserModelItem:
         for i, node in enumerate(self.nodes):
             self.nodes[i] = resolve_cb(node)
         return super().resolve(resolve_cb)
 
     @abc.abstractmethod
-    def _parse(self, parser: 'Parser'):
+    def _parse(self, parser: 'Parser') -> 'ParseTreeNode':
         pass
 
 
@@ -1053,7 +1056,7 @@ class MatchState(ParsingStateStatement):
 
     If the current state doesn't match the expected state then the parsing process will fail.
     """
-    def parse(self, parser: 'Parser'):
+    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
         c_pos = parser.position
         curr_parsing_state = parser.state.parsing_state
         if not curr_parsing_state:
@@ -1088,7 +1091,7 @@ class PushState(ParsingStateStatement):
 
     This statement always passes.
     """
-    def parse(self, parser: 'Parser'):
+    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
         parser.state.push_parsing_state(self._parsing_state)
         return None
 
@@ -1109,7 +1112,7 @@ class PopState(ParsingStateStatement):
     If the current statement doesn't match the expected statement, then the parsing process will fail. Otherwise,
     the current parsing state will be removed from the top of the parsing states stack.
     """
-    def parse(self, parser: 'Parser'):
+    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
         curr_parsing_state = parser.state.parsing_state
         if curr_parsing_state != self._parsing_state:
             c_pos = parser.position
@@ -1143,7 +1146,7 @@ class WrappedWithStateLayer(ParsingExpression):
         super().__init__(nodes=[node])
 
     @typing.override
-    def _parse(self, parser: 'Parser'):
+    def _parse(self, parser: 'Parser') -> 'ParseTreeNode':
         saved_state = parser.save_state()
 
         parser.state.push_state_layer()
@@ -1657,11 +1660,11 @@ class ParserState:
     def push_parsing_state(self, parsing_state: ParsingState):
         self.state_layers[-1].states_stack.append(parsing_state)
 
-    def pop_parsing_state(self):
+    def pop_parsing_state(self) -> ParsingState:
         return self.state_layers[-1].states_stack.pop()
 
     @property
-    def parsing_state(self):
+    def parsing_state(self) -> ParsingState | None:
         parsing_state = None
         for state_layer in reversed(self.state_layers):
             if state_layer.states_stack:
@@ -1672,7 +1675,7 @@ class ParserState:
     def push_state_layer(self):
         self.state_layers.append(self._state_layer_class())
 
-    def pop_state_layer(self):
+    def pop_state_layer(self) -> ParserStateLayer:
         return self.state_layers.pop()
 
 

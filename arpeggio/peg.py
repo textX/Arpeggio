@@ -12,6 +12,7 @@ import copy
 import enum
 import re
 import typing
+import collections.abc
 
 
 from arpeggio import (
@@ -42,7 +43,7 @@ from arpeggio import (
     PushState,
     PopState,
     WrappedWithStateLayer,
-    ParsingState,
+    ParsingState, ParserModelItem,
 )
 from arpeggio import RegExMatch as _
 
@@ -196,12 +197,12 @@ class MatchedAction:
     An abstract class for all action classes used in MatchActions parsing rules.
     """
     _rule: ParsingExpression  # bounding to this type for the rule_name attribute
-    _args: list[typing.Any] | None
+    _args: collections.abc.Sequence[typing.Any] | None
 
     def __init__(
         self,
         rule: ParsingExpression,
-        args: list[typing.Any] = None,
+        args: collections.abc.Sequence[typing.Any] = None,
     ):
         self._rule = rule
         self._args = args
@@ -212,8 +213,8 @@ class MatchedAction:
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         """
         This method must be implemented to run an action over the match result.
 
@@ -246,8 +247,8 @@ class ActionPush(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         parser.state.push_rule_reference(self._rule.rule_name, str(matched_result))
         return matched_result
 
@@ -262,8 +263,8 @@ class ActionPop(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         matched_str = str(matched_result)
         try:
             removed = parser.state.pop_rule_reference(self._rule.rule_name, matched_str)
@@ -294,8 +295,8 @@ class ActionPopFront(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         matched_str = str(matched_result)
         try:
             removed = parser.state.pop_front_rule_reference(self._rule.rule_name, matched_str)
@@ -327,8 +328,8 @@ class ActionAdd(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(self._rule.rule_name, matched_str)
         return matched_result
@@ -344,8 +345,8 @@ class ActionParentAdd(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
             self._rule.rule_name,
@@ -365,8 +366,8 @@ class ActionGlobalAdd(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
             self._rule.rule_name,
@@ -386,8 +387,8 @@ class ActionAny(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode,
         c_pos: int,
-        args = None,
-    ):
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
         matched_str = str(matched_result)
 
         is_known = parser.state.rule_reference_is_known(self._rule.rule_name, matched_str)
@@ -414,6 +415,7 @@ class MatchActions(ParsingExpression):
         super().__init__(rule_name='', nodes=[rule])
         self.actions = actions
 
+    @typing.override
     def _parse(self, parser: 'ParserPEG'):
         rule_node = self.nodes[0]
         c_pos = parser.position
@@ -435,7 +437,10 @@ class MatchActions(ParsingExpression):
         )
 
     @typing.override
-    def resolve(self, resolve_cb: typing.Callable[[ParsingExpression], ParsingExpression]):
+    def resolve(
+        self,
+        resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]
+    ) -> 'MatchActions':
         node = super().resolve(resolve_cb)
         for action in node.actions:
             action._rule = node.nodes[0]
@@ -730,29 +735,41 @@ class ParserPEGState(ParserState):
     def __init__(self):
         super().__init__()
 
-    def push_rule_reference(self, rule_name: str, reference_name: str):
+    def push_rule_reference(
+        self,
+        rule_name: str,
+        reference_name: str,
+    ):
         stack = self.state_layers[-1].rule_reference_stack.setdefault(rule_name, [])
         stack.append(reference_name)
 
-    def pop_rule_reference(self, rule_name: str, expected_reference_name: str = None):
+    def pop_rule_reference(
+        self,
+        rule_name: str,
+        expected_reference_name: str = None,
+    ) -> str | None:
         stack = self.state_layers[-1].rule_reference_stack[rule_name]
         if expected_reference_name is not None and stack[-1] != expected_reference_name:
             return None
         return stack.pop()
 
-    def pop_front_rule_reference(self, rule_name: str, expected_reference_name: str = None):
+    def pop_front_rule_reference(
+        self,
+        rule_name: str,
+        expected_reference_name: str = None,
+    ) -> str | None:
         stack = self.state_layers[-1].rule_reference_stack[rule_name]
         if expected_reference_name is not None and stack[0] != expected_reference_name:
             return None
         return stack.pop(0)
 
-    def first_rule_reference(self, rule_name: str):
+    def first_rule_reference(self, rule_name: str) -> str | None:
         stack = self.state_layers[-1].rule_reference_stack.get(rule_name)
         if not stack:
             return None
         return stack[0]
 
-    def last_rule_reference(self, rule_name: str):
+    def last_rule_reference(self, rule_name: str) -> str | None:
         stack = self.state_layers[-1].rule_reference_stack.get(rule_name)
         if not stack:
             return None
@@ -768,11 +785,15 @@ class ParserPEGState(ParserState):
         reference_set = self.state_layers[layer_num].rule_reference_set.setdefault(rule_name, set())
         reference_set.add(reference_name)
 
-    def known_rule_references(self, rule_name: str):
+    def known_rule_references(self, rule_name: str) -> set[str]:
         reference_set = self.state_layers[-1].rule_reference_set.get(rule_name)
         return reference_set
 
-    def rule_reference_is_known(self, rule_name: str, reference_name: str):
+    def rule_reference_is_known(
+        self,
+        rule_name: str,
+        reference_name: str
+    ) -> bool:
         for state_layer in reversed(self.state_layers):
             reference_set = state_layer.rule_reference_set.get(rule_name)
             if reference_set is None:
@@ -784,6 +805,7 @@ class ParserPEGState(ParserState):
 
 class ParserPEG(Parser):
     _state_class: type[ParserState] = ParserPEGState
+    _state: _state_class
 
     def __init__(self, language_def, root_rule_name, comment_rule_name=None,
                  *args, **kwargs):

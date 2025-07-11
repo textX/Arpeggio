@@ -136,6 +136,7 @@ end of function_name2
     parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
     parser.parse(input_text)
 
+
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
     assert e is not None
@@ -211,8 +212,20 @@ end of function_name2
 function_name1(1, 2, 3)
 function_name2(1, 2, 3)
 """
-    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input_text)
+    parser: ParserPEG = klass(
+        grammar_cb(),
+        'parser_entry',
+        debug = debug,  # noqa: E251
+        reduce_tree = True,  # noqa: E251
+    )
+    parse_tree = parser.parse(input_text)
+    assert parse_tree == [
+        ["def", "function_name1", "end of", "function_name1"],
+        ["def", "function_name2", ["function_name1", "(", "arg1", ")"], "end of", "function_name2"],
+        ["function_name1", "(", "1", ",", "2", ",", "3", ")"],
+        ["function_name2", "(", "1", ",", "2", ",", "3", ")"],
+        ""  # EOF
+    ]
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -261,8 +274,28 @@ def function_name3
 end of function_name3
 
 """
-    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input_text)
+    parser: ParserPEG = klass(
+        grammar_cb(),
+        'parser_entry',
+        debug = debug,  # noqa: E251
+        reduce_tree = True,  # noqa: E251
+    )
+    parse_tree = parser.parse(input_text)
+    assert parse_tree == [
+        ["def", "function_name1", "end of", "function_name1"],
+        ["def", "function_name2", "end of", "function_name2"],
+        [
+            "def", "function_name3",
+            ["defer", "function_name1"],
+            ["defer", "function_name2"],
+            ["function_name1", ":"],
+            ["function_name1", "(", "1", ",", "2", ",", "3", ")"],
+            ["function_name2", ":"],
+            ["function_name2", "(", "1", ",", "2", ",", "3", ")"],
+            "end of", "function_name3"
+         ],
+        ""
+    ]
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')
@@ -300,8 +333,26 @@ def function_name3
 end of function_name3
 
 """
-    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
-    parser.parse(input_text)
+    parser: ParserPEG = klass(
+        grammar_cb(),
+        'parser_entry',
+        debug = debug,  # noqa: E251
+        reduce_tree = True,  # noqa: E251
+    )
+    parse_tree = parser.parse(input_text)
+    assert parse_tree == [
+        ["def", "function_name1", "end of", "function_name1"],
+        ["def", "function_name2", "end of", "function_name2"],
+        [
+            "def", "function_name3",
+            "anonymous defer",
+            "anonymous defer",
+            ["deferred", ["function_name1", "(", "1", ",", "2", ",", "3", ")"], "end"],
+            ["deferred", ["function_name2", "(", "1", ",", "2", ",", "3", ")"], "end"],
+            "end of", "function_name3"
+        ],
+        ""
+    ]
 
     with pytest.raises(Exception) as e:
         parser.state.pop_rule_reference('function_name')

@@ -101,7 +101,7 @@ ARGUMENTS_START <- '(';
 ARGUMENTS_END <- ')';
 VALID_NAME <- r'[a-zA-Z0-9_]+';
 ARGUMENTS_DELIMITER <- ',';
-DEFER <- 'defer';
+DEFER <- r'defer(?=\s)';
 DEFER_DELIMITER <- ':';
 ANONYMOUS_DEFER <- 'anonymous defer';
 DEFERRED <- 'deferred';
@@ -326,6 +326,27 @@ end of function_name1
 deferred
     function_name1(1, 2, 3)
 end
+"""
+    parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
+    with pytest.raises(arpeggio.NoMatch):
+        parser.parse(input_text)
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_backreference_with_wrong_state_in_state_layer(klass, grammar_cb, debug, capsys):
+    input_text = """
+def function_name1
+end of function_name1
+
+def function_name2
+    deferred
+        function_name1(1, 2, 3)
+    end
+end of function_name2
 """
     parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
     with pytest.raises(arpeggio.NoMatch):

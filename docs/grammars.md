@@ -92,7 +92,7 @@ Here is an example of arpeggio grammar for simple calculator:
     def calc():       return OneOrMore(expression), EOF
 
 Each rule is given in the form of Python function. Python function returns data
-structure that maps to PEG expressions.
+structure that maps to PEG expressions and state statements.
 
 - **Sequence** is represented as Python tuple.
 - **Ordered choice** is represented as Python list where each element is one
@@ -107,6 +107,17 @@ structure that maps to PEG expressions.
 - **Not predicate** is represented as an instance of `Not` class.
 - **Literal string match** is represented as string or regular expression given
   as an instance of `RegExMatch` class.
+- **Match state predicate** is represented as an instance of `MatchState` class.
+  A parsing state passed to the instance must be of `ParsingState` class.
+  The class checks if the current state is the same as the provided one.
+- **Push state command** is represented as an instance of `PushState` class.
+  A parsing state passed to the instance must be of `ParsingState` class.
+- **Pop state predicate** is represented as an instance of `PopState` class.
+  A parsing state passed to the instance must be of `ParsingState` class.
+  The class checks if the current state is the same as the provided one if any.
+- **State layer wrapper** is represented as an instance of
+  `StateLayerWrapper` class. This wrapper is used to isolate the state
+  of a specific group of rules and check its integrity.
 - **End of string/file** is recognized by the `EOF` special rule.
 
 For example, the `calc` language consists of one or more `expression` and

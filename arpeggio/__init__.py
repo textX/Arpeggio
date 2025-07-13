@@ -14,6 +14,7 @@
 import abc
 import bisect
 import codecs
+import collections.abc
 import re
 import sys
 import types
@@ -418,7 +419,7 @@ class Sequence(ParsingExpression):
         # Prefetching
         append = results.append
 
-        saved_state = parser.save_state()
+        state_snapshot = parser.take_state_snapshot()
 
         try:
             for e in self.nodes:
@@ -428,7 +429,7 @@ class Sequence(ParsingExpression):
 
         except NoMatch:
             parser.position = c_pos     # Backtracking
-            parser.load_state(saved_state)
+            parser.rollback_state_to_snapshot(state_snapshot)
             raise
 
         finally:
@@ -462,7 +463,7 @@ class OrderedChoice(Sequence):
 
         try:
             for e in self.nodes:
-                saved_state = parser.save_state()
+                state_snapshot = parser.take_state_snapshot()
 
                 try:
                     result = e.parse(parser)
@@ -471,7 +472,7 @@ class OrderedChoice(Sequence):
                     break
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
-                    parser.load_state(saved_state)
+                    parser.rollback_state_to_snapshot(state_snapshot)
 
         finally:
             if self.ws is not None:
@@ -538,7 +539,7 @@ class ZeroOrMore(Repetition):
         result = None
 
         while True:
-            saved_state = parser.save_state()
+            state_snapshot = parser.take_state_snapshot()
 
             try:
                 c_pos = parser.position
@@ -550,7 +551,7 @@ class ZeroOrMore(Repetition):
                 append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
-                parser.load_state(saved_state)
+                parser.rollback_state_to_snapshot(state_snapshot)
                 break
 
         if self.eolterm:
@@ -583,7 +584,7 @@ class OneOrMore(Repetition):
 
         try:
             while True:
-                saved_state = parser.save_state()
+                state_snapshot = parser.take_state_snapshot()
 
                 try:
                     c_pos = parser.position
@@ -596,7 +597,7 @@ class OneOrMore(Repetition):
                     first = False
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
-                    parser.load_state(saved_state)
+                    parser.rollback_state_to_snapshot(state_snapshot)
 
                     if first:
                         raise
@@ -633,7 +634,7 @@ class UnorderedGroup(Repetition):
         sep_result = None
         first = True
 
-        saved_state = parser.save_state()
+        state_snapshot = parser.take_state_snapshot()
 
         while nodes_to_try:
             sep_exc = None
@@ -654,7 +655,7 @@ class UnorderedGroup(Repetition):
             match = True
             all_optionals_fail = True
             for e in list(nodes_to_try):
-                curr_saved_state = parser.save_state()
+                curr_state_snapshot = parser.take_state_snapshot()
 
                 try:
                     result = e.parse(parser)
@@ -673,7 +674,7 @@ class UnorderedGroup(Repetition):
                 except NoMatch:
                     match = False
                     parser.position = c_loc_pos     # local backtracking
-                    parser.load_state(curr_saved_state)
+                    parser.rollback_state_to_snapshot(curr_state_snapshot)
 
             if not match or all_optionals_fail:
                 # If sep is matched backtrack it
@@ -687,7 +688,7 @@ class UnorderedGroup(Repetition):
         if not match:
             # Unsuccessful match of the whole PE - full backtracking
             parser.position = c_pos
-            parser.load_state(saved_state)
+            parser.rollback_state_to_snapshot(state_snapshot)
             parser._nm_raise(self, c_pos, parser)
 
         if results:
@@ -710,7 +711,7 @@ class And(SyntaxPredicate):
     @typing.override
     def _parse(self, parser):
         c_pos = parser.position
-        saved_state = parser.save_state()
+        state_snapshot = parser.take_state_snapshot()
 
         try:
             for e in self.nodes:
@@ -721,7 +722,7 @@ class And(SyntaxPredicate):
                     raise
             parser.position = c_pos
         finally:
-            parser.load_state(saved_state)
+            parser.rollback_state_to_snapshot(state_snapshot)
 
 
 class Not(SyntaxPredicate):
@@ -1147,14 +1148,14 @@ class StateWrapper(ParsingExpression):
 
     @typing.override
     def _parse(self, parser: 'Parser') -> 'ParseTreeNode':
-        saved_state = parser.save_state()
+        state_snapshot = parser.take_state_snapshot()
 
         parser.state.push_state_layer()
 
         try:
             retval = self.nodes[0].parse(parser)
-        except Exception:
-            parser.load_state(saved_state)
+        except:
+            parser.rollback_state_to_snapshot(state_snapshot)
             raise
 
         parser.state.pop_state_layer()
@@ -1648,6 +1649,101 @@ class ParserStateLayer:
         return not self.states_stack
 
 
+class HistoryItem(abc.ABC):
+    """
+    An abstract class to store information needed to undo actions that were performed on the state system.
+
+    In order to add a new data type to the state class that can be modified during parsing process, a new class
+    should be created by inheriting from this class to handle the undoing process.
+    """
+    _object: typing.Any
+    _data: typing.Any
+
+    def __init__(self, object: typing.Any, data: typing.Any):
+        self._object =  object
+        self._data = data
+
+    @abc.abstractmethod
+    def undo(self):
+        """
+        Undo the operation information about which is stored in the class instance.
+        """
+        pass
+
+    def __deepcopy__(self, memo: dict = None):
+        return self.__class__(self._object, self._data)
+
+
+class HistorySequencePush(HistoryItem):
+    """
+    Mark appending a sequence (list, array, etc) with an item.
+    """
+    _object: collections.abc.MutableSequence
+
+    def __init__(self, obj: collections.abc.MutableSequence, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        popped_data = self._object.pop()
+        assert(popped_data == self._data)
+
+
+class HistorySequencePop(HistoryItem):
+    """
+    Mark removing the last item from a sequence.
+    """
+    _object: collections.abc.MutableSequence
+
+    def __init__(self, obj: collections.abc.MutableSequence, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        self._object.append(self._data)
+
+
+class HistorySequencePopFront(HistoryItem):
+    """
+    Mark removing the first item from a sequence.
+    """
+    _object: collections.abc.MutableSequence
+
+    def __init__(self, obj: collections.abc.MutableSequence, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        self._object.insert(0, self._data)
+
+
+class HistorySetAdd(HistoryItem):
+    """
+    Mark adding an item to a set of items.
+    """
+    _object: collections.abc.MutableSet
+
+    def __init__(self, obj: collections.abc.MutableSet, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        self._object.remove(self._data)
+
+
+class HistorySetRemove(HistoryItem):
+    """
+    Mark removing an item from a set of items.
+    """
+    _object: collections.abc.MutableSet
+
+    def __init__(self, object: collections.abc.MutableSet, data: typing.Any):
+        super().__init__(object, data)
+
+    @typing.override
+    def undo(self):
+        self._object.add(self._data)
+
 
 class ParserState:
     """
@@ -1659,17 +1755,22 @@ class ParserState:
     _state_layer_class: ParserStateLayer = ParserStateLayer
     state_layers: list[_state_layer_class]
 
+    _actions_history: list[HistoryItem]
+
     def __init__(self):
         self.state_layers = [self._state_layer_class()]
+        self._actions_history = []
 
     def __deepcopy__(self, memo: dict = None):
         copied = self.__class__()
         copied.state_layers = copy.deepcopy(self.state_layers, memo)
+        copied._actions_history = copy.deepcopy(self._actions_history, memo)
         return copied
 
     def clear(self):
         if len(self.state_layers) > 1 or self.state_layers[0]:
             self.state_layers = [self._state_layer_class()]
+        self._actions_history = []
 
     def load_from(self, other_state: 'ParserState'):
         self.state_layers = other_state.state_layers
@@ -1677,10 +1778,15 @@ class ParserState:
         other_state.state_layers = []
 
     def push_parsing_state(self, parsing_state: ParsingState):
-        self.state_layers[-1].states_stack.append(parsing_state)
+        states_queue = self.state_layers[-1].states_stack
+        states_queue.append(parsing_state)
+        self._actions_history.append(HistorySequencePush(states_queue, parsing_state))
 
     def pop_parsing_state(self) -> ParsingState:
-        return self.state_layers[-1].states_stack.pop()
+        states_queue = self.state_layers[-1].states_stack
+        parsing_state = states_queue.pop()
+        self._actions_history.append(HistorySequencePop(states_queue, parsing_state))
+        return parsing_state
 
     @property
     def parsing_state(self) -> ParsingState | None:
@@ -1692,14 +1798,26 @@ class ParserState:
         return parsing_state
 
     def push_state_layer(self):
-        self.state_layers.append(self._state_layer_class())
+        """
+        Push a new empty state layer onto the stack.
+        """
+        layer = self._state_layer_class()
+        self.state_layers.append(layer)
+        self._actions_history.append(HistorySequencePush(self.state_layers, layer))
 
-    def pop_state_layer(self) -> ParserStateLayer:
+    def pop_state_layer(self):
+        """
+        Remove the last state layer from the stack.
+
+        This function doesn't return anything because the state layer isn't supposed to be modified outside
+        the parser realization.
+        """
         if not self.state_layers[-1].queues_are_empty():
             raise GrammarError('One or more queues are not empty in the state layer that is being popped. '
                                'Probably, some grammar rules were not called to remove the items from the queues. '
                                'The parser state: ' + str(self))
-        return self.state_layers.pop()
+        layer = self.state_layers.pop()
+        self._actions_history.append(HistorySequencePop(self.state_layers, layer))
 
     def queues_are_empty(self) -> bool:
         if len(self.state_layers) > 1:
@@ -1710,6 +1828,9 @@ class ParserState:
         return f"""State layers:
 {self.state_layers}
 """
+
+
+ParserStateSnapshot: typing.TypeAlias = int
 
 
 # ----------------------------------------------------
@@ -2083,6 +2204,34 @@ class Parser(DebugPrinter):
 
     def load_state(self, new_state: ParserState):
         self._state.load_from(new_state)
+
+    def take_state_snapshot(self) -> ParserStateSnapshot:
+        """
+        Take a snapshot of the parser state.
+
+        Actually, returns the index of the current item in the history of operations made over the stack.
+        The behaviour might be changed in future so the returned type is not guaranteed to be int in the future versions
+        of the library.
+
+        Returns:
+            A snapshot.
+        """
+        return len(self._state._actions_history) - 1
+
+    def rollback_state_to_snapshot(self, snapshot: ParserStateSnapshot):
+        """
+        Rollback the state of the parser to a given state.
+
+        This method undoes all the state changes that were made after the snapshot was taken.
+
+        Parameters:
+            snapshot:
+                A previously taken snapshot to which the state is being rolled back.
+        """
+        for i in range(len(self._state._actions_history) - 1, snapshot, -1):
+            history_item = self._state._actions_history[i]
+            history_item.undo()
+            del self._state._actions_history[i]
 
 
 class CrossRef(ParserModelItem):

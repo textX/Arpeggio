@@ -21,6 +21,11 @@ from arpeggio import (
     CrossRef,
     EndOfFile,
     GrammarError,
+    HistorySequencePush,
+    HistorySequencePop,
+    HistorySequencePopFront,
+    HistorySetAdd,
+    HistorySetRemove,
     Not,
     OneOrMore,
     Optional,
@@ -782,6 +787,7 @@ class ParserPEGState(ParserState):
     ):
         stack = self.state_layers[-1].rule_reference_stack.setdefault(rule_name, [])
         stack.append(reference_name)
+        self._actions_history.append(HistorySequencePush(stack, reference_name))
 
     def pop_rule_reference(
         self,
@@ -791,7 +797,9 @@ class ParserPEGState(ParserState):
         stack = self.state_layers[-1].rule_reference_stack[rule_name]
         if expected_reference_name is not None and stack[-1] != expected_reference_name:
             return None
-        return stack.pop()
+        reference_name = stack.pop()
+        self._actions_history.append(HistorySequencePop(stack, reference_name))
+        return reference_name
 
     def pop_front_rule_reference(
         self,
@@ -801,7 +809,9 @@ class ParserPEGState(ParserState):
         stack = self.state_layers[-1].rule_reference_stack[rule_name]
         if expected_reference_name is not None and stack[0] != expected_reference_name:
             return None
-        return stack.pop(0)
+        reference_name = stack.pop(0)
+        self._actions_history.append(HistorySequencePopFront(stack, reference_name))
+        return reference_name
 
     def first_rule_reference(self, rule_name: str) -> str | None:
         stack = self.state_layers[-1].rule_reference_stack.get(rule_name)
@@ -824,6 +834,7 @@ class ParserPEGState(ParserState):
         layer_num = state_layer_scope.value
         reference_set = self.state_layers[layer_num].rule_reference_set.setdefault(rule_name, set())
         reference_set.add(reference_name)
+        self._actions_history.append(HistorySetAdd(reference_set, reference_name))
 
     def known_rule_references(self, rule_name: str) -> set[str]:
         reference_set = self.state_layers[-1].rule_reference_set.get(rule_name)

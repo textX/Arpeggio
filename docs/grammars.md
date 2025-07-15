@@ -292,10 +292,10 @@ A set of basic **match actions** if provided:
 - **global add** to add a matched token to the list of the matched tokens of
   the global state layer corresponding to the rule. This action always succeeds
   and can be used, for example, to determine global variables.
-- **any** to match any token corresponding to the rule that were previously
+- **any** to match any token corresponding to the rule that was previously
   added to the list of matched tokens (by **add** action) across all the state
   layers. If no token found, then the rule will fail to match.
-- **suppress** to suppress the rule so it wouldn't appear in the resulting
+- **suppress** to suppress a rule so it wouldn't appear in the resulting
   parsing tree.
 
 In the RHS a rule reference is a name of another rule. Parser will try to match

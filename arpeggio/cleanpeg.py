@@ -41,8 +41,6 @@ CLOSE = ")"
 CALL_START = "{"
 CALL_END = "}"
 CALL_DELIMITER = ','
-STATE_START = '['
-STATE_END = ']'
 STATE = '@'
 PUSH_STATE = '+@'
 POP_STATE = '-@'
@@ -121,10 +119,6 @@ def parsing_state_name():
 
 def wrapped_with_state_layer():
     return STATE_LAYER_START, ordered_choice, STATE_LAYER_END
-
-
-def operation():
-    return parsing_expression, action_calls
 
 
 def action_calls():

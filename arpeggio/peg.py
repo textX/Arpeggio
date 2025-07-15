@@ -25,7 +25,6 @@ from arpeggio import (
     HistorySequencePop,
     HistorySequencePopFront,
     HistorySetAdd,
-    HistorySetRemove,
     Not,
     OneOrMore,
     Optional,
@@ -48,7 +47,8 @@ from arpeggio import (
     PushState,
     PopState,
     StateWrapper,
-    ParsingState, ParserModelItem,
+    ParsingState,
+    ParserModelItem,
 )
 from arpeggio import RegExMatch as _
 
@@ -69,8 +69,6 @@ CLOSE = ")"
 CALL_START = "{"
 CALL_END = "}"
 CALL_DELIMITER = ','
-STATE_START = '['
-STATE_END = ']'
 STATE = '@'
 PUSH_STATE = '+@'
 POP_STATE = '-@'
@@ -153,10 +151,6 @@ def wrapped_with_state_layer():
         ordered_choice,
         STATE_LAYER_END
     )
-
-
-def operation():
-    return parsing_expression, action_calls
 
 
 def action_calls():

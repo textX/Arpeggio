@@ -48,6 +48,8 @@ PUSH_STATE = StrMatch('+@', suppress=True)
 POP_STATE = StrMatch('-@', suppress=True)
 STATE_LAYER_START = StrMatch('@(', suppress=True)
 STATE_LAYER_END = StrMatch(')', suppress=True)
+MODIFIERS_START = StrMatch('[', suppress=True)
+MODIFIERS_END = StrMatch(']', suppress=True)
 
 
 # PEG syntax rules
@@ -83,14 +85,44 @@ def repeated_expression():
 def statement():
     return [
         expression,
+        expression_with_modifiers,
         parsing_state,
         push_parsing_state,
         pop_parsing_state,
     ]
 
 
+def expression_with_modifiers():
+    return parsing_expression_with_modifiers, Optional(action_calls)
+
+
 def expression():
     return parsing_expression, Optional(action_calls)
+
+
+def parsing_expression_with_modifiers():
+    return modifiers, parsing_expression
+
+
+def modifiers():
+    return MODIFIERS_START, OneOrMore(modifier), MODIFIERS_END
+
+
+def modifier():
+    return (
+        _(r'[a-zA-Z_][a-zA-Z_0-9]*'),
+        StrMatch('=', suppress=True),
+        [true_literal, false_literal],
+        Optional(',', suppress=True)
+    )
+
+
+def true_literal():
+    return 'True'
+
+
+def false_literal():
+    return 'False'
 
 
 def parsing_expression():

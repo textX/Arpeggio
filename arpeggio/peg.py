@@ -14,7 +14,6 @@ import enum
 import re
 import typing
 
-
 from arpeggio import (
     EOF,
     And,
@@ -77,6 +76,8 @@ PUSH_STATE = StrMatch('+@', suppress=True)
 POP_STATE = StrMatch('-@', suppress=True)
 STATE_LAYER_START = StrMatch('@(', suppress=True)
 STATE_LAYER_END = StrMatch(')', suppress=True)
+MODIFIERS_START = StrMatch('[', suppress=True)
+MODIFIERS_END = StrMatch(']', suppress=True)
 
 
 # PEG syntax rules
@@ -112,14 +113,44 @@ def repeated_expression():
 def statement():
     return [
         expression,
+        expression_with_modifiers,
         parsing_state,
         push_parsing_state,
         pop_parsing_state,
     ]
 
 
+def expression_with_modifiers():
+    return parsing_expression_with_modifiers, Optional(action_calls)
+
+
 def expression():
     return parsing_expression, Optional(action_calls)
+
+
+def parsing_expression_with_modifiers():
+    return modifiers, parsing_expression
+
+
+def modifiers():
+    return MODIFIERS_START, OneOrMore(modifier), MODIFIERS_END
+
+
+def modifier():
+    return (
+        _(r'[a-zA-Z_][a-zA-Z_0-9]*'),
+        StrMatch('=', suppress=True),
+        [true_literal, false_literal],
+        Optional(',', suppress=True)
+    )
+
+
+def true_literal():
+    return 'True'
+
+
+def false_literal():
+    return 'False'
 
 
 def parsing_expression():
@@ -726,6 +757,33 @@ class MatchActions(ParsingExpression):
 
 
 
+class ModifyConfig(ParsingExpression):
+    _modifiers: collections.abc.Sequence[tuple[str, typing.Any]]
+
+    def __init__(
+        self,
+        node: ParsingExpression,
+        modifiers: collections.abc.Sequence[tuple[str, typing.Any]],
+    ):
+        super().__init__(nodes=[node])
+        self._modifiers = modifiers
+
+    @typing.override
+    def _parse(self, parser: 'Parser'):
+        old_values = []
+        for modifier in self._modifiers:
+            old_values.append(getattr(parser, modifier[0]))
+            setattr(parser, modifier[0], modifier[1])
+
+        try:
+            retval = self.nodes[0].parse(parser)
+        finally:
+            for i, modifier in enumerate(self._modifiers):
+                setattr(parser, modifier[0], old_values[i])
+
+        return retval
+
+
 class PEGVisitor(PTNodeVisitor):
     """
     Visitor that transforms parse tree to a PEG parser for the given language.
@@ -780,6 +838,10 @@ class PEGVisitor(PTNodeVisitor):
         'other': {
             'same': 'other_same',
         }
+    }
+
+    modifiers_map = {
+        'skip_whitespace': 'skipws',
     }
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,
@@ -921,6 +983,33 @@ class PEGVisitor(PTNodeVisitor):
                 args[0] = alias
 
         return args, original_command
+
+    @classmethod
+    def map_modifier(cls, name: str):
+        return cls.modifiers_map.get(name) or name
+
+    def visit_parsing_expression_with_modifiers(self, node, children):
+        if len(children) == 1:
+            return children[0]
+
+        modifiers = children[0]
+        modified_node = children[1]
+        return ModifyConfig(modified_node, modifiers)
+
+    def visit_modifiers(self, node, children):
+        return children
+
+    def visit_modifier(self, node, children):
+        return self.map_modifier(children[0]), children[1]
+
+    def visit_true_literal(self, node, children):
+        return True
+
+    def visit_false_literal(self, node, children):
+        return False
+
+    def visit_expression_with_modifiers(self, node, children):
+        return self.visit_expression(node, children)
 
     def visit_expression(self, node, children):
         if len(children) == 1:

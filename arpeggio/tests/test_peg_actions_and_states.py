@@ -46,7 +46,7 @@ function <-
     );
 
 global_function <-
-    GLOBAL
+    GLOBAL SPACE
     @(
         FUNCTION_START function_name{push, global add}
             program_element*
@@ -81,7 +81,7 @@ function_call <-
     ARGUMENTS_END;
 
 defer_call <-
-    DEFER defer_name{push};
+    DEFER SPACE defer_name{push};
 
 defer <-
     defer_name{pop_front} DEFER_DELIMITER;
@@ -112,13 +112,14 @@ ARGUMENTS_START <- '(';
 ARGUMENTS_END <- ')';
 VALID_NAME <- r'[a-zA-Z0-9_]+';
 ARGUMENTS_DELIMITER <- ',';
-DEFER <- r'defer(?=\s)';
+DEFER <- 'defer';
 DEFER_DELIMITER <- ':';
 ANONYMOUS_DEFER <- 'anonymous defer';
 DEFERRED <- 'deferred';
 END <- 'end';
-GLOBAL <- r'global(?=\s)';
+GLOBAL <- 'global';
 ERRONEOUS <- 'erroneous';
+SPACE <- [skip_whitespace=False]r'[ \t]+'{suppress};
 '''
 
 

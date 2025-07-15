@@ -295,6 +295,8 @@ A set of basic **match actions** if provided:
 - **any** to match any token corresponding to the rule that were previously
   added to the list of matched tokens (by **add** action) across all the state
   layers. If no token found, then the rule will fail to match.
+- **suppress** to suppress the rule so it wouldn't appear in the resulting
+  parsing tree.
 
 In the RHS a rule reference is a name of another rule. Parser will try to match
 another rule at that location.

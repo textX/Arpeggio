@@ -30,6 +30,7 @@ program_element <-
     / defer
     / function
     / alternative_function
+    / function_with_suppressed_keywords
     / global_function
     / function_call
     / erroneous_non_closed_start
@@ -60,6 +61,13 @@ alternative_function <-
         // `*` operator is greedy so the closing `)` won't be matched until all the program_element statements are found
     )
     '/' function_name{pop};
+
+function_with_suppressed_keywords <-
+    @(
+        FUNCTION_START_SUPPRESSED function_name{push, parent add}
+            program_element*
+        FUNCTION_END_SUPPRESSED function_name{pop, suppress}
+    );
 
 function_call <-
     function_name{any}
@@ -93,6 +101,9 @@ erroneous_non_closed_start <-
 
 erroneous_non_closed_end <-
     ERRONEOUS FUNCTION_END function_name{pop};
+
+FUNCTION_START_SUPPRESSED <- 'suppressed def'{suppress};
+FUNCTION_END_SUPPRESSED <- 'suppressed end of'{suppress};
 
 FUNCTION_START <- 'def';
 function_name <- VALID_NAME;
@@ -583,3 +594,44 @@ erroneous end of function_name1
     with pytest.raises(arpeggio.NoMatch):
         # If parser.state is not cleared then this rule will pass, but the state should be cleared on every parse.
         parser.parse(input_text2)
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, True),
+])
+def test_suppress_action(klass, grammar_cb, debug, capsys):
+    input_text = """
+suppressed def function_name1
+suppressed end of function_name1
+
+suppressed def function_name2
+    function_name1(arg1)
+suppressed end of function_name2
+
+function_name1(1, 2, 3)
+function_name2(1, 2, 3)
+"""
+    parser: ParserPEG = klass(
+        grammar_cb(),
+        'parser_entry',
+        debug = debug,  # noqa: E251
+        reduce_tree = True,  # noqa: E251
+    )
+    parse_tree = parser.parse(input_text)
+    assert parse_tree == [
+        "function_name1",
+        ["function_name2", ["function_name1", "(", "arg1", ")"]],
+        ["function_name1", "(", "1", ",", "2", ",", "3", ")"],
+        ["function_name2", "(", "1", ",", "2", ",", "3", ")"],
+        ""  # EOF
+    ]
+
+    with pytest.raises(Exception) as e:
+        parser.state.pop_rule_reference('function_name')
+    assert e is not None
+
+    if parser.debug:
+        output = capsys.readouterr()
+        assert 'states stack' in output.out

@@ -72,7 +72,7 @@ def full_expression():
 
 
 def repeated_expression():
-    return expression, Optional([
+    return statement, Optional([
         OPTIONAL,
         ZERO_OR_MORE,
         ONE_OR_MORE,
@@ -80,18 +80,27 @@ def repeated_expression():
     ])
 
 
-def expression():
+def statement():
     return [
-        regex,
+        expression,
         parsing_state,
         push_parsing_state,
         pop_parsing_state,
-        wrapped_with_state_layer,
-        operation,
-        rule_crossref,
+    ]
+
+
+def expression():
+    return parsing_expression, Optional(action_calls)
+
+
+def parsing_expression():
+    return [
+        regex,
+        str_match,
+        (rule_crossref, Not(ASSIGNMENT)),
         (OPEN, ordered_choice, CLOSE),
-        str_match
-    ], Not(ASSIGNMENT)
+        wrapped_with_state_layer,
+    ]
 
 
 def parsing_state():
@@ -115,7 +124,7 @@ def wrapped_with_state_layer():
 
 
 def operation():
-    return rule_crossref, action_calls
+    return parsing_expression, action_calls
 
 
 def action_calls():

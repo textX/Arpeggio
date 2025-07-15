@@ -100,7 +100,7 @@ def full_expression():
 
 
 def repeated_expression():
-    return expression, Optional([
+    return statement, Optional([
         OPTIONAL,
         ZERO_OR_MORE,
         ONE_OR_MORE,
@@ -108,17 +108,26 @@ def repeated_expression():
     ])
 
 
-def expression():
+def statement():
     return [
-        regex,
+        expression,
         parsing_state,
         push_parsing_state,
         pop_parsing_state,
-        wrapped_with_state_layer,
-        operation,
+    ]
+
+
+def expression():
+    return parsing_expression, Optional(action_calls)
+
+
+def parsing_expression():
+    return [
+        regex,
+        str_match,
         rule_crossref,
         (OPEN, ordered_choice, CLOSE),
-        str_match,
+        wrapped_with_state_layer,
     ]
 
 
@@ -147,7 +156,7 @@ def wrapped_with_state_layer():
 
 
 def operation():
-    return rule_crossref, action_calls
+    return parsing_expression, action_calls
 
 
 def action_calls():
@@ -407,6 +416,21 @@ class ActionAny(MatchedAction):
         return matched_result
 
 
+class ActionSuppress(MatchedAction):
+    """
+    An action that is used to suppress a rule.
+    """
+    @typing.override
+    def run(
+        self,
+        parser: 'ParserPEG',
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
+        return None
+
+
 class MatchActions(ParsingExpression):
     """
     Apply some actions to a matched rule.
@@ -467,6 +491,7 @@ class PEGVisitor(PTNodeVisitor):
         'any': ActionAny,
         'parent_add': ActionParentAdd,
         'global_add': ActionGlobalAdd,
+        'suppress': ActionSuppress,
     }
     matched_actions_aliases: dict[str, dict[str, str]] = {
         'state': {
@@ -615,7 +640,10 @@ class PEGVisitor(PTNodeVisitor):
 
         return args
 
-    def visit_operation(self, node, children):
+    def visit_expression(self, node, children):
+        if len(children) == 1:
+            return children[0]
+
         action_nodes = children[1]
         actions = []
         rule_node = children[0]

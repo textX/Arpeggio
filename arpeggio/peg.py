@@ -162,7 +162,11 @@ def action_call():
 
 
 def action_call_argument():
-    return _(r'\w+')
+    return [_(r'\w+'), action_call_quoted_argument]
+
+
+def action_call_quoted_argument():
+    return str_match()
 
 
 # PEG Lexical rules
@@ -669,6 +673,10 @@ class PEGVisitor(PTNodeVisitor):
     def visit_action_call(self, node, children):
         return children
 
+    def visit_action_call_quoted_argument(self, node, children):
+        matched_str = str(node)
+        return self.decode_escaped_str(matched_str[1:-1])
+
     def visit_parsing_state(self, node, children):
         state_name = str(node)
         parsing_state = self.get_state_by_name(state_name)
@@ -711,9 +719,7 @@ class PEGVisitor(PTNodeVisitor):
         match.compile()
         return match
 
-    def visit_str_match(self, node, children):
-        match_str = node.value[1:-1]
-
+    def decode_escaped_str(self, s):
         # Scan the string literal, and sequentially match those escape
         # sequences which are syntactically valid Python. Attempt to convert
         # those, raising ``GrammarError`` for any semantically invalid ones.
@@ -722,8 +728,12 @@ class PEGVisitor(PTNodeVisitor):
                 return codecs.decode(match.group(0), "unicode_escape")
             except UnicodeDecodeError as e:
                 raise GrammarError(f"Invalid escape sequence '{match.group(0)}'.") from e
-        match_str = PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, match_str)
 
+        return PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, s)
+
+    def visit_str_match(self, node, children):
+        match_str = node.value[1:-1]
+        match_str = self.decode_escaped_str(match_str)
         return StrMatch(match_str, ignore_case=self.ignore_case)
 
 

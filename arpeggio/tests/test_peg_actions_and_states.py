@@ -41,7 +41,8 @@ function <-
         FUNCTION_START function_name{push, parent add}
             program_element*
         // Test And expression not changing the state of the parser
-        FUNCTION_END &function_name{pop} function_name{pop}
+        // Also, test quoted argument
+        FUNCTION_END &function_name{'pop'} function_name{pop}
     );
 
 global_function <-
@@ -66,7 +67,7 @@ function_with_suppressed_keywords <-
     @(
         FUNCTION_START_SUPPRESSED function_name{push, parent add}
             program_element*
-        FUNCTION_END_SUPPRESSED function_name{pop, suppress}
+        FUNCTION_END_SUPPRESSED function_name{pop, 'suppress'}
     );
 
 function_call <-

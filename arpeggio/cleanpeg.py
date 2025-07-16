@@ -131,7 +131,11 @@ def action_call():
 
 
 def action_call_argument():
-    return _(r'\w+')
+    return [_(r'\w+'), action_call_quoted_argument]
+
+
+def action_call_quoted_argument():
+    return str_match()
 
 
 # PEG Lexical rules

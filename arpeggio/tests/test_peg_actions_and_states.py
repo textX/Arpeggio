@@ -46,12 +46,12 @@ function <-
     );
 
 global_function <-
-    GLOBAL SPACE
+    GLOBAL
     @(
         FUNCTION_START function_name{push, global add}
             program_element*
         // Test setting multiple modifiers and setting a modifier to a quoted string value:
-        FUNCTION_END [skip_whitespace=True, whitespace=' \t']function_name{pop}
+        FUNCTION_END function_name{pop}
     );
 
 alternative_function <-
@@ -81,7 +81,7 @@ function_call <-
     ARGUMENTS_END;
 
 defer_call <-
-    DEFER SPACE defer_name{push};
+    DEFER defer_name{push};
 
 defer <-
     defer_name{pop_front} DEFER_DELIMITER;
@@ -112,14 +112,13 @@ ARGUMENTS_START <- '(';
 ARGUMENTS_END <- ')';
 VALID_NAME <- r'[a-zA-Z0-9_]+';
 ARGUMENTS_DELIMITER <- ',';
-DEFER <- 'defer';
+DEFER <- r'defer(?=\s)';
 DEFER_DELIMITER <- ':';
 ANONYMOUS_DEFER <- 'anonymous defer';
 DEFERRED <- 'deferred';
 END <- 'end';
-GLOBAL <- 'global';
+GLOBAL <- r'global(?=\s)';
 ERRONEOUS <- 'erroneous';
-SPACE <- [skip_whitespace=False]r'[ \t]+'{suppress};
 '''
 
 

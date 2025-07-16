@@ -66,14 +66,14 @@ AND = "&"
 NOT = "!"
 OPEN = "("
 CLOSE = ")"
-CALL_START = "{"
-CALL_END = "}"
-CALL_DELIMITER = ','
-STATE = '@'
-PUSH_STATE = '+@'
-POP_STATE = '-@'
-STATE_LAYER_START = '@('
-STATE_LAYER_END = ')'
+CALL_START = StrMatch("{", suppress=True)
+CALL_END = StrMatch("}", suppress=True)
+CALL_DELIMITER = StrMatch(',', suppress=True)
+STATE = StrMatch('@', suppress=True)
+PUSH_STATE = StrMatch('+@', suppress=True)
+POP_STATE = StrMatch('-@', suppress=True)
+STATE_LAYER_START = StrMatch('@(', suppress=True)
+STATE_LAYER_END = StrMatch(')', suppress=True)
 
 
 # PEG syntax rules
@@ -154,7 +154,7 @@ def wrapped_with_state_layer():
 
 
 def action_calls():
-    return CALL_START, action_call, ZeroOrMore([CALL_DELIMITER, action_call]), CALL_END
+    return CALL_START, action_call, ZeroOrMore((CALL_DELIMITER, action_call)), CALL_END
 
 
 def action_call():
@@ -162,7 +162,7 @@ def action_call():
 
 
 def action_call_argument():
-    return _(r'[^\} \t,]+')
+    return _(r'\w+')
 
 
 # PEG Lexical rules
@@ -664,21 +664,23 @@ class PEGVisitor(PTNodeVisitor):
         return retval
 
     def visit_action_calls(self, node, children):
-        call_arguments = [arg for arg in node if arg.rule_name == 'action_call']
-        return call_arguments
+        return children
+
+    def visit_action_call(self, node, children):
+        return children
 
     def visit_parsing_state(self, node, children):
-        state_name = str(node[1])
+        state_name = str(node)
         parsing_state = self.get_state_by_name(state_name)
         return MatchState(parsing_state)
 
     def visit_push_parsing_state(self, node, children):
-        state_name = str(node[1])
+        state_name = str(node)
         parsing_state = self.get_state_by_name(state_name)
         return PushState(parsing_state)
 
     def visit_pop_parsing_state(self, node, children):
-        state_name = str(node[1])
+        state_name = str(node)
         parsing_state = self.get_state_by_name(state_name)
         return PopState(parsing_state)
 

@@ -50,8 +50,8 @@ global_function <-
     @(
         FUNCTION_START function_name{push, global add}
             program_element*
-        // Test And expression not changing the state of the parser
-        FUNCTION_END &function_name{pop} function_name{pop}
+        // Test setting multiple modifiers and setting a modifier to a quoted string value:
+        FUNCTION_END [skip_whitespace=True, whitespace=' \t']function_name{pop}
     );
 
 alternative_function <-
@@ -119,7 +119,7 @@ DEFERRED <- 'deferred';
 END <- 'end';
 GLOBAL <- 'global';
 ERRONEOUS <- 'erroneous';
-SPACE <- [skip_whitespace=False, whitespace=' \t']r'[ \t]+'{suppress};
+SPACE <- [skip_whitespace=False]r'[ \t]+'{suppress};
 '''
 
 

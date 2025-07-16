@@ -783,6 +783,15 @@ class ModifyConfig(ParsingExpression):
 
         return retval
 
+    @typing.override
+    def resolve(
+        self,
+        resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]
+    ) -> 'MatchActions':
+        node = super().resolve(resolve_cb)
+        self.rule_name = self.nodes[0].rule_name
+        return node
+
 
 class PEGVisitor(PTNodeVisitor):
     """

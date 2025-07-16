@@ -131,11 +131,12 @@ def action_call():
 
 
 def action_call_argument():
-    return [_(r'\w+'), action_call_quoted_argument]
+    return [_(r'\w+'), quoted_string]
 
 
-def action_call_quoted_argument():
-    return str_match()
+def quoted_string():
+    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
 
 
 # PEG Lexical rules
@@ -153,8 +154,7 @@ def rule_crossref():
 
 
 def str_match():
-    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+    return quoted_string()
 
 
 def comment():

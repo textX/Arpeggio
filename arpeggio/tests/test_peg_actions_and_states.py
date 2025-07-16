@@ -119,7 +119,7 @@ DEFERRED <- 'deferred';
 END <- 'end';
 GLOBAL <- 'global';
 ERRONEOUS <- 'erroneous';
-SPACE <- [skip_whitespace=False]r'[ \t]+'{suppress};
+SPACE <- [skip_whitespace=False, whitespace=' \t']r'[ \t]+'{suppress};
 '''
 
 

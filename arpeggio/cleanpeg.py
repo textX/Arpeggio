@@ -112,7 +112,7 @@ def modifier():
     return (
         _(r'[a-zA-Z_][a-zA-Z_0-9]*'),
         StrMatch('=', suppress=True),
-        [true_literal, false_literal],
+        [true_literal, false_literal, quoted_string],
         Optional(',', suppress=True)
     )
 

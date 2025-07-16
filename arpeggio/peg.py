@@ -140,7 +140,7 @@ def modifier():
     return (
         _(r'[a-zA-Z_][a-zA-Z_0-9]*'),
         StrMatch('=', suppress=True),
-        [true_literal, false_literal],
+        [true_literal, false_literal, quoted_string],
         Optional(',', suppress=True)
     )
 
@@ -842,6 +842,7 @@ class PEGVisitor(PTNodeVisitor):
 
     modifiers_map = {
         'skip_whitespace': 'skipws',
+        'whitespace': 'ws',
     }
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,

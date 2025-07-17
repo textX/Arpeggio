@@ -204,6 +204,15 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
     """, re.VERBOSE | re.UNICODE)
 
 
+class StateLayerScope(enum.Enum):
+    """
+    An enumeration used to identify the stack layer that should be used in an expression.
+    """
+    GLOBAL = 0
+    PARENT = -2
+    CURRENT = -1
+
+
 class MatchedAction:
     """
     An abstract class for all action classes used in MatchActions parsing rules.
@@ -289,12 +298,137 @@ class ActionPop(MatchedAction):
 
         if not removed:
             if parser.debug:
-                match_against = parser.state.last_rule_reference(self._rule.rule_name)
+                match_against = parser.state.last_pushed_rule_reference(self._rule.rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
             parser._nm_raise(self._rule, c_pos, parser)
         return matched_result
+
+
+class ActionAppend(MatchedAction):
+    """
+    An action that is used to append the list of matched tokens with a matched token according to the rule name.
+    """
+    @typing.override
+    def run(
+        self,
+        parser: 'ParserPEG',
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
+        if matched_result is None:
+            matched_str = ''
+        else:
+            matched_str = str(matched_result)
+        parser.state.append_rule_reference(self._rule.rule_name, matched_str)
+        return matched_result
+
+
+class ActionLast(MatchedAction):
+    """
+    An action that is used to match the last matched token from the top of the matches list according to the rule name.
+    """
+    _state_scope: StateLayerScope = StateLayerScope.CURRENT
+
+    @typing.override
+    def run(
+        self,
+        parser: 'ParserPEG',
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
+        if matched_result is None:
+            matched_str = ''
+        else:
+            matched_str = str(matched_result)
+
+        try:
+            last = parser.state.last_rule_reference(self._rule.rule_name, self._state_scope)
+        except (IndexError, KeyError):
+            if parser.debug:
+                parser.dprint(
+                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"'{parser.context(len(str(matched_result)))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        if matched_str != last:
+            if parser.debug:
+                parser.dprint(
+                    f"-- No match '{last}' at {c_pos} => "
+                    f"'{parser.context(len(last))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        return matched_result
+
+
+class ActionTryRemoveLast(MatchedAction):
+    """
+    An action that is used to remove the last matched token from the list of matched tokens according to the rule name.
+    """
+    @typing.override
+    def run(
+        self,
+        parser: 'ParserPEG',
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
+        parser.state.try_remove_last_rule_reference(self._rule.rule_name)
+        return matched_result
+
+
+class ActionParentLast(ActionLast):
+    """
+    An action that is used to match the last matched token from the top of the matches list of the parent's stack layer
+    according to the rule name.
+    """
+    _state_scope: StateLayerScope = StateLayerScope.PARENT
+
+
+class ActionLonger(MatchedAction):
+    """
+    An action that is used to match a longer token than the last matched token from the top of the matches list
+    according to the rule name.
+    """
+    _state_scope: StateLayerScope = StateLayerScope.CURRENT
+
+    @typing.override
+    def run(
+        self,
+        parser: 'ParserPEG',
+        matched_result: ParseTreeNode,
+        c_pos: int,
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode:
+        matched_str = str(matched_result)
+        try:
+            last = parser.state.last_rule_reference(self._rule.rule_name, self._state_scope)
+        except (IndexError, KeyError):
+            if parser.debug:
+                parser.dprint(
+                    f"-- The stack for `{self._rule.rule_name}` rule is empty or parent stack doesn't exist at {c_pos} => "
+                    f"'{parser.context(len(str(matched_result)))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        if len(matched_str) <= len(last):
+            if parser.debug:
+                parser.dprint(
+                    f"-- Match '{matched_str}' is not longer than parent's 'last' at {c_pos} => "
+                    f"'{parser.context(len(matched_str))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        return matched_result
+
+
+class ActionParentLonger(ActionLonger):
+    """
+    An action that is used to match a longer token than the last matched token from the top of the matches list of
+    the parent's stack layer according to the rule name.
+    """
+    _state_scope: StateLayerScope = StateLayerScope.PARENT
 
 
 class ActionPopFront(MatchedAction):
@@ -321,7 +455,7 @@ class ActionPopFront(MatchedAction):
 
         if not removed:
             if parser.debug:
-                match_against = parser.state.first_rule_reference(self._rule.rule_name)
+                match_against = parser.state.first_pushed_rule_reference(self._rule.rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
@@ -487,9 +621,15 @@ class PEGVisitor(PTNodeVisitor):
         'pop_front': ActionPopFront,
         'add': ActionAdd,
         'any': ActionAny,
+        'append': ActionAppend,
+        'try_remove': ActionTryRemoveLast,
+        'last': ActionLast,
+        'longer': ActionLonger,
         'parent_add': ActionParentAdd,
         'global_add': ActionGlobalAdd,
         'suppress': ActionSuppress,
+        'parent_last': ActionParentLast,
+        'parent_longer': ActionParentLonger,
     }
     matched_actions_aliases: dict[str, dict[str, str]] = {
         'state': {
@@ -498,9 +638,14 @@ class PEGVisitor(PTNodeVisitor):
         },
         'parent': {
             'add': 'parent_add',
+            'last': 'parent_last',
+            'longer': 'parent_longer',
         },
         'global': {
             'add': 'global_add',
+        },
+        'try': {
+            'remove': 'try_remove',
         },
     }
 
@@ -743,16 +888,19 @@ class ParserPEGStateLayer(ParserStateLayer):
     """
     rule_reference_stack: dict[str, str]
     rule_reference_set: dict[str, str]
+    rule_reference_list: dict[str, str]
 
     def __init__(self):
         super().__init__()
         self.rule_reference_stack = {}
         self.rule_reference_set = {}
+        self.rule_reference_list = {}
 
     def __deepcopy__(self, memo: dict = None):
         copied = super().__deepcopy__(memo)
         copied.rule_reference_stack = copy.deepcopy(self.rule_reference_stack, memo)
         copied.rule_reference_set = copy.deepcopy(self.rule_reference_set, memo)
+        copied.rule_reference_list = copy.deepcopy(self.rule_reference_list, memo)
         return copied
 
     def __bool__(self):
@@ -769,7 +917,12 @@ class ParserPEGStateLayer(ParserStateLayer):
             if value:
                 rule_reference_set_is_empty = False
 
-        if rule_reference_stack_is_empty and rule_reference_set_is_empty:
+        rule_reference_list_is_empty = True
+        for key, value in self.rule_reference_list.items():
+            if value:
+                rule_reference_list_is_empty = False
+
+        if rule_reference_stack_is_empty and rule_reference_set_is_empty and rule_reference_list_is_empty:
             return False
 
         return True
@@ -794,15 +947,6 @@ Rule references queue:
 Known rule references:
 {str(self.rule_reference_set)}
 """
-
-
-class StateLayerScope(enum.Enum):
-    """
-    An enumeration used to identify the stack layer that should be used in an expression.
-    """
-    GLOBAL = 0
-    PARENT = -2
-    CURRENT = -1
 
 
 class ParserPEGState(ParserState):
@@ -847,14 +991,51 @@ class ParserPEGState(ParserState):
         self._actions_history.append(HistorySequencePopFront(stack, reference_name))
         return reference_name
 
-    def first_rule_reference(self, rule_name: str) -> str | None:
+    def first_pushed_rule_reference(self, rule_name: str) -> str | None:
         stack = self.state_layers[-1].rule_reference_stack.get(rule_name)
         if not stack:
             return None
         return stack[0]
 
-    def last_rule_reference(self, rule_name: str) -> str | None:
-        stack = self.state_layers[-1].rule_reference_stack.get(rule_name)
+    def last_pushed_rule_reference(
+        self,
+        rule_name: str,
+        state_layer_scope: StateLayerScope = StateLayerScope.CURRENT,
+    ) -> str | None:
+        layer_num = state_layer_scope.value
+        stack = self.state_layers[layer_num].rule_reference_stack[rule_name]
+        if not stack:
+            return None
+        return stack[-1]
+
+    def append_rule_reference(
+        self,
+        rule_name: str,
+        reference_name: str,
+    ):
+        stack = self.state_layers[-1].rule_reference_list.setdefault(rule_name, [])
+        stack.append(reference_name)
+        self._actions_history.append(HistorySequencePush(stack, reference_name))
+
+    def try_remove_last_rule_reference(
+        self,
+        rule_name: str,
+    ):
+        stack = self.state_layers[-1].rule_reference_list.setdefault(rule_name, [])
+        if not stack:
+            return  # Was just trying.
+
+        item = stack[-1]
+        del stack[-1]
+        self._actions_history.append(HistorySequencePop(stack, item))
+
+    def last_rule_reference(
+        self,
+        rule_name: str,
+        state_layer_scope: StateLayerScope = StateLayerScope.CURRENT,
+    ) -> str | None:
+        layer_num = state_layer_scope.value
+        stack = self.state_layers[layer_num].rule_reference_list[rule_name]
         if not stack:
             return None
         return stack[-1]

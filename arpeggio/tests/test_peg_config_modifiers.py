@@ -20,7 +20,12 @@ import enum
 # Functions are used instead of variables to store grammar only to make parametrized test results readable
 def get_grammar():
     return r'''
-parser_entry <- program_element* EOF;
+parser_entry <-
+    (
+        INDENTATION{list append, suppress} program_element
+        (INDENTATION{list last, suppress} program_element)*
+    )?
+    EOF;
 
 program_element <-
     function
@@ -29,10 +34,13 @@ program_element <-
 function <-
     @(
         FUNCTION_START function_name{push}
-            program_element*
-        // Test setting multiple modifiers and setting a modifier to a quoted string value:
-        FUNCTION_END [skip_whitespace=True, whitespace=' \t']function_name{pop}
+        (
+            INDENTATION{parent list longer, list append, suppress} program_element
+            (INDENTATION{list last, suppress} program_element)*
+        )?
+        INDENTATION{parent list last, list try remove, suppress} FUNCTION_END [skip_whitespace=True, whitespace=' \t']function_name{pop}
     );
+
 
 function_call <-
     function_name
@@ -54,6 +62,7 @@ ARGUMENTS_END <- ')'{suppress};
 VALID_NAME <- r'[a-zA-Z0-9_]+';
 ARGUMENTS_DELIMITER <- ','{suppress};
 SPACE <- [skip_whitespace=False]r'[ \t]+';
+INDENTATION <- [whitespace='\n\r']r' *';
 '''
 
 
@@ -101,7 +110,7 @@ end of function_name2
 def test_single_modifier(klass, grammar_cb, debug, capsys):
     input_text = """
 function_name1(1, 2, 3)
-    """
+"""
     parser: ParserPEG = klass(
         grammar_cb(),
         'parser_entry',
@@ -113,3 +122,32 @@ function_name1(1, 2, 3)
         ['function_name1', '1', '2', '3'],
         '',
     ]
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
+])
+def test_indentation_with_spaces(klass, grammar_cb, debug, capsys):
+    input_text = """
+def function_name1
+end of function_name1
+
+def function_name2
+    function_name1(1, 2, 3)
+    function_name2(4, 5, 6)
+
+    def inner_function_name
+        function_name1(1, 2, 3)
+        function_name2(4, 5, 6)
+    end of inner_function_name
+end of function_name2
+"""
+    parser: ParserPEG = klass(
+        grammar_cb(),
+        'parser_entry',
+        debug = debug,  # noqa: E251
+        reduce_tree = True,  # noqa: E251
+    )
+    parser.parse(input_text)

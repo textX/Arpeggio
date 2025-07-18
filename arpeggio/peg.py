@@ -232,10 +232,10 @@ class MatchedAction:
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         """
         This method must be implemented to run an action over the match result.
 
@@ -266,10 +266,10 @@ class ActionPush(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         parser.state.push_rule_reference(self._rule.rule_name, str(matched_result))
         return matched_result
 
@@ -282,10 +282,10 @@ class ActionPop(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         try:
             removed = parser.state.pop_rule_reference(self._rule.rule_name, matched_str)
@@ -314,10 +314,10 @@ class ActionListAppend(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         if matched_result is None:
             matched_str = ''
         else:
@@ -336,10 +336,10 @@ class ActionListLast(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         if matched_result is None:
             matched_str = ''
         else:
@@ -372,10 +372,10 @@ class ActionTryRemoveLast(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         parser.state.try_remove_last_rule_reference(self._rule.rule_name)
         return matched_result
 
@@ -399,10 +399,10 @@ class ActionLonger(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         try:
             last = parser.state.last_rule_reference(self._rule.rule_name, self._state_scope)
@@ -439,10 +439,10 @@ class ActionPopFront(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         try:
             removed = parser.state.pop_front_rule_reference(self._rule.rule_name, matched_str)
@@ -472,10 +472,10 @@ class ActionAdd(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(self._rule.rule_name, matched_str)
         return matched_result
@@ -489,10 +489,10 @@ class ActionParentAdd(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
             self._rule.rule_name,
@@ -510,10 +510,10 @@ class ActionGlobalAdd(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
             self._rule.rule_name,
@@ -531,10 +531,10 @@ class ActionAny(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
 
         is_known = parser.state.rule_reference_is_known(self._rule.rule_name, matched_str)
@@ -556,10 +556,10 @@ class ActionSuppress(MatchedAction):
     def run(
         self,
         parser: 'ParserPEG',
-        matched_result: ParseTreeNode,
+        matched_result: ParseTreeNode | None,
         c_pos: int,
         args: collections.abc.Sequence[typing.Any] = None,
-    ) -> ParseTreeNode:
+    ) -> ParseTreeNode | None:
         return None
 
 

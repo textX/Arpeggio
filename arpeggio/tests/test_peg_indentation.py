@@ -23,8 +23,8 @@ def get_grammar():
     return r'''
 parser_entry <-
     (
-        INDENTATION{append, suppress} program_element
-        (INDENTATION{last, suppress} program_element)*
+        INDENTATION{list append, suppress} program_element
+        (INDENTATION{list last, suppress} program_element)*
     )?
     EOF;
 
@@ -36,10 +36,10 @@ function_with_underscores <-
     @(
         FUNCTION_START function_name{push, parent add}
         (
-            INDENTATION{parent longer, append, suppress} program_element
-            (INDENTATION{last, suppress} program_element)*
+            INDENTATION{parent list longer, list append, suppress} program_element
+            (INDENTATION{list last, suppress} program_element)*
         )?
-        INDENTATION{parent last, try remove, suppress} FUNCTION_END function_name{pop}
+        INDENTATION{parent list last, list try remove, suppress} FUNCTION_END function_name{pop}
     );
 
 

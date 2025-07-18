@@ -306,7 +306,7 @@ class ActionPop(MatchedAction):
         return matched_result
 
 
-class ActionAppend(MatchedAction):
+class ActionListAppend(MatchedAction):
     """
     An action that is used to append the list of matched tokens with a matched token according to the rule name.
     """
@@ -326,7 +326,7 @@ class ActionAppend(MatchedAction):
         return matched_result
 
 
-class ActionLast(MatchedAction):
+class ActionListLast(MatchedAction):
     """
     An action that is used to match the last matched token from the top of the matches list according to the rule name.
     """
@@ -380,7 +380,7 @@ class ActionTryRemoveLast(MatchedAction):
         return matched_result
 
 
-class ActionParentLast(ActionLast):
+class ActionParentListLast(ActionListLast):
     """
     An action that is used to match the last matched token from the top of the matches list of the parent's stack layer
     according to the rule name.
@@ -423,7 +423,7 @@ class ActionLonger(MatchedAction):
         return matched_result
 
 
-class ActionParentLonger(ActionLonger):
+class ActionParentListLonger(ActionLonger):
     """
     An action that is used to match a longer token than the last matched token from the top of the matches list of
     the parent's stack layer according to the rule name.
@@ -621,15 +621,15 @@ class PEGVisitor(PTNodeVisitor):
         'pop_front': ActionPopFront,
         'add': ActionAdd,
         'any': ActionAny,
-        'append': ActionAppend,
-        'try_remove': ActionTryRemoveLast,
-        'last': ActionLast,
-        'longer': ActionLonger,
+        'list_append': ActionListAppend,
+        'list_try_remove': ActionTryRemoveLast,
+        'list_last': ActionListLast,
+        'list_longer': ActionLonger,
         'parent_add': ActionParentAdd,
         'global_add': ActionGlobalAdd,
         'suppress': ActionSuppress,
-        'parent_last': ActionParentLast,
-        'parent_longer': ActionParentLonger,
+        'parent_list_last': ActionParentListLast,
+        'parent_list_longer': ActionParentListLonger,
     }
     matched_actions_aliases: dict[str, dict[str, str]] = {
         'state': {
@@ -638,14 +638,21 @@ class PEGVisitor(PTNodeVisitor):
         },
         'parent': {
             'add': 'parent_add',
-            'last': 'parent_last',
-            'longer': 'parent_longer',
+            'list': {
+                'parent_last': 'list_parent_last',
+                'longer': 'parent_list_longer',
+                'last': 'parent_list_last',
+            },
         },
         'global': {
             'add': 'global_add',
         },
-        'try': {
-            'remove': 'try_remove',
+        'list': {
+            'append': 'list_append',
+            'last': 'list_last',
+            'try': {
+                'remove': 'list_try_remove',
+            },
         },
     }
 
@@ -774,12 +781,14 @@ class PEGVisitor(PTNodeVisitor):
         if len(args) == 1:
             return args
 
-        action_aliases = self.matched_actions_aliases.get(args[0])
-        if action_aliases:
-            alias = action_aliases.get(args[1])
-            if alias:
-                del args[0]
+        alias = self.matched_actions_aliases
+        for i, arg in enumerate(args):
+            alias = alias.get(arg)
+            if type(alias) is str:
+                del args[:i]
                 args[0] = alias
+            elif alias is None:
+                return args
 
         return args
 

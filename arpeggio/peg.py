@@ -416,7 +416,7 @@ class ActionLonger(MatchedAction):
         if len(matched_str) <= len(last):
             if parser.debug:
                 parser.dprint(
-                    f"-- Match '{matched_str}' is not longer than parent's 'last' at {c_pos} => "
+                    f"-- Match '{matched_str}' is not longer than parent's '{last}' at {c_pos} => "
                     f"'{parser.context(len(matched_str))}'")
             parser._nm_raise(self._rule, c_pos, parser)
 

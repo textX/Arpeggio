@@ -31,6 +31,7 @@ from arpeggio import (
     OrderedChoice,
     ParserState,
     ParserStateLayer,
+    ParserRepetitionStateLayer,
     Parser,
     ParserPython,
     ParseTreeNode,
@@ -563,6 +564,70 @@ class ActionSuppress(MatchedAction):
         return None
 
 
+class ActionFirstLonger(MatchedAction):
+    """
+    An action to check that the first matched token is longer than the token in the parent repetition.
+
+    The main aim is to simplify validating indentation.
+    """
+    @typing.override
+    def run(
+        self,
+        parser: 'ParserPEG',
+        matched_result: ParseTreeNode | None,
+        c_pos: int,
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode | None:
+        if matched_result is None:
+            matched_str = ''
+        else:
+            matched_str = str(matched_result)
+
+        last_value = parser.state.repetition_last_rule_reference(rule_name)
+        if last_value is None:
+            parent_value = parser.state.repetition_last_rule_reference(rule_name, LayerScope.PARENT)
+            if parent_value is not None and len(matched_str) <= len(parent_value):
+                if parser.debug:
+                    parser.dprint(
+                        f"-- Matched repetition '{matched_str}' token is not longer than "
+                        f"parent token '{parent_value}' at {c_pos} => '{parser.context(len(matched_str))}'")
+                parser._nm_raise(self._rule, c_pos, parser)
+
+            parser.state.repetition_set_rule_reference(rule_name, matched_str)
+
+        return matched_result
+
+
+class ActionOtherSame(MatchedAction):
+    """
+    An action to check that the current matched token is longer than the previous token in the current repetition.
+
+    The main aim is to simplify validating indentation.
+    """
+    @typing.override
+    def run(
+        self,
+        parser: 'ParserPEG',
+        matched_result: ParseTreeNode | None,
+        c_pos: int,
+        args: collections.abc.Sequence[typing.Any] = None,
+    ) -> ParseTreeNode | None:
+        if matched_result is None:
+            matched_str = ''
+        else:
+            matched_str = str(matched_result)
+
+        last_value = parser.state.repetition_last_rule_reference(rule_name)
+        if matched_str != last_value:
+            if parser.debug:
+                parser.dprint(
+                    f"-- Matched repetition '{matched_str}' token is not the same as "
+                    f"the previous '{last_value}' token at {c_pos} => '{parser.context(len(matched_str))}'")
+            parser._nm_raise(self._rule, c_pos, parser)
+
+        return matched_result
+
+
 class MatchActions(ParsingExpression):
     """
     Apply some actions to a matched rule.
@@ -630,6 +695,8 @@ class PEGVisitor(PTNodeVisitor):
         'suppress': ActionSuppress,
         'parent_list_last': ActionParentListLast,
         'parent_list_longer': ActionParentListLonger,
+        'first_longer': ActionFirstLonger,
+        'other_same': ActionOtherSame,
     }
     matched_actions_aliases: dict[str, dict[str, str]] = {
         'state': {
@@ -654,6 +721,12 @@ class PEGVisitor(PTNodeVisitor):
                 'remove': 'list_try_remove',
             },
         },
+        'first': {
+            'longer': 'first_longer',
+        },
+        'other': {
+            'same': 'other_same',
+        }
     }
 
     def __init__(self, root_rule_name, comment_rule_name, ignore_case,
@@ -958,11 +1031,33 @@ Known rule references:
 """
 
 
+class ParserPEGRepetitionStateLayer(ParserRepetitionStateLayer):
+    """
+    A class to store the state information about the items in a PEG repetition (* or +).
+
+    Repetition layers are used to pass information between actions.
+    """
+    last_rule_reference: dict[str, str]
+
+    def __init__(self):
+        self.first_rule_reference = {}
+        self.last_rule_reference = {}
+
+    def __deepcopy__(self, memo: dict = None):
+        copied = super().__deepcopy__(memo)
+        copied.first_rule_reference = copy.deepcopy(self.first_rule_reference, memo)
+        copied.last_rule_reference = copy.deepcopy(self.last_rule_reference, memo)
+        return copied
+
+
 class ParserPEGState(ParserState):
     """
     A class that manages additional data used in PEG expressions.
     """
     _state_layer_class: ParserStateLayer = ParserPEGStateLayer
+
+    _repetition_layer_class: ParserRepetitionStateLayer = ParserPEGRepetitionStateLayer
+    repetition_layers: list[_repetition_layer_class]
 
     def __init__(self):
         super().__init__()
@@ -1076,6 +1171,24 @@ class ParserPEGState(ParserState):
             if reference_name in reference_set:
                 return True
         return False
+
+    def repetition_last_rule_reference(
+        self,
+        rule_name: str,
+        layer_scope: LayerScope = LayerScope.CURRENT,
+    ):
+        layer_num = layer_scope.value
+        if layer_num < 0 and len(self.repetition_layers) + layer_num < 0:
+            return None
+        last_reference_by_rule = self.repetition_layers[layer_num].last_rule_reference.get(rule_name)
+        return last_reference_by_rule
+
+    def repetition_set_rule_reference(
+        self,
+        rule_name: str,
+        name: str,
+    ):
+        self.repetition_layers[-1].last_rule_reference[rule_name] = name
 
 
 class ParserPEG(Parser):

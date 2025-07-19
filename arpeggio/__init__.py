@@ -538,6 +538,8 @@ class ZeroOrMore(Repetition):
         sep = self.sep.parse if self.sep else None
         result = None
 
+        parser.state.push_repetition_layer()
+
         while True:
             state_snapshot = parser.take_state_snapshot()
 
@@ -553,6 +555,8 @@ class ZeroOrMore(Repetition):
                 parser.position = c_pos  # Backtracking
                 parser.rollback_state_to_snapshot(state_snapshot)
                 break
+
+        parser.state.pop_repetition_layer()
 
         if self.eolterm:
             # Restore previous eolterm
@@ -582,6 +586,8 @@ class OneOrMore(Repetition):
         sep = self.sep.parse if self.sep else None
         result = None
 
+        parser.state.push_repetition_layer()
+
         try:
             while True:
                 state_snapshot = parser.take_state_snapshot()
@@ -603,10 +609,14 @@ class OneOrMore(Repetition):
                         raise
 
                     break
+
         finally:
+
             if self.eolterm:
                 # Restore previous eolterm
                 parser.eolterm = old_eolterm
+
+            parser.state.pop_repetition_layer()
 
         return results
 
@@ -635,6 +645,8 @@ class UnorderedGroup(Repetition):
         first = True
 
         state_snapshot = parser.take_state_snapshot()
+
+        parser.state.push_repetition_layer()
 
         while nodes_to_try:
             sep_exc = None
@@ -684,6 +696,8 @@ class UnorderedGroup(Repetition):
         if self.eolterm:
             # Restore previous eolterm
             parser.eolterm = old_eolterm
+
+        parser.state.pop_repetition_layer()
 
         if not match:
             # Unsuccessful match of the whole PE - full backtracking
@@ -1745,6 +1759,16 @@ class HistorySetRemove(HistoryItem):
         self._object.add(self._data)
 
 
+class ParserRepetitionStateLayer:
+    """
+    A basic class for the parser repetition state layer.
+
+    This class should store state information about the items that are inside a repetition (ZeroOrMore or OneOrMore).
+    """
+    def __deepcopy__(self, memo: dict = None):
+        return self.__class__()
+
+
 class ParserState:
     """
     A basic class for the parser state system.
@@ -1753,18 +1777,23 @@ class ParserState:
     Inherit from this class to manage additional state functionality.
     """
     _state_layer_class: ParserStateLayer = ParserStateLayer
+    _repetition_layer_class: ParserRepetitionStateLayer = ParserRepetitionStateLayer
+
     state_layers: list[_state_layer_class]
+    repetition_layers: list[_repetition_layer_class]
 
     _actions_history: list[HistoryItem]
 
     def __init__(self):
         self.state_layers = [self._state_layer_class()]
+        self.repetition_layers = []
         self._actions_history = []
 
     def __deepcopy__(self, memo: dict = None):
         copied = self.__class__()
         copied.state_layers = copy.deepcopy(self.state_layers, memo)
         copied._actions_history = copy.deepcopy(self._actions_history, memo)
+        copied.repetition_layers = copy.deepcopy(self.repetition_layers, memo)
         return copied
 
     def clear(self):
@@ -1823,6 +1852,19 @@ class ParserState:
         if len(self.state_layers) > 1:
             return False
         return self.state_layers[0].queues_are_empty()
+
+    def push_repetition_layer(self):
+        """
+        Push a new empty repetition layer onto the stack.
+        """
+        layer = self._repetition_layer_class()
+        self.repetition_layers.append(layer)
+
+    def pop_repetition_layer(self):
+        """
+        Remove the last repetition layer from the stack.
+        """
+        layer = self.repetition_layers.pop()
 
     def __str__(self) -> str:
         return f"""State layers:

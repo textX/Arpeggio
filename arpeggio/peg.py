@@ -586,11 +586,15 @@ class ActionFirstLonger(MatchedAction):
         last_value = parser.state.repetition_last_rule_reference(rule_name)
         if last_value is None:
             parent_value = parser.state.repetition_last_rule_reference(rule_name, LayerScope.PARENT)
-            if parent_value is not None and len(matched_str) <= len(parent_value):
+
+            if (
+                (parent_value is not None and len(matched_str) <= len(parent_value))
+                or (parent_value is None and len(matched_str) > 0)
+            ):
                 if parser.debug:
                     parser.dprint(
                         f"-- Matched repetition '{matched_str}' token is not longer than "
-                        f"parent token '{parent_value}' at {c_pos} => '{parser.context(len(matched_str))}'")
+                        f"parent token '{str(parent_value)}' at {c_pos} => '{parser.context(len(matched_str))}'")
                 parser._nm_raise(self._rule, c_pos, parser)
 
             parser.state.repetition_set_rule_reference(rule_name, matched_str)

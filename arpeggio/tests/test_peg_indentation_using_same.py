@@ -157,3 +157,21 @@ end of function_name2
     )
     with pytest.raises(NoMatch):
         parser.parse(input_text)
+
+
+@pytest.mark.parametrize('klass, grammar_cb, debug', [
+    (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, Debugging.DISABLED),
+    (ParserPEG, get_grammar, True),
+])
+def test_wrong_indentation_at_program_start(klass, grammar_cb, debug, capsys):
+    input_text = """____def function_name1
+____end of function_name1"""
+    parser: ParserPEG = klass(
+        grammar_cb(),
+        'parser_entry',
+        debug = debug,  # noqa: E251
+        reduce_tree = True,  # noqa: E251
+    )
+    with pytest.raises(NoMatch):
+        parser.parse(input_text)

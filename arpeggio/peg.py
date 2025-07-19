@@ -667,6 +667,7 @@ class ActionOtherSame(MatchedAction):
 class MatchActions(ParsingExpression):
     """
     Apply some actions to a matched rule.
+    Apply some actions to a matched rule.
 
     This rule parses his child rule and then runs stored actions over the result. Each action except the first one
     receives the previous action result and returns its own result (usually the same).

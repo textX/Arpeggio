@@ -204,7 +204,7 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
     """, re.VERBOSE | re.UNICODE)
 
 
-class StateLayerScope(enum.Enum):
+class LayerScope(enum.Enum):
     """
     An enumeration used to identify the stack layer that should be used in an expression.
     """
@@ -330,7 +330,7 @@ class ActionListLast(MatchedAction):
     """
     An action that is used to match the last matched token from the top of the matches list according to the rule name.
     """
-    _state_scope: StateLayerScope = StateLayerScope.CURRENT
+    _state_scope: LayerScope = LayerScope.CURRENT
 
     @typing.override
     def run(
@@ -385,7 +385,7 @@ class ActionParentListLast(ActionListLast):
     An action that is used to match the last matched token from the top of the matches list of the parent's stack layer
     according to the rule name.
     """
-    _state_scope: StateLayerScope = StateLayerScope.PARENT
+    _state_scope: LayerScope = LayerScope.PARENT
 
 
 class ActionLonger(MatchedAction):
@@ -393,7 +393,7 @@ class ActionLonger(MatchedAction):
     An action that is used to match a longer token than the last matched token from the top of the matches list
     according to the rule name.
     """
-    _state_scope: StateLayerScope = StateLayerScope.CURRENT
+    _state_scope: LayerScope = LayerScope.CURRENT
 
     @typing.override
     def run(
@@ -428,7 +428,7 @@ class ActionParentListLonger(ActionLonger):
     An action that is used to match a longer token than the last matched token from the top of the matches list of
     the parent's stack layer according to the rule name.
     """
-    _state_scope: StateLayerScope = StateLayerScope.PARENT
+    _state_scope: LayerScope = LayerScope.PARENT
 
 
 class ActionPopFront(MatchedAction):
@@ -497,7 +497,7 @@ class ActionParentAdd(MatchedAction):
         parser.state.remember_rule_reference(
             self._rule.rule_name,
             matched_str,
-            state_layer_scope = StateLayerScope.PARENT  # noqa: E251
+            state_layer_scope = LayerScope.PARENT  # noqa: E251
         )
         return matched_result
 
@@ -518,7 +518,7 @@ class ActionGlobalAdd(MatchedAction):
         parser.state.remember_rule_reference(
             self._rule.rule_name,
             matched_str,
-            state_layer_scope = StateLayerScope.GLOBAL  # noqa: E251
+            state_layer_scope = LayerScope.GLOBAL  # noqa: E251
         )
         return matched_result
 
@@ -1009,7 +1009,7 @@ class ParserPEGState(ParserState):
     def last_pushed_rule_reference(
         self,
         rule_name: str,
-        state_layer_scope: StateLayerScope = StateLayerScope.CURRENT,
+        state_layer_scope: LayerScope = LayerScope.CURRENT,
     ) -> str | None:
         layer_num = state_layer_scope.value
         stack = self.state_layers[layer_num].rule_reference_stack[rule_name]
@@ -1041,7 +1041,7 @@ class ParserPEGState(ParserState):
     def last_rule_reference(
         self,
         rule_name: str,
-        state_layer_scope: StateLayerScope = StateLayerScope.CURRENT,
+        state_layer_scope: LayerScope = LayerScope.CURRENT,
     ) -> str | None:
         layer_num = state_layer_scope.value
         stack = self.state_layers[layer_num].rule_reference_list[rule_name]
@@ -1053,7 +1053,7 @@ class ParserPEGState(ParserState):
         self,
         rule_name: str,
         reference_name: str,
-        state_layer_scope: StateLayerScope = StateLayerScope.CURRENT
+        state_layer_scope: LayerScope = LayerScope.CURRENT
     ):
         layer_num = state_layer_scope.value
         reference_set = self.state_layers[layer_num].rule_reference_set.setdefault(rule_name, set())

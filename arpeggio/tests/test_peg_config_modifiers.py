@@ -21,10 +21,7 @@ import enum
 def get_grammar():
     return r'''
 parser_entry <-
-    (
-        INDENTATION{list append, suppress} program_element
-        (INDENTATION{list last, suppress} program_element)*
-    )?
+    (block_indentation program_element)*
     EOF;
 
 program_element <-
@@ -34,13 +31,9 @@ program_element <-
 function <-
     @(
         FUNCTION_START function_name{push}
-        (
-            INDENTATION{parent list longer, list append, suppress} program_element
-            (INDENTATION{list last, suppress} program_element)*
-        )?
-        INDENTATION{parent list last, list try remove, suppress} FUNCTION_END [skip_whitespace=True, whitespace=' \t']function_name{pop}
+        (block_indentation program_element)*
+        block_indentation FUNCTION_END [skip_whitespace=True, whitespace=' \t']function_name{pop}
     );
-
 
 function_call <-
     function_name
@@ -53,6 +46,8 @@ function_call <-
     )*
     ARGUMENTS_DELIMITER?
     ARGUMENTS_END;
+
+block_indentation <- INDENTATION{first longer, other same};
 
 FUNCTION_START <- 'def';
 function_name <- VALID_NAME;

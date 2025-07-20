@@ -384,7 +384,7 @@ class ParsingExpression(ParsingStatement):
         return result
 
     def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]) -> ParserModelItem:
-        for i, node in enumerate(self.nodes):
+        for i, node in enumerate(typing.cast(list[ParsingExpression], self.nodes)):
             self.nodes[i] = resolve_cb(node)
         return super().resolve(resolve_cb)
 

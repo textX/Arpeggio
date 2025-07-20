@@ -8,11 +8,11 @@
 #######################################################################
 import abc
 import codecs
+import collections.abc
 import copy
 import enum
 import re
 import typing
-import collections.abc
 
 
 from arpeggio import (
@@ -692,7 +692,7 @@ class MatchActions(ParsingExpression):
         self,
         resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]
     ) -> 'MatchActions':
-        node = super().resolve(resolve_cb)
+        node = typing.cast(typing.Self, super().resolve(resolve_cb))
         for action in node.actions:
             action._rule = node.nodes[0]
         return node

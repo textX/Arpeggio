@@ -39,11 +39,13 @@ function <-
 function_call <-
     function_name
     ARGUMENTS_START
-    VALID_NAME?
     (
-        ARGUMENTS_DELIMITER
         VALID_NAME
-    )*
+        (
+            ARGUMENTS_DELIMITER
+            VALID_NAME
+        )*
+    )?
     ARGUMENTS_DELIMITER?
     ARGUMENTS_END;
 

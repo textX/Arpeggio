@@ -73,11 +73,13 @@ function_with_suppressed_keywords <-
 function_call <-
     function_name{any}
     ARGUMENTS_START
-    VALID_NAME?
     (
-        ARGUMENTS_DELIMITER
         VALID_NAME
-    )*
+        (
+            ARGUMENTS_DELIMITER
+            VALID_NAME
+        )*
+    )?
     ARGUMENTS_DELIMITER?
     ARGUMENTS_END;
 

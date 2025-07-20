@@ -240,8 +240,11 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
 - **Optional** expression is specified by `?`operator (e.g. `expression?`) and
   matches zero or one occurrence of *expression*
 - **Zero or more** expression is specified by `*` operator (e.g. `(( "*" /
-  "/" ) factor)*`).
+  "/" ) factor)*`). Additionally, a separator could be specified
+  by `%` operator (e.g. `(argument % ',')*`).
 - **One of more** is specified by `+` operator (e.g. `expression+`).
+  Additionally, a separator could be specified by `%` operator
+  (e.g. `(argument % ',')+`).
 - **Unordered group** is specified by `#` operator (e.g. `sequence#`). It has
   sense only if applied to the sequence expression. Elements of the sequence are
   matched in any order.

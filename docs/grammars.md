@@ -298,6 +298,22 @@ A set of basic **match actions** if provided:
 - **any** to match any token corresponding to the rule that was previously
   added to the list of matched tokens (by **add** action) across all the state
   layers. If no token found, then the rule will fail to match.
+- **list append** to add a token to the current state layer according to
+  the rule name.
+- **list try remove** to try to remove the last token from the current
+  state layer if any according to the rule name.
+- **list last** to match the last token added to the current state user list
+  according to the rule name.
+- **list longer** to match a token that is longer than the last token added
+  to the current state user list according to the rule name.
+- **parent list last** to match the last token added to the parent state user
+  list according to the rule name.
+- **parent list longer** to match a token that is longer than the last token added
+  to the parent state user list according to the rule name.
+- **other same** to match a token that is inside the repetition expression
+  only if it's always the same in every repetition.
+- **first longer** to match a token only if it's length is longer than
+  the length of the last token from the parent repetition expression.
 - **suppress** to suppress a rule so it wouldn't appear in the resulting
   parsing tree.
 

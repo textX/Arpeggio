@@ -564,6 +564,13 @@ class ZeroOrMore(Repetition):
 
         return results
 
+    @typing.override
+    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]) -> ParserModelItem:
+        node = super().resolve(resolve_cb)
+        if node.sep:
+            node.sep = node.sep.resolve(resolve_cb)
+        return node
+
 
 class OneOrMore(Repetition):
     """
@@ -619,6 +626,13 @@ class OneOrMore(Repetition):
             parser.state.pop_repetition_layer()
 
         return results
+
+    @typing.override
+    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]) -> ParserModelItem:
+        node = super().resolve(resolve_cb)
+        if node.sep:
+            node.sep = node.sep.resolve(resolve_cb)
+        return node
 
 
 class UnorderedGroup(Repetition):
@@ -2433,6 +2447,9 @@ class ParserPython(Parser):
                 retval.nodes = [inner_from_python(e) for e in expression]
                 if any(isinstance(x, CrossRef) for x in retval.nodes):
                     __for_resolving.append(retval)
+
+            elif isinstance(expression, ParserModelItem):
+                retval = expression
 
             else:
                 raise GrammarError(f"Unrecognized grammar element '{expression}'.")

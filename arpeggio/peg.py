@@ -65,8 +65,9 @@ OPTIONAL = "?"
 UNORDERED_GROUP = "#"
 AND = "&"
 NOT = "!"
-OPEN = "("
-CLOSE = ")"
+OPEN = StrMatch("(", suppress=True)
+REPETITION_DELIMITER = StrMatch("%", suppress=True)
+CLOSE = StrMatch(")", suppress=True)
 CALL_START = StrMatch("{", suppress=True)
 CALL_END = StrMatch("}", suppress=True)
 CALL_DELIMITER = StrMatch(',', suppress=True)
@@ -125,9 +126,29 @@ def parsing_expression():
         regex,
         str_match,
         rule_crossref,
-        (OPEN, ordered_choice, CLOSE),
+        grouped_parsing_expression,
         wrapped_with_state_layer,
     ]
+
+
+def grouped_parsing_expression():
+    return (
+        OPEN,
+        ordered_choice,
+        [
+            (
+                REPETITION_DELIMITER,
+                ordered_choice,
+                CLOSE,
+                [
+                    ZERO_OR_MORE,
+                    ONE_OR_MORE,
+                ]
+            ),
+            ordered_choice,
+            CLOSE,
+        ]
+    )
 
 
 def parsing_state():
@@ -941,6 +962,14 @@ class PEGVisitor(PTNodeVisitor):
             retval = UnorderedGroup(nodes=nodes[0].nodes)
 
         return retval
+
+    def visit_grouped_parsing_expression(self, node, children):
+        if len(children) == 3:
+            if children[2] == ZERO_OR_MORE:
+                return ZeroOrMore(nodes=children[0], sep=children[1])
+            else:
+                return OneOrMore(nodes=children[0], sep=children[1])
+        return children[0]
 
     def visit_rule_crossref(self, node, children):
         return CrossRef(node.value)

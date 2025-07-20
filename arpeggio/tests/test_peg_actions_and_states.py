@@ -75,12 +75,8 @@ function_call <-
     ARGUMENTS_START
     (
         VALID_NAME
-        (
-            ARGUMENTS_DELIMITER
-            VALID_NAME
-        )*
-    )?
-    ARGUMENTS_DELIMITER?
+        % ARGUMENTS_DELIMITER
+    )*
     ARGUMENTS_END;
 
 defer_call <-

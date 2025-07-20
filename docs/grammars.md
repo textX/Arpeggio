@@ -274,6 +274,14 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
   (e.g. `@( ((LOCAL variable_name{add}) / (variable_name{any} ASSIGN value))* )`).
   It allows to store added by actions data in separate layers (for example,
   to handle local variables).
+- **Config modifiers** are specified before the target expression
+  using `[` and `]` operator that allows to override config parameters of
+  the parser with the specified ones (e.g. `[debug=True]expression`).
+  Parameters are separated from each other with comma
+  (`,`, e.g. `[skip_whitespace=True, whitespace=' \t']expression`).
+  Currently, only boolean (`True`, `False`) and string values are supported.
+  Useful config modifiers: `debug`, `skip_whitespace` (corresponds to
+  the parser's `skipws`) and `whitespace` (corresponds to the parser's `ws`).
 - A special rule `EOF` will match end of input string.
 
 A set of basic **match actions** if provided:

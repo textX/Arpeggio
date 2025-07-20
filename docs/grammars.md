@@ -286,17 +286,17 @@ A set of basic **match actions** if provided:
   If the matched token and the token at the bottom of the stack aren't
   the same, then the match will fail. This action can be used to implement
   FIFO (First In, First Out) rules.
-- **add** to add a matched token to the list of the matched tokens
+- **add** to add a matched token to the set of the matched tokens
   corresponding to the rule. This action always succeeds and can be used,
   for example, to determine local variables.
-- **parent add** to add a matched token to the list of the matched tokens of
+- **parent add** to add a matched token to the set of the matched tokens of
   the parent state layer corresponding to the rule. This action always succeeds
   and can be used, for example, to determine local variables.
-- **global add** to add a matched token to the list of the matched tokens of
+- **global add** to add a matched token to the set of the matched tokens of
   the global state layer corresponding to the rule. This action always succeeds
   and can be used, for example, to determine global variables.
 - **any** to match any token corresponding to the rule that was previously
-  added to the list of matched tokens (by **add** action) across all the state
+  added to the set of matched tokens (by **add** action) across all the state
   layers. If no token found, then the rule will fail to match.
 - **list append** to add a token to the current state layer according to
   the rule name.

@@ -2255,12 +2255,6 @@ class Parser(DebugPrinter):
     def state(self) -> _state_class:
         return self._state
 
-    def save_state(self) -> ParserState:
-        return copy.deepcopy(self._state)
-
-    def load_state(self, new_state: ParserState):
-        self._state.load_from(new_state)
-
     def take_state_snapshot(self) -> ParserStateSnapshot:
         """
         Take a snapshot of the parser state.

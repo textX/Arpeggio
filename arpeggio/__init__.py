@@ -2221,7 +2221,7 @@ class Parser(DebugPrinter):
 
         return retval.replace('\n', ' ').replace('\r', '')
 
-    def _nm_raise(self, *args):
+    def _nm_raise(self, *args) -> typing.NoReturn:
         """
         Register new NoMatch object if the input is consumed
         from the last NoMatch and raise last NoMatch.

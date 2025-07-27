@@ -190,7 +190,7 @@ class ParsingStatement(ParserModelItem):
     """
 
     @abc.abstractmethod
-    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
         pass
 
 
@@ -389,7 +389,7 @@ class ParsingExpression(ParsingStatement):
         return super().resolve(resolve_cb)
 
     @abc.abstractmethod
-    def _parse(self, parser: 'Parser') -> 'ParseTreeNode':
+    def _parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
         pass
 
 
@@ -1085,7 +1085,7 @@ class MatchState(ParsingStateStatement):
 
     If the current state doesn't match the expected state then the parsing process will fail.
     """
-    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
         c_pos = parser.position
         curr_parsing_state = parser.state.parsing_state
         if not curr_parsing_state:
@@ -1120,7 +1120,7 @@ class PushState(ParsingStateStatement):
 
     This statement always passes.
     """
-    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
         parser.state.push_parsing_state(self._parsing_state)
         return None
 
@@ -1141,7 +1141,7 @@ class PopState(ParsingStateStatement):
     If the current statement doesn't match the expected statement, then the parsing process will fail. Otherwise,
     the current parsing state will be removed from the top of the parsing states stack.
     """
-    def parse(self, parser: 'Parser') -> 'ParseTreeNode':
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
         curr_parsing_state = parser.state.parsing_state
         if curr_parsing_state != self._parsing_state:
             c_pos = parser.position
@@ -1175,7 +1175,7 @@ class StateWrapper(ParsingExpression):
         super().__init__(nodes=[node])
 
     @typing.override
-    def _parse(self, parser: 'Parser') -> 'ParseTreeNode':
+    def _parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
         state_snapshot = parser.take_state_snapshot()
 
         parser.state.push_state_layer()

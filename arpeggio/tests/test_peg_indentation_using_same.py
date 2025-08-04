@@ -71,7 +71,7 @@ class Debugging(enum.Flag):
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, True),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_first_longer_and_other_same(klass, grammar_cb, debug, capsys):
     input_text = """
@@ -99,7 +99,7 @@ end of function_name2
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, True),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_wrong_indentation(klass, grammar_cb, debug, capsys):
     input_text = """
@@ -130,7 +130,7 @@ end of function_name2
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, True),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_wrong_indentation_at_end(klass, grammar_cb, debug, capsys):
     input_text = """
@@ -161,7 +161,7 @@ end of function_name2
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, True),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_wrong_indentation_at_program_start(klass, grammar_cb, debug, capsys):
     input_text = """____def function_name1

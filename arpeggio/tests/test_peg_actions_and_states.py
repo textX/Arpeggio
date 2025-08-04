@@ -208,7 +208,7 @@ erroneous end of function_name1
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, True),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_any(klass, grammar_cb, debug, capsys):
     input_text = """
@@ -249,7 +249,7 @@ function_name2(1, 2, 3)
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, True),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_backreference_any_not_met(klass, grammar_cb, debug, capsys):
     input_text = """
@@ -598,7 +598,7 @@ erroneous end of function_name1
 @pytest.mark.parametrize('klass, grammar_cb, debug', [
     (ParserPEGClean, get_clean_grammar, Debugging.DISABLED),
     (ParserPEG, get_grammar, Debugging.DISABLED),
-    (ParserPEG, get_grammar, True),
+    (ParserPEG, get_grammar, Debugging.ENABLED),
 ])
 def test_suppress_action(klass, grammar_cb, debug, capsys):
     input_text = """

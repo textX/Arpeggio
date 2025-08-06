@@ -764,9 +764,10 @@ class ModifyConfig(ParsingExpression):
         self,
         node: ParsingExpression,
         modifiers: collections.abc.Sequence[tuple[str, typing.Any]],
+        **kwargs,
     ):
-        super().__init__(nodes=[node])
         self._modifiers = modifiers
+        super().__init__(nodes=[node], **kwargs)
 
     @typing.override
     def _parse(self, parser: 'Parser'):
@@ -784,13 +785,18 @@ class ModifyConfig(ParsingExpression):
         return retval
 
     @typing.override
-    def resolve(
-        self,
-        resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]
-    ) -> 'MatchActions':
-        node = super().resolve(resolve_cb)
-        self.rule_name = self.nodes[0].rule_name
-        return node
+    @property
+    def name(self):
+        modifiers_str = ', '. join(map(lambda modifier: modifier[0] + '=' + str(modifier[1]), self._modifiers))
+        if self.rule_name:
+            return f'{self.rule_name}=[{modifiers_str}]{self.nodes[0].name}'
+        else:
+            return f'[{modifiers_str}]({self.nodes[0].name})'
+
+    @typing.override
+    @property
+    def resolved_rule_name(self):
+        return self.rule_name or self.nodes[0].rule_name
 
 
 class PEGVisitor(PTNodeVisitor):

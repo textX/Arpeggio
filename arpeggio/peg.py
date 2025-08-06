@@ -33,7 +33,7 @@ from arpeggio import (
     ParserStateLayer,
     ParserRepetitionStateLayer,
     Parser,
-    ParserModelDebuggable,
+    ParserModelDescribable,
     ParserPython,
     ParseTreeNode,
     PTNodeVisitor,
@@ -236,7 +236,7 @@ class LayerScope(enum.Enum):
     CURRENT = -1
 
 
-class MatchedAction(ParserModelDebuggable):
+class MatchedAction(ParserModelDescribable):
     """
     An abstract class for all action classes used in MatchActions parsing rules.
     """
@@ -282,6 +282,7 @@ class MatchedAction(ParserModelDebuggable):
     def __str__(self):
         return f'{str(self._rule)}{{{' '.join(map(str, self._args))}}}'
 
+    @typing.override
     @property
     def name(self):
         if self._command_hint:
@@ -679,6 +680,7 @@ class MatchActions(ParsingExpression):
         rule_node = self.nodes[0]
         return str(rule_node)
 
+    @typing.override
     @property
     def desc(self):
         return "{}{{{}}}{}".format(

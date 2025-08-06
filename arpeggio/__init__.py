@@ -71,7 +71,7 @@ class NoMatch(Exception):
     """
     def __init__(
         self,
-        rules: typing.Union['ParsingExpression', 'ParserModelDebuggable'],
+        rules: typing.Union['ParsingExpression', 'ParserModelDescribable'],
         position: int,
         parser: 'Parser',
     ):
@@ -183,7 +183,7 @@ class ParserModelItem(abc.ABC):
         return resolved_node
 
 
-class ParserModelDebuggable(abc.ABC):
+class ParserModelDescribable(abc.ABC):
     """
     A basic interface class for all parser model helper classes.
 
@@ -196,8 +196,16 @@ class ParserModelDebuggable(abc.ABC):
     def name(self):
         pass
 
+    @property
+    def desc(self):
+        return self.name + ': ' + self.__class__.__name__
 
-class ParsingStatement(ParserModelItem):
+    @property
+    def id(self):
+        return f'{self.name}: {id(self)}'
+
+
+class ParsingStatement(ParserModelItem, ParserModelDescribable):
     """
     A basic class for all parser model statement classes.
 
@@ -212,7 +220,7 @@ class ParsingStatement(ParserModelItem):
         pass
 
 
-class ParsingExpression(ParsingStatement, ParserModelDebuggable):
+class ParsingExpression(ParsingStatement):
     """
     An abstract class for all parsing expressions.
 
@@ -236,6 +244,8 @@ class ParsingExpression(ParsingStatement, ParserModelDebuggable):
 
     def __init__(self, *elements, **kwargs):
 
+        super().__init__()
+
         if len(elements) == 1:
             elements = elements[0]
         self.elements = elements
@@ -255,6 +265,7 @@ class ParsingExpression(ParsingStatement, ParserModelDebuggable):
         # positions.
         self._result_cache = {}  # position -> parse tree at the position
 
+    @typing.override
     @property
     def desc(self):
         return "{}{}".format(self.name, "-" if self.suppress else "")
@@ -267,6 +278,7 @@ class ParsingExpression(ParsingStatement, ParserModelDebuggable):
         else:
             return self.__class__.__name__
 
+    @typing.override
     @property
     def id(self):
         if self.root:
@@ -850,6 +862,7 @@ class Match(ParsingExpression):
     def __init__(self, rule_name, root=False, **kwargs):
         super().__init__(rule_name=rule_name, root=root, **kwargs)
 
+    @typing.override
     @property
     def name(self):
         if self.root:
@@ -1126,8 +1139,9 @@ class MatchState(ParsingStateStatement):
     def __str__(self):
         return '@' + self.state_name
 
+    @typing.override
     @property
-    def desc(self):
+    def name(self):
         return "@{}".format(
             self.state_name,
         )
@@ -1146,8 +1160,9 @@ class PushState(ParsingStateStatement):
     def __str__(self):
         return '+@' + self.state_name
 
+    @typing.override
     @property
-    def desc(self):
+    def name(self):
         return "+@{}".format(
             self.state_name,
         )
@@ -1176,8 +1191,9 @@ class PopState(ParsingStateStatement):
     def __str__(self):
         return '-@' + self.state_name
 
+    @typing.override
     @property
-    def desc(self):
+    def name(self):
         return "-@{}".format(
             self.state_name,
         )
@@ -1216,6 +1232,7 @@ class EndOfFile(Match):
     def __init__(self):
         super().__init__("EOF")
 
+    @typing.override
     @property
     def name(self):
         return "EOF"
@@ -1268,6 +1285,7 @@ class ParseTreeNode:
         self.error = error
         self.comments = None
 
+    @typing.override
     @property
     def name(self):
         return f"{self.rule_name} [{self.position}]"
@@ -1342,6 +1360,7 @@ class Terminal(ParseTreeNode):
         self.suppress = suppress
         self.extra_info = extra_info
 
+    @typing.override
     @property
     def desc(self):
         if self.value:
@@ -1404,6 +1423,7 @@ class NonTerminal(ParseTreeNode, list):
         """Terminal protocol."""
         return str(self)
 
+    @typing.override
     @property
     def desc(self):
         return self.name

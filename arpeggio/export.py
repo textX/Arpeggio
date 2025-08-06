@@ -114,7 +114,7 @@ class DOTExportAdapter(ExportAdapter):
 
 class PMDOTExportAdapter(DOTExportAdapter):
     """
-    Adapter for ParsingExpression graph types (parser model).
+    Adapter for ParsingStatement graph types (parser model).
     """
     @property
     def id(self):

@@ -35,7 +35,7 @@ by end of input (`EOF`). `second` rule is ordered choice and will match either
     parse as far as it can, leaving the rest of the input unprocessed, and return
     without an error. So, be sure to always end your root rule sequence with
     `EOF` if you want a complete parse.
-    
+
 
 During parsing each successfully matched rule will create a parse tree node. At
 the end of parsing a complete [parse tree](parse_trees.md) of the input will be
@@ -92,7 +92,7 @@ Here is an example of arpeggio grammar for simple calculator:
     def calc():       return OneOrMore(expression), EOF
 
 Each rule is given in the form of Python function. Python function returns data
-structure that maps to PEG expressions.
+structure that maps to PEG expressions and state statements.
 
 - **Sequence** is represented as Python tuple.
 - **Ordered choice** is represented as Python list where each element is one
@@ -107,6 +107,17 @@ structure that maps to PEG expressions.
 - **Not predicate** is represented as an instance of `Not` class.
 - **Literal string match** is represented as string or regular expression given
   as an instance of `RegExMatch` class.
+- **Match state predicate** is represented as an instance of `MatchState` class.
+  A parsing state passed to the instance must be of `ParsingState` class.
+  The class checks if the current state is the same as the provided one.
+- **Push state command** is represented as an instance of `PushState` class.
+  A parsing state passed to the instance must be of `ParsingState` class.
+- **Pop state predicate** is represented as an instance of `PopState` class.
+  A parsing state passed to the instance must be of `ParsingState` class.
+  The class checks if the current state is the same as the provided one if any.
+- **State layer wrapper** is represented as an instance of
+  `StateLayerWrapper` class. This wrapper is used to isolate the state
+  of a specific group of rules and check its integrity.
 - **End of string/file** is recognized by the `EOF` special rule.
 
 For example, the `calc` language consists of one or more `expression` and
@@ -229,8 +240,11 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
 - **Optional** expression is specified by `?`operator (e.g. `expression?`) and
   matches zero or one occurrence of *expression*
 - **Zero or more** expression is specified by `*` operator (e.g. `(( "*" /
-  "/" ) factor)*`).
+  "/" ) factor)*`). Additionally, a separator could be specified
+  by `%` operator (e.g. `(argument % ',')*`).
 - **One of more** is specified by `+` operator (e.g. `expression+`).
+  Additionally, a separator could be specified by `%` operator
+  (e.g. `(argument % ',')+`).
 - **Unordered group** is specified by `#` operator (e.g. `sequence#`). It has
   sense only if applied to the sequence expression. Elements of the sequence are
   matched in any order.
@@ -238,7 +252,70 @@ Each grammar rule is given as an assignment where the LHS is the rule name (e.g.
   used in the grammar above).
 - **Not predicate** is specified by `!` operator (e.g. `!expression` - not
   used in the grammar above).
+- **Match actions** are special commands written within `{` and `}` braces
+  after a rule (e.g. `some_rule{push, add}`). These commands will be executed
+  after the rule has been matched. Each command can have arguments separated
+  with the whitespace. If more than one command is specified, the commands
+  must be separated by comma `,` delimiter. See below for the list
+  of the provided actions.
+- **State matches** are given as state names preceded by `@` operator
+  (e.g. `@some_state`). A match will succeed only if the current state is
+  the same as the provided by the operator state.
+- **Push state** is used to push a state onto the stack of the states and
+  make it the current. It is specified using `+@` operator with a state name
+  after it (e.g. `+@some_state`). Later this state can be matched using
+  the `@` operator. This rule always succeeds.
+- **Pop state** is used to pop a state form the top of the state stack.
+  It is specified using `-@` operator followed by the state name that should
+  be removed (e.g. `-@some_state`). If the current state doesn't match
+  the specified state then the match fails.
+- **Wrapping with a state layer** is specified using `@(` and `)` operator and
+  allows one or more rules to be wrapped with a separate state layer
+  (e.g. `@( ((LOCAL variable_name{add}) / (variable_name{any} ASSIGN value))* )`).
+  It allows to store added by actions data in separate layers (for example,
+  to handle local variables).
 - A special rule `EOF` will match end of input string.
+
+A set of basic **match actions** if provided:
+- **push** to push a matched token onto the stack. This action always succeeds.
+- **pop** to match against the token at the top of the stack corresponding
+  to the rule and pop that token from the stack. If the matched token and
+  the token at the top of the stack aren't the same, then the match will fail.
+- **pop_front** to match against the token at the bottom of the stack
+  corresponding to the rule and remove that token from the stack.
+  If the matched token and the token at the bottom of the stack aren't
+  the same, then the match will fail. This action can be used to implement
+  FIFO (First In, First Out) rules.
+- **add** to add a matched token to the set of the matched tokens
+  corresponding to the rule. This action always succeeds and can be used,
+  for example, to determine local variables.
+- **parent add** to add a matched token to the set of the matched tokens of
+  the parent state layer corresponding to the rule. This action always succeeds
+  and can be used, for example, to determine local variables.
+- **global add** to add a matched token to the set of the matched tokens of
+  the global state layer corresponding to the rule. This action always succeeds
+  and can be used, for example, to determine global variables.
+- **any** to match any token corresponding to the rule that was previously
+  added to the set of matched tokens (by **add** action) across all the state
+  layers. If no token found, then the rule will fail to match.
+- **list append** to add a token to the current state layer according to
+  the rule name.
+- **list try remove** to try to remove the last token from the current
+  state layer if any according to the rule name.
+- **list last** to match the last token added to the current state user list
+  according to the rule name.
+- **list longer** to match a token that is longer than the last token added
+  to the current state user list according to the rule name.
+- **parent list last** to match the last token added to the parent state user
+  list according to the rule name.
+- **parent list longer** to match a token that is longer than the last token added
+  to the parent state user list according to the rule name.
+- **other same** to match a token that is inside the repetition expression
+  only if it's always the same in every repetition.
+- **first longer** to match a token only if it's length is longer than
+  the length of the last token from the parent repetition expression.
+- **suppress** to suppress a rule so it wouldn't appear in the resulting
+  parsing tree.
 
 In the RHS a rule reference is a name of another rule. Parser will try to match
 another rule at that location.

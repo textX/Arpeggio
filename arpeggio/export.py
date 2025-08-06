@@ -8,7 +8,10 @@
 
 import io
 
-from arpeggio import Terminal
+from arpeggio import (
+    Terminal,
+    ParsingExpression,
+)
 
 
 class Exporter:
@@ -111,7 +114,7 @@ class DOTExportAdapter(ExportAdapter):
 
 class PMDOTExportAdapter(DOTExportAdapter):
     """
-    Adapter for ParsingExpression graph types (parser model).
+    Adapter for ParsingStatement graph types (parser model).
     """
     @property
     def id(self):
@@ -124,6 +127,9 @@ class PMDOTExportAdapter(DOTExportAdapter):
     @property
     def neighbours(self):
         if not hasattr(self, "_neighbours"):
+            if not isinstance(self.adaptee, ParsingExpression):
+                return []
+
             self._neighbours= []
 
             # Registry of adapters used in this export

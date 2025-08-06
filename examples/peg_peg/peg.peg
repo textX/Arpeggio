@@ -1,9 +1,9 @@
  peggrammar <- rule+ EOF;
  rule <- rule_name LEFT_ARROW ordered_choice ';';
  ordered_choice <- sequence (SLASH sequence)*;
- sequence <- prefix+;
- prefix <- (AND/NOT)? sufix;
- sufix <- expression (QUESTION/STAR/PLUS)?;
+ sequence <- full_expression+;
+ full_expression <- (AND/NOT)? repeated_expression;
+ repeated_expression <- expression (QUESTION/STAR/PLUS)?;
  expression <- regex / rule_crossref
                 / (OPEN ordered_choice CLOSE) / str_match;
 

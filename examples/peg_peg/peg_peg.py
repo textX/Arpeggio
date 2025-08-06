@@ -56,6 +56,6 @@ def main(debug=False):
     parser.parser_model = parser_model
     parser.parse(peg_grammar)
 
+
 if __name__ == '__main__':
     main(debug=True)
-

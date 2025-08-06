@@ -3,8 +3,9 @@
 # Purpose: This module is a variation of the original peg.py.
 #   The syntax is slightly changed to be more readable and familiar to
 #   python users. It is based on the Yash's suggestion - issue 11
-# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2014-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
+# Copyright: (c) 2009-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2025 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
 # License: MIT License
 #######################################################################
 
@@ -15,6 +16,7 @@ from arpeggio import (
     OneOrMore,
     Optional,
     ParserPython,
+    StrMatch,
     ZeroOrMore,
     visit_parse_tree,
 )
@@ -29,36 +31,155 @@ __all__ = ['ParserPEG']
 ASSIGNMENT = "="
 ORDERED_CHOICE = "/"
 ZERO_OR_MORE = "*"
-ONE_OR_MORE = "+"
+ONE_OR_MORE_SYMBOL = '+'
+ONE_OR_MORE = _('(?<!\\s)\\' + ONE_OR_MORE_SYMBOL)
 OPTIONAL = "?"
 UNORDERED_GROUP = "#"
 AND = "&"
 NOT = "!"
-OPEN = "("
-CLOSE = ")"
+OPEN = StrMatch("(", suppress=True)
+REPETITION_DELIMITER = StrMatch("%", suppress=True)
+CLOSE = StrMatch(")", suppress=True)
+CALL_START = StrMatch("{", suppress=True)
+CALL_END = StrMatch("}", suppress=True)
+CALL_DELIMITER = StrMatch(',', suppress=True)
+STATE = StrMatch('@', suppress=True)
+PUSH_STATE = StrMatch('+@', suppress=True)
+POP_STATE = StrMatch('-@', suppress=True)
+STATE_LAYER_START = StrMatch('@(', suppress=True)
+STATE_LAYER_END = StrMatch(')', suppress=True)
+
 
 # PEG syntax rules
-def peggrammar():       return OneOrMore(rule), EOF
-def rule():             return rule_name, ASSIGNMENT, ordered_choice
-def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore(prefix)
-def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([OPTIONAL,
-                                                     ZERO_OR_MORE,
-                                                     ONE_OR_MORE,
-                                                     UNORDERED_GROUP])
-def expression():       return [regex, rule_crossref,
-                                (OPEN, ordered_choice, CLOSE),
-                                str_match], Not(ASSIGNMENT)
+def peggrammar():
+    return OneOrMore(rule), EOF
+
+
+def rule():
+    return rule_name, ASSIGNMENT, ordered_choice
+
+
+def ordered_choice():
+    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
+
+
+def sequence():
+    return OneOrMore(full_expression)
+
+
+def full_expression():
+    return Optional([AND, NOT]), repeated_expression
+
+
+def repeated_expression():
+    return statement, Optional([
+        OPTIONAL,
+        ZERO_OR_MORE,
+        ONE_OR_MORE,
+        UNORDERED_GROUP
+    ])
+
+
+def statement():
+    return [
+        expression,
+        parsing_state,
+        push_parsing_state,
+        pop_parsing_state,
+    ]
+
+
+def expression():
+    return parsing_expression, Optional(action_calls)
+
+
+def parsing_expression():
+    return [
+        regex,
+        str_match,
+        (rule_crossref, Not(ASSIGNMENT)),
+        grouped_parsing_expression,
+        wrapped_with_state_layer,
+    ]
+
+
+def grouped_parsing_expression():
+    return (
+        OPEN,
+        ordered_choice,
+        [
+            (
+                REPETITION_DELIMITER,
+                ordered_choice,
+                CLOSE,
+                [
+                    ZERO_OR_MORE,
+                    ONE_OR_MORE,
+                ]
+            ),
+            ordered_choice,
+            CLOSE,
+        ]
+    )
+
+
+def parsing_state():
+    return STATE, parsing_state_name
+
+
+def push_parsing_state():
+    return PUSH_STATE, parsing_state_name
+
+
+def pop_parsing_state():
+    return POP_STATE, parsing_state_name
+
+
+def parsing_state_name():
+    return _(r'[a-zA-Z_][a-zA-Z_0-9]*')
+
+
+def wrapped_with_state_layer():
+    return STATE_LAYER_START, ordered_choice, STATE_LAYER_END
+
+
+def action_calls():
+    return CALL_START, action_call, ZeroOrMore((CALL_DELIMITER, action_call)), CALL_END
+
+
+def action_call():
+    return OneOrMore(action_call_argument)
+
+
+def action_call_argument():
+    return [_(r'\w+'), quoted_string]
+
+
+def quoted_string():
+    return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
+             r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
+
 
 # PEG Lexical rules
-def regex():            return _(r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
-                                 r'''(r"[^"\\]*(?:\\.[^"\\]*)*")''')
-def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
-def rule_crossref():    return rule_name
-def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-                                 r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
-def comment():          return _("//.*\n", multiline=False)
+def regex():
+    return _(r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
+             r'''(r"[^"\\]*(?:\\.[^"\\]*)*")''')
+
+
+def rule_name():
+    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
+
+
+def rule_crossref():
+    return rule_name
+
+
+def str_match():
+    return quoted_string()
+
+
+def comment():
+    return _("//.*\n", multiline=False)
 
 
 class ParserPEG(ParserPEGOrig):

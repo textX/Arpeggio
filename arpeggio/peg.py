@@ -279,21 +279,25 @@ class MatchedAction(ParserModelDescribable):
         """
         pass
 
-    def __str__(self):
-        return f'{str(self._rule)}{{{' '.join(map(str, self._args))}}}'
-
-    @typing.override
     @property
-    def name(self):
+    def command_str(self):
         if self._command_hint:
             if self._args:
                 args_str = ' ' + ' '.join(map(str, self._args))
             else:
                 args_str = ''
-            command_str = f'{{..., {self._command_hint}{args_str}, ...}}'
+            command_str = f'{self._command_hint}{args_str}'
         else:
-            command_str = f'{{..., {self.__class__.__name__}({' '.join(map(str, self._args))}), ...}}'
-        return self._rule.rule_name + command_str
+            command_str = f'{self.__class__.__name__}({' '.join(map(str, self._args))})'
+        return command_str
+
+    def __str__(self):
+        return f'{str(self._rule)}{{{self.command_str}}}'
+
+    @typing.override
+    @property
+    def name(self):
+        return f'{self._rule.rule_name}{{..., {self.command_str}, ...}}'
 
 class ActionPush(MatchedAction):
     """
@@ -688,10 +692,19 @@ class MatchActions(ParsingExpression):
 
     @typing.override
     @property
+    def name(self):
+        actions_str = ', '.join(map(lambda action: ' '.join(action.command_str), self.actions))
+        if self.rule_name:
+            self_name = f'{self.rule_name}='
+        else:
+            self_name = ''
+        return f'{self_name}{str(self.nodes[0].resolved_rule_name)}{{{actions_str}}}'
+
+    @typing.override
+    @property
     def desc(self):
-        return "{}{{{}}}{}".format(
+        return "{}{}".format(
             self.name,
-            ', '.join(map(lambda x: ' '.join(str(x)), self.actions)),
             "-" if self.suppress else "",
         )
 

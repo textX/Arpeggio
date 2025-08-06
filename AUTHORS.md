@@ -1,6 +1,8 @@
 Arpeggio - Parser interpreter based on PEG grammars
 
-Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+Arpeggio author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+
+Original author of the state and actions subsystems: Andrey N. Dotsenko <pgandrey@ya.ru>
 
 
 # Contributors

@@ -1,8 +1,9 @@
 ###############################################################################
 # Name: arpeggio.py
 # Purpose: PEG parser interpreter
-# Author: Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
-# Copyright: (c) 2009-2019 Igor R. Dejanović <igor DOT dejanovic AT gmail DOT com>
+# Author: Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
+# Copyright: (c) 2009-2017 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
+# Copyright: (c) 2025 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>, Andrey N. Dotsenko <pgandrey@ya.ru>
 # License: MIT License
 #
 # This is an implementation of packrat parser interpreter based on PEG
@@ -10,12 +11,16 @@
 # textual notation.
 ###############################################################################
 
+import abc
 import bisect
 import codecs
+import collections.abc
 import re
 import sys
 import types
+import typing
 from collections import OrderedDict
+import copy
 
 try:
     from importlib.metadata import version
@@ -59,17 +64,20 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        rules (list of ParsingExpression): Rules that are tried at the position
+        rules: Rules or their wrappers that are tried at the position
             of the exception.
-        position (int): A position in the input stream where exception
-            occurred.
-        parser (Parser): An instance of a parser.
+        position: A position in the input stream where exception occurred.
+        parser: An instance of a parser.
     """
-    def __init__(self, rules, position, parser):
+    def __init__(
+        self,
+        rules: typing.Union['ParsingExpression', 'ParserModelDescribable'],
+        position: int,
+        parser: 'Parser',
+    ):
         self.rules = rules
         self.position = position
         self.parser = parser
-
 
     def eval_attrs(self):
         """
@@ -79,7 +87,7 @@ class NoMatch(Exception):
             if hasattr(rule, '_exp_str'):
                 # Rule may override expected report string
                 return rule._exp_str
-            elif rule.root:
+            elif hasattr(rule, 'root') and rule.root:
                 return rule.rule_name
             elif isinstance(rule, Match) and \
                     not isinstance(rule, EndOfFile):
@@ -159,10 +167,65 @@ class DebugPrinter:
 # Parser Model (PEG Abstract Semantic Graph) elements
 
 
-class ParsingExpression:
+class ParserModelItem(abc.ABC):
+    """
+    A basic class for all parser model classes.
+
+    Represents the node of the parser model. All parser model classes should be descendants of this basic class
+    including any helper classes.
+    """
+
+    def resolve(
+        self,
+        resolve_cb: typing.Callable[['ParserModelItem'], 'ParserModelItem']
+    ) -> 'ParserModelItem':
+        resolved_node = resolve_cb(self)
+        return resolved_node
+
+
+class ParserModelDescribable(abc.ABC):
+    """
+    A basic interface class for all parser model helper classes.
+
+    This class is needed mainly for debugging purposes. It allows to get information from the inner parts of the rules
+    about parsing errors.
+    """
+
+    @property
+    @abc.abstractmethod
+    def name(self):
+        pass
+
+    @property
+    def desc(self):
+        return self.name + ': ' + self.__class__.__name__
+
+    @property
+    def id(self):
+        return f'{self.name}: {id(self)}'
+
+
+class ParsingStatement(ParserModelItem, ParserModelDescribable):
+    """
+    A basic class for all parser model statement classes.
+
+    Statements can parse text or do something else like manipulating the parser state system.
+
+    All parser model statement classes (i.e. classes that participate in the parsing process) must be
+    descendants of this basic class.
+    """
+
+    @abc.abstractmethod
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
+        pass
+
+
+class ParsingExpression(ParsingStatement):
     """
     An abstract class for all parsing expressions.
-    Represents the node of the Parser Model.
+
+    The parsing expression differs from the parsing statement in such a way that it always involves
+    text parsing process.
 
     Attributes:
         elements: A list (or other python object) used as a staging structure
@@ -180,6 +243,8 @@ class ParsingExpression:
     suppress = False
 
     def __init__(self, *elements, **kwargs):
+
+        super().__init__()
 
         if len(elements) == 1:
             elements = elements[0]
@@ -200,10 +265,12 @@ class ParsingExpression:
         # positions.
         self._result_cache = {}  # position -> parse tree at the position
 
+    @typing.override
     @property
     def desc(self):
         return "{}{}".format(self.name, "-" if self.suppress else "")
 
+    @typing.override
     @property
     def name(self):
         if self.root:
@@ -211,6 +278,7 @@ class ParsingExpression:
         else:
             return self.__class__.__name__
 
+    @typing.override
     @property
     def id(self):
         if self.root:
@@ -237,6 +305,7 @@ class ParsingExpression:
                 processed.add(node)
                 node._clear_cache(processed)
 
+    @typing.override
     def parse(self, parser):
 
         if parser.debug:
@@ -345,6 +414,19 @@ class ParsingExpression:
 
         return result
 
+    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]) -> ParserModelItem:
+        for i, node in enumerate(typing.cast(list[ParsingExpression], self.nodes)):
+            self.nodes[i] = resolve_cb(node)
+        return super().resolve(resolve_cb)
+
+    @property
+    def resolved_rule_name(self):
+        return self.rule_name
+
+    @abc.abstractmethod
+    def _parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
+        pass
+
 
 class Sequence(ParsingExpression):
     """
@@ -356,6 +438,7 @@ class Sequence(ParsingExpression):
         self.ws = kwargs.pop('ws', None)
         self.skipws = kwargs.pop('skipws', None)
 
+    @typing.override
     def _parse(self, parser):
         results = []
         c_pos = parser.position
@@ -371,6 +454,8 @@ class Sequence(ParsingExpression):
         # Prefetching
         append = results.append
 
+        state_snapshot = parser.take_state_snapshot()
+
         try:
             for e in self.nodes:
                 result = e.parse(parser)
@@ -379,6 +464,7 @@ class Sequence(ParsingExpression):
 
         except NoMatch:
             parser.position = c_pos     # Backtracking
+            parser.rollback_state_to_snapshot(state_snapshot)
             raise
 
         finally:
@@ -396,6 +482,7 @@ class OrderedChoice(Sequence):
     Will match one of the parser expressions specified. Parser will try to
     match expressions in the order they are defined.
     """
+    @typing.override
     def _parse(self, parser):
         result = None
         match = False
@@ -411,6 +498,8 @@ class OrderedChoice(Sequence):
 
         try:
             for e in self.nodes:
+                state_snapshot = parser.take_state_snapshot()
+
                 try:
                     result = e.parse(parser)
                     match = True
@@ -418,6 +507,8 @@ class OrderedChoice(Sequence):
                     break
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
+                    parser.rollback_state_to_snapshot(state_snapshot)
+
         finally:
             if self.ws is not None:
                 parser.ws = old_ws
@@ -448,6 +539,7 @@ class Optional(Repetition):
     Optional will try to match parser expression specified and will not fail
     in case match is not successful.
     """
+    @typing.override
     def _parse(self, parser):
         result = None
         c_pos = parser.position
@@ -465,6 +557,7 @@ class ZeroOrMore(Repetition):
     ZeroOrMore will try to match parser expression specified zero or more
     times. It will never fail.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
 
@@ -480,7 +573,11 @@ class ZeroOrMore(Repetition):
         sep = self.sep.parse if self.sep else None
         result = None
 
+        parser.state.push_repetition_layer()
+
         while True:
+            state_snapshot = parser.take_state_snapshot()
+
             try:
                 c_pos = parser.position
                 if sep and result:
@@ -491,7 +588,10 @@ class ZeroOrMore(Repetition):
                 append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
+                parser.rollback_state_to_snapshot(state_snapshot)
                 break
+
+        parser.state.pop_repetition_layer()
 
         if self.eolterm:
             # Restore previous eolterm
@@ -499,11 +599,19 @@ class ZeroOrMore(Repetition):
 
         return results
 
+    @typing.override
+    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]) -> ParserModelItem:
+        node = super().resolve(resolve_cb)
+        if node.sep:
+            node.sep = node.sep.resolve(resolve_cb)
+        return node
+
 
 class OneOrMore(Repetition):
     """
     OneOrMore will try to match parser expression specified one or more times.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
         first = True
@@ -520,8 +628,12 @@ class OneOrMore(Repetition):
         sep = self.sep.parse if self.sep else None
         result = None
 
+        parser.state.push_repetition_layer()
+
         try:
             while True:
+                state_snapshot = parser.take_state_snapshot()
+
                 try:
                     c_pos = parser.position
                     if sep and result:
@@ -533,23 +645,36 @@ class OneOrMore(Repetition):
                     first = False
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
+                    parser.rollback_state_to_snapshot(state_snapshot)
 
                     if first:
                         raise
 
                     break
+
         finally:
+
             if self.eolterm:
                 # Restore previous eolterm
                 parser.eolterm = old_eolterm
 
+            parser.state.pop_repetition_layer()
+
         return results
+
+    @typing.override
+    def resolve(self, resolve_cb: typing.Callable[[ParserModelItem], ParserModelItem]) -> ParserModelItem:
+        node = super().resolve(resolve_cb)
+        if node.sep:
+            node.sep = node.sep.resolve(resolve_cb)
+        return node
 
 
 class UnorderedGroup(Repetition):
     """
     Will try to match all the parsing expressions in any order.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
         c_pos = parser.position
@@ -567,6 +692,10 @@ class UnorderedGroup(Repetition):
         result = None
         sep_result = None
         first = True
+
+        state_snapshot = parser.take_state_snapshot()
+
+        parser.state.push_repetition_layer()
 
         while nodes_to_try:
             sep_exc = None
@@ -587,6 +716,8 @@ class UnorderedGroup(Repetition):
             match = True
             all_optionals_fail = True
             for e in list(nodes_to_try):
+                curr_state_snapshot = parser.take_state_snapshot()
+
                 try:
                     result = e.parse(parser)
                     if result:
@@ -604,6 +735,7 @@ class UnorderedGroup(Repetition):
                 except NoMatch:
                     match = False
                     parser.position = c_loc_pos     # local backtracking
+                    parser.rollback_state_to_snapshot(curr_state_snapshot)
 
             if not match or all_optionals_fail:
                 # If sep is matched backtrack it
@@ -614,9 +746,12 @@ class UnorderedGroup(Repetition):
             # Restore previous eolterm
             parser.eolterm = old_eolterm
 
+        parser.state.pop_repetition_layer()
+
         if not match:
             # Unsuccessful match of the whole PE - full backtracking
             parser.position = c_pos
+            parser.rollback_state_to_snapshot(state_snapshot)
             parser._nm_raise(self, c_pos, parser)
 
         if results:
@@ -636,15 +771,21 @@ class And(SyntaxPredicate):
     This predicate will succeed if the specified expression matches current
     input.
     """
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
-        for e in self.nodes:
-            try:
-                e.parse(parser)
-            except NoMatch:
-                parser.position = c_pos
-                raise
-        parser.position = c_pos
+        state_snapshot = parser.take_state_snapshot()
+
+        try:
+            for e in self.nodes:
+                try:
+                    e.parse(parser)
+                except NoMatch:
+                    parser.position = c_pos
+                    raise
+            parser.position = c_pos
+        finally:
+            parser.rollback_state_to_snapshot(state_snapshot)
 
 
 class Not(SyntaxPredicate):
@@ -652,9 +793,11 @@ class Not(SyntaxPredicate):
     This predicate will succeed if the specified expression doesn't match
     current input.
     """
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         old_in_not = parser.in_not
+
         parser.in_not = True
         try:
             for e in self.nodes:
@@ -673,6 +816,7 @@ class Empty(SyntaxPredicate):
     """
     This predicate will always succeed without consuming input.
     """
+    @typing.override
     def _parse(self, parser):
         pass
 
@@ -692,6 +836,7 @@ class Combine(Decorator):
     This rules will always return a Terminal parse tree node.
     Whitespaces will be preserved. Comments will not be matched.
     """
+    @typing.override
     def _parse(self, parser):
         results = []
 
@@ -721,6 +866,7 @@ class Match(ParsingExpression):
     def __init__(self, rule_name, root=False, **kwargs):
         super().__init__(rule_name=rule_name, root=root, **kwargs)
 
+    @typing.override
     @property
     def name(self):
         if self.root:
@@ -837,6 +983,7 @@ class RegExMatch(Match):
     def __unicode__(self):
         return self.__str__()
 
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         m = self.regex.match(parser.input, c_pos)
@@ -870,6 +1017,7 @@ class StrMatch(Match):
         self.to_match = to_match
         self.ignore_case = ignore_case
 
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         input_frag = parser.input[c_pos:c_pos+len(self.to_match)]
@@ -908,7 +1056,6 @@ class StrMatch(Match):
         return hash(self.to_match)
 
 
-
 # HACK: Kwd class is a bit hackish. Need to find a better way to
 #       introduce different classes of string tokens.
 class Kwd(StrMatch):
@@ -922,6 +1069,166 @@ class Kwd(StrMatch):
         self.rule_name = 'keyword'
 
 
+class ParsingState:
+    """
+    A state that the parser could be in during the parsing process.
+
+    Stores a name and an integer identifier of the state. Each state must have its own unique state identifier
+    across all the states of the parse model that the state is used in. Each state must also have its own unique name.
+    There must not be two or more states with the same name in the parse model.
+    """
+    name: str
+    value: int
+
+    def __init__(self, name: str, value: int):
+        self.name = name
+        self.value = value
+
+    def __str__(self):
+        return f'{self.name} ({self.value})'
+
+    def __eq__(self, other: 'ParsingState'):
+        return self.value == other.value
+
+
+class ParsingStateStatement(ParsingStatement, abc.ABC):
+    """
+    An abstract class for parsing state statements.
+
+    Stores the parsing state and provides a property to get it.
+    """
+    _parsing_state: ParsingState
+
+    def __init__(
+        self,
+        parsing_state: ParsingState,
+    ):
+        super().__init__()
+        self._parsing_state = parsing_state
+
+    @property
+    def state_name(self):
+        return self._parsing_state.name
+
+    @property
+    def parsing_state(self):
+        return self._parsing_state
+
+
+class MatchState(ParsingStateStatement):
+    """
+    A statement to match the expected parsing state at the position the parser currently is in.
+
+    If the current state doesn't match the expected state then the parsing process will fail.
+    """
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
+        c_pos = parser.position
+        curr_parsing_state = parser.state.parsing_state
+        if not curr_parsing_state:
+            if parser.debug:
+                parser.dprint(
+                    f"-- The states stack is empty while matching `{self.parsing_state}` state at {c_pos} => "
+                    f"'{parser.context()}'")
+            parser._nm_raise(self, c_pos, parser)
+
+        if curr_parsing_state != self._parsing_state:
+            if parser.debug:
+                parser.dprint(
+                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state"
+                    f" at {c_pos} => '{parser.context()}'")
+            parser._nm_raise(self, c_pos, parser)
+
+        return None
+
+    def __str__(self):
+        return '@' + self.state_name
+
+    @typing.override
+    @property
+    def name(self):
+        return "@{}".format(
+            self.state_name,
+        )
+
+
+class PushState(ParsingStateStatement):
+    """
+    A statement to push a new parsing state at the position the parser currently is in.
+
+    This statement always passes.
+    """
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
+        parser.state.push_parsing_state(self._parsing_state)
+        return None
+
+    def __str__(self):
+        return '+@' + self.state_name
+
+    @typing.override
+    @property
+    def name(self):
+        return "+@{}".format(
+            self.state_name,
+        )
+
+
+class PopState(ParsingStateStatement):
+    """
+    A statement to match and remove the expected parsing state at the position the parser currently is in.
+
+    If the current statement doesn't match the expected statement, then the parsing process will fail. Otherwise,
+    the current parsing state will be removed from the top of the parsing states stack.
+    """
+    def parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
+        curr_parsing_state = parser.state.parsing_state
+        if curr_parsing_state != self._parsing_state:
+            c_pos = parser.position
+            if parser.debug:
+                parser.dprint(
+                    f"-- The current state (`{curr_parsing_state}`) doesn't match `{self.parsing_state}` state"
+                    f" at {c_pos} => '{parser.context()}'")
+            parser._nm_raise(self, c_pos, parser)
+
+        parser.state.pop_parsing_state()
+        return None
+
+    def __str__(self):
+        return '-@' + self.state_name
+
+    @typing.override
+    @property
+    def name(self):
+        return "-@{}".format(
+            self.state_name,
+        )
+
+
+class StateWrapper(ParsingExpression):
+    """
+    An expression wrapper that wraps an expression with a separate state layer.
+
+    The expression will be parsed after a new parse state layer is pushed onto the top of the parse layers stack.
+    Finally, the parse state layer will be removed from the top of the stack.
+    """
+    def __init__(self, node):
+        super().__init__(nodes=[node])
+
+    @typing.override
+    def _parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
+        state_snapshot = parser.take_state_snapshot()
+
+        parser.state.push_state_layer()
+
+        try:
+            retval = self.nodes[0].parse(parser)
+        except:
+            parser.rollback_state_to_snapshot(state_snapshot)
+            raise
+
+        parser.state.pop_state_layer()
+        return retval
+
+
 class EndOfFile(Match):
     """
     The Match class that will succeed in case end of input is reached.
@@ -929,10 +1236,12 @@ class EndOfFile(Match):
     def __init__(self):
         super().__init__("EOF")
 
+    @typing.override
     @property
     def name(self):
         return "EOF"
 
+    @typing.override
     def _parse(self, parser):
         c_pos = parser.position
         if len(parser.input) == c_pos:
@@ -980,6 +1289,7 @@ class ParseTreeNode:
         self.error = error
         self.comments = None
 
+    @typing.override
     @property
     def name(self):
         return f"{self.rule_name} [{self.position}]"
@@ -1054,6 +1364,7 @@ class Terminal(ParseTreeNode):
         self.suppress = suppress
         self.extra_info = extra_info
 
+    @typing.override
     @property
     def desc(self):
         if self.value:
@@ -1116,6 +1427,7 @@ class NonTerminal(ParseTreeNode, list):
         """Terminal protocol."""
         return str(self)
 
+    @typing.override
     @property
     def desc(self):
         return self.name
@@ -1376,6 +1688,250 @@ class SemanticActionToString(SemanticAction):
     def first_pass(self, parser, node, children):
         return str(node)
 
+
+class ParserStateLayer:
+    """
+    A basic class for additional state parameters.
+
+    Inherit from this class to add level-specific state parameters.
+    """
+    states_stack: list[ParsingState]
+
+    def __init__(self):
+        self.states_stack = []
+
+    def __deepcopy__(self, memo: dict = None):
+        copied = self.__class__()
+        copied.states_stack = copy.deepcopy(self.states_stack, memo)
+        return copied
+
+    def queues_are_empty(self) -> bool:
+        return not self.states_stack
+
+    def __str__(self):
+        return f"""States stack:
+{str(self.states_stack)}
+"""
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__}, id={id(self)}>{str(self)}'
+
+    def __bool__(self):
+        return not self.states_stack
+
+
+class HistoryItem(abc.ABC):
+    """
+    An abstract class to store information needed to undo actions that were performed on the state system.
+
+    In order to add a new data type to the state class that can be modified during parsing process, a new class
+    should be created by inheriting from this class to handle the undoing process.
+    """
+    _object: typing.Any
+    _data: typing.Any
+
+    def __init__(self, object: typing.Any, data: typing.Any):
+        self._object =  object
+        self._data = data
+
+    @abc.abstractmethod
+    def undo(self):
+        """
+        Undo the operation information about which is stored in the class instance.
+        """
+        pass
+
+    def __deepcopy__(self, memo: dict = None):
+        return self.__class__(self._object, self._data)
+
+
+class HistorySequencePush(HistoryItem):
+    """
+    Mark appending a sequence (list, array, etc) with an item.
+    """
+    _object: collections.abc.MutableSequence
+
+    def __init__(self, obj: collections.abc.MutableSequence, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        popped_data = self._object.pop()
+        assert(popped_data == self._data)
+
+
+class HistorySequencePop(HistoryItem):
+    """
+    Mark removing the last item from a sequence.
+    """
+    _object: collections.abc.MutableSequence
+
+    def __init__(self, obj: collections.abc.MutableSequence, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        self._object.append(self._data)
+
+
+class HistorySequencePopFront(HistoryItem):
+    """
+    Mark removing the first item from a sequence.
+    """
+    _object: collections.abc.MutableSequence
+
+    def __init__(self, obj: collections.abc.MutableSequence, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        self._object.insert(0, self._data)
+
+
+class HistorySetAdd(HistoryItem):
+    """
+    Mark adding an item to a set of items.
+    """
+    _object: collections.abc.MutableSet
+
+    def __init__(self, obj: collections.abc.MutableSet, data: typing.Any):
+        super().__init__(obj, data)
+
+    @typing.override
+    def undo(self):
+        self._object.remove(self._data)
+
+
+class HistorySetRemove(HistoryItem):
+    """
+    Mark removing an item from a set of items.
+    """
+    _object: collections.abc.MutableSet
+
+    def __init__(self, object: collections.abc.MutableSet, data: typing.Any):
+        super().__init__(object, data)
+
+    @typing.override
+    def undo(self):
+        self._object.add(self._data)
+
+
+class ParserRepetitionStateLayer:
+    """
+    A basic class for the parser repetition state layer.
+
+    This class should store state information about the items that are inside a repetition (ZeroOrMore or OneOrMore).
+    """
+    def __deepcopy__(self, memo: dict = None):
+        return self.__class__()
+
+
+class ParserState:
+    """
+    A basic class for the parser state system.
+
+    The class instance should store all the data that is used between rules during the parsing process.
+    Inherit from this class to manage additional state functionality.
+    """
+    _state_layer_class: ParserStateLayer = ParserStateLayer
+    _repetition_layer_class: ParserRepetitionStateLayer = ParserRepetitionStateLayer
+
+    state_layers: list[_state_layer_class]
+    repetition_layers: list[_repetition_layer_class]
+
+    _actions_history: list[HistoryItem]
+
+    def __init__(self):
+        self.state_layers = [self._state_layer_class()]
+        self.repetition_layers = []
+        self._actions_history = []
+
+    def __deepcopy__(self, memo: dict = None):
+        copied = self.__class__()
+        copied.state_layers = copy.deepcopy(self.state_layers, memo)
+        copied._actions_history = copy.deepcopy(self._actions_history, memo)
+        copied.repetition_layers = copy.deepcopy(self.repetition_layers, memo)
+        return copied
+
+    def clear(self):
+        if len(self.state_layers) > 1 or self.state_layers[0]:
+            self.state_layers = [self._state_layer_class()]
+        self._actions_history = []
+
+    def load_from(self, other_state: 'ParserState'):
+        self.state_layers = other_state.state_layers
+        # Make the other state invalid to prevent possible errors:
+        other_state.state_layers = []
+
+    def push_parsing_state(self, parsing_state: ParsingState):
+        states_queue = self.state_layers[-1].states_stack
+        states_queue.append(parsing_state)
+        self._actions_history.append(HistorySequencePush(states_queue, parsing_state))
+
+    def pop_parsing_state(self) -> ParsingState:
+        states_queue = self.state_layers[-1].states_stack
+        parsing_state = states_queue.pop()
+        self._actions_history.append(HistorySequencePop(states_queue, parsing_state))
+        return parsing_state
+
+    @property
+    def parsing_state(self) -> ParsingState | None:
+        parsing_state = None
+        for state_layer in reversed(self.state_layers):
+            if state_layer.states_stack:
+                parsing_state = state_layer.states_stack[-1]
+                break
+        return parsing_state
+
+    def push_state_layer(self):
+        """
+        Push a new empty state layer onto the stack.
+        """
+        layer = self._state_layer_class()
+        self.state_layers.append(layer)
+        self._actions_history.append(HistorySequencePush(self.state_layers, layer))
+
+    def pop_state_layer(self):
+        """
+        Remove the last state layer from the stack.
+
+        This function doesn't return anything because the state layer isn't supposed to be modified outside
+        the parser realization.
+        """
+        if not self.state_layers[-1].queues_are_empty():
+            raise GrammarError('One or more queues are not empty in the state layer that is being popped. '
+                               'Probably, some grammar rules were not called to remove the items from the queues. '
+                               'The parser state: ' + str(self))
+        layer = self.state_layers.pop()
+        self._actions_history.append(HistorySequencePop(self.state_layers, layer))
+
+    def queues_are_empty(self) -> bool:
+        if len(self.state_layers) > 1:
+            return False
+        return self.state_layers[0].queues_are_empty()
+
+    def push_repetition_layer(self):
+        """
+        Push a new empty repetition layer onto the stack.
+        """
+        layer = self._repetition_layer_class()
+        self.repetition_layers.append(layer)
+
+    def pop_repetition_layer(self):
+        """
+        Remove the last repetition layer from the stack.
+        """
+        layer = self.repetition_layers.pop()
+
+    def __str__(self) -> str:
+        return f"""State layers:
+{self.state_layers}
+"""
+
+
+ParserStateSnapshot: typing.TypeAlias = int
+
+
 # ----------------------------------------------------
 # Parsers
 
@@ -1403,10 +1959,15 @@ class Parser(DebugPrinter):
 
     # Not marker for NoMatch rules list. Used if the first unsuccessful rule
     # match is Not.
+    _state_class: type[ParserState] = ParserState
+    _state: _state_class
+
+    check_state_integrity: bool
+
     FIRST_NOT = Not()
 
     def __init__(self, skipws=True, ws=None, reduce_tree=False, autokwd=False,
-                 ignore_case=False, memoization=False, **kwargs):
+                 ignore_case=False, memoization=False, check_state_integrity=True, **kwargs):
         """
         Args:
             skipws (bool): Should the whitespace skipping be done.  Default is
@@ -1419,6 +1980,8 @@ class Parser(DebugPrinter):
             ignore_case(bool): If case is ignored (default=False)
             memoization(bool): If memoization should be used
                 (a.k.a. packrat parsing)
+            check_state_integrity: Raises an error if count of pushes isn't equal
+                the count of pops in the global state layer.
         """
 
         super().__init__(**kwargs)
@@ -1437,6 +2000,8 @@ class Parser(DebugPrinter):
         self.autokwd = autokwd
         self.ignore_case = ignore_case
         self.memoization = memoization
+        self.check_state_integrity = check_state_integrity
+
         self.comments_model = None
         self.comments = []
         self.comment_positions = {}
@@ -1449,6 +2014,8 @@ class Parser(DebugPrinter):
         if ignore_case:
             flags = re.IGNORECASE
         self.keyword_regex = re.compile(r'[^\d\W]\w*', flags)
+
+        self._state = self._state_class()
 
         # Keep track of root rule we are currently in.
         # Used for debugging purposes
@@ -1501,6 +2068,7 @@ class Parser(DebugPrinter):
             file_name(str): If input is loaded from file this can be
                 set to file name. It is used in error messages.
         """
+        self.state.clear()
         self.position = 0  # Input position
         self.nm = None  # Last NoMatch exception
         self.line_ends = []
@@ -1523,6 +2091,13 @@ class Parser(DebugPrinter):
             # Do this here to free memory.
             if self.memoization:
                 self._clear_caches()
+
+        if self.check_state_integrity:
+            queues_are_empty = self.state.queues_are_empty()
+            if not queues_are_empty:
+                raise GrammarError('One or more queues are not empty. '
+                                   'Probably, some grammar rules were not called to remove the items from the queues. '
+                                   'The parser state: ' + str(self.state))
 
         # In debug mode export parse tree to dot file for
         # visualization
@@ -1689,7 +2264,7 @@ class Parser(DebugPrinter):
 
         return retval.replace('\n', ' ').replace('\r', '')
 
-    def _nm_raise(self, *args):
+    def _nm_raise(self, *args) -> typing.NoReturn:
         """
         Register new NoMatch object if the input is consumed
         from the last NoMatch and raise last NoMatch.
@@ -1719,8 +2294,40 @@ class Parser(DebugPrinter):
         if self.comments_model:
             self.comments_model._clear_cache()
 
+    @property
+    def state(self) -> _state_class:
+        return self._state
 
-class CrossRef:
+    def take_state_snapshot(self) -> ParserStateSnapshot:
+        """
+        Take a snapshot of the parser state.
+
+        Actually, returns the index of the current item in the history of operations made over the stack.
+        The behaviour might be changed in future so the returned type is not guaranteed to be int in the future versions
+        of the library.
+
+        Returns:
+            A snapshot.
+        """
+        return len(self._state._actions_history) - 1
+
+    def rollback_state_to_snapshot(self, snapshot: ParserStateSnapshot):
+        """
+        Rollback the state of the parser to a given state.
+
+        This method undoes all the state changes that were made after the snapshot was taken.
+
+        Parameters:
+            snapshot:
+                A previously taken snapshot to which the state is being rolled back.
+        """
+        for i in range(len(self._state._actions_history) - 1, snapshot, -1):
+            history_item = self._state._actions_history[i]
+            history_item.undo()
+            del self._state._actions_history[i]
+
+
+class CrossRef(ParserModelItem):
     '''
     Used for rule reference resolving.
     '''
@@ -1877,6 +2484,9 @@ class ParserPython(Parser):
                 retval.nodes = [inner_from_python(e) for e in expression]
                 if any(isinstance(x, CrossRef) for x in retval.nodes):
                     __for_resolving.append(retval)
+
+            elif isinstance(expression, ParserModelItem):
+                retval = expression
 
             else:
                 raise GrammarError(f"Unrecognized grammar element '{expression}'.")

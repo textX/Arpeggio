@@ -419,6 +419,10 @@ class ParsingExpression(ParsingStatement):
             self.nodes[i] = resolve_cb(node)
         return super().resolve(resolve_cb)
 
+    @property
+    def resolved_rule_name(self):
+        return self.rule_name
+
     @abc.abstractmethod
     def _parse(self, parser: 'Parser') -> typing.Optional['ParseTreeNode']:
         pass

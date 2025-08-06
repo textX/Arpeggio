@@ -56,7 +56,8 @@ global_function <-
 
 alternative_function <-
     // Test branching with push action
-    FUNCTION_START function_name{push, add}
+    // Also test resolving rule name by using a nested action
+    FUNCTION_START (function_name{push}){add}
     @(
         program_element*
         // `*` operator is greedy so the closing `)` won't be matched until all the program_element statements are found

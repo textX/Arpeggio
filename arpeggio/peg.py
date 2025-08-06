@@ -306,7 +306,7 @@ class ActionPush(MatchedAction):
         matched_result: ParseTreeNode | None,
         c_pos: int,
     ) -> ParseTreeNode | None:
-        parser.state.push_rule_reference(self._rule.rule_name, str(matched_result))
+        parser.state.push_rule_reference(self._rule.resolved_rule_name, str(matched_result))
         return matched_result
 
 
@@ -322,18 +322,19 @@ class ActionPop(MatchedAction):
         c_pos: int,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
+        rule_name = self._rule.resolved_rule_name
         try:
-            removed = parser.state.pop_rule_reference(self._rule.rule_name, matched_str)
+            removed = parser.state.pop_rule_reference(rule_name, matched_str)
         except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
-                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"-- The stack for `{rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
             parser._nm_raise(self, c_pos, parser)
 
         if not removed:
             if parser.debug:
-                match_against = parser.state.last_pushed_rule_reference(self._rule.rule_name)
+                match_against = parser.state.last_pushed_rule_reference(rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
@@ -356,7 +357,7 @@ class ActionListAppend(MatchedAction):
             matched_str = ''
         else:
             matched_str = str(matched_result)
-        parser.state.append_rule_reference(self._rule.rule_name, matched_str)
+        parser.state.append_rule_reference(self._rule.resolved_rule_name, matched_str)
         return matched_result
 
 
@@ -378,12 +379,13 @@ class ActionListLast(MatchedAction):
         else:
             matched_str = str(matched_result)
 
+        rule_name = self._rule.resolved_rule_name
         try:
-            last = parser.state.last_rule_reference(self._rule.rule_name, self._state_scope)
+            last = parser.state.last_rule_reference(rule_name, self._state_scope)
         except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
-                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"-- The stack for `{rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
             parser._nm_raise(self, c_pos, parser)
 
@@ -408,7 +410,7 @@ class ActionTryRemoveLast(MatchedAction):
         matched_result: ParseTreeNode | None,
         c_pos: int,
     ) -> ParseTreeNode | None:
-        parser.state.try_remove_last_rule_reference(self._rule.rule_name)
+        parser.state.try_remove_last_rule_reference(self._rule.resolved_rule_name)
         return matched_result
 
 
@@ -435,12 +437,13 @@ class ActionLonger(MatchedAction):
         c_pos: int,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
+        rule_name =self._rule.resolved_rule_name
         try:
-            last = parser.state.last_rule_reference(self._rule.rule_name, self._state_scope)
+            last = parser.state.last_rule_reference(rule_name, self._state_scope)
         except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
-                    f"-- The stack for `{self._rule.rule_name}` rule is empty or parent stack doesn't exist at {c_pos} => "
+                    f"-- The stack for `{rule_name}` rule is empty or parent stack doesn't exist at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
             parser._nm_raise(self, c_pos, parser)
 
@@ -474,18 +477,19 @@ class ActionPopFront(MatchedAction):
         c_pos: int,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
+        rule_name =self._rule.resolved_rule_name
         try:
-            removed = parser.state.pop_front_rule_reference(self._rule.rule_name, matched_str)
+            removed = parser.state.pop_front_rule_reference(rule_name, matched_str)
         except (IndexError, KeyError):
             if parser.debug:
                 parser.dprint(
-                    f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
+                    f"-- The stack for `{rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
             parser._nm_raise(self, c_pos, parser)
 
         if not removed:
             if parser.debug:
-                match_against = parser.state.first_pushed_rule_reference(self._rule.rule_name)
+                match_against = parser.state.first_pushed_rule_reference(rule_name)
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
@@ -506,7 +510,7 @@ class ActionAdd(MatchedAction):
         c_pos: int,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
-        parser.state.remember_rule_reference(self._rule.rule_name, matched_str)
+        parser.state.remember_rule_reference(self._rule.resolved_rule_name, matched_str)
         return matched_result
 
 
@@ -523,7 +527,7 @@ class ActionParentAdd(MatchedAction):
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
-            self._rule.rule_name,
+            self._rule.resolved_rule_name,
             matched_str,
             state_layer_scope = LayerScope.PARENT  # noqa: E251
         )
@@ -543,7 +547,7 @@ class ActionGlobalAdd(MatchedAction):
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
-            self._rule.rule_name,
+            self._rule.resolved_rule_name,
             matched_str,
             state_layer_scope = LayerScope.GLOBAL  # noqa: E251
         )
@@ -563,7 +567,7 @@ class ActionAny(MatchedAction):
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
 
-        is_known = parser.state.rule_reference_is_known(self._rule.rule_name, matched_str)
+        is_known = parser.state.rule_reference_is_known(self._rule.resolved_rule_name, matched_str)
         if not is_known:
             if parser.debug:
                 parser.dprint(
@@ -700,6 +704,12 @@ class MatchActions(ParsingExpression):
         for action in node.actions:
             action._rule = node.nodes[0]
         return node
+
+    @typing.override
+    @property
+    def resolved_rule_name(self):
+        return self.rule_name or self.nodes[0].rule_name
+
 
 
 class PEGVisitor(PTNodeVisitor):

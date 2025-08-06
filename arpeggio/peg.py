@@ -606,6 +606,7 @@ class ActionFirstLonger(MatchedAction):
         else:
             matched_str = str(matched_result)
 
+        rule_name = self._rule.resolved_rule_name
         last_value = parser.state.repetition_last_rule_reference(rule_name)
         if last_value is None:
             parent_value = parser.state.repetition_last_rule_reference(rule_name, LayerScope.PARENT)
@@ -643,6 +644,7 @@ class ActionOtherSame(MatchedAction):
         else:
             matched_str = str(matched_result)
 
+        rule_name = self._rule.resolved_rule_name
         last_value = parser.state.repetition_last_rule_reference(rule_name)
         if matched_str != last_value:
             if parser.debug:

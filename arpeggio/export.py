@@ -127,7 +127,7 @@ class PMDOTExportAdapter(DOTExportAdapter):
     @property
     def neighbours(self):
         if not hasattr(self, "_neighbours"):
-            if not isinstance(self, ParsingExpression):
+            if not isinstance(self.adaptee, ParsingExpression):
                 return []
 
             self._neighbours= []

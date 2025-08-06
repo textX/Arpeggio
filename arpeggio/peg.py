@@ -260,7 +260,6 @@ class MatchedAction(ParserModelDebuggable):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         """
         This method must be implemented to run an action over the match result.
@@ -305,7 +304,6 @@ class ActionPush(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         parser.state.push_rule_reference(self._rule.rule_name, str(matched_result))
         return matched_result
@@ -321,7 +319,6 @@ class ActionPop(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         try:
@@ -353,7 +350,6 @@ class ActionListAppend(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         if matched_result is None:
             matched_str = ''
@@ -375,7 +371,6 @@ class ActionListLast(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         if matched_result is None:
             matched_str = ''
@@ -411,7 +406,6 @@ class ActionTryRemoveLast(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         parser.state.try_remove_last_rule_reference(self._rule.rule_name)
         return matched_result
@@ -438,7 +432,6 @@ class ActionLonger(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         try:
@@ -478,7 +471,6 @@ class ActionPopFront(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         try:
@@ -511,7 +503,6 @@ class ActionAdd(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(self._rule.rule_name, matched_str)
@@ -528,7 +519,6 @@ class ActionParentAdd(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
@@ -549,7 +539,6 @@ class ActionGlobalAdd(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
         parser.state.remember_rule_reference(
@@ -570,7 +559,6 @@ class ActionAny(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         matched_str = str(matched_result)
 
@@ -595,7 +583,6 @@ class ActionSuppress(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         return None
 
@@ -612,7 +599,6 @@ class ActionFirstLonger(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         if matched_result is None:
             matched_str = ''
@@ -650,7 +636,6 @@ class ActionOtherSame(MatchedAction):
         parser: 'ParserPEG',
         matched_result: ParseTreeNode | None,
         c_pos: int,
-        args: collections.abc.Sequence[typing.Any] = None,
     ) -> ParseTreeNode | None:
         if matched_result is None:
             matched_str = ''

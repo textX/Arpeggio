@@ -201,8 +201,9 @@ def test_backreference_non_pushed(klass, grammar_cb, debug, capsys):
 erroneous end of function_name1
     """
     parser: ParserPEG = klass(grammar_cb(), 'parser_entry', debug=debug)
-    with pytest.raises(arpeggio.NoMatch):
+    with pytest.raises(arpeggio.NoMatch) as err_info:
         parser.parse(input_text)
+    assert 'function_name{..., pop, ...}' in str(err_info.value)
 
 
 @pytest.mark.parametrize('klass, grammar_cb, debug', [

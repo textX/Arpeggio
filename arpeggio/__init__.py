@@ -64,13 +64,17 @@ class NoMatch(Exception):
     match is not successful.
 
     Args:
-        rules (list of ParsingExpression): Rules that are tried at the position
+        rules: Rules or their wrappers that are tried at the position
             of the exception.
-        position (int): A position in the input stream where exception
-            occurred.
-        parser (Parser): An instance of a parser.
+        position: A position in the input stream where exception occurred.
+        parser: An instance of a parser.
     """
-    def __init__(self, rules, position, parser):
+    def __init__(
+        self,
+        rules: typing.Union['ParsingExpression', 'ParserModelDebuggable'],
+        position: int,
+        parser: 'Parser',
+    ):
         self.rules = rules
         self.position = position
         self.parser = parser
@@ -83,7 +87,7 @@ class NoMatch(Exception):
             if hasattr(rule, '_exp_str'):
                 # Rule may override expected report string
                 return rule._exp_str
-            elif rule.root:
+            elif hasattr(rule, 'root') and rule.root:
                 return rule.rule_name
             elif isinstance(rule, Match) and \
                     not isinstance(rule, EndOfFile):
@@ -179,6 +183,20 @@ class ParserModelItem(abc.ABC):
         return resolved_node
 
 
+class ParserModelDebuggable(abc.ABC):
+    """
+    A basic interface class for all parser model helper classes.
+
+    This class is needed mainly for debugging purposes. It allows to get information from the inner parts of the rules
+    about parsing errors.
+    """
+
+    @property
+    @abc.abstractmethod
+    def name(self):
+        pass
+
+
 class ParsingStatement(ParserModelItem):
     """
     A basic class for all parser model statement classes.
@@ -194,7 +212,7 @@ class ParsingStatement(ParserModelItem):
         pass
 
 
-class ParsingExpression(ParsingStatement):
+class ParsingExpression(ParsingStatement, ParserModelDebuggable):
     """
     An abstract class for all parsing expressions.
 
@@ -241,6 +259,7 @@ class ParsingExpression(ParsingStatement):
     def desc(self):
         return "{}{}".format(self.name, "-" if self.suppress else "")
 
+    @typing.override
     @property
     def name(self):
         if self.root:

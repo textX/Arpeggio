@@ -33,6 +33,7 @@ from arpeggio import (
     ParserStateLayer,
     ParserRepetitionStateLayer,
     Parser,
+    ParserModelDebuggable,
     ParserPython,
     ParseTreeNode,
     PTNodeVisitor,
@@ -235,20 +236,23 @@ class LayerScope(enum.Enum):
     CURRENT = -1
 
 
-class MatchedAction:
+class MatchedAction(ParserModelDebuggable):
     """
     An abstract class for all action classes used in MatchActions parsing rules.
     """
     _rule: ParsingExpression  # bounding to this type for the rule_name attribute
     _args: collections.abc.Sequence[typing.Any] | None
+    _command_hint: str | None
 
     def __init__(
         self,
         rule: ParsingExpression,
         args: collections.abc.Sequence[typing.Any] = None,
+        command_hint: str = None,
     ):
         self._rule = rule
         self._args = args
+        self._command_hint = command_hint
 
     @abc.abstractmethod
     def run(
@@ -279,6 +283,17 @@ class MatchedAction:
     def __str__(self):
         return f'{str(self._rule)}{{{' '.join(map(str, self._args))}}}'
 
+    @property
+    def name(self):
+        if self._command_hint:
+            if self._args:
+                args_str = ' ' + ' '.join(map(str, self._args))
+            else:
+                args_str = ''
+            command_str = f'{{..., {self._command_hint}{args_str}, ...}}'
+        else:
+            command_str = f'{{..., {self.__class__.__name__}({' '.join(map(str, self._args))}), ...}}'
+        return self._rule.rule_name + command_str
 
 class ActionPush(MatchedAction):
     """
@@ -316,7 +331,7 @@ class ActionPop(MatchedAction):
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         if not removed:
             if parser.debug:
@@ -324,7 +339,7 @@ class ActionPop(MatchedAction):
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
         return matched_result
 
 
@@ -374,14 +389,14 @@ class ActionListLast(MatchedAction):
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         if matched_str != last:
             if parser.debug:
                 parser.dprint(
                     f"-- No match '{last}' at {c_pos} => "
                     f"'{parser.context(len(last))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         return matched_result
 
@@ -433,14 +448,14 @@ class ActionLonger(MatchedAction):
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty or parent stack doesn't exist at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         if len(matched_str) <= len(last):
             if parser.debug:
                 parser.dprint(
                     f"-- Match '{matched_str}' is not longer than parent's '{last}' at {c_pos} => "
                     f"'{parser.context(len(matched_str))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         return matched_result
 
@@ -473,7 +488,7 @@ class ActionPopFront(MatchedAction):
                 parser.dprint(
                     f"-- The stack for `{self._rule.rule_name}` rule is empty at {c_pos} => "
                     f"'{parser.context(len(str(matched_result)))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         if not removed:
             if parser.debug:
@@ -481,7 +496,7 @@ class ActionPopFront(MatchedAction):
                 parser.dprint(
                     f"-- No match '{match_against}' at {c_pos} => "
                     f"'{parser.context(len(match_against))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         return matched_result
 
@@ -565,7 +580,7 @@ class ActionAny(MatchedAction):
                 parser.dprint(
                     f"-- No known match for '{matched_str}' at {c_pos} => "
                     f"'{parser.context(len(matched_str))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         return matched_result
 
@@ -616,7 +631,7 @@ class ActionFirstLonger(MatchedAction):
                     parser.dprint(
                         f"-- Matched repetition '{matched_str}' token is not longer than "
                         f"parent token '{str(parent_value)}' at {c_pos} => '{parser.context(len(matched_str))}'")
-                parser._nm_raise(self._rule, c_pos, parser)
+                parser._nm_raise(self, c_pos, parser)
 
             parser.state.repetition_set_rule_reference(rule_name, matched_str)
 
@@ -648,7 +663,7 @@ class ActionOtherSame(MatchedAction):
                 parser.dprint(
                     f"-- Matched repetition '{matched_str}' token is not the same as "
                     f"the previous '{last_value}' token at {c_pos} => '{parser.context(len(matched_str))}'")
-            parser._nm_raise(self._rule, c_pos, parser)
+            parser._nm_raise(self, c_pos, parser)
 
         return matched_result
 
@@ -875,20 +890,24 @@ class PEGVisitor(PTNodeVisitor):
 
         return args
 
-    def preprocess_action_args(self, args):
+    def preprocess_action_args(self, args) -> tuple[list[typing.Any], list[str]]:
         if len(args) == 1:
-            return args
+            return args, [args[0]]
 
         alias = self.matched_actions_aliases
+        original_command = []
         for i, arg in enumerate(args):
             alias = alias.get(arg)
+            if alias is None:
+                return args, [args[0]]
+
+            original_command.append(args[i])
+
             if type(alias) is str:
                 del args[:i]
                 args[0] = alias
-            elif alias is None:
-                return args
 
-        return args
+        return args, original_command
 
     def visit_expression(self, node, children):
         if len(children) == 1:
@@ -899,10 +918,14 @@ class PEGVisitor(PTNodeVisitor):
         rule_node = children[0]
         for action_node in action_nodes:
             action_args = [str(action_node[i]) for i in range(len(action_node))]
-            action_args = self.preprocess_action_args(action_args)
+            action_args, original_command = self.preprocess_action_args(action_args)
             action_args = self.postprocess_action_args(action_args)
             action_name = action_args[0]
-            action = self.matched_actions[action_name](rule_node, action_args[1:])
+            action = self.matched_actions[action_name](
+                rule_node,
+                action_args[1:],
+                command_hint = ' '.join(original_command),  # noqa: E251
+            )
             actions.append(action)
         return MatchActions(children[0], actions)
 

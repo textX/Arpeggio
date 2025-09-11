@@ -1536,6 +1536,10 @@ class Parser(DebugPrinter):
             if self.memoization:
                 self._clear_caches()
 
+            # Clear NoMatch instance to prevent reference cycles
+            # through traceback stack frames
+            self.nm = None
+
         # In debug mode export parse tree to dot file for
         # visualization
         if self.debug and self.parse_tree:

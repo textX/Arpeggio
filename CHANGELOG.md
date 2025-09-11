@@ -15,7 +15,22 @@ please take a look at related PRs and issues and see if the change affects you.
 ## [Unreleased]
 
 
-[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.1...HEAD
+[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.3...HEAD
+
+
+## [2.0.3] (released: 2025-09-11)
+
+- fix: memory leak through exception traceback.
+
+[2.0.3]: https://github.com/textX/Arpeggio/compare/2.0.2...2.0.3
+
+
+## [2.0.2] (released: 2023-07-09)
+
+- fix: drop deprecated `setup_requires` and `tests_require` [#116]. Thanks @kloczek.
+
+[#116]: https://github.com/textX/Arpeggio/issues/116
+[2.0.2]: https://github.com/textX/Arpeggio/compare/2.0.1...2.0.2
 
 
 ## [2.0.1] (released: 2023-07-09)

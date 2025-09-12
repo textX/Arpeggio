@@ -80,7 +80,14 @@ please take a look at related PRs and issues and see if the change affects you.
 [#96]: https://github.com/textX/Arpeggio/issues/96
 [ruff]: https://github.com/astral-sh/ruff
 [flit]: https://flit.pypa.io/
-[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.2...HEAD
+[Unreleased]: https://github.com/textX/Arpeggio/compare/2.0.3...HEAD
+
+
+## [2.0.3] (released: 2025-09-12)
+
+- fix: memory leak through exception traceback.
+
+[2.0.3]: https://github.com/textX/Arpeggio/compare/2.0.2...2.0.3
 
 
 ## [2.0.2] (released: 2023-07-09)

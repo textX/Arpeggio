@@ -18,7 +18,8 @@ please take a look at related PRs and issues and see if the change affects you.
 - Added support for Python 3.13 and relax restriction on upper Python version.
 - Fix parsing of regex rules in peg and cleanpeg syntaxes ([#125]). Thanks
   @smurfix for reporting ([#123]).
-- **(BIC)** Removed support for Python 3.6. The minimal supported version is 3.7.
+- **(BIC)** Removed support for Python 3.6-3.8. The minimal supported version is
+  3.9.
 - Added sypport for Python 3.12.
 - Migrated to pyproject.toml for project configuration.
 - Use [ruff] instead of flake8 for linting. ruff can also be used for code

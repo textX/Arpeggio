@@ -41,7 +41,7 @@ tutorials.
 
 ## Python versions
 
-Arpeggio works with Python 3.7+. Other versions might work but are not tested.
+Arpeggio works with Python 3.9+. Other versions might work but are not tested.
 
 ## Open-source projects using Arpeggio
 

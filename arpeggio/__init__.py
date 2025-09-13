@@ -844,8 +844,8 @@ class RegExMatch(Match):
             matched = m.group()
             if parser.debug:
                 parser.dprint(
-                    "++ Match '%s' at %d => '%s'" %
-                    (matched, c_pos, parser.context(len(matched))))
+                    f"++ Match '{matched}' at {c_pos} => "
+                    f"'{parser.context(len(matched))}'")
             parser.position += len(matched)
             if matched:
                 return Terminal(self, c_pos, matched, extra_info=m)

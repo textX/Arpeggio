@@ -48,14 +48,9 @@ Arpeggio is currently using `mkdocs`, a documentation generator, to generate the
 To test the docs locally, you need to follow the first 3 instructions at the
 [Get Started!](#get-started) section
 
-1. Fork the repo (one-time effort)
-2. Clone your fork locally (one-time effort)
-3. Create a virtualenv for the fork and install the relevant libraries (one-time effort)
+To render the docs in you browser run:
 
-Once you complete the above 3 instructions, you can now:
-
-4. Activate the virtualenv
-5. Run `mkdocs serve` at the root folder
+    just servedocs
 
 `mkdocs` will run a webserver that serves the documentation at 127.0.0.1:8000
 
@@ -79,67 +74,42 @@ If you are proposing a feature:
 
 Ready to contribute? Here's how to set up `Arpeggio` for local development.
 
-1. Fork the `Arpeggio` repo on GitHub.
-2. Clone your fork locally:
+1. [Install uv](https://docs.astral.sh/uv/getting-started/installation/) Python
+   package/project manager and [just](https://github.com/casey/just) task runner.
 
-        $ git clone git@github.com:your_name_here/Arpeggio.git
+2. Fork the `Arpeggio` repo on GitHub.
 
-3. Install your local copy into a virtualenv. This is how you set up your fork
-   for local development:
+3. Clone your fork locally:
 
-        $ cd Arpeggio/
-        $ python -m venv venv
-        $ source venv/bin/activate
-        $ ./install-dev.sh 
+        git clone git@github.com:your_name_here/Arpeggio.git
         
-    Previous stuff is needed only the first time. To continue working on Arpeggio
-    later you just do:
-    
-        $ cd Arpeggio/ 
-        $ source venv/bin/activate
-        
-    Note that on Windows sourcing syntax is a bit different. Check the docs for
-    virtualenv.
-        
-    An excellent overview of available tools for Python environments management
-    can be found
-    [here](https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe)
-    
-    To verify that everything is setup properly run tests:
-    
-        $ flake8
-        $ py.test tests/functional/
-
 4. Create a branch for local development::
 
-        $ git checkout -b name-of-your-bugfix-or-feature
+        cd Arpeggio/
+        git checkout -b name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8, the
-   tests, and have a look at the coverage:
+5. When you're done making changes:
+   - Reformat code:
 
-        $ flake8
-        $ py.test tests/functional/
-        $ coverage run --source textx -m py.test tests/functional
-        $ coverage report
-        
-   You can run all this at once with provided script `runtests.sh`
+        just reformat
+
+   and verify that all checks pass:
    
-        $ ./runtests.sh
-
-   In case you have doubts, have also a look at the html rendered version of
-   the coverage results:
-
-        $ coverage html
+        just check
 
 6. Commit your changes and push your branch to GitHub:
 
-        $ git add .
-        $ git commit -m "Your detailed description of your changes."
-        $ git push origin name-of-your-bugfix-or-feature
+        git add .
+        git commit -m "Your detailed description of your changes."
+        git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+   Check [this](https://chris.beams.io/posts/git-commit/) on how to write nice
+   git log messages.
+
+8. Submit a pull request through the GitHub website. CI will run the tests for
+   all supported Python versions. Check in the GitHub UI that all pipelines pass.
 
 
 ## Pull Request Guidelines
@@ -158,13 +128,24 @@ Before you submit a pull request, check that it meets these guidelines:
 To run a subset of tests:
 
 ```
-$ py.test tests/functional/mytest.py
+just test tests/func/mytest.py
 ```
 
 or a single test:
 
 ```
-$ py.test tests/functional/mytest.py::some_test
+just test tests/func/mytest.py::some_test
+```
+
+To serve docs locally:
+
+```
+just servedocs
+```
+
+To see all `just` options:
+```
+just
 ```
 
 ## Credit

@@ -15,6 +15,8 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- Migrated to [just](https://github.com/casey/just) for project management.
+- Autoformating code with [ruff](https://docs.astral.sh/ruff/).
 - Added support for Python 3.13 and relax restriction on upper Python version.
 - Fix parsing of regex rules in peg and cleanpeg syntaxes ([#125]). Thanks
   @smurfix for reporting ([#123]).

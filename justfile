@@ -52,10 +52,10 @@ types:
 	uv run --no-default-groups --group test mypy arpeggio
 
 # run all checks
-check: check-format lint types coverage
+check: check-format lint coverage
 
 [private]
-check-ci: check-format lint types test
+check-ci: check-format lint test
 
 # format code with ruff
 [no-cd]

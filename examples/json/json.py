@@ -9,10 +9,10 @@
 # (see http://pyparsing.wikispaces.com/).
 ##############################################################################
 
-from __future__ import unicode_literals
 
 import os
-from arpeggio import *
+
+from arpeggio import EOF, Optional, ParserPython, ZeroOrMore
 from arpeggio import RegExMatch as _
 
 
@@ -70,10 +70,11 @@ def main(debug=False):
 
     # Load test JSON file
     current_dir = os.path.dirname(__file__)
-    testdata = open(os.path.join(current_dir, "test.json")).read()
+    with open(os.path.join(current_dir, "test.json")) as f:
+        testdata = f.read()
 
     # Parse json string
-    parse_tree = parser.parse(testdata)
+    parser.parse(testdata)
 
     # parse_tree can now be analysed and transformed to some other form
     # using e.g. visitor support. See http://textx.github.io/Arpeggio/semantics/

@@ -6,10 +6,17 @@
 # License: MIT License
 ##############################################################################
 
-from __future__ import unicode_literals
-import pprint
 import os
-from arpeggio import *
+import pprint
+
+from arpeggio import (
+    EOF,
+    OneOrMore,
+    ParserPython,
+    PTNodeVisitor,
+    ZeroOrMore,
+    visit_parse_tree,
+)
 from arpeggio import RegExMatch as _
 
 
@@ -42,11 +49,11 @@ class CSVVisitor(PTNodeVisitor):
         value = children[0]
         try:
             return float(value)
-        except:
+        except ValueError:
             pass
         try:
             return int(value)
-        except:
+        except ValueError:
             return value
 
     def visit_record(self, node, children):
@@ -70,7 +77,8 @@ def main(debug=False):
 
     # Creating parse tree out of textual input
     current_dir = os.path.dirname(__file__)
-    test_data = open(os.path.join(current_dir, "test_data.csv"), "r").read()
+    with open(os.path.join(current_dir, "test_data.csv")) as f:
+        test_data = f.read()
     parse_tree = parser.parse(test_data)
 
     # Create list of lists using visitor

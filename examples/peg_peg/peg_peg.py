@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 # Name: peg_peg.py
 # Purpose: PEG parser definition using PEG itself.
@@ -11,17 +10,18 @@
 # grammar definition language.
 ##############################################################################
 
-from __future__ import unicode_literals
 
 import os
-from arpeggio import *
+
+from arpeggio import visit_parse_tree
 from arpeggio.export import PMDOTExporter
-from arpeggio.peg import PEGVisitor, ParserPEG
+from arpeggio.peg import ParserPEG, PEGVisitor
 
 
 def main(debug=False):
     current_dir = os.path.dirname(__file__)
-    peg_grammar = open(os.path.join(current_dir, "peg.peg")).read()
+    with open(os.path.join(current_dir, "peg.peg")) as f:
+        peg_grammar = f.read()
 
     # ParserPEG will use ParserPython to parse peg_grammar definition and
     # create parser_model for parsing PEG based grammars

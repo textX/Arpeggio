@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #######################################################################
 # Name: bibtex.py
 # Purpose: Parser for bibtex files
@@ -6,12 +5,22 @@
 # Copyright: (c) 2013-2015 Igor R. Dejanovic <igor DOT dejanovic AT gmail DOT com>
 # License: MIT License
 #######################################################################
-from __future__ import print_function, unicode_literals
 
-import pprint
 import os
+import pprint
+import re
 import sys
-from arpeggio import *
+
+from arpeggio import (
+    EOF,
+    And,
+    Combine,
+    Optional,
+    ParserPython,
+    PTNodeVisitor,
+    ZeroOrMore,
+    visit_parse_tree,
+)
 from arpeggio import RegExMatch as _
 
 
@@ -95,7 +104,7 @@ class BibtexVisitor(PTNodeVisitor):
         Key is returned under 'bibkey' key. Type is returned under 'bibtype'.
         """
         if self.debug:
-            print("  Processing bibentry %s" % children[1])
+            print(f"  Processing bibentry {children[1]}")
         bib_entry_map = {"bibtype": children[0], "bibkey": children[1]}
         for field in children[2:]:
             bib_entry_map[field[0]] = field[1]
@@ -106,7 +115,7 @@ class BibtexVisitor(PTNodeVisitor):
         Constructs a tuple (fieldname, fieldvalue).
         """
         if self.debug:
-            print("    Processing field %s" % children[0])
+            print(f"    Processing field {children[0]}")
         field = (children[0], children[1])
         return field
 
@@ -140,7 +149,7 @@ def main(debug=False, file_name=None):
     if not file_name:
         file_name = os.path.join(os.path.dirname(__file__), "bibtex_example.bib")
 
-    with codecs.open(file_name, "r", encoding="utf-8") as bibtexfile:
+    with open(file_name, encoding="utf-8") as bibtexfile:
         bibtexfile_content = bibtexfile.read()
 
     # We create a parse tree or abstract syntax tree out of

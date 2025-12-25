@@ -18,11 +18,10 @@
 #        right
 #    end
 #######################################################################
-from __future__ import print_function, unicode_literals
 
 import os
-from arpeggio import ZeroOrMore, EOF, PTNodeVisitor, ParserPython, visit_parse_tree
-from arpeggio.export import PMDOTExporter, PTDOTExporter
+
+from arpeggio import EOF, ParserPython, PTNodeVisitor, ZeroOrMore, visit_parse_tree
 
 
 # Grammar rules
@@ -90,7 +89,8 @@ class RobotVisitor(PTNodeVisitor):
 def main(debug=False):
     # Load program
     current_dir = os.path.dirname(__file__)
-    input_program = open(os.path.join(current_dir, "program.rbt"), "r").read()
+    with open(os.path.join(current_dir, "program.rbt")) as f:
+        input_program = f.read()
 
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of python constructs therefore we

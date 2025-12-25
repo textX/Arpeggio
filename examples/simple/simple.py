@@ -9,10 +9,10 @@
 # It is taken and adapted from pyPEG project (see http://www.fdik.org/pyPEG/).
 #######################################################################
 
-from __future__ import unicode_literals
 
 import os
-from arpeggio import *
+
+from arpeggio import Kwd, OneOrMore, ParserPython, ZeroOrMore
 from arpeggio import RegExMatch as _
 
 
@@ -80,13 +80,14 @@ def simpleLanguage():
 def main(debug=False):
     # Load test program from file
     current_dir = os.path.dirname(__file__)
-    test_program = open(os.path.join(current_dir, "program.simple")).read()
+    with open(os.path.join(current_dir, "program.simple")) as f:
+        test_program = f.read()
 
     # Parser instantiation. simpleLanguage is the definition of the root rule
     # and comment is a grammar rule for comments.
     parser = ParserPython(simpleLanguage, comment, debug=debug)
 
-    parse_tree = parser.parse(test_program)
+    parser.parse(test_program)
 
 
 if __name__ == "__main__":

@@ -8,9 +8,11 @@
 
 import os
 import pprint
+
+from csvlang import CSVVisitor
+
 from arpeggio import visit_parse_tree
 from arpeggio.cleanpeg import ParserPEG
-from csvlang import CSVVisitor
 
 
 def main(debug=False):
@@ -21,11 +23,13 @@ def main(debug=False):
     # spaces. Newlines have semantics in csv files. They are used to separate
     # records.
     current_dir = os.path.dirname(__file__)
-    csv_grammar = open(os.path.join(current_dir, "csvlang.peg"), "r").read()
+    with open(os.path.join(current_dir, "csvlang.peg")) as f:
+        csv_grammar = f.read()
     parser = ParserPEG(csv_grammar, "csvfile", ws="\t ", debug=debug)
 
     # Creating parse tree out of textual input
-    test_data = open(os.path.join(current_dir, "test_data.csv"), "r").read()
+    with open(os.path.join(current_dir, "test_data.csv")) as f:
+        test_data = f.read()
     parse_tree = parser.parse(test_data)
 
     # Create list of lists using visitor

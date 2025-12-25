@@ -13,7 +13,8 @@ import pytest
 from arpeggio import EOF, NoMatch, Optional, ParserPython
 
 
-def g():    return [Optional('first'), Optional('second'), Optional('third')], EOF
+def g():
+    return [Optional("first"), Optional("second"), Optional("third")], EOF
 
 
 def test_optional_in_choice():

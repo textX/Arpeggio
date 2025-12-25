@@ -17,6 +17,7 @@ def test_autokwd():
     """
     autokwd will match keywords on word boundaries.
     """
+
     def grammar():
         return ("one", "two", "three")
 
@@ -94,16 +95,16 @@ def test_file(capsys):
     parser = ParserPython(grammar, debug=True, file=sys.stdout)
     out, err = capsys.readouterr()
 
-    parser.dprint('this is stdout')
+    parser.dprint("this is stdout")
     out, err = capsys.readouterr()
-    assert out == 'this is stdout\n'
-    assert err == ''
+    assert out == "this is stdout\n"
+    assert err == ""
 
     # Now use stderr
     parser = ParserPython(grammar, debug=False, file=sys.stderr)
     out, err = capsys.readouterr()
 
-    parser.dprint('this is stderr')
+    parser.dprint("this is stderr")
     out, err = capsys.readouterr()
-    assert out == ''
-    assert err == 'this is stderr\n'
+    assert out == ""
+    assert err == "this is stderr\n"

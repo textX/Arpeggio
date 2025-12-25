@@ -2,14 +2,19 @@ from arpeggio import ParserPython, SemanticAction
 
 
 def test_direct_rule_call():
-    '''
+    """
     Test regression where in direct rule call semantic action is
     erroneously attached to both caller and callee.
-    '''
+    """
 
-    def grammar():  return rule1, rule2
-    def rule1():    return "a"
-    def rule2():    return rule1
+    def grammar():
+        return rule1, rule2
+
+    def rule1():
+        return "a"
+
+    def rule2():
+        return rule1
 
     call_count = [0]
 

@@ -21,11 +21,9 @@ from calc import CalcVisitor
 
 
 def main(debug=False):
-
     # Grammar is defined using textual specification based on PEG language.
     # Load grammar form file.
-    calc_grammar = open(os.path.join(os.path.dirname(__file__),
-                                     'calc_clean.peg'), 'r').read()
+    calc_grammar = open(os.path.join(os.path.dirname(__file__), "calc_clean.peg")).read()
 
     # First we will make a parser - an instance of the calc parser model.
     # Parser model is given in the form of PEG notation therefore we
@@ -49,9 +47,9 @@ def main(debug=False):
 
     print("{} = {}".format(input_expr, result))
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

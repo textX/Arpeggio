@@ -2,14 +2,13 @@ from arpeggio import EOF, NoMatch, Optional, ParserPython, UnorderedGroup
 
 
 def test_nondeterministic_unordered_group():
-
     def root():
-        return 'word1', UnorderedGroup(some_rule, 'word2', some_rule), EOF
+        return "word1", UnorderedGroup(some_rule, "word2", some_rule), EOF
 
     def some_rule():
-        return Optional('word2'), Optional('word3')
+        return Optional("word2"), Optional("word3")
 
-    content = '''word1 word2 '''
+    content = """word1 word2 """
 
     # If the 'word2' from unordered group in the `root` rule matches first
     # the input parses, else it fails.

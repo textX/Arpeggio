@@ -2,18 +2,27 @@ from arpeggio import ParserPython
 
 
 def test_memoization_positive(capsys):
-    '''
+    """
     Test that already matched rule is found in the cache on
     subsequent matches.
     Args:
         capsys - pytest fixture for output capture
-    '''
+    """
 
-    def grammar():  return [(rule1, ruleb), (rule1, rulec)]
-    def rule1():    return rulea, ruleb
-    def rulea():    return "a"
-    def ruleb():    return "b"
-    def rulec():    return "c"
+    def grammar():
+        return [(rule1, ruleb), (rule1, rulec)]
+
+    def rule1():
+        return rulea, ruleb
+
+    def rulea():
+        return "a"
+
+    def ruleb():
+        return "b"
+
+    def rulec():
+        return "c"
 
     parser = ParserPython(grammar, memoization=True, debug=True)
 
@@ -23,27 +32,35 @@ def test_memoization_positive(capsys):
     parser.parse("a   b   c")
 
     # Assert that cached result is used
-    assert  "Cache hit" in capsys.readouterr()[0]
+    assert "Cache hit" in capsys.readouterr()[0]
     assert parser.cache_hits == 1
     assert parser.cache_misses == 4
 
+
 def test_memoization_nomatch(capsys):
-    '''
+    """
     Test that already failed match is found in the cache on
     subsequent matches.
-    '''
+    """
 
-    def grammar():  return [(rule1, ruleb), [rule1, rulec]]
-    def rule1():    return rulea, ruleb
-    def rulea():    return "a"
-    def ruleb():    return "b"
-    def rulec():    return "c"
+    def grammar():
+        return [(rule1, ruleb), [rule1, rulec]]
+
+    def rule1():
+        return rulea, ruleb
+
+    def rulea():
+        return "a"
+
+    def ruleb():
+        return "b"
+
+    def rulec():
+        return "c"
 
     parser = ParserPython(grammar, memoization=True, debug=True)
     parser.parse("c")
 
-    assert  "Cache hit for [rule1=Sequence, 0] = '0'" in capsys.readouterr()[0]
+    assert "Cache hit for [rule1=Sequence, 0] = '0'" in capsys.readouterr()[0]
     assert parser.cache_hits == 1
     assert parser.cache_misses == 4
-
-

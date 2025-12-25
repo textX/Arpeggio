@@ -21,22 +21,37 @@
 from __future__ import print_function, unicode_literals
 
 import os
-from arpeggio import ZeroOrMore, EOF, PTNodeVisitor, ParserPython, \
-    visit_parse_tree
+from arpeggio import ZeroOrMore, EOF, PTNodeVisitor, ParserPython, visit_parse_tree
 from arpeggio.export import PMDOTExporter, PTDOTExporter
 
+
 # Grammar rules
-def robot():      return 'begin', ZeroOrMore(command), 'end', EOF
-def command():      return [UP, DOWN, LEFT, RIGHT]
-def UP():           return 'up'
-def DOWN():         return 'down'
-def LEFT():         return 'left'
-def RIGHT():        return 'right'
+def robot():
+    return "begin", ZeroOrMore(command), "end", EOF
+
+
+def command():
+    return [UP, DOWN, LEFT, RIGHT]
+
+
+def UP():
+    return "up"
+
+
+def DOWN():
+    return "down"
+
+
+def LEFT():
+    return "left"
+
+
+def RIGHT():
+    return "right"
 
 
 # Semantic actions visitor
 class RobotVisitor(PTNodeVisitor):
-
     def visit_robot(self, node, children):
         if self.debug:
             print("Evaluating position")
@@ -73,10 +88,9 @@ class RobotVisitor(PTNodeVisitor):
 
 
 def main(debug=False):
-
     # Load program
     current_dir = os.path.dirname(__file__)
-    input_program = open(os.path.join(current_dir, 'program.rbt'), 'r').read()
+    input_program = open(os.path.join(current_dir, "program.rbt"), "r").read()
 
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of python constructs therefore we

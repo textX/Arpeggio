@@ -32,7 +32,7 @@ from arpeggio import (
 )
 from arpeggio import RegExMatch as _
 
-__all__ = ['ParserPEG']
+__all__ = ["ParserPEG"]
 
 # Lexical invariants
 LEFT_ARROW = "<-"
@@ -48,31 +48,64 @@ CLOSE = ")"
 
 
 # PEG syntax rules
-def peggrammar():       return OneOrMore(rule), EOF
-def rule():             return rule_name, LEFT_ARROW, ordered_choice, ";"
-def ordered_choice():   return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
-def sequence():         return OneOrMore(prefix)
-def prefix():           return Optional([AND, NOT]), sufix
-def sufix():            return expression, Optional([OPTIONAL,
-                                                     ZERO_OR_MORE,
-                                                     ONE_OR_MORE,
-                                                     UNORDERED_GROUP])
-def expression():       return [regex, rule_crossref,
-                                (OPEN, ordered_choice, CLOSE),
-                                str_match]
+def peggrammar():
+    return OneOrMore(rule), EOF
+
+
+def rule():
+    return rule_name, LEFT_ARROW, ordered_choice, ";"
+
+
+def ordered_choice():
+    return sequence, ZeroOrMore(ORDERED_CHOICE, sequence)
+
+
+def sequence():
+    return OneOrMore(prefix)
+
+
+def prefix():
+    return Optional([AND, NOT]), sufix
+
+
+def sufix():
+    return expression, Optional([OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, UNORDERED_GROUP])
+
+
+def expression():
+    return [regex, rule_crossref, (OPEN, ordered_choice, CLOSE), str_match]
+
 
 # PEG Lexical rules
-def regex():            return _(r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
-                                 r'''(r"[^"\\]*(?:\\.[^"\\]*)*")''')
-def rule_name():        return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
-def rule_crossref():    return rule_name
-def str_match():        return _(r'''(?s)('[^'\\]*(?:\\.[^'\\]*)*')|'''
-                                     r'''("[^"\\]*(?:\\.[^"\\]*)*")''')
-def comment():          return _("//.*\n", multiline=False)
+def regex():
+    return _(
+        r"""(r'[^'\\]*(?:\\.[^'\\]*)*')|"""
+        r"""(r"[^"\\]*(?:\\.[^"\\]*)*")"""
+    )
+
+
+def rule_name():
+    return _(r"[a-zA-Z_]([a-zA-Z_]|[0-9])*")
+
+
+def rule_crossref():
+    return rule_name
+
+
+def str_match():
+    return _(
+        r"""(?s)('[^'\\]*(?:\\.[^'\\]*)*')|"""
+        r"""("[^"\\]*(?:\\.[^"\\]*)*")"""
+    )
+
+
+def comment():
+    return _("//.*\n", multiline=False)
 
 
 # Escape sequences supported in PEG literal string matches
-PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
+PEG_ESCAPE_SEQUENCES_RE = re.compile(
+    r"""
     \\ ( [\n\\'"abfnrtv]  |  # \\x single-character escapes
          [0-7]{1,3}       |  # \\ooo octal escape
          x[0-9A-Fa-f]{2}  |  # \\xXX hex escape
@@ -80,7 +113,9 @@ PEG_ESCAPE_SEQUENCES_RE = re.compile(r"""
          U[0-9A-Fa-f]{8}  |  # \\UXXXXXXXX hex escape
          N\{[- 0-9A-Z]+\}    # \\N{name} Unicode name or alias
        )
-    """, re.VERBOSE | re.UNICODE)
+    """,
+    re.VERBOSE | re.UNICODE,
+)
 
 
 class PEGVisitor(PTNodeVisitor):
@@ -88,19 +123,15 @@ class PEGVisitor(PTNodeVisitor):
     Visitor that transforms parse tree to a PEG parser for the given language.
     """
 
-    def __init__(self, root_rule_name, comment_rule_name, ignore_case,
-                 *args, **kwargs):
+    def __init__(self, root_rule_name, comment_rule_name, ignore_case, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name
         self.ignore_case = ignore_case
         # Used for linking phase
-        self.peg_rules = {
-            "EOF": EndOfFile()
-        }
+        self.peg_rules = {"EOF": EndOfFile()}
 
     def visit_peggrammar(self, node, children):
-
         def _resolve(node):
             """
             Resolves CrossRefs from the parser model.
@@ -114,29 +145,30 @@ class PEGVisitor(PTNodeVisitor):
                 try:
                     return self.peg_rules[rule_name]
                 except KeyError as e:
-                    raise SemanticError(f"Rule \"{rule_name}\" does not exists.") from e
+                    raise SemanticError(f'Rule "{rule_name}" does not exists.') from e
 
             def resolve_rule_by_name(rule_name):
+                if self.debug:
+                    self.dprint(f"Resolving crossref {rule_name}")
 
+                resolved_rule = get_rule_by_name(rule_name)
+                while type(resolved_rule) is CrossRef:
+                    target_rule = resolved_rule.target_rule_name
+                    resolved_rule = get_rule_by_name(target_rule)
+
+                # If resolved rule hasn't got the same name it
+                # should be cloned and preserved in the peg_rules cache
+                if resolved_rule.rule_name != rule_name:
+                    resolved_rule = copy.copy(resolved_rule)
+                    resolved_rule.rule_name = rule_name
+                    self.peg_rules[rule_name] = resolved_rule
                     if self.debug:
-                        self.dprint(f"Resolving crossref {rule_name}")
-
-                    resolved_rule = get_rule_by_name(rule_name)
-                    while type(resolved_rule) is CrossRef:
-                        target_rule = resolved_rule.target_rule_name
-                        resolved_rule = get_rule_by_name(target_rule)
-
-                    # If resolved rule hasn't got the same name it
-                    # should be cloned and preserved in the peg_rules cache
-                    if resolved_rule.rule_name != rule_name:
-                        resolved_rule = copy.copy(resolved_rule)
-                        resolved_rule.rule_name = rule_name
-                        self.peg_rules[rule_name] = resolved_rule
-                        if self.debug:
-                            self.dprint(f"Resolving: cloned to "
-                                        f"{resolved_rule.rule_name} "
-                                        f"=> {resolved_rule.name}")
-                    return resolved_rule
+                        self.dprint(
+                            f"Resolving: cloned to "
+                            f"{resolved_rule.rule_name} "
+                            f"=> {resolved_rule.name}"
+                        )
+                return resolved_rule
 
             if isinstance(node, CrossRef):
                 # The root rule is a cross-ref
@@ -231,15 +263,16 @@ class PEGVisitor(PTNodeVisitor):
                 return codecs.decode(match.group(0), "unicode_escape")
             except UnicodeDecodeError as e:
                 raise GrammarError(f"Invalid escape sequence '{match.group(0)}'.") from e
+
         match_str = PEG_ESCAPE_SEQUENCES_RE.sub(decode_escape, match_str)
 
         return StrMatch(match_str, ignore_case=self.ignore_case)
 
 
 class ParserPEG(Parser):
-
-    def __init__(self, language_def, root_rule_name, comment_rule_name=None,
-                 *args, **kwargs):
+    def __init__(
+        self, language_def, root_rule_name, comment_rule_name=None, *args, **kwargs
+    ):
         """
         Constructs parser from textual PEG definition.
 
@@ -264,20 +297,26 @@ class ParserPEG(Parser):
         # visualization
         if self.debug:
             from arpeggio.export import PMDOTExporter
+
             root_rule = self.parser_model.rule_name
             PMDOTExporter().exportFile(
-                self.parser_model, f"{root_rule}_peg_parser_model.dot")
+                self.parser_model, f"{root_rule}_peg_parser_model.dot"
+            )
 
     def _parse(self):
         return self.parser_model.parse(self)
 
     def _from_peg(self, language_def):
-        parser = ParserPython(peggrammar, comment, reduce_tree=False,
-                              debug=self.debug)
+        parser = ParserPython(peggrammar, comment, reduce_tree=False, debug=self.debug)
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)
 
-        return visit_parse_tree(parse_tree, PEGVisitor(self.root_rule_name,
-                                                       self.comment_rule_name,
-                                                       self.ignore_case,
-                                                       debug=self.debug))
+        return visit_parse_tree(
+            parse_tree,
+            PEGVisitor(
+                self.root_rule_name,
+                self.comment_rule_name,
+                self.ignore_case,
+                debug=self.debug,
+            ),
+        )

@@ -12,12 +12,29 @@ import os
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
-def record():                   return field, ZeroOrMore(",", field)
-def field():                    return [quoted_field, field_content]
-def quoted_field():             return '"', field_content_quoted, '"'
-def field_content():            return _(r'([^,\n])+')
-def field_content_quoted():     return _(r'(("")|([^"]))+')
-def csvfile():                  return OneOrMore([record, '\n']), EOF
+
+def record():
+    return field, ZeroOrMore(",", field)
+
+
+def field():
+    return [quoted_field, field_content]
+
+
+def quoted_field():
+    return '"', field_content_quoted, '"'
+
+
+def field_content():
+    return _(r"([^,\n])+")
+
+
+def field_content_quoted():
+    return _(r'(("")|([^"]))+')
+
+
+def csvfile():
+    return OneOrMore([record, "\n"]), EOF
 
 
 class CSVVisitor(PTNodeVisitor):
@@ -39,22 +56,21 @@ class CSVVisitor(PTNodeVisitor):
 
     def visit_csvfile(self, node, children):
         # We are not interested in newlines so we will filter them.
-        return [x for x in children if x!='\n']
-
+        return [x for x in children if x != "\n"]
 
 
 def main(debug=False):
-    print('Here')
+    print("Here")
     # First we will make a parser - an instance of the CVS parser model.
     # Parser model is given in the form of python constructs therefore we
     # are using ParserPython class.
     # Skipping of whitespace will be done only for tabs and spaces. Newlines
     # have semantics in csv files. They are used to separate records.
-    parser = ParserPython(csvfile, ws='\t ', debug=debug)
+    parser = ParserPython(csvfile, ws="\t ", debug=debug)
 
     # Creating parse tree out of textual input
     current_dir = os.path.dirname(__file__)
-    test_data = open(os.path.join(current_dir, 'test_data.csv'), 'r').read()
+    test_data = open(os.path.join(current_dir, "test_data.csv"), "r").read()
     parse_tree = parser.parse(test_data)
 
     # Create list of lists using visitor
@@ -63,9 +79,9 @@ def main(debug=False):
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(csv_content)
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

@@ -4,16 +4,15 @@ from arpeggio import EOF, NoMatch, OrderedChoice, ParserPython, Sequence, ZeroOr
 
 
 def test_ordered_choice_skipws_ws():
-
     # Both rules will skip white-spaces
     def sentence():
         return Sequence(ZeroOrMore(word), skipws=True), EOF
 
     def word():
-        return OrderedChoice([(id, ' ', '.'), id, '.'], skipws=True)
+        return OrderedChoice([(id, " ", "."), id, "."], skipws=True)
 
     def id():
-        return 'id'
+        return "id"
 
     parser = ParserPython(sentence)
 
@@ -31,7 +30,7 @@ def test_ordered_choice_skipws_ws():
 
     # Now we change skipws flag
     def word():  # noqa
-        return OrderedChoice([(id, ' ', '.'), id, '.'], skipws=False)
+        return OrderedChoice([(id, " ", "."), id, "."], skipws=False)
 
     parser = ParserPython(sentence)
 

@@ -11,9 +11,17 @@ import pytest  # noqa
 # Grammar
 from arpeggio import ParserPython
 
-def grammar():      return first, "±", second
-def first():        return "♪"
-def second():       return "a"
+
+def grammar():
+    return first, "±", second
+
+
+def first():
+    return "♪"
+
+
+def second():
+    return "a"
 
 
 def test_unicode_match():

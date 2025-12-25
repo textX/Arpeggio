@@ -15,12 +15,28 @@ from arpeggio import EOF, NoMatch, Optional, ParserPython
 from arpeggio import RegExMatch as _
 
 
-def foo():      return 'r', bar, Optional(qux), baz, Optional(ham), Optional(buz), EOF
-def bar():      return 'BAR'
-def baz():      return _(r'1\w+')
-def buz():      return _(r'Aba*', ignore_case=True)
-def qux():      return _(r'/\*.*\*/', multiline=True)
-def ham():      return _(r'/\*.*\*/', re_flags=re.DOTALL)  # equivalent to qux
+def foo():
+    return "r", bar, Optional(qux), baz, Optional(ham), Optional(buz), EOF
+
+
+def bar():
+    return "BAR"
+
+
+def baz():
+    return _(r"1\w+")
+
+
+def buz():
+    return _(r"Aba*", ignore_case=True)
+
+
+def qux():
+    return _(r"/\*.*\*/", multiline=True)
+
+
+def ham():
+    return _(r"/\*.*\*/", re_flags=re.DOTALL)  # equivalent to qux
 
 
 @pytest.fixture

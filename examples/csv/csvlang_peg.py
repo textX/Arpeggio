@@ -12,6 +12,7 @@ from arpeggio import visit_parse_tree
 from arpeggio.cleanpeg import ParserPEG
 from csvlang import CSVVisitor
 
+
 def main(debug=False):
     # First we will make a parser - an instance of the CVS parser model.
     # Parser model is given in the form of clean PEG description therefore we
@@ -20,11 +21,11 @@ def main(debug=False):
     # spaces. Newlines have semantics in csv files. They are used to separate
     # records.
     current_dir = os.path.dirname(__file__)
-    csv_grammar = open(os.path.join(current_dir, 'csvlang.peg'), 'r').read()
-    parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=debug)
+    csv_grammar = open(os.path.join(current_dir, "csvlang.peg"), "r").read()
+    parser = ParserPEG(csv_grammar, "csvfile", ws="\t ", debug=debug)
 
     # Creating parse tree out of textual input
-    test_data = open(os.path.join(current_dir, 'test_data.csv'), 'r').read()
+    test_data = open(os.path.join(current_dir, "test_data.csv"), "r").read()
     parse_tree = parser.parse(test_data)
 
     # Create list of lists using visitor
@@ -33,9 +34,9 @@ def main(debug=False):
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(csv_content)
 
+
 if __name__ == "__main__":
     # In debug mode dot (graphviz) files for parser model
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

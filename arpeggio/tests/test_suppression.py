@@ -11,8 +11,7 @@ from arpeggio import ParserPython, Sequence, StrMatch, RegExMatch
 
 
 def test_sequence_suppress():
-    """
-    """
+    """ """
 
     def grammar():
         return Sequence("one", "two", "three", suppress=True), "four"
@@ -53,10 +52,9 @@ def test_register_syntax_classes_suppress():
         suppress = True
 
     def grammar():
-        return "one", "two", RegExMatch(r'\d+'), "three"
+        return "one", "two", RegExMatch(r"\d+"), "three"
 
-    parser = ParserPython(grammar,
-                          syntax_classes={'StrMatch': SuppressStrMatch})
+    parser = ParserPython(grammar, syntax_classes={"StrMatch": SuppressStrMatch})
 
     result = parser.parse("one two 42 three")
 

@@ -22,7 +22,6 @@ from arpeggio import (
 
 
 def test_combine_python():
-
     # This will result in NonTerminal node
     def root():
         return my_rule(), "."

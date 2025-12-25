@@ -72,9 +72,10 @@ def argument(parser, node, children):
         print(children[0])
         return children[0]
 
-    sign = -1 if children[0] == '-' else 1
+    sign = -1 if children[0] == "-" else 1
 
     return sign * children[-1]
+
 
 # Rules are mapped to semantic actions
 sem_actions = {
@@ -83,7 +84,6 @@ sem_actions = {
 
 
 def test_issue_16():
-
     parser = ParserPEG(grammar, "calc", skipws=False)
 
     input_expr = """public function __construct( )"""

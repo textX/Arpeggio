@@ -12,10 +12,21 @@ import pytest  # noqa
 from arpeggio import ParserPython, SemanticAction, ParseTreeNode
 from arpeggio import RegExMatch as _
 
-def grammar():      return parentheses, 'strmatch'
-def parentheses():  return '(', rulea, ')'
-def rulea():        return ['+', '-'], number
-def number():       return _(r'\d+')
+
+def grammar():
+    return parentheses, "strmatch"
+
+
+def parentheses():
+    return "(", rulea, ")"
+
+
+def rulea():
+    return ["+", "-"], number
+
+
+def number():
+    return _(r"\d+")
 
 
 p_removed = False
@@ -26,7 +37,7 @@ parse_tree_node = False
 class ParenthesesSA(SemanticAction):
     def first_pass(self, parser, node, children):
         global p_removed, parse_tree_node
-        p_removed = str(children[0]) != '('
+        p_removed = str(children[0]) != "("
         parse_tree_node = isinstance(children[0], ParseTreeNode)
         return children[0] if len(children) == 1 else children[1]
 
@@ -43,10 +54,9 @@ rulea.sem = RuleSA()
 
 
 def test_default_action_enabled():
-
     parser = ParserPython(grammar)
 
-    parser.parse('(-34) strmatch')
+    parser.parse("(-34) strmatch")
 
     parser.getASG(defaults=True)
 
@@ -56,10 +66,9 @@ def test_default_action_enabled():
 
 
 def test_default_action_disabled():
-
     parser = ParserPython(grammar)
 
-    parser.parse('(-34) strmatch')
+    parser.parse("(-34) strmatch")
 
     parser.getASG(defaults=False)
 

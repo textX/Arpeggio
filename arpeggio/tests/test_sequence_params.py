@@ -54,7 +54,7 @@ def test_ws():
             two   three  four""")
 
     def grammar():
-        return Sequence("one", "two", "three", ws=' '), "four"
+        return Sequence("one", "two", "three", ws=" "), "four"
 
     parser = ParserPython(grammar)
 
@@ -70,7 +70,7 @@ def test_ws():
 
     # Test for ws with more than one char.
     def grammar():
-        return Sequence("one", "two", "three", ws=' \t'), "four"
+        return Sequence("one", "two", "three", ws=" \t"), "four"
 
     parser = ParserPython(grammar)
 

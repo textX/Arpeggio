@@ -5,10 +5,14 @@ from arpeggio import ZeroOrMore, OneOrMore, ParserPython, EOF
 
 
 def test_zeroormore_eolterm():
+    def grammar():
+        return first, second, EOF
 
-    def grammar():      return first, second, EOF
-    def first():        return ZeroOrMore(["a", "b"], eolterm=True)
-    def second():       return "a"
+    def first():
+        return ZeroOrMore(["a", "b"], eolterm=True)
+
+    def second():
+        return "a"
 
     # first rule should match only first line
     # so that second rule will match "a" on the new line
@@ -22,10 +26,14 @@ def test_zeroormore_eolterm():
 
 
 def test_oneormore_eolterm():
+    def grammar():
+        return first, second, EOF
 
-    def grammar():      return first, second, EOF
-    def first():        return OneOrMore(["a", "b"], eolterm=True)
-    def second():       return "a"
+    def first():
+        return OneOrMore(["a", "b"], eolterm=True)
+
+    def second():
+        return "a"
 
     # first rule should match only first line
     # so that second rule will match "a" on the new line

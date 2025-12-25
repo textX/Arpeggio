@@ -29,19 +29,18 @@ from robot import RobotVisitor
 
 
 def main(debug=False):
-
     current_dir = os.path.dirname(__file__)
 
     # Load grammar
-    robot_grammar = open(os.path.join(current_dir, 'robot.peg')).read()
+    robot_grammar = open(os.path.join(current_dir, "robot.peg")).read()
 
     # First we will make a parser - an instance of the robot parser model.
     # Parser model is given in the form of PEG specification therefore we
     # are using ParserPEG class.
-    parser = ParserPEG(robot_grammar, 'robot', debug=debug)
+    parser = ParserPEG(robot_grammar, "robot", debug=debug)
 
     # Load program code
-    robot_program = open(os.path.join(current_dir, 'program.rbt')).read()
+    robot_program = open(os.path.join(current_dir, "program.rbt")).read()
 
     # We create a parse tree out of textual input
     parse_tree = parser.parse(robot_program)

@@ -24,7 +24,6 @@ from arpeggio import (
 
 
 def test_sequence():
-
     def grammar():
         return ("a", "b", "c")
 
@@ -37,7 +36,6 @@ def test_sequence():
 
 
 def test_ordered_choice():
-
     def grammar():
         return ["a", "b", "c"], EOF
 
@@ -54,15 +52,11 @@ def test_ordered_choice():
 
     with pytest.raises(NoMatch) as e:
         parser.parse("ab")
-    assert str(e.value) == (
-       "Expected EOF at position (1, 2) => 'a*b'."
-    )
+    assert str(e.value) == ("Expected EOF at position (1, 2) => 'a*b'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("bb")
-    assert str(e.value) == (
-       "Expected EOF at position (1, 2) => 'b*b'."
-    )
+    assert str(e.value) == ("Expected EOF at position (1, 2) => 'b*b'.")
 
 
 def test_unordered_group():
@@ -78,25 +72,18 @@ def test_unordered_group():
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a b a c")
-    assert str(e.value) == (
-       "Expected 'c' at position (1, 5) => 'a b *a c'."
-    )
+    assert str(e.value) == ("Expected 'c' at position (1, 5) => 'a b *a c'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a c")
-    assert str(e.value) == (
-       "Expected 'b' at position (1, 4) => 'a c*'."
-    )
+    assert str(e.value) == ("Expected 'b' at position (1, 4) => 'a c*'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("b b a c")
-    assert str(e.value) == (
-       "Expected 'a' or 'c' at position (1, 3) => 'b *b a c'."
-    )
+    assert str(e.value) == ("Expected 'a' or 'c' at position (1, 3) => 'b *b a c'.")
 
 
 def test_unordered_group_with_separator():
-
     def grammar():
         return UnorderedGroup("a", "b", "c", sep=StrMatch(",")), EOF
 
@@ -105,48 +92,36 @@ def test_unordered_group_with_separator():
     parsed = parser.parse("b, a , c")
 
     assert str(parsed) == "b | , | a | , | c | "
-    assert repr(parsed) == \
-        "[  'b' [0],  ',' [1],  'a' [3],  ',' [5],  'c' [7], EOF [8] ]"
+    assert repr(parsed) == "[  'b' [0],  ',' [1],  'a' [3],  ',' [5],  'c' [7], EOF [8] ]"
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a, b, a, c")
-    assert str(e.value) == (
-       "Expected 'c' at position (1, 7) => 'a, b, *a, c'."
-    )
+    assert str(e.value) == ("Expected 'c' at position (1, 7) => 'a, b, *a, c'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a, c")
-    assert str(e.value) == (
-       "Expected ',' or 'b' at position (1, 5) => 'a, c*'."
-    )
+    assert str(e.value) == ("Expected ',' or 'b' at position (1, 5) => 'a, c*'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("b, b, a, c")
-    assert str(e.value) == (
-       "Expected 'a' or 'c' at position (1, 4) => 'b, *b, a, c'."
-    )
+    assert str(e.value) == ("Expected 'a' or 'c' at position (1, 4) => 'b, *b, a, c'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse(",a, b, c")
     assert str(e.value) == (
-       "Expected 'a' or 'b' or 'c' at position (1, 1) => '*,a, b, c'."
+        "Expected 'a' or 'b' or 'c' at position (1, 1) => '*,a, b, c'."
     )
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a, b, c,")
-    assert str(e.value) == (
-       "Expected EOF at position (1, 8) => 'a, b, c*,'."
-    )
+    assert str(e.value) == ("Expected EOF at position (1, 8) => 'a, b, c*,'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a, ,b, c")
-    assert str(e.value) == (
-       "Expected 'b' or 'c' at position (1, 4) => 'a, *,b, c'."
-    )
+    assert str(e.value) == ("Expected 'b' or 'c' at position (1, 4) => 'a, *,b, c'.")
 
 
 def test_unordered_group_with_optionals():
-
     def grammar():
         return UnorderedGroup("a", Optional("b"), "c"), EOF
 
@@ -163,19 +138,14 @@ def test_unordered_group_with_optionals():
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a b c b")
-    assert str(e.value) == (
-       "Expected EOF at position (1, 7) => 'a b c *b'."
-    )
+    assert str(e.value) == ("Expected EOF at position (1, 7) => 'a b c *b'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a b ")
-    assert str(e.value) == (
-       "Expected 'c' at position (1, 5) => 'a b *'."
-    )
+    assert str(e.value) == ("Expected 'c' at position (1, 5) => 'a b *'.")
 
 
 def test_unordered_group_with_optionals_and_separator():
-
     def grammar():
         return UnorderedGroup("a", Optional("b"), "c", sep=","), EOF
 
@@ -192,39 +162,28 @@ def test_unordered_group_with_optionals_and_separator():
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a, b, c, b")
-    assert str(e.value) == (
-       "Expected EOF at position (1, 8) => 'a, b, c*, b'."
-    )
+    assert str(e.value) == ("Expected EOF at position (1, 8) => 'a, b, c*, b'.")
 
     # FIXME: Shouldn't this only be ',' and the position 5?
     with pytest.raises(NoMatch) as e:
         parser.parse("a, b ")
-    assert str(e.value) == (
-       "Expected ',' or 'c' at position (1, 6) => 'a, b *'."
-    )
+    assert str(e.value) == ("Expected ',' or 'c' at position (1, 6) => 'a, b *'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a, c, ")
-    assert str(e.value) == (
-       "Expected 'b' at position (1, 7) => 'a, c, *'."
-    )
+    assert str(e.value) == ("Expected 'b' at position (1, 7) => 'a, c, *'.")
 
     # FIXME: Shouldn't the ',' be at position 5?
     with pytest.raises(NoMatch) as e:
         parser.parse("a, b c ")
-    assert str(e.value) == (
-        "Expected ',' at position (1, 6) => 'a, b *c '."
-    )
+    assert str(e.value) == ("Expected ',' at position (1, 6) => 'a, b *c '.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse(",a, c ")
-    assert str(e.value) == (
-       "Expected 'a' or 'b' or 'c' at position (1, 1) => '*,a, c '."
-    )
+    assert str(e.value) == ("Expected 'a' or 'b' or 'c' at position (1, 1) => '*,a, c '.")
 
 
 def test_zero_or_more():
-
     def grammar():
         return ZeroOrMore("a"), EOF
 
@@ -233,8 +192,10 @@ def test_zero_or_more():
     parsed = parser.parse("aaaaaaa")
 
     assert str(parsed) == "a | a | a | a | a | a | a | "
-    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],"\
+    assert (
+        repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],"
         "  'a' [3],  'a' [4],  'a' [5],  'a' [6], EOF [7] ]"
+    )
 
     parsed = parser.parse("")
 
@@ -243,13 +204,10 @@ def test_zero_or_more():
 
     with pytest.raises(NoMatch) as e:
         parser.parse("bbb")
-    assert str(e.value) == (
-       "Expected 'a' or EOF at position (1, 1) => '*bbb'."
-    )
+    assert str(e.value) == ("Expected 'a' or EOF at position (1, 1) => '*bbb'.")
 
 
 def test_zero_or_more_with_separator():
-
     def grammar():
         return ZeroOrMore("a", sep=","), EOF
 
@@ -257,12 +215,12 @@ def test_zero_or_more_with_separator():
 
     parsed = parser.parse("a, a , a , a ,  a,a, a")
 
-    assert str(parsed) == \
-        "a | , | a | , | a | , | a | , | a | , | a | , | a | "
-    assert repr(parsed) == \
-        "[  'a' [0],  ',' [1],  'a' [3],  ',' [5],  'a' [7],  ',' [9],  "\
-        "'a' [11],  ',' [13],  'a' [16],  ',' [17],  'a' [18],  ',' [19],"\
+    assert str(parsed) == "a | , | a | , | a | , | a | , | a | , | a | , | a | "
+    assert (
+        repr(parsed) == "[  'a' [0],  ',' [1],  'a' [3],  ',' [5],  'a' [7],  ',' [9],  "
+        "'a' [11],  ',' [13],  'a' [16],  ',' [17],  'a' [18],  ',' [19],"
         "  'a' [21], EOF [22] ]"
+    )
 
     parsed = parser.parse("")
 
@@ -271,31 +229,22 @@ def test_zero_or_more_with_separator():
 
     with pytest.raises(NoMatch) as e:
         parser.parse("aa a")
-    assert str(e.value) == (
-       "Expected ',' or EOF at position (1, 2) => 'a*a a'."
-    )
+    assert str(e.value) == ("Expected ',' or EOF at position (1, 2) => 'a*a a'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse(",a,a ,a")
-    assert str(e.value) == (
-       "Expected 'a' or EOF at position (1, 1) => '*,a,a ,a'."
-    )
+    assert str(e.value) == ("Expected 'a' or EOF at position (1, 1) => '*,a,a ,a'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a,a ,a,")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 8) => 'a,a ,a,*'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 8) => 'a,a ,a,*'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("bbb")
-    assert str(e.value) == (
-       "Expected 'a' or EOF at position (1, 1) => '*bbb'."
-    )
+    assert str(e.value) == ("Expected 'a' or EOF at position (1, 1) => '*bbb'.")
 
 
 def test_zero_or_more_with_optional_separator():
-
     def grammar():
         return ZeroOrMore("a", sep=RegExMatch(",?")), EOF
 
@@ -303,12 +252,12 @@ def test_zero_or_more_with_optional_separator():
 
     parsed = parser.parse("a, a , a   a ,  a,a, a")
 
-    assert str(parsed) == \
-        "a | , | a | , | a | a | , | a | , | a | , | a | "
-    assert repr(parsed) == \
-        "[  'a' [0],  ',' [1],  'a' [3],  ',' [5],  'a' [7],  "\
-        "'a' [11],  ',' [13],  'a' [16],  ',' [17],  'a' [18],  ',' [19],"\
+    assert str(parsed) == "a | , | a | , | a | a | , | a | , | a | , | a | "
+    assert (
+        repr(parsed) == "[  'a' [0],  ',' [1],  'a' [3],  ',' [5],  'a' [7],  "
+        "'a' [11],  ',' [13],  'a' [16],  ',' [17],  'a' [18],  ',' [19],"
         "  'a' [21], EOF [22] ]"
+    )
 
     parsed = parser.parse("")
 
@@ -319,25 +268,18 @@ def test_zero_or_more_with_optional_separator():
 
     with pytest.raises(NoMatch) as e:
         parser.parse(",a,a ,a")
-    assert str(e.value) == (
-       "Expected 'a' or EOF at position (1, 1) => '*,a,a ,a'."
-    )
+    assert str(e.value) == ("Expected 'a' or EOF at position (1, 1) => '*,a,a ,a'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a,a ,a,")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 8) => 'a,a ,a,*'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 8) => 'a,a ,a,*'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("bbb")
-    assert str(e.value) == (
-       "Expected 'a' or EOF at position (1, 1) => '*bbb'."
-    )
+    assert str(e.value) == ("Expected 'a' or EOF at position (1, 1) => '*bbb'.")
 
 
 def test_one_or_more():
-
     def grammar():
         return OneOrMore("a"), "b"
 
@@ -346,26 +288,23 @@ def test_one_or_more():
     parsed = parser.parse("aaaaaa a  b")
 
     assert str(parsed) == "a | a | a | a | a | a | a | b"
-    assert repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],"\
+    assert (
+        repr(parsed) == "[  'a' [0],  'a' [1],  'a' [2],"
         "  'a' [3],  'a' [4],  'a' [5],  'a' [7],  'b' [10] ]"
+    )
 
     parser.parse("ab")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("b")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*b'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*b'.")
 
 
 def test_one_or_more_with_separator():
-
     def grammar():
         return OneOrMore("a", sep=","), "b"
 
@@ -374,45 +313,35 @@ def test_one_or_more_with_separator():
     parsed = parser.parse("a, a, a, a  b")
 
     assert str(parsed) == "a | , | a | , | a | , | a | b"
-    assert repr(parsed) == \
-        "[  'a' [0],  ',' [1],  'a' [3],  ',' [4],  'a' [6],  ',' [7],  "\
+    assert (
+        repr(parsed) == "[  'a' [0],  ',' [1],  'a' [3],  ',' [4],  'a' [6],  ',' [7],  "
         "'a' [9],  'b' [12] ]"
+    )
 
     parser.parse("a b")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("b")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*b'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*b'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a a b")
-    assert str(e.value) == (
-       "Expected ',' or 'b' at position (1, 3) => 'a *a b'."
-    )
+    assert str(e.value) == ("Expected ',' or 'b' at position (1, 3) => 'a *a b'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a a, b")
-    assert str(e.value) == (
-       "Expected ',' or 'b' at position (1, 3) => 'a *a, b'."
-    )
+    assert str(e.value) == ("Expected ',' or 'b' at position (1, 3) => 'a *a, b'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse(", a, a b")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*, a, a b'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*, a, a b'.")
 
 
 def test_one_or_more_with_optional_separator():
-
     def grammar():
         return OneOrMore("a", sep=RegExMatch(",?")), "b"
 
@@ -421,39 +350,31 @@ def test_one_or_more_with_optional_separator():
     parsed = parser.parse("a, a  a, a  b")
 
     assert str(parsed) == "a | , | a | a | , | a | b"
-    assert repr(parsed) == \
-        "[  'a' [0],  ',' [1],  'a' [3],  'a' [6],  ',' [7],  "\
+    assert (
+        repr(parsed) == "[  'a' [0],  ',' [1],  'a' [3],  'a' [6],  ',' [7],  "
         "'a' [9],  'b' [12] ]"
+    )
 
     parser.parse("a b")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("b")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*b'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*b'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("a a, b")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 6) => 'a a, *b'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 6) => 'a a, *b'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse(", a, a b")
-    assert str(e.value) == (
-       "Expected 'a' at position (1, 1) => '*, a, a b'."
-    )
+    assert str(e.value) == ("Expected 'a' at position (1, 1) => '*, a, a b'.")
 
 
 def test_optional():
-
     def grammar():
         return Optional("a"), "b", EOF
 
@@ -471,21 +392,17 @@ def test_optional():
 
     with pytest.raises(NoMatch) as e:
         parser.parse("aab")
-    assert str(e.value) == (
-       "Expected 'b' at position (1, 2) => 'a*ab'."
-    )
+    assert str(e.value) == ("Expected 'b' at position (1, 2) => 'a*ab'.")
 
     with pytest.raises(NoMatch) as e:
         parser.parse("")
-    assert str(e.value) == (
-       "Expected 'a' or 'b' at position (1, 1) => '*'."
-    )
+    assert str(e.value) == ("Expected 'a' or 'b' at position (1, 1) => '*'.")
 
 
 # Syntax predicates
 
-def test_and():
 
+def test_and():
     def grammar():
         return "a", And("b"), ["c", "b"], EOF
 
@@ -498,20 +415,15 @@ def test_and():
     # 'And' will try to match 'b' and fail so 'c' will never get matched
     with pytest.raises(NoMatch) as e:
         parser.parse("ac")
-    assert str(e.value) == (
-       "Expected 'b' at position (1, 2) => 'a*c'."
-    )
+    assert str(e.value) == ("Expected 'b' at position (1, 2) => 'a*c'.")
 
     # 'And' will not consume 'b' from the input so second 'b' will never match
     with pytest.raises(NoMatch) as e:
         parser.parse("abb")
-    assert str(e.value) == (
-       "Expected EOF at position (1, 3) => 'ab*b'."
-    )
+    assert str(e.value) == ("Expected EOF at position (1, 3) => 'ab*b'.")
 
 
 def test_not():
-
     def grammar():
         return "a", Not("b"), ["b", "c"], EOF
 
@@ -525,13 +437,9 @@ def test_not():
     # Not will fail on 'b'
     with pytest.raises(NoMatch) as e:
         parser.parse("ab")
-    assert str(e.value) == (
-       "Not expected input at position (1, 2) => 'a*b'."
-    )
+    assert str(e.value) == ("Not expected input at position (1, 2) => 'a*b'.")
 
     # And will not consume 'c' from the input so 'b' will never match
     with pytest.raises(NoMatch) as e:
         parser.parse("acb")
-    assert str(e.value) == (
-       "Expected EOF at position (1, 3) => 'ac*b'."
-    )
+    assert str(e.value) == ("Expected EOF at position (1, 3) => 'ac*b'.")

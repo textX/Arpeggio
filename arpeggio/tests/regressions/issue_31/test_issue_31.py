@@ -2,9 +2,11 @@ from arpeggio import ParserPython, ZeroOrMore
 
 
 def test_empty_nested_parse():
+    def grammar():
+        return [first]
 
-    def grammar(): return [first]
-    def first(): return ZeroOrMore("second")
+    def first():
+        return ZeroOrMore("second")
 
     parser = ParserPython(grammar)
 
@@ -13,4 +15,3 @@ def test_empty_nested_parse():
     tree = parser.parse("something")
 
     assert not tree
-

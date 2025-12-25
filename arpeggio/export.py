@@ -19,14 +19,13 @@ class Exporter:
     def __init__(self):
         super().__init__()
 
-        # Export initialization
-        self._render_set = set()        # Used in rendering to prevent
-                                        # rendering
-                                        # of the same node multiple times
+        # Export initialization. Used in rendering to prevent rendering of the
+        # same node multiple times
+        self._render_set = set()
 
-        self._adapter_map = {}          # Used as a registry of adapters to
-                                        # ensure that the same adapter is
-                                        # returned for the same adaptee object
+        # Used as a registry of adapters to ensure that the same adapter is
+        # returned for the same adaptee object
+        self._adapter_map = {}
 
     def export(self, obj):
         """
@@ -74,8 +73,9 @@ class ExportAdapter:
         adaptee: A node to adapt.
         export: An export object used as a context of the export.
     """
+
     def __init__(self, node, export):
-        self.adaptee = node     # adaptee is adapted graph node
+        self.adaptee = node  # adaptee is adapted graph node
         self.export = export
 
 
@@ -87,6 +87,7 @@ class DOTExportAdapter(ExportAdapter):
     """
     Base adapter class for the DOT export support.
     """
+
     @property
     def id(self):
         """
@@ -113,6 +114,7 @@ class PMDOTExportAdapter(DOTExportAdapter):
     """
     Adapter for ParsingExpression graph types (parser model).
     """
+
     @property
     def id(self):
         return id(self.adaptee)
@@ -124,7 +126,7 @@ class PMDOTExportAdapter(DOTExportAdapter):
     @property
     def neighbours(self):
         if not hasattr(self, "_neighbours"):
-            self._neighbours= []
+            self._neighbours = []
 
             # Registry of adapters used in this export
             adapter_map = self.export._adapter_map
@@ -149,6 +151,7 @@ class PTDOTExportAdapter(PMDOTExportAdapter):
     """
     Adapter for ParseTreeNode graph types.
     """
+
     @property
     def neighbours(self):
         if isinstance(self.adaptee, Terminal):
@@ -166,20 +169,19 @@ class DOTExporter(Exporter):
     """
     Export to DOT language (part of GraphViz, see http://www.graphviz.org/)
     """
+
     def _render_node(self, node):
         if node not in self._render_set:
             self._render_set.add(node)
-            self._outf.write(f'\n{node.id} [label="{self._dot_label_esc(node.desc)}"];'
-                             )
-            #TODO Comment handling
-#            if hasattr(node, "comments") and root.comments:
-#                retval += self.node(root.comments)
-#                retval += '\n%s->%s [label="comment"]' % \
-                            #(id(root), id(root.comments))
+            self._outf.write(f'\n{node.id} [label="{self._dot_label_esc(node.desc)}"];')
+            # TODO Comment handling
+            #            if hasattr(node, "comments") and root.comments:
+            #                retval += self.node(root.comments)
+            #                retval += '\n%s->%s [label="comment"]' % \
+            # (id(root), id(root.comments))
             for name, n in node.neighbours:
-                self._outf.write(f'\n{node.id}->{n.id} [label="{name}"]'
-                                 )
-                self._outf.write('\n')
+                self._outf.write(f'\n{node.id}->{n.id} [label="{name}"]')
+                self._outf.write("\n")
                 self._render_node(n)
 
     def _start(self):
@@ -190,8 +192,8 @@ class DOTExporter(Exporter):
 
     def _dot_label_esc(self, to_esc):
         to_esc = to_esc.replace("\\", "\\\\")
-        to_esc = to_esc.replace('\"', '\\"')
-        to_esc = to_esc.replace('\n', '\\n')
+        to_esc = to_esc.replace('"', '\\"')
+        to_esc = to_esc.replace("\n", "\\n")
         return to_esc
 
 
@@ -199,23 +201,21 @@ class PMDOTExporter(DOTExporter):
     """
     A convenience DOTExport extension that uses ParserExpressionDOTExportAdapter
     """
+
     def export(self, obj):
-        return super().\
-            export(PMDOTExportAdapter(obj, self))
+        return super().export(PMDOTExportAdapter(obj, self))
 
     def exportFile(self, obj, file_name):
-        return super().\
-            exportFile(PMDOTExportAdapter(obj, self), file_name)
+        return super().exportFile(PMDOTExportAdapter(obj, self), file_name)
 
 
 class PTDOTExporter(DOTExporter):
     """
     A convenience DOTExport extension that uses PTDOTExportAdapter
     """
+
     def export(self, obj):
-        return super().\
-            export(PTDOTExportAdapter(obj, self))
+        return super().export(PTDOTExportAdapter(obj, self))
 
     def exportFile(self, obj, file_name):
-        return super().\
-            exportFile(PTDOTExportAdapter(obj, self), file_name)
+        return super().exportFile(PTDOTExportAdapter(obj, self), file_name)

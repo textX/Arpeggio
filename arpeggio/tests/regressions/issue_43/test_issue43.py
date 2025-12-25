@@ -1,11 +1,12 @@
 """
 See https://github.com/textX/Arpeggio/issues/43
 """
+
 from arpeggio.cleanpeg import ParserPEG
 
 
 def try_grammer(peg):
-    p = ParserPEG(peg, 'letters', debug=False)
+    p = ParserPEG(peg, "letters", debug=False)
     p.parse(""" { a b } """)
     p.parse(""" { b a } """)
 

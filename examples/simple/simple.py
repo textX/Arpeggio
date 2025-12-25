@@ -15,29 +15,72 @@ import os
 from arpeggio import *
 from arpeggio import RegExMatch as _
 
+
 # Grammar
-def comment():          return [_(r"//.*"), _(r"(?s)/\*.*?\*/")]
-def literal():          return _(r'\d*\.\d*|\d+|".*?"')
-def symbol():           return _(r"\w+")
-def operator():         return _(r"\+|\-|\*|\/|\=\=")
-def operation():        return symbol, operator, [literal, functioncall]
-def expression():       return [literal, operation, functioncall]
-def expressionlist():   return expression, ZeroOrMore(",", expression)
-def returnstatement():  return Kwd("return"), expression
-def ifstatement():      return Kwd("if"), "(", expression, ")", block, Kwd("else"), block
-def statement():        return [ifstatement, returnstatement], ";"
-def block():            return "{", OneOrMore(statement), "}"
-def parameterlist():    return "(", symbol, ZeroOrMore(",", symbol), ")"
-def functioncall():     return symbol, "(", expressionlist, ")"
-def function():         return Kwd("function"), symbol, parameterlist, block
-def simpleLanguage():   return function
+def comment():
+    return [_(r"//.*"), _(r"(?s)/\*.*?\*/")]
+
+
+def literal():
+    return _(r'\d*\.\d*|\d+|".*?"')
+
+
+def symbol():
+    return _(r"\w+")
+
+
+def operator():
+    return _(r"\+|\-|\*|\/|\=\=")
+
+
+def operation():
+    return symbol, operator, [literal, functioncall]
+
+
+def expression():
+    return [literal, operation, functioncall]
+
+
+def expressionlist():
+    return expression, ZeroOrMore(",", expression)
+
+
+def returnstatement():
+    return Kwd("return"), expression
+
+
+def ifstatement():
+    return Kwd("if"), "(", expression, ")", block, Kwd("else"), block
+
+
+def statement():
+    return [ifstatement, returnstatement], ";"
+
+
+def block():
+    return "{", OneOrMore(statement), "}"
+
+
+def parameterlist():
+    return "(", symbol, ZeroOrMore(",", symbol), ")"
+
+
+def functioncall():
+    return symbol, "(", expressionlist, ")"
+
+
+def function():
+    return Kwd("function"), symbol, parameterlist, block
+
+
+def simpleLanguage():
+    return function
 
 
 def main(debug=False):
-
     # Load test program from file
     current_dir = os.path.dirname(__file__)
-    test_program = open(os.path.join(current_dir, 'program.simple')).read()
+    test_program = open(os.path.join(current_dir, "program.simple")).read()
 
     # Parser instantiation. simpleLanguage is the definition of the root rule
     # and comment is a grammar rule for comments.
@@ -51,4 +94,3 @@ if __name__ == "__main__":
     # and parse tree will be created for visualization.
     # Checkout current folder for .dot files.
     main(debug=True)
-

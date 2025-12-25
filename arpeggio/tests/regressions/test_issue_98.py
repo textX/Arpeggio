@@ -9,15 +9,15 @@ def test_suppressed_match_in_zero_or_more():
     class SuppressStrMatch(StrMatch):
         suppress = True
 
-    newline = SuppressStrMatch('\n')
+    newline = SuppressStrMatch("\n")
 
     def line():
-        return RegExMatch(r'^.*$'), newline
+        return RegExMatch(r"^.*$"), newline
 
     def grammar():
         return ZeroOrMore(line), EOF
 
     parser = ParserPython(grammar, skipws=False)
-    result = parser.parse('one\n\nthree\nfour\n')
+    result = parser.parse("one\n\nthree\nfour\n")
 
     assert result

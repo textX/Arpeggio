@@ -44,11 +44,15 @@ name = "arpeggio"
 [tool.flit.sdist]
 exclude = ["**/.*"]
 
-[project.optional-dependencies]
+[tool.uv]
+default-groups = ["dev"]
+
+[dependency-groups]
 dev = [
-    "mkdocs",
-    "mike",
     "flit",
+    {include-group = "test"},
+    {include-group = "docs"},
+    {include-group = "dbg"},
 ]
 
 test = [
@@ -56,6 +60,17 @@ test = [
     "coverage",
     "coveralls",
     "pytest",
+    "mypy",
+]
+
+docs = [
+    "mkdocs",
+    "mike",
+]
+
+dbg = [
+    "pudb",
+    "ipython",
 ]
 
 [tool.ruff]

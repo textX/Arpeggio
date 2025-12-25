@@ -594,9 +594,9 @@ class UnorderedGroup(Repetition):
             c_loc_pos = parser.position
             match = True
             all_optionals_fail = True
-            for e in list(nodes_to_try):
+            for node in list(nodes_to_try):
                 try:
-                    result = e.parse(parser)
+                    result = node.parse(parser)
                     if result:
                         if sep_exc:
                             raise sep_exc
@@ -606,7 +606,7 @@ class UnorderedGroup(Repetition):
                         match = True
                         all_optionals_fail = False
                         append(result)
-                        nodes_to_try.remove(e)
+                        nodes_to_try.remove(node)
                         break
 
                 except NoMatch:

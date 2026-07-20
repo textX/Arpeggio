@@ -6,7 +6,29 @@ always be given. If you plan to make a contribution it would be great if you
 first announce that on [the issue
 tracker](https://github.com/textX/Arpeggio/issues).
 
-You can contribute in many ways:
+
+## Legal Notice
+
+When contributing to this project, you must agree that you have authored 100% of
+the content, that you have the necessary rights to the content and that the
+content you contribute may be provided under the project license.
+
+
+## Guidelines for AI-assisted Contributions
+
+AI tools are welcome as helpers, not authors. Keep these practices in mind:
+
+- Stay accountable: only submit changes you understand and can justify; be ready
+  to explain behavior, edge cases, and alignment with Arpeggio conventions. If
+  an AI suggestion feels unclear, rewrite or drop it.
+- Keep humans in the loop: discuss non-trivial ideas early via Issues or
+  Discussions, especially when you are unsure about design or impact.
+- Use AI for acceleration, then verify: treat AI output as a draft for code,
+  tests, or docs; run linters/tests and review the logic yourself.
+- Be transparent in PRs: note briefly if AI was used and for what (e.g., initial
+  draft, test scaffolding), and call out any parts where you want extra review.
+- Prefer focused patches over large dumps; if you cannot confidently explain an
+  AI-produced change, open a well-described issue instead.
 
 
 ## Types of Contributions

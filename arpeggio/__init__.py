@@ -1431,6 +1431,75 @@ class SemanticActionToString(SemanticAction):
 
 
 # ----------------------------------------------------
+# Grammar validation
+
+
+def _is_non_consuming(node, visited=None):
+    """
+    Returns True if the given parser expression can succeed without
+    consuming any input.
+
+    Used during grammar construction to detect repetitions whose body
+    may match the empty string, which would cause infinite loops.
+    """
+    if visited is None:
+        visited = set()
+
+    node_id = id(node)
+    if node_id in visited:
+        # Cycle detected; assume consuming to avoid false positives.
+        return False
+    visited.add(node_id)
+
+    if isinstance(node, (Optional, ZeroOrMore, SyntaxPredicate)):
+        return True
+    if isinstance(node, RegExMatch):
+        # Check if the regex can match the empty string.
+        return bool(node.regex.match(""))
+    if isinstance(node, StrMatch):
+        return node.to_match == ""
+    if isinstance(node, OrderedChoice):
+        return any(_is_non_consuming(n, visited) for n in node.nodes)
+    if isinstance(node, Sequence):
+        return all(_is_non_consuming(n, visited) for n in node.nodes)
+    if isinstance(node, OneOrMore):
+        return len(node.nodes) > 0 and _is_non_consuming(node.nodes[0], visited)
+    if isinstance(node, UnorderedGroup):
+        return all(_is_non_consuming(n, visited) for n in node.nodes)
+    return False
+
+
+def _validate_parser_model(node, visited=None):
+    """
+    Walk the parser model tree and raise GrammarError if any
+    ZeroOrMore or OneOrMore repetition has a body that can succeed
+    without consuming input.
+    """
+    if visited is None:
+        visited = set()
+
+    node_id = id(node)
+    if node_id in visited:
+        return
+    visited.add(node_id)
+
+    if isinstance(node, (ZeroOrMore, OneOrMore)):
+        child = node.nodes[0]
+        if _is_non_consuming(child):
+            rule_desc = f" in rule '{node.rule_name}'" if node.rule_name else ""
+            raise GrammarError(
+                f"Non-consuming match inside "
+                f"{node.__class__.__name__}"
+                f"{rule_desc}. "
+                f"Body expression {child.name!r} may succeed without "
+                f"consuming input, which would cause an infinite loop."
+            )
+
+    for child in node.nodes:
+        _validate_parser_model(child, visited)
+
+
+# ----------------------------------------------------
 # Parsers
 
 
@@ -1977,6 +2046,10 @@ class ParserPython(Parser):
         parser_model = inner_from_python(expression)
         resolve()
         assert self.__cross_refs == 0, "Not all crossrefs are resolved!"
+
+        # Validate parser model for potential infinite loops.
+        _validate_parser_model(parser_model)
+
         return parser_model
 
     def errors(self):

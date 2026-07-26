@@ -79,8 +79,8 @@ def bibkey():                   return _(r'[^\s,]+')
 - Field value can be quoted and braced. Let's match the content.
 ```python
 def fieldvalue_quoted_content():    return _(r'((\\")|[^"])*')
-def fieldvalue_braced_content():    return Combine(ZeroOrMore(Optional(And("{"), fieldvalue_inner),\
-                                                  fieldvalue_part))
+def fieldvalue_braced_content():    return Combine(ZeroOrMore([fieldvalue_inner,\
+                                                  fieldvalue_part]))
 def fieldvalue_part():          return _(r'((\\")|[^{}])+')
 def fieldvalue_inner():         return "{", fieldvalue_braced_content, "}"
 ```

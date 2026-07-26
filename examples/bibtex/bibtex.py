@@ -13,9 +13,7 @@ import sys
 
 from arpeggio import (
     EOF,
-    And,
     Combine,
-    Optional,
     ParserPython,
     PTNodeVisitor,
     ZeroOrMore,
@@ -75,7 +73,7 @@ def fieldvalue_quoted_content():
 
 
 def fieldvalue_braced_content():
-    return Combine(ZeroOrMore([Optional(And("{"), fieldvalue_inner), fieldvalue_part]))
+    return Combine(ZeroOrMore([fieldvalue_inner, fieldvalue_part]))
 
 
 def fieldvalue_part():

@@ -1,13 +1,14 @@
+import pytest
+
+from arpeggio import GrammarError
 from arpeggio.cleanpeg import ParserPEG
 
 
-def test_regex_with_empty_successful_match_in_repetition():
+def test_regex_with_empty_match_in_repetition_should_fail_validation():
+    """Regex that matches empty should fail during grammar construction."""
     grammar = """
             rule = (subexpression)+
             subexpression = r'^.*$'
             """
-    parser = ParserPEG(grammar, "rule")
-    parsed = parser.parse("something simple")
-
-    assert parsed.rule_name == "rule"
-    assert parsed.subexpression.rule_name == "subexpression"
+    with pytest.raises(GrammarError, match="Non-consuming match"):
+        ParserPEG(grammar, "rule")

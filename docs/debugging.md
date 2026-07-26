@@ -87,16 +87,16 @@ For parser model this is achieved with the following Python code:
 
 ```python
 from arpeggio.export import PMDOTExporter
-PMDOTExporter().exportFile(parser.parser_model,
-                            "my_parser_model.dot")
+
+PMDOTExporter().exportFile(parser.parser_model, "my_parser_model.dot")
 ```
 
 For parse tree it is achieved with:
 
 ```python
 from arpeggio.export import PTDOTExporter
-PTDOTExporter().exportFile(parse_tree,
-                           "my_parse_tree.dot")
+
+PTDOTExporter().exportFile(parse_tree, "my_parse_tree.dot")
 ```
 
 To get e.g. `png` images from `dot` files do as usual:

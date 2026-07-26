@@ -168,18 +168,18 @@ of `StrMatch` which sets `suppress` to `True`:
 class SuppressStrMatch(StrMatch):
     suppress = True
 
-def grammar():
-    return "one", "two", RegExMatch(r'\d+'), "three"
 
-parser = ParserPython(grammar,
-                      syntax_classes={'StrMatch': SuppressStrMatch})
+def grammar():
+    return "one", "two", RegExMatch(r"\d+"), "three"
+
+
+parser = ParserPython(grammar, syntax_classes={"StrMatch": SuppressStrMatch})
 
 result = parser.parse("one two 42 three")
 
 # Only regex will end up in the tree
 assert len(result) == 1
 assert result[0] == "42"
-
 ```
 
 We use `syntax_classes` parameter to `ParserPython` of `dict` type where keys
@@ -259,6 +259,7 @@ Creating a parser using PEG syntax is done by the class `ParserPEG` from the
 
 ```python
 from arpeggio.cleanpeg import ParserPEG
+
 parser = ParserPEG(calc_grammar, "calc")
 ```
 

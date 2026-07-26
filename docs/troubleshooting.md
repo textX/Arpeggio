@@ -104,8 +104,12 @@ As a side note, there is implicit reduction of nodes whose grammar rule is a
 sequence with only one child.
 
 ```python
-def mean():             return number
-def number():           return _(r'\d*\.\d*|\d+')
+def mean():
+    return number
+
+
+def number():
+    return _(r"\d*\.\d*|\d+")
 ```
 
 Here a node `number` will be suppressed from the parser model and visitor

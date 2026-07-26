@@ -112,15 +112,15 @@ Furthermore, child nodes can be filtered by rule name using attribute access.
 
 ```python
 def visit_bar(self, node, children):
-  # Index access
-  child = children[2]
+    # Index access
+    child = children[2]
 
-  # Iteration
-  for child in children:
-    ...
+    # Iteration
+    for child in children:
+        ...
 
-  # Returns a list of all rules created by PEG rule 'baz'
-  baz_created = children.baz
+    # Returns a list of all rules created by PEG rule 'baz'
+    baz_created = children.baz
 ```
 
 ## Post-processing in second calls
@@ -167,9 +167,9 @@ If you want to call this default behaviour from your visitor method, call
 
 ```python
 def visitor_myrule(self, node, children):
-  if some_condition:
-    ...
-  else:
-    return super(MyVisitor, self).visit__default__(node, children)
+    if some_condition:
+        ...
+    else:
+        return super(MyVisitor, self).visit__default__(node, children)
 ```
 

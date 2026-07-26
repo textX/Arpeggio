@@ -111,9 +111,8 @@ Create file `test_data.csv` with the following content:
 In `csvlang.py` file write:
 
 ```python
-test_data = open('test_data.csv', 'r').read()
+test_data = open("test_data.csv", "r").read()
 parse_tree = parser.parse(test_data)
-
 ```
 
 `test_data` is Python string containing test CSV data from the file. Calling
@@ -208,8 +207,8 @@ parse inputs.  This time we shall instantiate different parser class
 ```python
 from arpeggio.cleanpeg import ParserPEG
 
-csv_grammar = open('csvlang.peg', 'r').read()
-parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ')
+csv_grammar = open("csvlang.peg", "r").read()
+parser = ParserPEG(csv_grammar, "csvfile", ws="\t ")
 ```
 
 Here we load the grammar from `csvlang.peg` file and construct the parser using
@@ -231,7 +230,7 @@ specification approach we use.
 To put parser in debug mode add `debug=True` to the parser parameters list.
 
 ```python
-parser = ParserPEG(csv_grammar, 'csvfile', ws='\t ', debug=True)
+parser = ParserPEG(csv_grammar, "csvfile", ws="\t ", debug=True)
 ```
 
 
@@ -270,7 +269,7 @@ class CSVVisitor(PTNodeVisitor):
 
     def visit_csvfile(self, node, children):
         # We are not interested in empty lines so we will filter them.
-        return [x for x in children if x!='\n']
+        return [x for x in children if x != "\n"]
 ```
 
 and apply this visitor to the parse tree:
@@ -282,21 +281,17 @@ csv_content = visit_parse_tree(parse_tree, CSVVisitor())
 Now if we pretty-print `csv_content` we can see that it is exactly what we wanted:
 
 ```python
-[   [   u'Unquoted test',
-        u'Quoted test',
-        u'23234',
-        u'One Two Three',
-        u'343456.45'],
-    [   u'Unquoted test 2',
-        u'Quoted test with ""inner"" quotes',
-        u'23234',
-        u'One Two Three',
-        u'34312.7'],
-    [   u'Unquoted test 3',
-        u'Quoted test 3',
-        u'23234',
-        u'One Two Three',
-        u'343486.12']]
+[
+    ["Unquoted test", "Quoted test", "23234", "One Two Three", "343456.45"],
+    [
+        "Unquoted test 2",
+        'Quoted test with ""inner"" quotes',
+        "23234",
+        "One Two Three",
+        "34312.7",
+    ],
+    ["Unquoted test 3", "Quoted test 3", "23234", "One Two Three", "343486.12"],
+]
 ```
 
 But, there is more we can do. If we look at our data we can see that some fields
@@ -306,35 +301,37 @@ convert them to Python floats or ints.  To do this conversion we will introduce
 
 ```python
 class CSVVisitor(PTNodeVisitor):
-  ...
-  def visit_field(self, node, children):
-      value = children[0]
-      try:
-          return float(value)
-      except:
-          pass
-      try:
-          return int(value)
-      except:
-          return value
-  ...
+    ...
+
+    def visit_field(self, node, children):
+        value = children[0]
+        try:
+            return float(value)
+        except:
+            pass
+        try:
+            return int(value)
+        except:
+            return value
+
+    ...
 ```
 
 If we pretty-print `csv_content` now we can see that numeric values are not strings
 anymore but a proper Python types.
 
 ```python
-[   [u'Unquoted test', u'Quoted test', 23234.0, u'One Two Three', 343456.45],
-    [   u'Unquoted test 2',
-        u'Quoted test with ""inner"" quotes',
+[
+    ["Unquoted test", "Quoted test", 23234.0, "One Two Three", 343456.45],
+    [
+        "Unquoted test 2",
+        'Quoted test with ""inner"" quotes',
         23234.0,
-        u'One Two Three',
-        34312.7],
-    [   u'Unquoted test 3',
-        u'Quoted test 3',
-        23234.0,
-        u'One Two Three',
-        343486.12]]
+        "One Two Three",
+        34312.7,
+    ],
+    ["Unquoted test 3", "Quoted test 3", 23234.0, "One Two Three", 343486.12],
+]
 ```
 
 

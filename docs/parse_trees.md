@@ -77,7 +77,7 @@ Or iteration:
 
 ```python
 for child in pt_node:
-  ...
+    ...
 ```
 
 Additionally, you can access children by the child rule name:
@@ -86,9 +86,17 @@ For example:
 
 ```python
 # Grammar
-def foo(): return "a", bar, "b", baz, "c", ZeroOrMore(bar)
-def bar(): return "bar"
-def baz(): return "baz"
+def foo():
+    return "a", bar, "b", baz, "c", ZeroOrMore(bar)
+
+
+def bar():
+    return "bar"
+
+
+def baz():
+    return "baz"
+
 
 # Parsing
 parser = ParserPython(foo)
@@ -96,9 +104,9 @@ result = parser.parse("a bar b baz c bar bar bar")
 
 # Accessing parse tree nodes. All asserts will pass.
 # Index access
-assert result[1].rule_name  == 'bar'
+assert result[1].rule_name == "bar"
 # Access by rule name
-assert result.bar.rule_name == 'bar'
+assert result.bar.rule_name == "bar"
 
 # There are 8 children nodes of the root 'result' node.
 # Each child is a terminal in this case.
@@ -115,7 +123,6 @@ assert len(result.bar) == 4
 # First 'bar' is at position 2 and second is at position 14
 assert result.bar[0].position == 2
 assert result.bar[1].position == 14
-
 ```
 
 
@@ -186,8 +193,10 @@ syntax noise from the punctuation and such in the resulting parse tree.
 class SuppressStrMatch(StrMatch):
     suppress = True
 
+
 def grammar():
     return "one", "two", SuppressStrMatch("three"), "four"
+
 
 parser = ParserPython(grammar)
 

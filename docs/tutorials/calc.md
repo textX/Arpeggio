@@ -30,19 +30,22 @@ Let's start with grammar definition.
 - Each `calc` file consists of one or more expressions.
 
 ```python
-def calc():       return OneOrMore(expression), EOF
+def calc():
+    return OneOrMore(expression), EOF
 ```
 
 - Each expression is a sum or subtraction of terms.
 
 ```python
-def expression(): return term, ZeroOrMore(["+", "-"], term)
+def expression():
+    return term, ZeroOrMore(["+", "-"], term)
 ```
 
 - Each term is a multiplication or division of factors.
 
 ```python
-def term():       return factor, ZeroOrMore(["*","/"], factor)
+def term():
+    return factor, ZeroOrMore(["*", "/"], factor)
 ```
 
 !!! note
@@ -53,7 +56,8 @@ def term():       return factor, ZeroOrMore(["*","/"], factor)
   sign is optional. This is a support for unary minus.
 
 ```python
-def factor():     return Optional(["+","-"]), [number, ("(", expression, ")")]
+def factor():
+    return Optional(["+", "-"]), [number, ("(", expression, ")")]
 ```
 
 !!! note
@@ -63,7 +67,8 @@ def factor():     return Optional(["+","-"]), [number, ("(", expression, ")")]
 - And finally we define `number` using regular expression as
 
 ```python
-def number():     return _(r'\d*\.\d*|\d+')
+def number():
+    return _(r"\d*\.\d*|\d+")
 ```
 
 # The parser
@@ -114,7 +119,6 @@ tree nodes is done bottom-up.
 
 ```python
 class CalcVisitor(PTNodeVisitor):
-
     def visit_number(self, node, children):
         """
         Converts node value to float.
@@ -122,7 +126,6 @@ class CalcVisitor(PTNodeVisitor):
         return float(node.value)
 
     ...
-
 ```
 
 Visit method for the `number` rule will do the conversion of the matched text
@@ -130,16 +133,14 @@ to `float` type. This nodes will always be the terminal nodes and will be
 evaluated first.
 
 ```python
-
-    def visit_factor(self, node, children):
-        """
-        Applies a sign to the expression or number.
-        """
-        if len(children) == 1:
-            return children[0]
-        sign = -1 if children[0] == '-' else 1
-        return sign * children[-1]
-
+def visit_factor(self, node, children):
+    """
+    Applies a sign to the expression or number.
+    """
+    if len(children) == 1:
+        return children[0]
+    sign = -1 if children[0] == "-" else 1
+    return sign * children[-1]
 ```
 
 Factor will have an optional sign as the first child and whatever matches first
@@ -153,19 +154,18 @@ evaluation and apply an optional sing on it.
 
 
 ```python
-
-    def visit_term(self, node, children):
-        """
-        Divides or multiplies factors.
-        Factor nodes will be already evaluated.
-        """
-        term = children[0]
-        for i in range(2, len(children), 2):
-            if children[i-1] == "*":
-                term *= children[i]
-            else:
-                term /= children[i]
-        return term
+def visit_term(self, node, children):
+    """
+    Divides or multiplies factors.
+    Factor nodes will be already evaluated.
+    """
+    term = children[0]
+    for i in range(2, len(children), 2):
+        if children[i - 1] == "*":
+            term *= children[i]
+        else:
+            term /= children[i]
+    return term
 ```
 
 `term` consist of multiplication or divisions. Both operations are left

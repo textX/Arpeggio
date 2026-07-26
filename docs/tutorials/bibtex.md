@@ -49,28 +49,45 @@ Then create grammar rules:
 
 - BibTeX file consists of zero or more BibTeX entries.
 ```python
-def bibfile():    return ZeroOrMore(bibentry), EOF
+def bibfile():
+    return ZeroOrMore(bibentry), EOF
 ```
 - Now we define the structure of BibTeX entry.
 ```python
-def bibentry():  return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
+def bibentry():
+    return bibtype, "{", bibkey, ",", field, ZeroOrMore(",", field), "}"
 ```
 - Each field is given as field name, equals char (`=`), and the field value.
 ```python
-def field():     return fieldname, "=", fieldvalue
+def field():
+    return fieldname, "=", fieldvalue
 ```
 - Field value can be specified inside braces or quotes.
 ```python
-def fieldvalue():               return [fieldvalue_braces, fieldvalue_quotes]
-def fieldvalue_braces():        return "{", fieldvalue_braced_content, "}"
-def fieldvalue_quotes():        return '"', fieldvalue_quoted_content, '"'
+def fieldvalue():
+    return [fieldvalue_braces, fieldvalue_quotes]
+
+
+def fieldvalue_braces():
+    return "{", fieldvalue_braced_content, "}"
+
+
+def fieldvalue_quotes():
+    return '"', fieldvalue_quoted_content, '"'
 ```
 - Now, let's define field name, BibTeX type and the key. We use regular
   expression match for this (`RegExMatch` class).
 ```python
-def fieldname():                return _(r'[-\w]+')
-def bibtype():                  return _(r'@\w+')
-def bibkey():                   return _(r'[^\s,]+')
+def fieldname():
+    return _(r"[-\w]+")
+
+
+def bibtype():
+    return _(r"@\w+")
+
+
+def bibkey():
+    return _(r"[^\s,]+")
 ```
   Field name is defined as hyphen or alphanumeric one or more times.
   BibTeX entry type is `@` char after which must be one or more alphanumeric.
@@ -78,11 +95,20 @@ def bibkey():                   return _(r'[^\s,]+')
 
 - Field value can be quoted and braced. Let's match the content.
 ```python
-def fieldvalue_quoted_content():    return _(r'((\\")|[^"])*')
-def fieldvalue_braced_content():    return Combine(ZeroOrMore([fieldvalue_inner,\
-                                                  fieldvalue_part]))
-def fieldvalue_part():          return _(r'((\\")|[^{}])+')
-def fieldvalue_inner():         return "{", fieldvalue_braced_content, "}"
+def fieldvalue_quoted_content():
+    return _(r'((\\")|[^"])*')
+
+
+def fieldvalue_braced_content():
+    return Combine(ZeroOrMore([fieldvalue_inner, fieldvalue_part]))
+
+
+def fieldvalue_part():
+    return _(r'((\\")|[^{}])+')
+
+
+def fieldvalue_inner():
+    return "{", fieldvalue_braced_content, "}"
 ```
 !!! note "Combine decorator"
     We use `Combine` decorator to specify braced content. This decorator
@@ -102,7 +128,7 @@ Now, we have our parser. Let's parse some input:
 
 - First load some BibTeX data from a file.
 ```python
-file_name = os.path.join(os.path.dirname(__file__), 'bibtex_example.bib')
+file_name = os.path.join(os.path.dirname(__file__), "bibtex_example.bib")
 with codecs.open(file_name, "r", encoding="utf-8") as bibtexfile:
     bibtexfile_content = bibtexfile.read()
 ```
@@ -126,20 +152,22 @@ the field value cleaned up from the BibTeX cruft.
 Like this:
 
 ```python
-{   'author': 'Igor Dejanović and Gordana Milosavljević and Branko Perišić and Maja Tumbas',
-    'bibkey': 'DejanovicADomain-SpecificLanguageforDefiningStaticStructureofDatabaseApplications2010',
-    'bibtype': '@article',
-    'doi': '10.2298/CSIS090203002D',
-    'issn': '1820-0214',
-    'journal': 'Computer Science and Information Systems',
-    'month': 'June',
-    'number': '3',
-    'pages': '409--440',
-    'title': 'A Domain-Specific Language for Defining Static Structure of Database Applications',
-    'type': 'M23',
-    'url': 'http://www.comsis.org/ComSIS/Vol7No3/RegularPapers/paper2.htm',
-    'volume': '7',
-    'year': '2010'}
+{
+    "author": "Igor Dejanović and Gordana Milosavljević and Branko Perišić and Maja Tumbas",
+    "bibkey": "DejanovicADomain-SpecificLanguageforDefiningStaticStructureofDatabaseApplications2010",
+    "bibtype": "@article",
+    "doi": "10.2298/CSIS090203002D",
+    "issn": "1820-0214",
+    "journal": "Computer Science and Information Systems",
+    "month": "June",
+    "number": "3",
+    "pages": "409--440",
+    "title": "A Domain-Specific Language for Defining Static Structure of Database Applications",
+    "type": "M23",
+    "url": "http://www.comsis.org/ComSIS/Vol7No3/RegularPapers/paper2.htm",
+    "volume": "7",
+    "year": "2010",
+}
 ```
 
 The key is stored under a dict key `bibkey` while the entry type is stored 
@@ -156,7 +184,6 @@ each grammar rule whose parse tree node we want to process.
 
 ```python
 class BibTeXVisitor(PTNodeVisitor):
-
     def visit_bibfile(self, node, children):
         """
         Just returns list of child nodes (bibentries).
@@ -169,10 +196,7 @@ class BibTeXVisitor(PTNodeVisitor):
         Constructs a map where key is bibentry field name.
         Key is returned under 'bibkey' key. Type is returned under 'bibtype'.
         """
-        bib_entry_map = {
-            'bibtype': children[0],
-            'bibkey': children[1]
-        }
+        bib_entry_map = {"bibtype": children[0], "bibkey": children[1]}
         for field in children[2:]:
             bib_entry_map[field[0]] = field[1]
         return bib_entry_map

@@ -63,8 +63,10 @@ please take a look at related PRs and issues and see if the change affects you.
   ```python
   def grammar():
       ZeroOrMore(a), EOF
+
+
   def a():
-      RegExMatch('.*')
+      RegExMatch(".*")
   ```
 
   Rule `a` is a `RegExMatch` which may succeed by matching empty string thus

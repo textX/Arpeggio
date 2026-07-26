@@ -97,10 +97,11 @@ code generation.
 
 ```python
 from arpeggio import ParserPython
-parser = ParserPython(calc)   # calc is the root rule of your grammar
-                              # Use param debug=True for verbose debugging
-                              # messages and grammar and parse tree visualization
-                              # using graphviz and dot
+
+parser = ParserPython(calc)  # calc is the root rule of your grammar
+# Use param debug=True for verbose debugging
+# messages and grammar and parse tree visualization
+# using graphviz and dot
 ```
 
 **Parse your inputs**

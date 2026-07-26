@@ -37,7 +37,7 @@ default it is set to `"\t\n\r "`.
 For example, to prevent a newline to be treated as whitespace you could write:
 
 ```python
-parser = ParserPython(calc, ws='\t\r ')
+parser = ParserPython(calc, ws="\t\r ")
 ```
 
 !!! note

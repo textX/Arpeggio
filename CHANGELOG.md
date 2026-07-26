@@ -15,6 +15,10 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- Added type hints to all public API modules
+  (``arpeggio/__init__.py``, ``peg.py``, ``cleanpeg.py``, ``export.py``).
+  Grammar-definition functions are deliberately left untyped to keep the DSL
+  clean. mypy is now part of the dev workflow via ``just types``.
 - Added grammar validation to detect non-consuming matches inside repetitions
   (`ZeroOrMore`, `OneOrMore`). Such expressions would cause infinite loops and
   now raise `GrammarError` during parser construction. See [#101].

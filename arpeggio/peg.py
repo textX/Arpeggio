@@ -6,9 +6,12 @@
 # License: MIT License
 #######################################################################
 
+from __future__ import annotations
+
 import codecs
 import copy
 import re
+from typing import Any
 
 from arpeggio import (
     EOF,
@@ -124,13 +127,20 @@ class PEGVisitor(PTNodeVisitor):
     Visitor that transforms parse tree to a PEG parser for the given language.
     """
 
-    def __init__(self, root_rule_name, comment_rule_name, ignore_case, *args, **kwargs):
+    def __init__(
+        self,
+        root_rule_name: str,
+        comment_rule_name: str | None,
+        ignore_case: bool,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.root_rule_name = root_rule_name
         self.comment_rule_name = comment_rule_name
         self.ignore_case = ignore_case
         # Used for linking phase
-        self.peg_rules = {"EOF": EndOfFile()}
+        self.peg_rules: dict[str, Any] = {"EOF": EndOfFile()}
 
     def visit_peggrammar(self, node, children):
         def _resolve(node):
@@ -183,7 +193,7 @@ class PEGVisitor(PTNodeVisitor):
                 return node
 
         # Find root and comment rules
-        self.resolved = set()
+        self.resolved: set[Any] = set()
         comment_rule = None
         for rule in children:
             if rule.rule_name == self.root_rule_name:
@@ -272,8 +282,13 @@ class PEGVisitor(PTNodeVisitor):
 
 class ParserPEG(Parser):
     def __init__(
-        self, language_def, root_rule_name, comment_rule_name=None, *args, **kwargs
-    ):
+        self,
+        language_def: str,
+        root_rule_name: str,
+        comment_rule_name: str | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         Constructs parser from textual PEG definition.
 
@@ -312,7 +327,7 @@ class ParserPEG(Parser):
     def _parse(self):
         return self.parser_model.parse(self)
 
-    def _from_peg(self, language_def):
+    def _from_peg(self, language_def: str):
         parser = ParserPython(peggrammar, comment, reduce_tree=False, debug=self.debug)
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)

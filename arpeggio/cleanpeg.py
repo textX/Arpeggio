@@ -8,6 +8,9 @@
 # License: MIT License
 #######################################################################
 
+from __future__ import annotations
+
+from typing import Any
 
 from arpeggio import (
     EOF,
@@ -97,7 +100,7 @@ def comment():
 
 
 class ParserPEG(ParserPEGOrig):
-    def _from_peg(self, language_def):
+    def _from_peg(self, language_def: str) -> Any:
         parser = ParserPython(peggrammar, comment, reduce_tree=False, debug=self.debug)
         parser.root_rule_name = self.root_rule_name
         parse_tree = parser.parse(language_def)

@@ -49,10 +49,10 @@ coverage:
 
 # run static type checks
 types:
-	uv run --no-default-groups --group test mypy arpeggio
+	uv run --no-default-groups --group test mypy --no-site-packages -p arpeggio --exclude 'arpeggio/tests/'
 
 # run all checks
-check: check-format lint coverage
+check: check-format lint types coverage
 
 [private]
 check-ci: check-format lint test

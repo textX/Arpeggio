@@ -306,8 +306,10 @@ raises a `GrammarError`, before any input is parsed:
 ```python
 from arpeggio import ParserPython, ZeroOrMore, Optional, EOF, GrammarError
 
+
 def bad_grammar():
     return ZeroOrMore(Optional("x")), EOF
+
 
 try:
     ParserPython(bad_grammar)
@@ -353,6 +355,7 @@ adding a mandatory consuming element:
 def bad():
     return ZeroOrMore(Optional("x")), EOF
 
+
 # fixed - always consumes at least one character when it matches
 def good():
     return ZeroOrMore(("x", Optional("y"))), EOF
@@ -369,8 +372,10 @@ when validation fails:
 ```python
 repetition = ZeroOrMore(Optional("x"), user_data={"source_pos": 42})
 
+
 def grammar():
     return repetition, EOF
+
 
 try:
     ParserPython(grammar)

@@ -1535,9 +1535,7 @@ def _is_non_consuming(node, state=None, results=None):
     elif isinstance(node, Sequence):
         result = all(_is_non_consuming(n, state, results) for n in node.nodes)
     elif isinstance(node, OneOrMore):
-        result = len(node.nodes) > 0 and _is_non_consuming(
-            node.nodes[0], state, results
-        )
+        result = len(node.nodes) > 0 and _is_non_consuming(node.nodes[0], state, results)
     elif isinstance(node, UnorderedGroup):
         result = all(_is_non_consuming(n, state, results) for n in node.nodes)
     else:

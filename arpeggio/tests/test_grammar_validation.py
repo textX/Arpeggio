@@ -131,6 +131,59 @@ def test_non_consuming_through_rule_indirection():
         ParserPython(grammar)
 
 
+def test_zero_or_more_with_shared_non_consuming_node():
+    """Shared (DAG) non-consuming node used twice must still be detected.
+
+    Regression: the parser model is a DAG -- the same node object can be
+    referenced from multiple places. Previously the analysis treated the
+    second occurrence as a recursion cycle and reported the sequence as
+    consuming, letting a hanging grammar through.
+    """
+    optional = Optional("x")
+
+    def grammar():
+        return ZeroOrMore((optional, optional)), EOF
+
+    with pytest.raises(GrammarError, match="Non-consuming match"):
+        ParserPython(grammar)
+
+
+def test_zero_or_more_with_shared_nullable_rule():
+    """Nullable rule referenced multiple times must be detected.
+
+    Same DAG regression as above, but through rule reference resolution,
+    which is how textX grammars are shaped (e.g. 'A: B B; B: 'x'?;'
+    inside a repetition).
+    """
+
+    def grammar():
+        return ZeroOrMore((sub, sub)), EOF
+
+    def sub():
+        return Optional("x")
+
+    with pytest.raises(GrammarError, match="Non-consuming match"):
+        ParserPython(grammar)
+
+
+def test_left_recursion_cycle_assumed_consuming():
+    """A left-recursive cycle is not flagged as non-consuming.
+
+    Genuine cycles lead to unbounded recursion at parse time
+    (RecursionError), not to an infinite repetition loop, so validation
+    deliberately assumes they consume to avoid false positives.
+    """
+
+    def grammar():
+        return ZeroOrMore(a), EOF
+
+    def a():
+        return (a, "x")
+
+    parser = ParserPython(grammar)
+    assert parser
+
+
 # --- Cases that should NOT raise GrammarError ---
 
 

@@ -1475,39 +1475,63 @@ class SemanticActionToString(SemanticAction):
 # Grammar validation
 
 
-def _is_non_consuming(node, visited=None):
+def _is_non_consuming(node, state=None, results=None):
     """
     Returns True if the given parser expression can succeed without
     consuming any input.
 
     Used during grammar construction to detect repetitions whose body
     may match the empty string, which would cause infinite loops.
+
+    The parser model is a DAG: a rule body referenced from multiple
+    places is the same node object. A memoized depth-first search with
+    three states distinguishes:
+
+      - unvisited nodes (0)
+      - nodes on the current analysis path (1) -- a real recursion
+        cycle. Such cycles lead to unbounded recursion at parse time
+        (RecursionError), not to an infinite repetition loop, so they
+        are treated as consuming to avoid false positives.
+      - nodes fully analyzed on a previous branch (2) -- the cached
+        result is reused instead of being wrongly treated as a cycle.
     """
-    if visited is None:
-        visited = set()
+    if state is None:
+        state = {}
+        results = {}
 
     node_id = id(node)
-    if node_id in visited:
-        # Cycle detected; assume consuming to avoid false positives.
+    status = state.get(node_id, 0)
+    if status == 2:
+        # Already analyzed on another branch; reuse the result.
+        return results[node_id]
+    if status == 1:
+        # Real cycle on the current analysis path.
         return False
-    visited.add(node_id)
+    state[node_id] = 1
 
     if isinstance(node, (Optional, ZeroOrMore, SyntaxPredicate)):
-        return True
-    if isinstance(node, RegExMatch):
+        result = True
+    elif isinstance(node, RegExMatch):
         # Check if the regex can match the empty string.
-        return bool(node.regex.match(""))
-    if isinstance(node, StrMatch):
-        return node.to_match == ""
-    if isinstance(node, OrderedChoice):
-        return any(_is_non_consuming(n, visited) for n in node.nodes)
-    if isinstance(node, Sequence):
-        return all(_is_non_consuming(n, visited) for n in node.nodes)
-    if isinstance(node, OneOrMore):
-        return len(node.nodes) > 0 and _is_non_consuming(node.nodes[0], visited)
-    if isinstance(node, UnorderedGroup):
-        return all(_is_non_consuming(n, visited) for n in node.nodes)
-    return False
+        result = bool(node.regex.match(""))
+    elif isinstance(node, StrMatch):
+        result = node.to_match == ""
+    elif isinstance(node, OrderedChoice):
+        result = any(_is_non_consuming(n, state, results) for n in node.nodes)
+    elif isinstance(node, Sequence):
+        result = all(_is_non_consuming(n, state, results) for n in node.nodes)
+    elif isinstance(node, OneOrMore):
+        result = len(node.nodes) > 0 and _is_non_consuming(
+            node.nodes[0], state, results
+        )
+    elif isinstance(node, UnorderedGroup):
+        result = all(_is_non_consuming(n, state, results) for n in node.nodes)
+    else:
+        result = False
+
+    state[node_id] = 2
+    results[node_id] = result
+    return result
 
 
 def _validate_parser_model(node, visited=None):

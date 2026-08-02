@@ -31,7 +31,7 @@ from arpeggio import (
     StrMatch,
     UnorderedGroup,
     ZeroOrMore,
-    _validate_parser_model,
+    validate_parser_model,
     visit_parse_tree,
 )
 from arpeggio import RegExMatch as _
@@ -310,9 +310,9 @@ class ParserPEG(Parser):
             self.comments_model.rule_name = comment_rule_name
 
         # Validate the parser model for potential infinite loops.
-        _validate_parser_model(self.parser_model)
+        validate_parser_model(self.parser_model)
         if self.comments_model:
-            _validate_parser_model(self.comments_model)
+            validate_parser_model(self.comments_model)
 
         # In debug mode export parser model to dot for
         # visualization

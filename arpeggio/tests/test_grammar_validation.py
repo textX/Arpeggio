@@ -184,6 +184,22 @@ def test_left_recursion_cycle_assumed_consuming():
     assert parser
 
 
+def test_grammar_error_carries_offending_expression_and_user_data():
+    """GrammarError.expression must reference the offending repetition
+    node, preserving any user_data attached to it."""
+
+    repetition = ZeroOrMore(Optional("x"), user_data={"source_pos": 42})
+
+    def grammar():
+        return repetition, EOF
+
+    with pytest.raises(GrammarError) as excinfo:
+        ParserPython(grammar)
+
+    assert excinfo.value.expression is repetition
+    assert excinfo.value.expression.user_data["source_pos"] == 42
+
+
 # --- Cases that should NOT raise GrammarError ---
 
 

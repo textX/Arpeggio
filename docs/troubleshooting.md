@@ -121,3 +121,27 @@ This implicit reduction can not be disabled at the moment. Please see [issue
 
 
 
+
+## Non-consuming match inside repetition (GrammarError)
+
+If parser construction fails with:
+
+    GrammarError: Non-consuming match inside ZeroOrMore. Body expression
+    'Optional' may succeed without consuming input, which would cause an
+    infinite loop.
+
+it means the grammar contains a repetition (`ZeroOrMore`, `OneOrMore`) whose
+body can succeed without consuming any input. Such grammars would hang the
+parser in an infinite loop, so Arpeggio rejects them at construction time.
+
+Typical causes:
+
+- Optional or nested repetition directly inside a repetition, e.g. `('a'?)*`
+- A regex that can match the empty string, e.g. `r'.*'` inside a repetition
+- A lookahead (`And`/`Not`) inside a repetition, e.g. `(!'a')*`
+- A reference to another rule that is itself nullable
+
+To fix it, make sure the repetition body consumes input whenever it succeeds,
+for example by adding a mandatory consuming element: `('a' 'b'?)*`.
+
+See [Grammar validation](grammars.md#grammar-validation) for details.

@@ -23,6 +23,11 @@ please take a look at related PRs and issues and see if the change affects you.
 - Added grammar validation to detect non-consuming matches inside repetitions
   (`ZeroOrMore`, `OneOrMore`). Such expressions would cause infinite loops and
   now raise `GrammarError` during parser construction. See [#101].
+- The offending repetition is available on `GrammarError` as its `expression`
+  attribute, and parser model nodes (`ParsingExpression`) gained an opaque
+  `user_data` dictionary for attaching arbitrary metadata (e.g. source
+  positions). The validation is also available as a public
+  `validate_parser_model()` function for hand-built parser models.
 - Fixed grammar validation missing non-consuming matches when the same node is
   referenced multiple times in the parser model (DAG-shaped grammars, e.g. a
   nullable rule used twice in a sequence inside a repetition).

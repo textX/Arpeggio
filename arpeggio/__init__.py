@@ -48,7 +48,16 @@ class GrammarError(ArpeggioError):
     """
     Error raised during parser building phase used to indicate error in the
     grammar definition.
+
+    Attributes:
+        expression (ParsingExpression | None): The parser model node the
+            error refers to, when available (e.g. the offending repetition
+            for non-consuming match errors).
     """
+
+    def __init__(self, message: str, expression: ParsingExpression | None = None) -> None:
+        super().__init__(message)
+        self.expression = expression
 
 
 class SemanticError(ArpeggioError):
@@ -199,6 +208,11 @@ class ParsingExpression:
 
         if "suppress" in kwargs:
             self.suppress = kwargs["suppress"]
+
+        # Opaque user data. Arpeggio never touches or interprets this dict;
+        # clients (e.g. textX) can attach arbitrary metadata such as source
+        # positions to parser model nodes.
+        self.user_data: dict[str, Any] = kwargs.get("user_data", {})
 
         # Memoization. Every node cache the parsing results for the given input
         # positions.
@@ -1534,11 +1548,22 @@ def _is_non_consuming(node, state=None, results=None):
     return result
 
 
-def _validate_parser_model(node, visited=None):
+def validate_parser_model(node, visited=None):
     """
+    Validate a parser model for potential infinite loops.
+
     Walk the parser model tree and raise GrammarError if any
     ZeroOrMore or OneOrMore repetition has a body that can succeed
     without consuming input.
+
+    The offending repetition node is available on the raised
+    GrammarError as its `expression` attribute, so that callers can
+    map the problem back to the grammar definition (e.g. via node
+    user_data).
+
+    Args:
+        node (ParsingExpression): The root of the parser model to
+            validate.
     """
     if visited is None:
         visited = set()
@@ -1557,11 +1582,12 @@ def _validate_parser_model(node, visited=None):
                 f"{node.__class__.__name__}"
                 f"{rule_desc}. "
                 f"Body expression {child.name!r} may succeed without "
-                f"consuming input, which would cause an infinite loop."
+                f"consuming input, which would cause an infinite loop.",
+                expression=node,
             )
 
     for child in node.nodes:
-        _validate_parser_model(child, visited)
+        validate_parser_model(child, visited)
 
 
 # ----------------------------------------------------
@@ -2130,7 +2156,7 @@ class ParserPython(Parser):
         assert self.__cross_refs == 0, "Not all crossrefs are resolved!"
 
         # Validate parser model for potential infinite loops.
-        _validate_parser_model(parser_model)
+        validate_parser_model(parser_model)
 
         return parser_model
 

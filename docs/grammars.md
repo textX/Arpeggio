@@ -284,3 +284,107 @@ parse_tree = parser.parse(input_expr)
     will start faster.  Nevertheless, the parsing performance will be the same in
     both approach since the same code for parsing is used.
 
+
+## Grammar validation
+
+Some grammars, although syntactically well-formed, are pathological and can
+never parse any input. The most dangerous case is a **non-consuming match
+inside a repetition** (`ZeroOrMore`, `OneOrMore`).
+
+Consider:
+
+    rule = ('a'?)* EOF
+
+The body of `ZeroOrMore` is `'a'?` (Optional). On input where `'a'` does not
+match, `'a'?` succeeds by matching the empty string. `ZeroOrMore` then tries
+again from the same input position, succeeds again, and loops forever. Such a
+grammar would hang the parser.
+
+Arpeggio detects these invalid grammars at **parser construction time** and
+raises a `GrammarError`, before any input is parsed:
+
+```python
+from arpeggio import ParserPython, ZeroOrMore, Optional, EOF, GrammarError
+
+def bad_grammar():
+    return ZeroOrMore(Optional("x")), EOF
+
+try:
+    ParserPython(bad_grammar)
+except GrammarError as e:
+    print(e)  # Non-consuming match inside ZeroOrMore. ...
+```
+
+The validation runs automatically when a parser is constructed, for all three
+grammar definition approaches (Python grammars, `arpeggio.peg` and
+`arpeggio.cleanpeg` notations), and also for the comments model if defined.
+
+The offending parser model node is available on the exception as
+`GrammarError.expression`:
+
+```python
+except GrammarError as e:
+    offending_repetition = e.expression  # ZeroOrMore/OneOrMore node
+```
+
+### What is considered non-consuming
+
+An expression is considered non-consuming (nullable) if it can succeed without
+consuming any input:
+
+- `Optional`, `ZeroOrMore` and the syntax predicates `And`/`Not`
+- `RegExMatch` whose regex can match the empty string (e.g. `r'.*'`)
+- `StrMatch` matching the empty string
+- `Sequence` where all elements are non-consuming
+- `OrderedChoice` where at least one alternative is non-consuming
+
+A repetition whose body is (or may lead to) a non-consuming match is rejected.
+Note that a *left-recursive* rule inside a repetition is deliberately **not**
+rejected: such cycles cause a `RecursionError` at parse time rather than an
+infinite repetition loop (see [Troubleshooting](troubleshooting.md#left-recursion-and-recursionerror)).
+
+### Fixing non-consuming repetitions
+
+Make sure the repetition body always consumes input when it succeeds, e.g. by
+adding a mandatory consuming element:
+
+```python
+# broken - hangs the parser
+def bad():
+    return ZeroOrMore(Optional("x")), EOF
+
+# fixed - always consumes at least one character when it matches
+def good():
+    return ZeroOrMore(("x", Optional("y"))), EOF
+```
+
+### Attaching metadata to parser model nodes
+
+Each parser expression (`ParsingExpression`) has an opaque `user_data`
+dictionary that Arpeggio never touches or interprets. You can use it to attach
+arbitrary metadata to parser model nodes, e.g. the source position in a
+grammar description, and read it back from `GrammarError.expression.user_data`
+when validation fails:
+
+```python
+repetition = ZeroOrMore(Optional("x"), user_data={"source_pos": 42})
+
+def grammar():
+    return repetition, EOF
+
+try:
+    ParserPython(grammar)
+except GrammarError as e:
+    print(e.expression.user_data["source_pos"])  # 42
+```
+
+### Validating an existing parser model
+
+Parser models built by hand (not through a `Parser` constructor) can be
+validated explicitly with the public function `validate_parser_model`:
+
+```python
+from arpeggio import validate_parser_model
+
+validate_parser_model(my_parser_model)
+```

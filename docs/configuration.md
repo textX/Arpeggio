@@ -151,7 +151,10 @@ For example:
     parser = ParserPython(grammar)
     result = parser.parse(input)
 
-`sep` can be any valid parsing expression.
+`sep` can be any valid parsing expression. A separator is kept in the parse
+tree only when the following repetition element also matches. Otherwise, the
+separator is backtracked and can be matched by an enclosing rule (for example,
+a rule that explicitly allows a trailing comma).
 
 ### Memoization (a.k.a. packrat parsing)
 

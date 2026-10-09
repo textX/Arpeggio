@@ -516,11 +516,13 @@ class ZeroOrMore(Repetition):
         while True:
             try:
                 c_pos = parser.position
+                sep_result = None
                 if sep and result:
                     sep_result = sep(parser)
-                    if sep_result:
-                        append(sep_result)
                 result = p(parser)
+                # Keep the separator only if the following element matched.
+                if sep_result:
+                    append(sep_result)
                 append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
@@ -558,11 +560,13 @@ class OneOrMore(Repetition):
             while True:
                 try:
                     c_pos = parser.position
+                    sep_result = None
                     if sep and result:
                         sep_result = sep(parser)
-                        if sep_result:
-                            append(sep_result)
                     result = p(parser)
+                    # Keep the separator only if the following element matched.
+                    if sep_result:
+                        append(sep_result)
                     append(result)
                     first = False
                 except NoMatch:

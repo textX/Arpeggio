@@ -15,6 +15,8 @@ please take a look at related PRs and issues and see if the change affects you.
 
 ## [Unreleased]
 
+- Fixed `ZeroOrMore` and `OneOrMore` retaining separator nodes in the parse
+  tree after the following element fails to match and the input is backtracked.
 - Added support for Python 3.14.
 - Added type hints to all public API modules
   (``arpeggio/__init__.py``, ``peg.py``, ``cleanpeg.py``, ``export.py``).

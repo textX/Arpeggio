@@ -521,7 +521,8 @@ class ZeroOrMore(Repetition):
                     if sep_result:
                         append(sep_result)
                 result = p(parser)
-                append(result)
+                if result is not None:
+                    append(result)
             except NoMatch:
                 parser.position = c_pos  # Backtracking
                 break
@@ -563,7 +564,8 @@ class OneOrMore(Repetition):
                         if sep_result:
                             append(sep_result)
                     result = p(parser)
-                    append(result)
+                    if result is not None:
+                        append(result)
                     first = False
                 except NoMatch:
                     parser.position = c_pos  # Backtracking
